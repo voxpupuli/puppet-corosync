@@ -1,0 +1,106 @@
+#!/bin/bash
+#
+#
+#  Generic OCF RA that kicks off a run of Puppet when the primitive is either
+#  promoted or demoted.  Also used to define master/slave facts when Facter is
+#  ran.
+#
+# Copyright (c) 2012 Puppet Labs, LLC, All Rights Reserved.
+#
+
+#######################################################################
+# Initialization:
+
+. ${OCF_ROOT}/resource.d/heartbeat/.ocf-shellfuncs
+
+#######################################################################
+
+meta_data() {
+  cat <<END
+<?xml version="1.0"?>
+<!DOCTYPE resource-agent SYSTEM "ra-api-1.dtd">
+<resource-agent name="ppk" version="0.0.1">
+<version>0.0.1</version>
+
+<longdesc lang="en">
+This agent kicks off a run of Puppet when promotion and demotion occurs.
+</longdesc>
+<shortdesc lang="en">Puppet promotion/demotion kicker</shortdesc>
+
+<parameters>
+
+<parameter name="puppet_options" unique="1">
+<longdesc lang="en">
+Command line option to the Puppet excutable to be added to the execution of
+'puppet agent --onetime'
+</longdesc>
+<shortdesc lang="en">Puppet command options</shortdesc>
+<content type="string" default="" />
+</parameter>
+
+</parameters>
+
+<actions>
+<action name="start"   timeout="1" />
+<action name="stop"    timeout="1" />
+<action name="promote" timeout="600" />
+<action name="demote"  timeout="600" />
+<action name="monitor" timeout="20" interval="20" depth="0" role="Slave" />
+<action name="monitor" timeout="20" interval="10" depth="0" role="Master" />
+</actions>
+</resource-agent>
+END
+}
+
+#######################################################################
+
+_usage() {
+cat <<END
+usage: $0 {start|stop|monitor|meta-data}
+
+Expects to have a fully populated OCF RA-compliant environment set.
+END
+}
+
+ppk_start() {
+  return $OCF_SUCCESS
+}
+
+ppk_stop() {
+  return $OCF_SUCCESS
+}
+
+ppk_monitor() {
+  return $OCF_SUCCESS
+}
+
+ppk_promote() {
+  puppet agent --onetime ${OCF_RESKEY_puppet_options}
+  return $OCF_SUCCESS
+}
+
+ppk_demote() {
+  puppet agent --onetime ${OCF_RESKEY_puppet_options}
+  return $OCF_SUCCESS
+}
+
+case $__OCF_ACTION in
+meta-data)	meta_data
+		exit $OCF_SUCCESS
+		;;
+start)		ppk_start;;
+stop)		ppk_stop;;
+monitor)	ppk_monitor;;
+promote)        ppk_promote;;
+demote)         ppk_demote;;
+usage|help)	ppk_usage
+		exit $OCF_SUCCESS
+		;;
+*)		pec_usage
+		exit $OCF_ERR_UNIMPLEMENTED
+		;;
+esac
+rc=$?
+ocf_log debug "${OCF_RESOURCE_INSTANCE} $__OCF_ACTION : $rc"
+exit $rc
+

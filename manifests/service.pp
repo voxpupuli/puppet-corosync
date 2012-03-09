@@ -1,14 +1,15 @@
 # == Define: corosync::service
 #
-# Models a corosync service for use by the Puppet Enterprise Console.
+# Models a Corosync service.  Corosync services are plugins that provide
+# functionality for monitoring cluster resources.  One of the most common
+# of these plugins being Pacemaker.
 #
 # === Parameters
 #
 # [*namevar*]
-#   If there is a parameter that defaults to the value of the title string
-#   when not explicitly set, you must always say so.  This parameter can be
-#   referred to as a "namevar," since it's functionally equivalent to the
-#   namevar of a core resource type.
+#   The namevar in this type is the title you give it when you define a resource
+#   instance.  It is used for a handful of purposes; defining the name of the
+#   config file and the name defined inside the file itself.
 #
 # [*version*]
 #   Version of the protocol used by this service.
@@ -17,7 +18,7 @@
 #
 # Provide some examples on how to use this type:
 #
-#   hapec::corosync::service { 'pacemaker':
+#   corosync::service { 'pacemaker':
 #     version => '0',
 #   }
 #

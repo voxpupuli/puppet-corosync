@@ -1,11 +1,9 @@
 name    'puppetlabs-corosync'
 version '0.0.1'
-source 'UNKNOWN'
+source 'https://github.com/puppetlabs/puppetlabs-corosync.git'
 author 'puppetlabs'
-license 'UNKNOWN'
-summary 'UNKNOWN'
-description 'UNKNOWN'
-project_page 'UNKNOWN'
-
-## Add dependencies, if any:
-# dependency 'username/name', '>= 1.2.0'
+license 'APL 2.0'
+summary 'Sets up and manages Corosync'
+description 'This module is a set of manifests and types/providers for quickly setting up highly available clusters using Corosync'
+project_page 'https://github.com/puppetlabs/puppetlabs-corosync'
+dependency 'puppetlabs/stdlib', '>= 2.3.1'
