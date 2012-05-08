@@ -111,7 +111,7 @@ class corosync(
   if $enable_secauth_real == 'on' {
     file { '/etc/corosync/authkey':
       ensure  => file,
-      source  => '/etc/puppetlabs/puppet/ssl/certs/ca.pem',
+      source  => '/etc/puppet/ssl/certs/ca.pem',
       mode    => '0400',
       owner   => 'root',
       group   => 'root',
