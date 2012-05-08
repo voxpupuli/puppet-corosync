@@ -1,19 +1,22 @@
-corosync: MVP implementation of a module to manage Corosync, primarily the Pacemaker portion.
+corosync: MVP implementation of a module to manage Corosync, primarily the
+Pacemaker portion.
 
-There are two things this module has: Puppet manifests to install and create initial
-configurations needed to get things up and running.  A set of types and providers you
-can subsequently use to configure various Corosync resources, like primitives or
-collocations.
+There are two things this module has: Puppet manifests to install and create
+initial configurations needed to get things up and running.  A set of types and
+providers you can subsequently use to configure various Corosync resources, like
+primitives or collocations.
 
-I built this against Debian Squeeze with backports enabled so, since it is a MVP it only
-current supports Debian since some paths are hardcoded.  Examples on how to get started are
-in the tests directory.  Sadly I have not had enough time to write proper rspec for either
-for types, providers, or manifests.  More documentation can be found in the manifests and
-the type/providers if you either read them or print them out with "puppet {describe, doc}".
+I built this against Debian Squeeze with backports enabled so, since it is a MVP
+it only current supports Debian since some paths are hardcoded.  Examples on how
+to get started are in the tests directory.  Sadly I have not had enough time to
+write proper rspec for either for types, providers, or manifests.  More
+documentation can be found in the manifests and the type/providers if you either
+read them or print them out with "puppet {describe, doc}".
 
-I learned a lot writing the module.  It was one of the last things I started before moving
-from the Professional Services team to Operations here at Puppet Labs.  Working on it keeps
-popping up here and there, which it interrupting my new duties so I am cutting a release in
-its current state for people to descend upon and improve.  I'll still keep taking jabs at it
-now and again but Corosync is a beast with its own assumptions and I don't think I could
-every stop improving on this module.
+I learned a lot writing the module.  It was one of the last things I started
+before moving from the Professional Services team to Operations here at Puppet
+Labs.  Working on it keeps popping up here and there, which it interrupting my
+new duties so I am cutting a release in its current state for people to descend
+upon and improve.  I'll still keep taking jabs at it now and again but Corosync
+is a beast with its own assumptions and I don't think I could every stop
+improving on this module.
