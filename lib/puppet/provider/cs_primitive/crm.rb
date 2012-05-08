@@ -89,7 +89,8 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
       :ensure          => :present,
       :primitive_class => @resource[:primitive_class],
       :provided_by     => @resource[:provided_by],
-      :primitive_type  => @resource[:primitive_type]
+      :primitive_type  => @resource[:primitive_type],
+      :promotable      => @resource[:promotable]
     }
     @property_hash[:parameters] = @resource[:parameters] if ! @resource[:parameters].nil?
     @property_hash[:operations] = @resource[:operations] if ! @resource[:operations].nil?
