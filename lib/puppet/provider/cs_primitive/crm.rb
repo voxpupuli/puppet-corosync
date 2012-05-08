@@ -188,9 +188,9 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
         "#{@property_hash[:name]} ",
         "#{@property_hash[:primitive_class]}:#{@property_hash[:provided_by]}:#{@property_hash[:primitive_type]} "
       ]
-      updated << operations.join(' ') unless operations.nil?
-      updated << parameters.join(' ') unless parameters.nil?
-      updated << metadatas.join(' ') unless metadatas.nil?
+      updated << "#{operations.join(' ')}" unless operations.nil?
+      updated << "#{parameters.join(' ')}" unless parameters.nil?
+      updated << "#{metadatas.join(' ')}" unless metadatas.nil?
       if @property_hash[:promotable] == :true
         updated << "\n"
         updated << "ms ms_#{@property_hash[:name]} #{@property_hash[:name]}"
