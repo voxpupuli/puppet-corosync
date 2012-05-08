@@ -44,6 +44,7 @@
 #
 class corosync(
   $enable_secauth     = 'UNSET',
+  $authkey            = '/etc/puppet/ssl/certs/ca.pem',
   $threads            = 'UNSET',
   $port               = 'UNSET',
   $bind_address       = 'UNSET',
@@ -111,7 +112,7 @@ class corosync(
   if $enable_secauth_real == 'on' {
     file { '/etc/corosync/authkey':
       ensure  => file,
-      source  => '/etc/puppet/ssl/certs/ca.pem',
+      source  => $authkey,
       mode    => '0400',
       owner   => 'root',
       group   => 'root',
