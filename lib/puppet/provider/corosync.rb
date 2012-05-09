@@ -30,6 +30,7 @@ class Puppet::Provider::Corosync < Puppet::Provider
         debug('Corosync not ready, retrying')
         sleep 2
       end
+      sleep 5
     end
   end
 
