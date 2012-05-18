@@ -40,8 +40,8 @@ Command line option to the Puppet excutable to be added to the execution of
 </parameters>
 
 <actions>
-<action name="start"   timeout="1" />
-<action name="stop"    timeout="1" />
+<action name="start"   timeout="600" />
+<action name="stop"    timeout="600" />
 <action name="monitor" timeout="20" interval="20" depth="0" />
 </actions>
 </resource-agent>
@@ -59,12 +59,12 @@ END
 }
 
 ppk_start() {
-  puppet agent --onetime ${OCF_RESKEY_puppet_options}
+  sleep 5 && FACTER_ms_override=master puppet agent --onetime ${OCF_RESKEY_puppet_options}
   return $OCF_SUCCESS
 }
 
 ppk_stop() {
-  puppet agent --onetime ${OCF_RESKEY_puppet_options}
+  sleep 5 && FACTER_ms_override=slave puppet agent --onetime ${OCF_RESKEY_puppet_options}
   return $OCF_SUCCESS
 }
 
