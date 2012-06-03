@@ -5,9 +5,9 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Coros
         of Corosync cluster configuration properties.'
 
   # Path to the crm binary for interacting with the cluster configuration.
-  commands :crm           => '/usr/sbin/crm'
-  commands :cibadmin      => '/usr/sbin/cibadmin'
-  commands :crm_attribute => '/usr/sbin/crm_attribute'
+  commands :crm           => 'crm'
+  commands :cibadmin      => 'cibadmin'
+  commands :crm_attribute => 'crm_attribute'
 
   def self.instances
 
@@ -15,11 +15,7 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Coros
 
     instances = []
 
-    cmd = []
-    cmd << command(:crm)
-    cmd << 'configure'
-    cmd << 'show'
-    cmd << 'xml'
+    cmd = [ command(:crm), 'configure', 'show', 'xml' ]
     raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
     doc = REXML::Document.new(raw)
 
@@ -50,13 +46,14 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Coros
 
   # Unlike create we actually immediately delete the item.
   def destroy
-    cmd = []
-    cmd << command(:cibadmin)
-    cmd << '--scope'
-    cmd << 'crm_config'
-    cmd << '--delete'
-    cmd << '--xpath'
-    cmd << "//nvpair[@name='#{resource[:name]}']"
+    cmd = [
+      command(:cibadmin),
+      '--scope',
+      'crm_config',
+      '--delete',
+      '--xpath',
+      "//nvpair[@name='#{resource[:name]}']"
+    ]
     debug('Revmoving cluster property')
     Puppet::Util.execute(cmd)
     @property_hash.clear
@@ -82,12 +79,13 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Coros
   # as stdin for the crm command.
   def flush
     unless @property_hash.empty?
-      cmd = []
-      cmd << command(:crm)
-      cmd << 'configure'
-      cmd << 'property'
-      cmd << '$id="cib-bootstrap-options"'
-      cmd << "#{@property_hash[:name]}=#{@property_hash[:value]}"
+      cmd = [
+        command(:crm),
+        'configure',
+        'property',
+        '$id="cib-bootstrap-options"',
+        "#{@property_hash[:name]}=#{@property_hash[:value]}"
+      ]
       Puppet::Util.execute(cmd)
     end
   end

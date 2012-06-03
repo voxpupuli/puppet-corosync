@@ -1,8 +1,8 @@
 #!/bin/bash
 #
 #
-#  Generic OCF RA that kicks off a run of Puppet.  Designed to work in
-#  conjunction with ppdata.
+#  Generic OCF RA that just sets the master/slave state so we can use it.
+#  The state is read by facter and used during a puppet agent run. 
 #
 # Copyright (c) 2012 Puppet Labs, LLC, All Rights Reserved.
 #
@@ -18,31 +18,21 @@ meta_data() {
   cat <<END
 <?xml version="1.0"?>
 <!DOCTYPE resource-agent SYSTEM "ra-api-1.dtd">
-<resource-agent name="ppk" version="0.0.1">
+<resource-agent name="ppdata" version="0.0.1">
 <version>0.0.1</version>
 
 <longdesc lang="en">
-This agent kicks off a run of Puppet.
+Manages the data associated with master/slave CA relationships.
 </longdesc>
 <shortdesc lang="en">Puppet promotion/demotion kicker</shortdesc>
 
-<parameters>
-
-<parameter name="puppet_options" unique="1">
-<longdesc lang="en">
-Command line option to the Puppet excutable to be added to the execution of
-'puppet agent --onetime'
-</longdesc>
-<shortdesc lang="en">Puppet command options</shortdesc>
-<content type="string" default="" />
-</parameter>
-
-</parameters>
-
 <actions>
-<action name="start"   timeout="600" />
-<action name="stop"    timeout="600" />
-<action name="monitor" timeout="20" interval="20" depth="0" />
+<action name="start"   timeout="1" />
+<action name="stop"    timeout="1" />
+<action name="promote" timeout="600" />
+<action name="demote"  timeout="600" />
+<action name="monitor" timeout="20" interval="20" depth="0" role="Slave" />
+<action name="monitor" timeout="20" interval="10" depth="0" role="Master" />
 </actions>
 </resource-agent>
 END
@@ -59,16 +49,22 @@ END
 }
 
 ppk_start() {
-  sleep 5 && FACTER_ms_override=master puppet agent --onetime ${OCF_RESKEY_puppet_options}
   return $OCF_SUCCESS
 }
 
 ppk_stop() {
-  sleep 5 && FACTER_ms_override=slave puppet agent --onetime ${OCF_RESKEY_puppet_options}
   return $OCF_SUCCESS
 }
 
 ppk_monitor() {
+  return $OCF_SUCCESS
+}
+
+ppk_promote() {
+  return $OCF_SUCCESS
+}
+
+ppk_demote() {
   return $OCF_SUCCESS
 }
 
@@ -78,7 +74,9 @@ meta-data)	meta_data
 		;;
 start)		ppk_start;;
 stop)		ppk_stop;;
-monitor)        ppk_monitor;;
+monitor)	ppk_monitor;;
+promote)        ppk_promote;;
+demote)         ppk_demote;;
 usage|help)	ppk_usage
 		exit $OCF_SUCCESS
 		;;

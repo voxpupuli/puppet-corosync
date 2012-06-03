@@ -9,10 +9,12 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
         better model since these values can be almost anything.'
 
   # Path to the crm binary for interacting with the cluster configuration.
-  commands :crm => '/usr/sbin/crm'
-  commands :crm_attribute => '/usr/sbin/crm_attribute'
+  commands :crm => 'crm'
+  commands :crm_attribute => 'crm_attribute'
 
   def self.instances
+
+    block_until_ready
 
     instances = []
 
@@ -89,7 +91,8 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
       :ensure          => :present,
       :primitive_class => @resource[:primitive_class],
       :provided_by     => @resource[:provided_by],
-      :primitive_type  => @resource[:primitive_type]
+      :primitive_type  => @resource[:primitive_type],
+      :promotable      => @resource[:promotable]
     }
     @property_hash[:parameters] = @resource[:parameters] if ! @resource[:parameters].nil?
     @property_hash[:operations] = @resource[:operations] if ! @resource[:operations].nil?
@@ -163,34 +166,31 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
   def flush
     unless @property_hash.empty?
       unless @property_hash[:operations].empty?
-        operations = []
+        operations = ''
         @property_hash[:operations].each do |o|
-          operations << "op #{o[0]}"
+          operations << "op #{o[0]} "
           o[1].each_pair do |k,v|
-            operations << "#{k}=#{v}"
+            operations << "#{k}=#{v} "
           end
         end
       end
       unless @property_hash[:parameters].empty?
-        parameters = ['params']
+        parameters = 'params '
         @property_hash[:parameters].each_pair do |k,v|
-          parameters << "#{k}=#{v}"
+          parameters << "#{k}=#{v} "
         end
       end
       unless @property_hash[:metadata].empty?
-        metadatas = ['meta']
+        metadatas = 'meta '
         @property_hash[:metadata].each_pair do |k,v|
-          metadatas << "#{k}=#{v}"
+          metadatas << "#{k}=#{v} "
         end
       end
-      updated = [
-        'primitive ',
-        "#{@property_hash[:name]} ",
-        "#{@property_hash[:primitive_class]}:#{@property_hash[:provided_by]}:#{@property_hash[:primitive_type]} "
-      ]
-      updated << operations.join(' ') unless operations.nil?
-      updated << parameters.join(' ') unless parameters.nil?
-      updated << metadatas.join(' ') unless metadatas.nil?
+      updated = "primitive #{@property_hash[:name]} "
+      updated << "#{@property_hash[:primitive_class]}:#{@property_hash[:provided_by]}:#{@property_hash[:primitive_type]} "
+      updated << "#{operations} " unless operations.nil?
+      updated << "#{parameters} " unless parameters.nil?
+      updated << "#{metadatas} " unless metadatas.nil?
       if @property_hash[:promotable] == :true
         updated << "\n"
         updated << "ms ms_#{@property_hash[:name]} #{@property_hash[:name]}"
