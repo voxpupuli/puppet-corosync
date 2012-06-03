@@ -9,13 +9,14 @@ class Puppet::Provider::Corosync < Puppet::Provider
   # until we're up so we can make changes that don't disappear in to a black
   # hole.
   def self.ready?
-    cmd = []
-    cmd << command(:crm_attribute)
-    cmd << '--type'
-    cmd << 'crm_config'
-    cmd << '--query'
-    cmd << '--name'
-    cmd << 'dc-version'
+    cmd =  [
+      command(:crm_attribute),
+      '--type',
+      'crm_config',
+      '--query',
+      '--name',
+      'dc-version'
+    ]
     raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
     if status == 0
       return true
@@ -30,6 +31,10 @@ class Puppet::Provider::Corosync < Puppet::Provider
         debug('Corosync not ready, retrying')
         sleep 2
       end
+      # Sleeping a spare two since it seems that dc-version is returning before
+      # It is really ready to take config changes, but it is close enough.
+      # Probably need to find a better way to check for reediness.
+      sleep 2
     end
   end
 

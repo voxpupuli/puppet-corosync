@@ -44,6 +44,7 @@
 #
 class corosync(
   $enable_secauth     = 'UNSET',
+  $authkey            = '/etc/puppet/ssl/certs/ca.pem',
   $threads            = 'UNSET',
   $port               = 'UNSET',
   $bind_address       = 'UNSET',
@@ -111,7 +112,7 @@ class corosync(
   if $enable_secauth_real == 'on' {
     file { '/etc/corosync/authkey':
       ensure  => file,
-      source  => '/etc/puppetlabs/puppet/ssl/certs/ca.pem',
+      source  => $authkey,
       mode    => '0400',
       owner   => 'root',
       group   => 'root',
@@ -142,6 +143,15 @@ class corosync(
   file { '/usr/lib/ocf/resource.d/pacemaker/ppk':
     ensure  => file,
     source  => "puppet:///modules/${module_name}/ppk",
+    mode    => '0755',
+    owner   => 'root',
+    group   => 'root',
+    before  => Service['corosync'],
+  }
+
+  file { '/usr/lib/ocf/resource.d/pacemaker/ppdata':
+    ensure  => file,
+    source  => "puppet:///modules/${module_name}/ppdata",
     mode    => '0755',
     owner   => 'root',
     group   => 'root',
