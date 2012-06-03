@@ -9,10 +9,12 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
         better model since these values can be almost anything.'
 
   # Path to the crm binary for interacting with the cluster configuration.
-  commands :crm => '/usr/sbin/crm'
-  commands :crm_attribute => '/usr/sbin/crm_attribute'
+  commands :crm => 'crm'
+  commands :crm_attribute => 'crm_attribute'
 
   def self.instances
+
+    block_until_ready
 
     instances = []
 

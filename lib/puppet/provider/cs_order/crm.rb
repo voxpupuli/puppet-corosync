@@ -6,18 +6,16 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Corosync
         aspects.'
 
   # Path to the crm binary for interacting with the cluster configuration.
-  commands :crm => '/usr/sbin/crm'
-  commands :crm_attribute => '/usr/sbin/crm_attribute'
+  commands :crm => 'crm'
+  commands :crm_attribute => 'crm_attribute'
 
   def self.instances
 
+    block_until_ready
+
     instances = []
 
-    cmd = []
-    cmd << command(:crm)
-    cmd << 'configure'
-    cmd << 'show'
-    cmd << 'xml'
+    cmd = [ command(:crm), 'configure', 'show', 'xml' ]
     raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
     doc = REXML::Document.new(raw)
 
@@ -52,11 +50,7 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Corosync
 
   # Unlike create we actually immediately delete the item.
   def destroy
-    cmd = []
-    cmd << command(:crm)
-    cmd << 'configure'
-    cmd << 'delete'
-    cmd << @resource[:name]
+    cmd = [ command(:crm), 'configure', 'delete', @resource[:name] ]
     debug('Revmoving order directive')
     Puppet::Util.execute(cmd)
     @property_hash.clear
@@ -98,8 +92,7 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Corosync
   # as stdin for the crm command.
   def flush
     unless @property_hash.empty?
-      updated = ''
-      updated << "order "
+      updated = 'order '
       updated << "#{@property_hash[:name]} "
       updated << "#{@property_hash[:score]}: "
       updated << "#{@property_hash[:first]} "
