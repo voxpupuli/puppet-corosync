@@ -1,3 +1,4 @@
+$LOAD_PATH.push(File.join(File.dirname(__FILE__), '..', '..', '..'))
 require 'puppet/provider/corosync'
 Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Corosync) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
