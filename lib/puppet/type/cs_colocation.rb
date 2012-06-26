@@ -41,6 +41,10 @@ module Puppet
       end
     end
 
+    newparam(:cib) do
+      desc "The CIB shadow group to which this colocation belongs"
+    end
+
     newproperty(:score) do
       desc "The priority of this colocation.  Primitives can be a part of
         multiple colocation groups and so there is a way to control which

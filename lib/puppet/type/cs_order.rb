@@ -30,6 +30,10 @@ module Puppet
         desired state after the first primitive."
     end
 
+    newparam(:cib) do
+      desc "The shadow CIB group that the order belongs to"
+    end
+
     newproperty(:score) do
       desc "The priority of the this ordered grouping.  Primitives can be a part
         of multiple order groups and so there is a way to control which

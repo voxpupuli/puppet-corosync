@@ -107,17 +107,17 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
     @property_hash[:parameters] = @resource[:parameters] if ! @resource[:parameters].nil?
     @property_hash[:operations] = @resource[:operations] if ! @resource[:operations].nil?
     @property_hash[:metadata] = @resource[:metadata] if ! @resource[:metadata].nil?
+    @property_hash[:ms_metadata] = @resource[:ms_metadata] if ! @resource[:ms_metadata].nil?
+    @property_hash[:cib] = @resource[:cib] if ! @resource[:cib].nil?
   end
 
   # Unlike create we actually immediately delete the item.  Corosync forces us
   # to "stop" the primitive before we are able to remove it.
   def destroy
-    cmd = [ command(:crm), 'resource', 'stop', @resource[:name] ]
     debug('Stopping primitive before removing it')
-    Puppet::Util.execute(cmd)
-    cmd = [ command(:crm), 'configure', 'delete', @resource[:name] ]
+    crm('resource', 'stop', @resource[:name])
     debug('Revmoving primitive')
-    Puppet::Util.execute(cmd)
+    crm('configure', 'delete', @resource[:name])
     @property_hash.clear
   end
 
@@ -169,9 +169,8 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
       @property_hash[:promotable] = should
     when :false
       @property_hash[:promotable] = should
-      cmd = [ command(:crm), 'resource', 'stop', "ms_#{@resource[:name]}" ]
-      cmd = [ command(:crm), 'configure', 'delete', "ms_#{@resource[:name]}" ]
-      Puppet::Util.execute(cmd)
+      crm('resource', 'stop', "ms_#{@resource[:name]}")
+      crm('configure', 'delete', "ms_#{@resource[:name]}")
     end
   end
 
@@ -205,7 +204,9 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
         end
       end
       updated = "primitive #{@property_hash[:name]} "
-      updated << "#{@property_hash[:primitive_class]}:#{@property_hash[:provided_by]}:#{@property_hash[:primitive_type]} "
+      updated << "#{@property_hash[:primitive_class]}:"
+      updated << "#{@property_hash[:provided_by]}:" if @property_hash[:provided_by]
+      updated << "#{@property_hash[:primitive_type]} "
       updated << "#{operations} " unless operations.nil?
       updated << "#{parameters} " unless parameters.nil?
       updated << "#{metadatas} " unless metadatas.nil?
@@ -219,11 +220,11 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
           end
         end
       end
-      cmd = [ command(:crm), 'configure', 'load', 'update', '-' ]
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        Puppet::Util.execute(cmd, :stdinfile => tmpfile.path.to_s)
+        ENV['CIB_shadow'] = @resource[:cib]
+        crm('configure', 'load', 'update', tmpfile.path.to_s)
       end
     end
   end

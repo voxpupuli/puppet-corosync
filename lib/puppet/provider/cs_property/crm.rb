@@ -46,16 +46,8 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Coros
 
   # Unlike create we actually immediately delete the item.
   def destroy
-    cmd = [
-      command(:cibadmin),
-      '--scope',
-      'crm_config',
-      '--delete',
-      '--xpath',
-      "//nvpair[@name='#{resource[:name]}']"
-    ]
     debug('Revmoving cluster property')
-    Puppet::Util.execute(cmd)
+    cibadmin('--scope', 'crm_config', '--delete', '--xpath', "//nvpair[@name='#{resource[:name]}']")
     @property_hash.clear
   end
 
@@ -79,14 +71,10 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Coros
   # as stdin for the crm command.
   def flush
     unless @property_hash.empty?
-      cmd = [
-        command(:crm),
-        'configure',
-        'property',
-        '$id="cib-bootstrap-options"',
-        "#{@property_hash[:name]}=#{@property_hash[:value]}"
-      ]
-      Puppet::Util.execute(cmd)
+      # clear this on properties, in case it's set from a previous
+      # run of a different corosync type
+      ENV['CIB_shadow'] = nil
+      crm('configure', 'property', '$id="cib-bootstrap-options"', "#{@property_hash[:name]}=#{@property_hash[:value]}")
     end
   end
 end

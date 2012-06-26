@@ -44,15 +44,15 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Corosync
       :ensure     => :present,
       :first      => @resource[:first],
       :second     => @resource[:second],
-      :score      => @resource[:score]
+      :score      => @resource[:score],
+      :cib        => @resource[:cib],
     }
   end
 
   # Unlike create we actually immediately delete the item.
   def destroy
-    cmd = [ command(:crm), 'configure', 'delete', @resource[:name] ]
     debug('Revmoving order directive')
-    Puppet::Util.execute(cmd)
+    crm('configure', 'delete', @resource[:name])
     @property_hash.clear
   end
 
@@ -97,16 +97,11 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Corosync
       updated << "#{@property_hash[:score]}: "
       updated << "#{@property_hash[:first]} "
       updated << "#{@property_hash[:second]}"
-      cmd = []
-      cmd << command(:crm)
-      cmd << 'configure'
-      cmd << 'load'
-      cmd << 'update'
-      cmd << '-'
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        Puppet::Util.execute(cmd, :stdinfile => tmpfile.path.to_s)
+        ENV['CIB_shadow'] = @resource[:cib]
+        crm('configure', 'load', 'update', tmpfile.path.to_s)
       end
     end
   end

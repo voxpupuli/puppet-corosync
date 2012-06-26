@@ -110,6 +110,10 @@ module Puppet
       defaultto Hash.new
     end
 
+    newparam(:cib) do
+      desc "The CIB shadow that the primmitive belongs to"
+    end
+
     newproperty(:promotable) do
       desc "Designates if the primitive is capable of being managed in a master/slave
         state.  This will create a new ms resource in your Corosync config and add
