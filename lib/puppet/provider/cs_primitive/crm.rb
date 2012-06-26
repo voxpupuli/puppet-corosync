@@ -43,6 +43,8 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
       primitive[items['id'].to_sym][:parameters] = {}
       primitive[items['id'].to_sym][:operations] = {}
       primitive[items['id'].to_sym][:metadata] = {}
+      primitive[items['id'].to_sym][:ms_metadata] = {}
+      primitive[items['id'].to_sym][:promotable] = :false
 
       if ! e.elements['instance_attributes'].nil?
         e.elements['instance_attributes'].each_element do |i|
@@ -65,6 +67,14 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
           end
         end
       end
+      if e.parent.name == 'master'
+        primitive[items['id'].to_sym][:promotable] = :true
+        if ! e.parent.elements['meta_attributes'].nil?
+          e.parent.elements['meta_attributes'].each_element do |m|
+            primitive[items['id'].to_sym][:ms_metadata][(m.attributes['name'])] = m.attributes['value']
+          end
+        end
+      end
       primitive_instance = {
         :name            => primitive.first[0],
         :ensure          => :present,
@@ -74,10 +84,10 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
         :parameters      => primitive.first[1][:parameters],
         :operations      => primitive.first[1][:operations],
         :metadata        => primitive.first[1][:metadata],
-        :promotable      => :false,
+        :ms_metadata     => primitive.first[1][:ms_metadata],
+        :promotable      => primitive.first[1][:promotable],
         :provider        => self.name
       }
-      primitive_instance[:promotable] = :true if e.parent.name == 'master'
       instances << new(primitive_instance)
     end
     instances
@@ -126,6 +136,10 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
     @property_hash[:metadata]
   end
 
+  def ms_metadata
+    @property_hash[:ms_metadata]
+  end
+
   def promotable
     @property_hash[:promotable]
   end
@@ -143,6 +157,10 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
 
   def metadata=(should)
     @property_hash[:metadata] = should
+  end
+
+  def ms_medata=(should)
+    @property_hash[:ms_metadata] = should
   end
 
   def promotable=(should)
@@ -193,7 +211,13 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
       updated << "#{metadatas} " unless metadatas.nil?
       if @property_hash[:promotable] == :true
         updated << "\n"
-        updated << "ms ms_#{@property_hash[:name]} #{@property_hash[:name]}"
+        updated << "ms ms_#{@property_hash[:name]} #{@property_hash[:name]} "
+        unless @property_hash[:ms_metadata].empty?
+          updated << 'meta '
+          @property_hash[:ms_metadata].each_pair do |k,v|
+            updated << "#{k}=#{v} "
+          end
+        end
       end
       cmd = [ command(:crm), 'configure', 'load', 'update', '-' ]
       Tempfile.open('puppet_crm_update') do |tmpfile|

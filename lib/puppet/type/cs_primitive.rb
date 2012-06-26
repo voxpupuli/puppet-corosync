@@ -100,6 +100,16 @@ module Puppet
       defaultto Hash.new
     end
 
+    newproperty(:ms_metadata) do
+      desc "A hash of metadata for the master/slave primitive state."
+
+      validate do |value|
+        raise Puppet::Error, "Puppet::Type::Cs_Primitive: ms_metadata property must be a hash" unless value.is_a? Hash
+      end
+
+      defaultto Hash.new
+    end
+
     newproperty(:promotable) do
       desc "Designates if the primitive is capable of being managed in a master/slave
         state.  This will create a new ms resource in your Corosync config and add
