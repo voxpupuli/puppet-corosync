@@ -1,4 +1,4 @@
-require 'puppet/provider/corosync'
+require File.join(File.dirname(__FILE__), '..', 'corosync')
 Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Corosync) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived. This provider will check the state
