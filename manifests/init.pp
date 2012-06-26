@@ -138,6 +138,7 @@ class corosync(
     group   => 'root',
     recurse => true,
     purge   => true,
+    require => Package['corosync']
   }
 
   file { '/usr/lib/ocf/resource.d/pacemaker/ppk':
@@ -146,6 +147,7 @@ class corosync(
     mode    => '0755',
     owner   => 'root',
     group   => 'root',
+    require => Package['pacemaker', 'corosync'],
     before  => Service['corosync'],
   }
 
@@ -155,6 +157,7 @@ class corosync(
     mode    => '0755',
     owner   => 'root',
     group   => 'root',
+    require => Package['pacemaker', 'corosync'],
     before  => Service['corosync'],
   }
 
