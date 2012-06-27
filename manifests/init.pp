@@ -48,7 +48,8 @@ class corosync(
   $threads            = 'UNSET',
   $port               = 'UNSET',
   $bind_address       = 'UNSET',
-  $multicast_address  = 'UNSET'
+  $multicast_address  = 'UNSET',
+  $unicast_addresses  = 'UNSET',
 ) {
 
   # Making it possible to provide data with parameterized class declarations or
@@ -77,10 +78,26 @@ class corosync(
     default => $bind_address,
   }
 
+  $unicast_addresses_real = $unicast_addresses ? {
+    'UNSET' => $::unicast_addresses ? {
+      undef   => 'UNSET',
+      default => $::unicast_addresses
+    },
+    default => $unicast_addresses
+  }
+  if $unicast_addresses_real == 'UNSET' {
+    $corosync_conf = "${module_name}/corosync.conf.erb"
+  } else {
+    $corosync_conf = "${module_name}/corosync.conf.udpu.erb"
+  }
+
+
   # We use an if here instead of a selector since we need to fail the catalog if
   # this value is provided.  This is emulating a required variable as defined in
   # parameterized class.
-  if $multicast_address == 'UNSET' {
+
+  # $multicast_address is NOT required if $unicast_address is provided
+  if $multicast_address == 'UNSET' and $unicast_addresses_real == 'UNSET' {
     if ! $::multicast_address {
       fail('You must provide a value for multicast_address')
     } else {
@@ -127,7 +144,7 @@ class corosync(
     mode    => '0644',
     owner   => 'root',
     group   => 'root',
-    content => template("${module_name}/corosync.conf.erb"),
+    content => template($corosync_conf),
     require => Package['corosync'],
   }
 
