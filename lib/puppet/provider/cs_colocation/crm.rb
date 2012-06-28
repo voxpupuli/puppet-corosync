@@ -21,19 +21,26 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Cor
 
     doc.root.elements['configuration'].elements['constraints'].each_element('rsc_colocation') do |e|
       items = e.attributes
-      colocation = {
-        :name => items['id'],
-        :primitives => [ items['rsc'], items['with-rsc'] ],
-        :score => items['score']
-      }
+
+      if items['rsc-role']
+        rsc = "#{items['rsc']}:#{items['rsc-role']}"
+      else
+        rsc = items['rsc']
+      end
+
+      if items ['with-rsc-role']
+        with_rsc = "#{items['with-rsc']}:#{items['with-rsc-role']}"
+      else
+        with_rsc = items['with-rsc']
+      end
 
       # Sorting the array of primitives because order doesn't matter so someone
       # switching the order around shouldn't generate an event.
       colocation_instance = {
-        :name       => colocation[:name],
+        :name       => items['id'],
         :ensure     => :present,
-        :primitives => colocation[:primitives].sort,
-        :score      => colocation[:score],
+        :primitives => [rsc, with_rsc].sort,
+        :score      => items['score'],
         :provider   => self.name
       }
       instances << new(colocation_instance)

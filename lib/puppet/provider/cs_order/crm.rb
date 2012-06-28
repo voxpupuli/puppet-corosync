@@ -21,14 +21,25 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Corosync
 
     doc.root.elements['configuration'].elements['constraints'].each_element('rsc_order') do |e|
       items = e.attributes
-      order = { :name => items['id'].to_sym, :first => items['first'], :second => items['then'], :score => items['score'] }
+
+      if items['first-action']
+        first = "#{items['first']}:#{items['first-action']}"
+      else
+        first = items['first']
+      end
+
+      if items['then-action']
+        second = "#{items['then']}:#{items['then-action']}"
+      else
+        second = items['then']
+      end
 
       order_instance = {
-        :name       => order[:name],
+        :name       => items['id'],
         :ensure     => :present,
-        :first      => order[:first],
-        :second     => order[:second],
-        :score      => order[:score],
+        :first      => first,
+        :second     => second,
+        :score      => items['score'],
         :provider   => self.name
       }
       instances << new(order_instance)
