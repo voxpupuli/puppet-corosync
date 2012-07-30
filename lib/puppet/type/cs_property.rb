@@ -31,5 +31,9 @@ module Puppet
         value but we aren't validating string vs. integer vs. boolean because
         cluster properties can range the gambit."
     end
+
+    autorequire(:service) do
+      [ 'corosync' ]
+    end
   end
 end

@@ -9,7 +9,7 @@ Puppet::Type.type(:cs_commit).provide(:crm, :parent => Puppet::Provider::Corosyn
     []
   end
 
-  def commit(cib)
+  def sync(cib)
     crm "cib", "commit", cib
   end
 end

@@ -43,5 +43,31 @@ module Puppet
 
       defaultto 'INFINITY'
     end
+
+    autorequire(:cs_shadow) do
+      [ @parameters[:cib] ]
+    end
+
+    autorequire(:service) do
+      [ 'corosync' ]
+    end
+
+    autorequire(:cs_primitive) do
+      autos = []
+
+      autos << unmunge_cs_primitive(@parameters[:first].should)
+      autos << unmunge_cs_primitive(@parameters[:second].should)
+
+      autos
+    end
+
+    def unmunge_cs_primitive(name)
+      name = name.split(':')[0]
+      if name.start_with? 'ms_'
+        name = name[3..-1]
+      end
+
+      name
+    end
   end
 end

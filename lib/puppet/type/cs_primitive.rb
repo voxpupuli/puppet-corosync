@@ -54,6 +54,13 @@ module Puppet
         * `crm configure ra providers <ra> <class>`"
     end
 
+    newparam(:cib) do
+      desc "Corosync applies its configuration immediately. Using a CIB allows
+        you to group multiple primitives and relationships to be applied at
+        once. This can be necessary to make insert complex configurations into
+        Corosync correctly."
+    end
+
     # Our parameters and operations properties must be hashes.
     newproperty(:parameters) do
       desc "A hash of params for the primitive.  Parameters in a primitive are
@@ -110,10 +117,6 @@ module Puppet
       defaultto Hash.new
     end
 
-    newparam(:cib) do
-      desc "The CIB shadow that the primmitive belongs to"
-    end
-
     newproperty(:promotable) do
       desc "Designates if the primitive is capable of being managed in a master/slave
         state.  This will create a new ms resource in your Corosync config and add
@@ -129,6 +132,18 @@ module Puppet
 
         defaultto :false
     end
+
+    autorequire(:cs_shadow) do
+      autos = []
+      if @parameters[:cib]
+        autos << @parameters[:cib].value
+      end
+
+      autos
+    end
+
+    autorequire(:service) do
+      [ 'corosync' ]
+    end
   end
 end
-

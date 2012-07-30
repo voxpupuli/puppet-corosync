@@ -2,7 +2,7 @@ module Puppet
   newtype(:cs_shadow) do
     newproperty(:cib) do
       def sync
-        provider.create(self.should)
+        provider.sync(self.should)
       end
 
       def retrieve
@@ -18,6 +18,15 @@ module Puppet
 
     newparam(:name) do
       isnamevar
+    end
+
+    def generate
+      options = { :name => @title }
+      [ Puppet::Type.type(:cs_commit).new(options) ]
+    end
+
+    autorequire(:service) do
+      [ 'corosync' ]
     end
   end
 end
