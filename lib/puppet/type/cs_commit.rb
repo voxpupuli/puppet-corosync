@@ -2,7 +2,7 @@ require 'ruby-debug'
 
 module Puppet
   newtype(:cs_commit) do
-    @doc = ""
+    @doc = "This type is an implementation detail. DO NOT use it directly"
     newproperty(:cib) do
       def sync
         provider.sync(self.should)

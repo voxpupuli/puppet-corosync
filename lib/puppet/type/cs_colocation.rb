@@ -42,7 +42,14 @@ module Puppet
     end
 
     newparam(:cib) do
-      desc "The CIB shadow group to which this colocation belongs"
+      desc "Corosync applies its configuration immediately. Using a CIB allows
+        you to group multiple primitives and relationships to be applied at
+        once. This can be necessary to insert complex configurations into
+        Corosync correctly.
+
+        This paramater sets the CIB this colocation should be created in. A
+        cs_shadow resource with a title of the same name as this value should
+        also be added to your manifest."
     end
 
     newproperty(:score) do

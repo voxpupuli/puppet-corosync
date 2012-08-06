@@ -31,7 +31,14 @@ module Puppet
     end
 
     newparam(:cib) do
-      desc "The shadow CIB group that the order belongs to"
+      desc "Corosync applies its configuration immediately. Using a CIB allows
+        you to group multiple primitives and relationships to be applied at
+        once. This can be necessary to insert complex configurations into
+        Corosync correctly.
+
+        This paramater sets the CIB this order should be created in. A
+        cs_shadow resource with a title of the same name as this value should
+        also be added to your manifest."
     end
 
     newproperty(:score) do
