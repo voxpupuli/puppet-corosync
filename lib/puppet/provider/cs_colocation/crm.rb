@@ -1,4 +1,4 @@
-require 'puppet/provider/corosync'
+require File.join(File.dirname(__FILE__), '..', 'corosync')
 Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Corosync) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived.  This provider will check the state
@@ -21,19 +21,26 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Cor
 
     doc.root.elements['configuration'].elements['constraints'].each_element('rsc_colocation') do |e|
       items = e.attributes
-      colocation = {
-        :name => items['id'],
-        :primitives => [ items['rsc'], items['with-rsc'] ],
-        :score => items['score']
-      }
+
+      if items['rsc-role']
+        rsc = "#{items['rsc']}:#{items['rsc-role']}"
+      else
+        rsc = items['rsc']
+      end
+
+      if items ['with-rsc-role']
+        with_rsc = "#{items['with-rsc']}:#{items['with-rsc-role']}"
+      else
+        with_rsc = items['with-rsc']
+      end
 
       # Sorting the array of primitives because order doesn't matter so someone
       # switching the order around shouldn't generate an event.
       colocation_instance = {
-        :name       => colocation[:name],
+        :name       => items['id'],
         :ensure     => :present,
-        :primitives => colocation[:primitives].sort,
-        :score      => colocation[:score],
+        :primitives => [rsc, with_rsc].sort,
+        :score      => items['score'],
         :provider   => self.name
       }
       instances << new(colocation_instance)
@@ -48,15 +55,15 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Cor
       :name       => @resource[:name],
       :ensure     => :present,
       :primitives => @resource[:primitives],
-      :score      => @resource[:score]
+      :score      => @resource[:score],
+      :cib        => @resource[:cib],
     }
   end
 
   # Unlike create we actually immediately delete the item.
   def destroy
-    cmd = [ command(:crm), 'configure', 'delete', @resource[:name] ]
     debug('Revmoving colocation')
-    Puppet::Util.execute(cmd)
+    crm('configure', 'delete', @resource[:name])
     @property_hash.clear
   end
 
@@ -94,11 +101,11 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Cor
       updated << "#{@property_hash[:name]} "
       updated << "#{@property_hash[:score]}: "
       updated << "#{@property_hash[:primitives].join(' ')}"
-      cmd = [ command(:crm), 'configure', 'load','update', '-' ]
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        Puppet::Util.execute(cmd, :stdinfile => tmpfile.path.to_s)
+        ENV["CIB_shadow"] = @resource[:cib]
+        crm('configure', 'load', 'update', tmpfile.path.to_s)
       end
     end
   end

@@ -1,4 +1,4 @@
-require 'puppet/provider/corosync'
+require File.join(File.dirname(__FILE__), '..', 'corosync')
 Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Corosync) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived. This provider will check the state
@@ -21,14 +21,25 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Corosync
 
     doc.root.elements['configuration'].elements['constraints'].each_element('rsc_order') do |e|
       items = e.attributes
-      order = { :name => items['id'].to_sym, :first => items['first'], :second => items['then'], :score => items['score'] }
+
+      if items['first-action']
+        first = "#{items['first']}:#{items['first-action']}"
+      else
+        first = items['first']
+      end
+
+      if items['then-action']
+        second = "#{items['then']}:#{items['then-action']}"
+      else
+        second = items['then']
+      end
 
       order_instance = {
-        :name       => order[:name],
+        :name       => items['id'],
         :ensure     => :present,
-        :first      => order[:first],
-        :second     => order[:second],
-        :score      => order[:score],
+        :first      => first,
+        :second     => second,
+        :score      => items['score'],
         :provider   => self.name
       }
       instances << new(order_instance)
@@ -44,15 +55,15 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Corosync
       :ensure     => :present,
       :first      => @resource[:first],
       :second     => @resource[:second],
-      :score      => @resource[:score]
+      :score      => @resource[:score],
+      :cib        => @resource[:cib],
     }
   end
 
   # Unlike create we actually immediately delete the item.
   def destroy
-    cmd = [ command(:crm), 'configure', 'delete', @resource[:name] ]
     debug('Revmoving order directive')
-    Puppet::Util.execute(cmd)
+    crm('configure', 'delete', @resource[:name])
     @property_hash.clear
   end
 
@@ -97,16 +108,11 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Corosync
       updated << "#{@property_hash[:score]}: "
       updated << "#{@property_hash[:first]} "
       updated << "#{@property_hash[:second]}"
-      cmd = []
-      cmd << command(:crm)
-      cmd << 'configure'
-      cmd << 'load'
-      cmd << 'update'
-      cmd << '-'
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        Puppet::Util.execute(cmd, :stdinfile => tmpfile.path.to_s)
+        ENV['CIB_shadow'] = @resource[:cib]
+        crm('configure', 'load', 'update', tmpfile.path.to_s)
       end
     end
   end
