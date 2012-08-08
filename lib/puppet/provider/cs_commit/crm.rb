@@ -1,4 +1,5 @@
-require File.join(File.dirname(__FILE__), '..', 'corosync')
+require 'pathname'
+require Pathname.new(__FILE__).dirname.dirname.dirname.expand_path + 'corosync'
 
 Puppet::Type.type(:cs_commit).provide(:crm, :parent => Puppet::Provider::Corosync) do
   commands :crm => 'crm'
@@ -10,6 +11,6 @@ Puppet::Type.type(:cs_commit).provide(:crm, :parent => Puppet::Provider::Corosyn
   end
 
   def sync(cib)
-    crm "cib", "commit", cib
+    crm('cib', 'commit', cib)
   end
 end

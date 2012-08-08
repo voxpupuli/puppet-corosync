@@ -1,4 +1,5 @@
-require File.join(File.dirname(__FILE__), '..', 'corosync')
+require 'pathname' # JJM WORK_AROUND #14073
+require Pathname.new(__FILE__).dirname.dirname.dirname.expand_path + 'corosync'
 Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Corosync) do
   desc 'Specific provider for a rather specific type since I currently have no
         plan to abstract corosync/pacemaker vs. keepalived.  Primitives in
@@ -26,7 +27,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
     # key/value pairs for basic primitive information (which Corosync stores
     # in the configuration as "resources").  After getting that basic data we
     # descend into parameters, operations (which the config labels as
-    # instance_attributes and operations), and metadata then generateembedded
+    # instance_attributes and operations), and metadata then generate embedded
     # hash structures of each entry.
     REXML::XPath.each(doc, '//primitive') do |e|
 

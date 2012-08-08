@@ -1,4 +1,5 @@
-require File.join(File.dirname(__FILE__), '..', 'corosync')
+require 'pathname' # JJM WORK_AROUND #14073
+require Pathname.new(__FILE__).dirname.dirname.dirname.expand_path + 'corosync'
 Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Corosync) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived. This provider will check the state
@@ -104,10 +105,8 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Corosync
   def flush
     unless @property_hash.empty?
       updated = 'order '
-      updated << "#{@property_hash[:name]} "
-      updated << "#{@property_hash[:score]}: "
-      updated << "#{@property_hash[:first]} "
-      updated << "#{@property_hash[:second]}"
+      updated << "#{@property_hash[:name]} #{@property_hash[:score]}: "
+      updated << "#{@property_hash[:first]} #{@property_hash[:second]}"
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
