@@ -27,10 +27,10 @@ module Puppet
 
     newparam(:primitive_class) do
       desc "Corosync class of the primitive.  Examples of classes are lsb or ocf.
-        Lsb funtiony a lot like the init provider in Puppet for services, an init
-        is ran periodically on each host to identify status, or star and stop a
-        particular application.  Ocf of the other hand is a script with
-        meta-data  and stucture that is specific to Corosync and Pacemaker."
+        Lsb funtions a lot like the init provider in Puppet for services, an init
+        script is ran periodically on each host to identify status, or to start
+        and stop a particular application.  Ocf of the other hand is a script with
+        meta-data and stucture that is specific to Corosync and Pacemaker."
     end
 
     newparam(:primitive_type) do
@@ -42,11 +42,10 @@ module Puppet
 
     newparam(:provided_by) do
       desc "Corosync primitive provider.  All resource agents used in a primitve
-        have a something that provides them to the system, be it the Pacemaker
-        or redhat plugins...there not always obvious though and currently this
-        leaves it up to you to understand Corosync enough to figure it out.
-        Usually, if it isn't obvious it is because there only one provider for
-        a resource agent.
+        have something that provides them to the system, be it the Pacemaker or
+        redhat plugins...they're not always obvious though so currently you're
+        left to understand Corosync enough to figure it out.  Usually, if it isn't
+        obvious it is because there is only one provider for the resource agent.
 
         To find the list of providers for a resource agent run the following
         from the command line has Corosync installed:
@@ -125,12 +124,9 @@ module Puppet
       desc "Designates if the primitive is capable of being managed in a master/slave
         state.  This will create a new ms resource in your Corosync config and add
         this primitive to it.  Concequently Corosync will be helpful and update all
-        your colocation and order resources too but Puppet won't.  At this time you
-        will need to compensate for this and make sure your colocation and order
-        resources have been updated by replacing the name of this primitive with
-        ms_$name.  I am currently unsure on how to obtain this data directly from
-        Corosync.  Once it updates them is doesn't seem to leave anything indicating
-        why in the dump of the config."
+        your colocation and order resources too but Puppet won't.  Currenlty we unmunge
+        configuraiton entries that start with ms_ so that you don't have to account for
+        name change in all our manifests."
 
         newvalues(:true, :false)
 

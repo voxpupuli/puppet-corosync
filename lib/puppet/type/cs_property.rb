@@ -1,6 +1,6 @@
 module Puppet
   newtype(:cs_property) do
-    @doc = "Type for manipulating corosync/pacemkaer configuration properties.
+    @doc = "Type for manipulating corosync/pacemaker configuration properties.
       Besides the configuration file that is managed by the module the contains
       all these related Corosync types and providers, there is a set of cluster
       properties that can be set and saved inside the CIB (A CIB being a set of

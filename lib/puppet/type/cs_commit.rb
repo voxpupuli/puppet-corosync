@@ -1,5 +1,3 @@
-require 'ruby-debug'
-
 module Puppet
   newtype(:cs_commit) do
     @doc = "This type is an implementation detail. DO NOT use it directly"
@@ -50,8 +48,6 @@ module Puppet
         autos << r
       end
 
-      p autos.size
-      debugger
       autos
     end
   end
