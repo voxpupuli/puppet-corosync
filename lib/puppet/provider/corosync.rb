@@ -3,20 +3,12 @@ class Puppet::Provider::Corosync < Puppet::Provider
   # Yep, that's right we are parsing XML...FUN! (It really wasn't that bad)
   require 'rexml/document'
 
-
   # Corosync takes a while to build the initial CIB configuration once the
   # service is started for the first time.  This provides us a way to wait
   # until we're up so we can make changes that don't disappear in to a black
   # hole.
   def self.ready?
-    cmd =  [
-      command(:crm_attribute),
-      '--type',
-      'crm_config',
-      '--query',
-      '--name',
-      'dc-version'
-    ]
+    cmd =  [ command(:crm_attribute), '--type', 'crm_config', '--query', '--name', 'dc-version' ]
     raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
     if status == 0
       return true

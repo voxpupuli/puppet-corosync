@@ -1,4 +1,4 @@
-require 'pathname' # JJM WORK_AROUND #14073
+require 'pathname'
 require Pathname.new(__FILE__).dirname.dirname.dirname.expand_path + 'corosync'
 
 Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Corosync) do
@@ -8,6 +8,7 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Cor
         aspects.'
 
   # Path to the crm binary for interacting with the cluster configuration.
+  # Decided to just go with relative.
   commands :crm => 'crm'
   commands :crm_attribute => 'crm_attribute'
 
@@ -99,14 +100,12 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Cor
   # as stdin for the crm command.
   def flush
     unless @property_hash.empty?
-      updated = 'colocation '
-      updated << "#{@property_hash[:name]} "
-      updated << "#{@property_hash[:score]}: "
-      updated << "#{@property_hash[:primitives].join(' ')}"
-      Tempfile.open('puppet_crm_update') do |tmpfile|
+      updated = "colocation "
+      updated << "#{@property_hash[:name]} #{@property_hash[:score]}: #{@property_hash[:primitives].join(' ')}"
+      tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        ENV["CIB_shadow"] = @resource[:cib]
+        env["cib_shadow"] = @resource[:cib]
         crm('configure', 'load', 'update', tmpfile.path.to_s)
       end
     end

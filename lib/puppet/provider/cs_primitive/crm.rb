@@ -1,5 +1,6 @@
-require 'pathname' # JJM WORK_AROUND #14073
+require 'pathname'
 require Pathname.new(__FILE__).dirname.dirname.dirname.expand_path + 'corosync'
+
 Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Corosync) do
   desc 'Specific provider for a rather specific type since I currently have no
         plan to abstract corosync/pacemaker vs. keepalived.  Primitives in
@@ -41,11 +42,11 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
         }
       })
 
-      primitive[items['id'].to_sym][:parameters] = {}
-      primitive[items['id'].to_sym][:operations] = {}
-      primitive[items['id'].to_sym][:metadata] = {}
+      primitive[items['id'].to_sym][:parameters]  = {}
+      primitive[items['id'].to_sym][:operations]  = {}
+      primitive[items['id'].to_sym][:metadata]    = {}
       primitive[items['id'].to_sym][:ms_metadata] = {}
-      primitive[items['id'].to_sym][:promotable] = :false
+      primitive[items['id'].to_sym][:promotable]  = :false
 
       if ! e.elements['instance_attributes'].nil?
         e.elements['instance_attributes'].each_element do |i|
@@ -204,8 +205,8 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
           metadatas << "#{k}=#{v} "
         end
       end
-      updated = "primitive #{@property_hash[:name]} "
-      updated << "#{@property_hash[:primitive_class]}:"
+      updated = "primitive "
+      updated << "#{@property_hash[:name]} #{@property_hash[:primitive_class]}:"
       updated << "#{@property_hash[:provided_by]}:" if @property_hash[:provided_by]
       updated << "#{@property_hash[:primitive_type]} "
       updated << "#{operations} " unless operations.nil?
@@ -221,10 +222,10 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
           end
         end
       end
-      Tempfile.open('puppet_crm_update') do |tmpfile|
+      tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        ENV['CIB_shadow'] = @resource[:cib]
+        env['cib_shadow'] = @resource[:cib]
         crm('configure', 'load', 'update', tmpfile.path.to_s)
       end
     end
