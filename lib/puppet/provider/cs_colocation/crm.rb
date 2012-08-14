@@ -1,5 +1,5 @@
 require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.dirname.expand_path + 'corosync'
+require Pathname.new(__FILE__).dirname.dirname.expand_path + 'corosync'
 
 Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Corosync) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
