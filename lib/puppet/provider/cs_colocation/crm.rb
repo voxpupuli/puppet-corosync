@@ -102,10 +102,10 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Cor
     unless @property_hash.empty?
       updated = "colocation "
       updated << "#{@property_hash[:name]} #{@property_hash[:score]}: #{@property_hash[:primitives].join(' ')}"
-      tempfile.open('puppet_crm_update') do |tmpfile|
+      Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        env["cib_shadow"] = @resource[:cib]
+        ENV["CIB_shadow"] = @resource[:cib]
         crm('configure', 'load', 'update', tmpfile.path.to_s)
       end
     end

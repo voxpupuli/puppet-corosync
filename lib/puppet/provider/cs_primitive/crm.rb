@@ -222,10 +222,10 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
           end
         end
       end
-      tempfile.open('puppet_crm_update') do |tmpfile|
+      Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        env['cib_shadow'] = @resource[:cib]
+        ENV['CIB_shadow'] = @resource[:cib]
         crm('configure', 'load', 'update', tmpfile.path.to_s)
       end
     end
