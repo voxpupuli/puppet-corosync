@@ -1,5 +1,5 @@
 require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.dirname.expand_path + 'corosync'
+require Pathname.new(__FILE__).dirname.dirname.expand_path + 'corosync'
 
 Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Corosync) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
@@ -102,10 +102,10 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Cor
     unless @property_hash.empty?
       updated = "colocation "
       updated << "#{@property_hash[:name]} #{@property_hash[:score]}: #{@property_hash[:primitives].join(' ')}"
-      tempfile.open('puppet_crm_update') do |tmpfile|
+      Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        env["cib_shadow"] = @resource[:cib]
+        ENV["CIB_shadow"] = @resource[:cib]
         crm('configure', 'load', 'update', tmpfile.path.to_s)
       end
     end
