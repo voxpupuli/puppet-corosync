@@ -38,5 +38,7 @@ define corosync::service($version) {
     mode    => '0644',
     owner   => 'root',
     group   => 'root',
+    require => Package['corosync'],
+    notify  => Service['corosync'],
   }
 }
