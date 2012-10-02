@@ -56,6 +56,7 @@ class corosync(
   $bind_address       = 'UNSET',
   $multicast_address  = 'UNSET',
   $unicast_addresses  = 'UNSET',
+  $debug              = false,
 ) {
 
   # Making it possible to provide data with parameterized class declarations or
@@ -144,6 +145,14 @@ class corosync(
 
   package { [ 'corosync', 'pacemaker' ]: ensure => present }
 
+  # Template uses:
+  # - $unicast_addresses
+  # - $multicast_address
+  # - $debug
+  # - $bind_address_real
+  # - $port_real
+  # - $enable_secauth_real
+  # - $threads_real
   file { '/etc/corosync/corosync.conf':
     ensure  => file,
     mode    => '0644',
