@@ -1,10 +1,10 @@
 module Puppet
   newtype(:cs_primitive) do
-    @doc = "Type for manipulating Corosync/Pacemkaer primitives.  Primtives
+    @doc = "Type for manipulating Corosync/Pacemaker primitives.  Primitives
       are probably the most important building block when creating highly
       available clusters using Corosync and Pacemaker.  Each primitive defines
       an application, ip address, or similar to monitor and maintain.  These
-      managed primitves are maintained using what is called a resource agent.
+      managed primitives are maintained using what is called a resource agent.
       These resource agents have a concept of class, type, and subsystem that
       provides the functionality.  Regretibly these pieces of vocabulary
       clash with those used in Puppet so to overcome the name clashing the
