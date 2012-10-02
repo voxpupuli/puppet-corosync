@@ -31,7 +31,7 @@ logging {
   to_logfile:      no
   to_syslog:       yes
   syslog_facility: daemon
-  debug:           on
+  debug:           <%= debug ? 'on' : 'off' %>
   timestamp:       on
   logger_subsys {
     subsys: AMF
