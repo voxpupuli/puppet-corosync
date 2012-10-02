@@ -113,8 +113,14 @@ module Puppet
     newproperty(:ms_metadata) do
       desc "A hash of metadata for the master/slave primitive state."
 
+      munge do |value|
+        value['notify'] = String(value['notify']) unless value['notify'].nil?
+        value
+      end
+
       validate do |value|
         raise Puppet::Error, "Puppet::Type::Cs_Primitive: ms_metadata property must be a hash" unless value.is_a? Hash
+        raise Puppet::Error, "Puppet::Type::Cs_primitive: ms_metadata property 'notify' must be true/false" unless value['notify'].nil? or String(value['notify']) =~ /^(true|false)$/
       end
 
       defaultto Hash.new
