@@ -161,7 +161,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
     @property_hash[:metadata] = should
   end
 
-  def ms_medata=(should)
+  def ms_metadata=(should)
     @property_hash[:ms_metadata] = should
   end
 
