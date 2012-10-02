@@ -26,7 +26,7 @@
 #   An IP address that has been reserved for multicast traffic.  This is the
 #   default way that Corosync accomplishes communication across the cluster.
 #
-# [*uniicast_addresses*]
+# [*unicast_addresses*]
 #   An array of IP addresses that make up the cluster's members.  These are
 #   use if you are able to use multicast on your network and instead opt for
 #   the udpu transport.  You need a relatively recent version of Corosync to
