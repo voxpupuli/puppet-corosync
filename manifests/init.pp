@@ -57,6 +57,7 @@ class corosync(
   $multicast_address  = 'UNSET',
   $unicast_addresses  = 'UNSET',
   $force_online       = false,
+  $check_standby      = false,
   $debug              = false,
 ) {
 
@@ -199,6 +200,16 @@ class corosync(
     unless  => 'grep START=yes /etc/default/corosync',
     require => Package['corosync'],
     before  => Service['corosync'],
+  }
+
+  if $check_standby == true {
+    # Throws a puppet error if node is on standby
+    exec { 'check_standby node':
+      command => 'echo "Node appears to be on standby" && false',
+      path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
+      unless  => "crm node status|grep ${::hostname}-standby|grep 'value=\"off\"'",
+      require => Service['corosync'],
+    }
   }
 
   if $force_online == true {
