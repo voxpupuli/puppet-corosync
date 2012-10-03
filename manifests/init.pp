@@ -56,6 +56,7 @@ class corosync(
   $bind_address       = 'UNSET',
   $multicast_address  = 'UNSET',
   $unicast_addresses  = 'UNSET',
+  $force_online       = false,
   $debug              = false,
 ) {
 
@@ -198,6 +199,15 @@ class corosync(
     unless  => 'grep START=yes /etc/default/corosync',
     require => Package['corosync'],
     before  => Service['corosync'],
+  }
+
+  if $force_online == true {
+    exec { 'force_online node':
+      command => 'crm node online',
+      path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
+      unless  => "crm node status|grep ${::hostname}-standby|grep 'value=\"off\"'",
+      require => Service['corosync'],
+    }
   }
 
   service { 'corosync':
