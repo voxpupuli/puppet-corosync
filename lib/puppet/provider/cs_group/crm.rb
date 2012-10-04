@@ -8,16 +8,13 @@ Puppet::Type.type(:cs_group).provide(:crm, :parent => Puppet::Provider::Corosync
 
   def self.instances
 
+    block_until_ready
+
     instances = []
 
-    cmd = []
-    cmd << command(:crm)
-    cmd << 'configure'
-    cmd << 'show'
-    cmd << 'xml'
+    cmd = [ command(:crm), 'configure', 'show', 'xml' ]
     raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
     doc = REXML::Document.new(raw)
-
 
     REXML::XPath.each(doc, '//group') do |e|
 
@@ -25,7 +22,7 @@ Puppet::Type.type(:cs_group).provide(:crm, :parent => Puppet::Provider::Corosync
       group = { :name => items['id'].to_sym }
 
       primitives = []
-      
+
       if ! e.elements['primitive'].nil?
         e.each_element do |p|
           primitives << p.attributes['id']
@@ -51,22 +48,31 @@ Puppet::Type.type(:cs_group).provide(:crm, :parent => Puppet::Provider::Corosync
       :ensure     => :present,
       :primitives => @resource[:primitives]
     }
+    @property_hash[:cib] = @resource[:cib] if ! @resource[:cib].nil?
   end
 
   # Unlike create we actually immediately delete the item but first, like primitives,
   # we need to stop the group.
   def destroy
-    cmd = [ command(:crm), 'resource', 'stop', @resource[:name] ]
     debug('Stopping group before removing it')
-    Puppet::Util.exectute(cmd)
-    cmd = []
-    cmd << command(:crm)
-    cmd << 'configure'
-    cmd << 'delete'
-    cmd << @resource[:name]
+    crm('resource', 'stop', @resource[:name])
     debug('Revmoving group')
-    Puppet::Util.execute(cmd)
+    crm('configure', 'delete', @resource[:name])
     @property_hash.clear
+  end
+
+  # Getter that obtains the primitives array for us that should have
+  # been populated by prefetch or instances (depends on if your using
+  # puppet resource or not).
+  def primitives
+    @property_hash[:primitives]
+  end
+
+  # Our setters for the primitives array and score.  Setters are used when the
+  # resource already exists so we just update the current value in the property
+  # hash and doing this marks it to be flushed.
+  def primitives=(should)
+    @property_hash[:primitives] = should.sort
   end
 
   # Flush is triggered on anything that has been detected as being
@@ -75,20 +81,13 @@ Puppet::Type.type(:cs_group).provide(:crm, :parent => Puppet::Provider::Corosync
   # as stdin for the crm command.
   def flush
     unless @property_hash.empty?
-      updated = ''
-      updated << "group "
-      updated << "#{@property_hash[:name]} "
-      updated << "#{@property_hash[:primitives].join(' ')}"
-      cmd = []
-      cmd << command(:crm)
-      cmd << 'configure'
-      cmd << 'load'
-      cmd << 'update'
-      cmd << '-'
+      updated = 'group '
+      updated << "#{@property_hash[:name]} #{@property_hash[:primitives].join(' ')}"
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        Puppet::Util.execute(cmd, :stdinfile => tmpfile.path.to_s)
+        ENV['CIB_shadow'] = @resource[:cib]
+        crm('configure', 'load', 'update', tmpfile.path.to_s)
       end
     end
   end
