@@ -1,4 +1,6 @@
-require 'puppet/provider/corosync'
+require 'pathname'
+require Pathname.new(__FILE__).dirname.dirname.expand_path + 'corosync'
+
 Puppet::Type.type(:cs_group).provide(:crm, :parent => Puppet::Provider::Corosync) do
   desc 'Provider to add, delete, manipulate primitive groups.'
 
