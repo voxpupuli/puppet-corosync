@@ -207,7 +207,7 @@ class corosync(
     exec { 'check_standby node':
       command => 'echo "Node appears to be on standby" && false',
       path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
-      unless  => "crm node status|grep ${::hostname}-standby|grep 'value=\"off\"'",
+      onlyif  => "crm node status|grep ${::hostname}-standby|grep 'value=\"on\"'",
       require => Service['corosync'],
     }
   }
@@ -216,7 +216,7 @@ class corosync(
     exec { 'force_online node':
       command => 'crm node online',
       path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
-      unless  => "crm node status|grep ${::hostname}-standby|grep 'value=\"off\"'",
+      onlyif  => "crm node status|grep ${::hostname}-standby|grep 'value=\"on\"'",
       require => Service['corosync'],
     }
   }
