@@ -113,6 +113,13 @@ module Puppet
     newproperty(:ms_metadata) do
       desc "A hash of metadata for the master/slave primitive state."
 
+      munge do |value_hash|
+        value_hash.inject({}) do |memo,(key,value)|
+          memo[key] = String(value)
+          memo
+        end
+      end
+
       validate do |value|
         raise Puppet::Error, "Puppet::Type::Cs_Primitive: ms_metadata property must be a hash" unless value.is_a? Hash
       end
