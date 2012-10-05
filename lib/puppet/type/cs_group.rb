@@ -21,11 +21,15 @@ module Puppet
       desc "An array of primitives to have in this group.  Must be listed in the
           order that you wish them to start."
 
-      validate do |value|
-        raise Puppet::Error, "Puppet::Type::Cs_Group: primitives property must be an array." unless value.is_a? Array
+      # Have to redefine should= here so we can sort the array that is given to
+      # us by the manifest.  While were checking on the class of our value we
+      # are going to go ahead and do some validation too.  The way Corosync
+      # colocation works we need to only accept two value arrays.
+      def should=(value)
+        super
+        raise Puppet::Error, "Puppet::Type::Cs_Group: primitives property must be at least a 2-element array." unless value.is_a? Array and value.length > 1
+        @should
       end
-
-      defaultto Array.new
     end
 
     newparam(:cib) do
