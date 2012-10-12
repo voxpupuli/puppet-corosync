@@ -174,26 +174,6 @@ class corosync(
     require => Package['corosync']
   }
 
-  file { '/usr/lib/ocf/resource.d/pacemaker/ppk':
-    ensure  => file,
-    source  => "puppet:///modules/${module_name}/ppk",
-    mode    => '0755',
-    owner   => 'root',
-    group   => 'root',
-    require => Package['pacemaker', 'corosync'],
-    before  => Service['corosync'],
-  }
-
-  file { '/usr/lib/ocf/resource.d/pacemaker/ppdata':
-    ensure  => file,
-    source  => "puppet:///modules/${module_name}/ppdata",
-    mode    => '0755',
-    owner   => 'root',
-    group   => 'root',
-    require => Package['pacemaker', 'corosync'],
-    before  => Service['corosync'],
-  }
-
   exec { 'enable corosync':
     command => 'sed -i s/START=no/START=yes/ /etc/default/corosync',
     path    => [ '/bin', '/usr/bin' ],
