@@ -13,18 +13,22 @@ Basic usage
 
 *To install and configure Corosync*
 
-    class { 'corosync':
-      enable_secauth    => true,
-      authkey           => '/var/lib/puppet/ssl/certs/ca.pem',
-      bind_address      => $ipaddress,
-      multicast_address => '239.1.1.2',
-    }
+```puppet
+class { 'corosync':
+  enable_secauth    => true,
+  authkey           => '/var/lib/puppet/ssl/certs/ca.pem',
+  bind_address      => $ipaddress,
+  multicast_address => '239.1.1.2',
+}
+```
 
 *To enable Pacemaker*
 
-    corosync::service { 'pacemaker':
-      version => '0',
-    }
+```puppet
+corosync::service { 'pacemaker':
+  version => '0',
+}
+```
 
 Configuring primitives
 ------------------------
@@ -34,39 +38,45 @@ These are things like virtual IPs or services like drbd, nginx, and apache.
 
 *To assign a VIP to a network interface to be used by Nginx*
 
-    cs_primitive { 'nginx_vip':
-      primitive_class => 'ocf',
-      primitive_type  => 'IPaddr2',
-      provided_by     => 'heartbeat',
-      parameters      => { 'ip' => '172.16.210.100', 'cidr_netmask' => '24' },
-      operations      => { 'monitor' => { 'interval' => '10s' } },
-    }
+```puppet
+cs_primitive { 'nginx_vip':
+  primitive_class => 'ocf',
+  primitive_type  => 'IPaddr2',
+  provided_by     => 'heartbeat',
+  parameters      => { 'ip' => '172.16.210.100', 'cidr_netmask' => '24' },
+  operations      => { 'monitor' => { 'interval' => '10s' } },
+}
+```
 
 *Make Corosync manage and monitor the state of Nginx using a custom OCF agent*
 
-    cs_primitive { 'nginx_service':
-      primitive_class => 'ocf',
-      primitive_type  => 'nginx_fixed',
-      provided_by     => 'pacemaker',
-      operations      => {
-        'monitor' => { 'interval' => '10s', 'timeout' => '30s' },
-        'start'   => { 'interval' => '0', 'timeout' => '30s', 'on-fail' => 'restart' }
-      },
-      require         => Cs_primitive['nginx_vip'],
-    }
+```puppet
+cs_primitive { 'nginx_service':
+  primitive_class => 'ocf',
+  primitive_type  => 'nginx_fixed',
+  provided_by     => 'pacemaker',
+  operations      => {
+    'monitor' => { 'interval' => '10s', 'timeout' => '30s' },
+    'start'   => { 'interval' => '0', 'timeout' => '30s', 'on-fail' => 'restart' }
+  },
+  require         => Cs_primitive['nginx_vip'],
+}
+```
 
 *Make Corosync manage and monitor the state of Apache using a LSB agent*
 
-    cs_primitive { 'nginx_service':
-      primitive_class => 'lsb',
-      primitive_type  => 'apache2',
-      provided_by     => 'heartbeat',
-      operations      => {
-        'monitor' => { 'interval' => '10s', 'timeout' => '30s' },
-        'start'   => { 'interval' => '0', 'timeout' => '30s', 'on-fail' => 'restart' }
-      },
-      require         => Cs_primitive['apache2_vip'],
-    }
+```puppet
+cs_primitive { 'nginx_service':
+  primitive_class => 'lsb',
+  primitive_type  => 'apache2',
+  provided_by     => 'heartbeat',
+  operations      => {
+    'monitor' => { 'interval' => '10s', 'timeout' => '30s' },
+    'start'   => { 'interval' => '0', 'timeout' => '30s', 'on-fail' => 'restart' }
+  },
+  require         => Cs_primitive['apache2_vip'],
+}
+```
 
 Configuring colocations
 -----------------------
@@ -74,9 +84,11 @@ Configuring colocations
 Colocations keep primitives together.  Meaning if a vip moves to web02 from web01
 because web01 just hit the dirt it will drag the nginx service with it.
 
-    cs_colocation { 'vip_with_service':
-      primitives => [ 'nginx_vip', 'nginx_service' ],
-    }
+```puppet
+cs_colocation { 'vip_with_service':
+  primitives => [ 'nginx_vip', 'nginx_service' ],
+}
+```
 
 Configuring migration or state order
 ------------------------------------
@@ -86,11 +98,13 @@ but order definitions will define the order of which each primitive is started. 
 Nginx is configured to listen only on our vip we definitely want the vip to be
 migrated to a new node before nginx comes up or the migration will fail.
 
-    cs_order { 'vip_before_service':
-      first   => 'nginx_vip',
-      second  => 'nginx_service',
-      require => Cs_colocation['vip_with_service'],
-    }
+```puppet
+cs_order { 'vip_before_service':
+  first   => 'nginx_vip',
+  second  => 'nginx_service',
+  require => Cs_colocation['vip_with_service'],
+}
+```
 
 Dependencies
 ------------
@@ -113,8 +127,8 @@ We suggest you at least go read the [Clusters from Scratch](http://www.clusterla
 from Cluster Labs.  It will help you out a lot when understanding how all the pieces
 fall together a point you in the right direction when Corosync fails unexpectedly.
 
-A simple but complete manifest example can be found on [Cody Herriges' Github](https://github.com/ody/ha-demo) plus
-There are more incomplete examples spread across the [Puppet Labs Github](https://github.com/puppetlabs).
+A simple but complete manifest example can be found on [Cody Herriges' Github](https://github.com/ody/ha-demo), plus
+there are more incomplete examples spread across the [Puppet Labs Github](https://github.com/puppetlabs).
 
 Contributors
 ------------
