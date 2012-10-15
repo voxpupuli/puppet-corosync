@@ -10,6 +10,9 @@
 # [*enable_secauth*]
 #   Controls corosync's ability to authenticate and encrypt multicast messages.
 #
+# [*authkey*]
+#   Specifies the path to the CA which is used to sign Corosync's certificate.
+#
 # [*threads*]
 #   How many threads you are going to let corosync use to encode and decode
 #   multicast messages.  If you turn off secauth then corosync wil ignore
@@ -31,6 +34,18 @@
 #   use if you are able to use multicast on your network and instead opt for
 #   the udpu transport.  You need a relatively recent version of Corosync to
 #   make this possible.
+#
+# [*force_online*]
+#   True/false parameter specifying whether to force nodes that have been put
+#   in standby back online.
+#
+# [*check_standby*]
+#   True/false parameter specifying whether puppet should return an error log
+#   message if a node is in standby. Useful for monitoring node state.
+#
+# [*debug*]
+#   True/false parameter specifying whether Corosync should produce debug
+#   output in its logs.
 #
 # === Examples
 #
