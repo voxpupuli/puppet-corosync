@@ -11,6 +11,11 @@ Puppet::Type.type(:cs_shadow).provide(:crm, :parent => Puppet::Provider::Corosyn
   end
 
   def sync(cib)
+    begin
+      crm('cib', 'delete', cib)
+    rescue => e
+      # If the CIB doesn't exist, we don't care.
+    end
     crm('cib', 'new', cib)
   end
 end
