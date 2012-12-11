@@ -189,12 +189,14 @@ class corosync(
     require => Package['corosync']
   }
 
-  exec { 'enable corosync':
-    command => 'sed -i s/START=no/START=yes/ /etc/default/corosync',
-    path    => [ '/bin', '/usr/bin' ],
-    unless  => 'grep START=yes /etc/default/corosync',
-    require => Package['corosync'],
-    before  => Service['corosync'],
+  if $::osfamily == 'Debian' {
+    exec { 'enable corosync':
+      command => 'sed -i s/START=no/START=yes/ /etc/default/corosync',
+      path    => [ '/bin', '/usr/bin' ],
+      unless  => 'grep START=yes /etc/default/corosync',
+      require => Package['corosync'],
+      before  => Service['corosync'],
+    }
   }
 
   if $check_standby == true {
