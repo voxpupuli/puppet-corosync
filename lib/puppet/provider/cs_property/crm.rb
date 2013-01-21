@@ -7,9 +7,13 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Coros
         of Corosync cluster configuration properties.'
 
   # Path to the crm binary for interacting with the cluster configuration.
-  commands :crm           => 'crm'
   commands :cibadmin      => 'cibadmin'
   commands :crm_attribute => 'crm_attribute'
+  if Puppet::PUPPETVERSION.to_f < 3
+    commands :crm => 'crm'
+  else
+    has_command(:crm, 'crm') { environment :HOME => '/root' }
+  end
 
   def self.instances
 
@@ -18,7 +22,13 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Coros
     instances = []
 
     cmd = [ command(:crm), 'configure', 'show', 'xml' ]
-    raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+    if Puppet::PUPPETVERSION.to_f < 3
+      raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+    else
+      raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd, nil, nil,
+        :custom_environment => { 'HOME' => '/root' }
+      )
+    end
     doc = REXML::Document.new(raw)
 
     doc.root.elements['configuration/crm_config/cluster_property_set'].each_element do |e|

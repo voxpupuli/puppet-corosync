@@ -18,6 +18,7 @@ class corosync::reprobe {
   exec { 'crm resource reprobe':
     path        => ['/bin','/usr/bin','/sbin','/usr/sbin'],
     refreshonly => true,
+    environment => 'HOME=/root',
   }
   Cs_primitive <| |> {
     notify => Exec['crm resource reprobe'],
