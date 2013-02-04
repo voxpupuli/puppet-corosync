@@ -21,9 +21,9 @@ module Puppet
     end
 
     newproperty(:primitives, :array_matching => :all) do
-      desc "Two Corosync primitives to be grouped together.  Colocation groups
-        come in twos and order is irrelavent.  Property will raise an error if
-        you do not provide a two value array."
+      desc "At least two Corosync primitives to be located together. Order of primitives
+        in colocation groups is irrelevant.  Property will raise an error if
+        you do not provide an array containing at least two values."
 
       # Have to redefine should= here so we can sort the array that is given to
       # us by the manifest.  While were checking on the class of our value we
@@ -32,10 +32,10 @@ module Puppet
       def should=(value)
         super
         if value.is_a? Array
-          raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be a two value array." unless value.size == 2
+          raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be an array of at least two primitives." unless value.size >= 2
           @should.sort!
         else
-          raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be a two value array."
+          raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be an array."
           @should
         end
       end
