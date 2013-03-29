@@ -63,18 +63,18 @@
 #
 # Copyright 2012, Puppet Labs, LLC.
 #
-class corosync(
-  $enable_secauth     = 'UNSET',
-  $authkey            = '/etc/puppet/ssl/certs/ca.pem',
-  $threads            = 'UNSET',
-  $port               = 'UNSET',
-  $bind_address       = 'UNSET',
-  $multicast_address  = 'UNSET',
-  $unicast_addresses  = 'UNSET',
-  $force_online       = false,
-  $check_standby      = false,
-  $debug              = false,
-) {
+class corosync (
+  $enable_secauth     = $corosync::params::enable_secauth,
+  $authkey            = $corosync::params::authkey,
+  $threads            = $corosync::params::threads,
+  $port               = $corosync::params::port,
+  $bind_address       = $corosync::params::bind_address,
+  $multicast_address  = $corosync::params::multicast_address,
+  $unicast_addresses  = $corosync::params::unicast_addresses,
+  $force_online       = $corosync::params::force_online,
+  $check_standby      = $corosync::params::check_standby,
+  $debug              = $corosync::params::debug
+) inherits corosync::params {
 
   # Making it possible to provide data with parameterized class declarations or
   # Console.
@@ -156,11 +156,18 @@ class corosync(
       mode    => '0400',
       owner   => 'root',
       group   => 'root',
-      notify  => Service['corosync'],
+      notify  => Service['$corosync::params::corosync_svc'],
     }
   }
 
-  package { [ 'corosync', 'pacemaker' ]: ensure => present }
+    package { 'corosync':
+        name    => $corosync::params::corosync_name,
+        ensure  => installed,
+    }
+    package { 'pacemaker':
+        name    => $corosync::params::pacemaker,
+        ensure  => installed,
+    }
 
   # Template uses:
   # - $unicast_addresses
@@ -170,8 +177,9 @@ class corosync(
   # - $port_real
   # - $enable_secauth_real
   # - $threads_real
-  file { '/etc/corosync/corosync.conf':
+  file { 'conf_file':
     ensure  => file,
+    name    => $corosync::params::conf_file,
     mode    => '0644',
     owner   => 'root',
     group   => 'root',
@@ -179,8 +187,9 @@ class corosync(
     require => Package['corosync'],
   }
 
-  file { '/etc/corosync/service.d':
+  file { 'service_d':
     ensure  => directory,
+    name    => $corosync::params::corosync_svc_dir,
     mode    => '0755',
     owner   => 'root',
     group   => 'root',
@@ -219,8 +228,9 @@ class corosync(
   }
 
   service { 'corosync':
-    ensure    => running,
-    enable    => true,
-    subscribe => File[ [ '/etc/corosync/corosync.conf', '/etc/corosync/service.d' ] ],
+    ensure      => running,
+    name        => $corosync::params::corosync_svc,
+    enable      => true,
+    subscribe   => File[ [ 'conf_file', 'service_d' ] ],
   }
 }
