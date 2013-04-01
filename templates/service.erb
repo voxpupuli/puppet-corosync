@@ -1,4 +1,13 @@
+# This file is being maintained by Puppet.
+# DO NOT EDIT
+#
 service {
-  name: <%= name %>
-  ver:  <%= version %>
+  name:      <%= name %>
+  ver:       <%= version %>
+<% if logd != :undef -%>
+  use_logd:  <%= logd %>
+<% end -%>
+<% if mgmtd != :undef -%>
+  use_mgmtd: <%= mgmtd %>
+<% end -%>
 }

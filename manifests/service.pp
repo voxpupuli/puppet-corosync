@@ -30,9 +30,12 @@
 #
 # Copyright 2012 Puppet Labs, LLC.
 #
-define corosync::service($version) {
+define corosync::service(
+    $version,
+    $mgmtd  = undef,
+    $logd   = undef) {
 
-  file { "/etc/corosync/service.d/${name}":
+  file { "$corosync::params::corosync_svc_dir/${name}":
     ensure  => file,
     content => template("${module_name}/service.erb"),
     mode    => '0644',
