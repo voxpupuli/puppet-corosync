@@ -30,7 +30,10 @@
 #
 # Copyright 2012 Puppet Labs, LLC.
 #
-define corosync::service($version) {
+define corosync::service(
+    $version,
+    $mgmtd  = undef,
+    $logd   = undef) {
 
   file { "$corosync::params::corosync_svc_dir/${name}":
     ensure  => file,
