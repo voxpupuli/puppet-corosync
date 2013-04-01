@@ -32,7 +32,7 @@
 #
 define corosync::service($version) {
 
-  file { "/etc/corosync/service.d/${name}":
+  file { "$corosync::params::corosync_svc_dir/${name}":
     ensure  => file,
     content => template("${module_name}/service.erb"),
     mode    => '0644',
