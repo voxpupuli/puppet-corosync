@@ -73,6 +73,7 @@ class corosync (
   $unicast_addresses  = $corosync::params::unicast_addresses,
   $force_online       = $corosync::params::force_online,
   $check_standby      = $corosync::params::check_standby,
+  $service_enable     = $corosync::params::service_enable,
   $debug              = $corosync::params::debug
 ) inherits corosync::params {
 
@@ -156,7 +157,7 @@ class corosync (
       mode    => '0400',
       owner   => 'root',
       group   => 'root',
-      notify  => Service['$corosync::params::corosync_svc'],
+      notify  => Service['corosync'],
     }
   }
 
@@ -230,7 +231,7 @@ class corosync (
   service { 'corosync':
     ensure      => running,
     name        => $corosync::params::corosync_svc,
-    enable      => true,
+    enable      => $service_enable,
     subscribe   => File[ [ 'conf_file', 'service_d' ] ],
   }
 }
