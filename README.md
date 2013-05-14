@@ -90,6 +90,48 @@ cs_colocation { 'vip_with_service':
 }
 ```
 
+Configuring locations
+---------------------
+
+Location binds a primitive to nodes via score. I.e. the primitive 'cluster-ip' with
+score of INFINITY to cluster member 'node3', so the resource cluster-ip will run always on node3.
+
+```puppet
+cs_location { 'ip_always_on_node3':
+  rsc => 'cluster-ip',
+  host => 'node3',
+  score => 'INFINITY',
+}
+```
+
+Also you can use rules. Here the resource 'cluster-ip' is not able to
+run on a node without successful ping to the given ip.
+
+```puppet
+cs_primitive { 'ping':
+  primitive_class => 'ocf',
+  primitive_type  => 'ping',
+  provided_by     => 'pacemaker',
+  parameters      => { 'name' => "pingd", 'host_list' => "192.168.56.254" },
+  operations      => { 'monitor' => { 'interval' => '10s', 'timeout' => '5s' }, },
+}
+
+cs_location { 'ip_on_connected_node':
+  rsc => 'cluster-ip',
+  rules => [ { 'score' => '-INFINITY', 'operation' => 'or', expressions => ['not_defined pingd', 'pingd lte 0'], }, ],
+}
+```
+
+Cloning primitives
+------------------
+
+```puppet
+cs_clone { 'pingclone':
+  primitive => 'ping',
+  metadata => { 'globally-unique' => "false", 'clone-max' => "2", 'target-role' => "Started" },
+}
+```
+
 Configuring migration or state order
 ------------------------------------
 
