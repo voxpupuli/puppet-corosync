@@ -17,78 +17,59 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
   # given an XML element (a <primitive> from cibadmin), produce a hash suitible
   # for creating a new provider instance.
   def self.element_to_hash(e)
-    # We are obtaining four different sets of data in this block.  We obtain
-    # key/value pairs for basic primitive information (which Corosync stores
-    # in the configuration as "resources").  After getting that basic data we
-    # descend into parameters, operations (which the config labels as
-    # instance_attributes and operations), and metadata then generate embedded
-    # hash structures of each entry.
-    primitive = {}
-    items = e.attributes
-    primitive.merge!({
-      items['id'].to_sym => {
-        :class    => items['class'],
-        :type     => items['type'],
-        :provider => items['provider']
-      }
-    })
+    hash = {
+      :primitive_class  => e.attributes['class'],
+      :primitive_type   => e.attributes['type'],
+      :provided_by      => e.attributes['provider'],
+      :name             => e.attributes['id'].to_sym,
+      :ensure           => :present,
+      :provider         => self.name,
+      :parameters       => {},
+      :operations       => {},
+      :utilization      => {},
+      :metadata         => {},
+      :ms_metadata      => {},
+      :promotable       => :false
+    }
 
-    primitive[items['id'].to_sym][:parameters]  = {}
-    primitive[items['id'].to_sym][:operations]  = {}
-    primitive[items['id'].to_sym][:utilization] = {}
-    primitive[items['id'].to_sym][:metadata]    = {}
-    primitive[items['id'].to_sym][:ms_metadata] = {}
-    primitive[items['id'].to_sym][:promotable]  = :false
 
     if ! e.elements['instance_attributes'].nil?
       e.elements['instance_attributes'].each_element do |i|
-        primitive[items['id'].to_sym][:parameters][(i.attributes['name'])] = i.attributes['value']
+        hash[:parameters][(i.attributes['name'])] = i.attributes['value']
       end
     end
 
     if ! e.elements['meta_attributes'].nil?
       e.elements['meta_attributes'].each_element do |m|
-        primitive[items['id'].to_sym][:metadata][(m.attributes['name'])] = m.attributes['value']
+        hash[:metadata][(m.attributes['name'])] = m.attributes['value']
       end
     end
 
     if ! e.elements['utilization'].nil?
       e.elements['utilization'].each_element do |m|
-        primitive[items['id'].to_sym][:utilization][(m.attributes['name'])] = m.attributes['value']
+        hash[:utilization][(m.attributes['name'])] = m.attributes['value']
       end
     end
 
     if ! e.elements['operations'].nil?
       e.elements['operations'].each_element do |o|
         valids = o.attributes.reject do |k,v| k == 'id' end
-        primitive[items['id'].to_sym][:operations][valids['name']] = {}
+        hash[:operations][valids['name']] = {}
         valids.each do |k,v|
-          primitive[items['id'].to_sym][:operations][valids['name']][k] = v if k != 'name'
+          hash[:operations][valids['name']][k] = v if k != 'name'
         end
       end
     end
     if e.parent.name == 'master'
-      primitive[items['id'].to_sym][:promotable] = :true
+      hash[:promotable] = :true
       if ! e.parent.elements['meta_attributes'].nil?
         e.parent.elements['meta_attributes'].each_element do |m|
-          primitive[items['id'].to_sym][:ms_metadata][(m.attributes['name'])] = m.attributes['value']
+          hash[:ms_metadata][(m.attributes['name'])] = m.attributes['value']
         end
       end
     end
-    {
-      :name            => primitive.first[0],
-      :ensure          => :present,
-      :primitive_class => primitive.first[1][:class],
-      :provided_by     => primitive.first[1][:provider],
-      :primitive_type  => primitive.first[1][:type],
-      :parameters      => primitive.first[1][:parameters],
-      :utilization     => primitive.first[1][:utilization],
-      :operations      => primitive.first[1][:operations],
-      :metadata        => primitive.first[1][:metadata],
-      :ms_metadata     => primitive.first[1][:ms_metadata],
-      :promotable      => primitive.first[1][:promotable],
-      :provider        => self.name
-    }
+
+    hash
   end
 
   def self.instances
