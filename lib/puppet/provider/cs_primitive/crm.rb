@@ -14,6 +14,19 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
   commands :crm => 'crm'
   commands :crm_attribute => 'crm_attribute'
 
+  # given an XML element containing some <nvpair>s, return a hash. Return an
+  # empty hash if `e` is nil.
+  def self.nvpairs_to_hash(e)
+    return {} if e.nil?
+
+    hash = {}
+    e.each_element do |i|
+      hash[(i.attributes['name'])] = i.attributes['value']
+    end
+
+    hash
+  end
+
   # given an XML element (a <primitive> from cibadmin), produce a hash suitible
   # for creating a new provider instance.
   def self.element_to_hash(e)
@@ -24,32 +37,13 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
       :name             => e.attributes['id'].to_sym,
       :ensure           => :present,
       :provider         => self.name,
-      :parameters       => {},
+      :parameters       => nvpairs_to_hash(e.elements['instance_attributes']),
       :operations       => {},
-      :utilization      => {},
-      :metadata         => {},
+      :utilization      => nvpairs_to_hash(e.elements['utilization']),
+      :metadata         => nvpairs_to_hash(e.elements['meta_attributes']),
       :ms_metadata      => {},
       :promotable       => :false
     }
-
-
-    if ! e.elements['instance_attributes'].nil?
-      e.elements['instance_attributes'].each_element do |i|
-        hash[:parameters][(i.attributes['name'])] = i.attributes['value']
-      end
-    end
-
-    if ! e.elements['meta_attributes'].nil?
-      e.elements['meta_attributes'].each_element do |m|
-        hash[:metadata][(m.attributes['name'])] = m.attributes['value']
-      end
-    end
-
-    if ! e.elements['utilization'].nil?
-      e.elements['utilization'].each_element do |m|
-        hash[:utilization][(m.attributes['name'])] = m.attributes['value']
-      end
-    end
 
     if ! e.elements['operations'].nil?
       e.elements['operations'].each_element do |o|
