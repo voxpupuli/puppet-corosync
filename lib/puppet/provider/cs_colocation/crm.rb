@@ -9,8 +9,12 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Cor
 
   # Path to the crm binary for interacting with the cluster configuration.
   # Decided to just go with relative.
-  commands :crm => 'crm'
   commands :crm_attribute => 'crm_attribute'
+  if Puppet::PUPPETVERSION.to_f < 3
+    commands :crm => 'crm'
+  else
+    has_command(:crm, 'crm') { environment :HOME => '/root' }
+  end
 
   def self.instances
 
@@ -19,7 +23,13 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Cor
     instances = []
 
     cmd = [ command(:crm), 'configure', 'show', 'xml' ]
-    raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+    if Puppet::PUPPETVERSION.to_f < 3
+      raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+    else
+      raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd, nil, nil,
+        :custom_environment => { 'HOME' => '/root' }
+      )
+    end
     doc = REXML::Document.new(raw)
 
     doc.root.elements['configuration'].elements['constraints'].each_element('rsc_colocation') do |e|
