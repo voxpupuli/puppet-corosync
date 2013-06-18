@@ -16,6 +16,9 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
                 <nvpair id="example_vm-instance_attributes-xmfile" name="xmfile" value="/etc/xen/example_vm.cfg"/>
                 <nvpair id="example_vm-instance_attributes-name" name="name" value="example_vm_name"/>
               </instance_attributes>
+              <utilization id="example_vm-utilization">
+                <nvpair id="example_vm-utilization-ram" name="ram" value="256"/>
+              </utilization>
               <meta_attributes id="example_vm-meta_attributes">
                 <nvpair id="example_vm-meta_attributes-target-role" name="target-role" value="Started"/>
                 <nvpair id="example_vm-meta_attributes-priority" name="priority" value="7"/>
@@ -77,6 +80,12 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
         expect(instance.operations).to eq({
           "start" => {"interval" => "0", "timeout" => "60"},
           "stop" => {"interval" => "0", "timeout" => "40"},
+        })
+      end
+
+      it 'has a utilization property corresponding to <utilization>' do
+        expect(instance.utilization).to eq({
+          "ram" => "256",
         })
       end
 
