@@ -96,6 +96,21 @@ module Puppet
       defaultto Hash.new
     end
 
+    newproperty(:utilization) do
+      desc "A hash of utilization attributes for the primitive. If nodes are
+        also configured with available resources, and Pacemaker's placement
+        stratgey is set appropriately, then Pacemaker can place primitives on
+        nodes only where resources are available.
+
+        See the Pacemaker documentation:
+
+        http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch11.html"
+
+      validate do |value|
+        raise Puppet::Error, "Puppet::Type::Cs_Primitive: utilization property must be a hash." unless value.is_a? Hash
+      end
+    end
+
     newproperty(:metadata) do
       desc "A hash of metadata for the primitive.  A primitive can have a set of
         metadata that doesn't affect the underlying Corosync type/provider but
