@@ -14,6 +14,58 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
   commands :crm => 'crm'
   commands :crm_attribute => 'crm_attribute'
 
+  # given an XML element containing some <nvpair>s, return a hash. Return an
+  # empty hash if `e` is nil.
+  def self.nvpairs_to_hash(e)
+    return {} if e.nil?
+
+    hash = {}
+    e.each_element do |i|
+      hash[(i.attributes['name'])] = i.attributes['value']
+    end
+
+    hash
+  end
+
+  # given an XML element (a <primitive> from cibadmin), produce a hash suitible
+  # for creating a new provider instance.
+  def self.element_to_hash(e)
+    hash = {
+      :primitive_class  => e.attributes['class'],
+      :primitive_type   => e.attributes['type'],
+      :provided_by      => e.attributes['provider'],
+      :name             => e.attributes['id'].to_sym,
+      :ensure           => :present,
+      :provider         => self.name,
+      :parameters       => nvpairs_to_hash(e.elements['instance_attributes']),
+      :operations       => {},
+      :utilization      => nvpairs_to_hash(e.elements['utilization']),
+      :metadata         => nvpairs_to_hash(e.elements['meta_attributes']),
+      :ms_metadata      => {},
+      :promotable       => :false
+    }
+
+    if ! e.elements['operations'].nil?
+      e.elements['operations'].each_element do |o|
+        valids = o.attributes.reject do |k,v| k == 'id' end
+        hash[:operations][valids['name']] = {}
+        valids.each do |k,v|
+          hash[:operations][valids['name']][k] = v if k != 'name'
+        end
+      end
+    end
+    if e.parent.name == 'master'
+      hash[:promotable] = :true
+      if ! e.parent.elements['meta_attributes'].nil?
+        e.parent.elements['meta_attributes'].each_element do |m|
+          hash[:ms_metadata][(m.attributes['name'])] = m.attributes['value']
+        end
+      end
+    end
+
+    hash
+  end
+
   def self.instances
 
     block_until_ready
@@ -24,73 +76,8 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
     raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
     doc = REXML::Document.new(raw)
 
-    # We are obtaining four different sets of data in this block.  We obtain
-    # key/value pairs for basic primitive information (which Corosync stores
-    # in the configuration as "resources").  After getting that basic data we
-    # descend into parameters, operations (which the config labels as
-    # instance_attributes and operations), and metadata then generate embedded
-    # hash structures of each entry.
     REXML::XPath.each(doc, '//primitive') do |e|
-
-      primitive = {}
-      items = e.attributes
-      primitive.merge!({
-        items['id'].to_sym => {
-          :class    => items['class'],
-          :type     => items['type'],
-          :provider => items['provider']
-        }
-      })
-
-      primitive[items['id'].to_sym][:parameters]  = {}
-      primitive[items['id'].to_sym][:operations]  = {}
-      primitive[items['id'].to_sym][:metadata]    = {}
-      primitive[items['id'].to_sym][:ms_metadata] = {}
-      primitive[items['id'].to_sym][:promotable]  = :false
-
-      if ! e.elements['instance_attributes'].nil?
-        e.elements['instance_attributes'].each_element do |i|
-          primitive[items['id'].to_sym][:parameters][(i.attributes['name'])] = i.attributes['value']
-        end
-      end
-
-      if ! e.elements['meta_attributes'].nil?
-        e.elements['meta_attributes'].each_element do |m|
-          primitive[items['id'].to_sym][:metadata][(m.attributes['name'])] = m.attributes['value']
-        end
-      end
-
-      if ! e.elements['operations'].nil?
-        e.elements['operations'].each_element do |o|
-          valids = o.attributes.reject do |k,v| k == 'id' end
-          primitive[items['id'].to_sym][:operations][valids['name']] = {}
-          valids.each do |k,v|
-            primitive[items['id'].to_sym][:operations][valids['name']][k] = v if k != 'name'
-          end
-        end
-      end
-      if e.parent.name == 'master'
-        primitive[items['id'].to_sym][:promotable] = :true
-        if ! e.parent.elements['meta_attributes'].nil?
-          e.parent.elements['meta_attributes'].each_element do |m|
-            primitive[items['id'].to_sym][:ms_metadata][(m.attributes['name'])] = m.attributes['value']
-          end
-        end
-      end
-      primitive_instance = {
-        :name            => primitive.first[0],
-        :ensure          => :present,
-        :primitive_class => primitive.first[1][:class],
-        :provided_by     => primitive.first[1][:provider],
-        :primitive_type  => primitive.first[1][:type],
-        :parameters      => primitive.first[1][:parameters],
-        :operations      => primitive.first[1][:operations],
-        :metadata        => primitive.first[1][:metadata],
-        :ms_metadata     => primitive.first[1][:ms_metadata],
-        :promotable      => primitive.first[1][:promotable],
-        :provider        => self.name
-      }
-      instances << new(primitive_instance)
+      instances << new(element_to_hash(e))
     end
     instances
   end
@@ -108,6 +95,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
     }
     @property_hash[:parameters] = @resource[:parameters] if ! @resource[:parameters].nil?
     @property_hash[:operations] = @resource[:operations] if ! @resource[:operations].nil?
+    @property_hash[:utilization] = @resource[:utilization] if ! @resource[:utilization].nil?
     @property_hash[:metadata] = @resource[:metadata] if ! @resource[:metadata].nil?
     @property_hash[:ms_metadata] = @resource[:ms_metadata] if ! @resource[:ms_metadata].nil?
     @property_hash[:cib] = @resource[:cib] if ! @resource[:cib].nil?
@@ -134,6 +122,10 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
     @property_hash[:operations]
   end
 
+  def utilization
+    @property_hash[:utilization]
+  end
+
   def metadata
     @property_hash[:metadata]
   end
@@ -155,6 +147,10 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
 
   def operations=(should)
     @property_hash[:operations] = should
+  end
+
+  def utilization=(should)
+    @property_hash[:utilization] = should
   end
 
   def metadata=(should)
@@ -199,6 +195,12 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
           parameters << "#{k}=#{v} "
         end
       end
+      unless @property_hash[:utilization].empty?
+        utilization = 'utilization '
+        @property_hash[:utilization].each_pair do |k,v|
+          utilization << "#{k}=#{v} "
+        end
+      end
       unless @property_hash[:metadata].empty?
         metadatas = 'meta '
         @property_hash[:metadata].each_pair do |k,v|
@@ -211,6 +213,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
       updated << "#{@property_hash[:primitive_type]} "
       updated << "#{operations} " unless operations.nil?
       updated << "#{parameters} " unless parameters.nil?
+      updated << "#{utilization} " unless utilization.nil?
       updated << "#{metadatas} " unless metadatas.nil?
       if @property_hash[:promotable] == :true
         updated << "\n"
