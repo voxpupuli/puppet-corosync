@@ -9,7 +9,6 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Coros
   # Path to the crm binary for interacting with the cluster configuration.
   commands :crm           => 'crm'
   commands :cibadmin      => 'cibadmin'
-  commands :crm_attribute => 'crm_attribute'
 
   def self.instances
 

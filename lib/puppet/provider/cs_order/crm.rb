@@ -9,7 +9,6 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Corosync
 
   # Path to the crm binary for interacting with the cluster configuration.
   commands :crm => 'crm'
-  commands :crm_attribute => 'crm_attribute'
 
   def self.instances
 
