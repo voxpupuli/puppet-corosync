@@ -10,7 +10,6 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Cor
   # Path to the crm binary for interacting with the cluster configuration.
   # Decided to just go with relative.
   commands :crm => 'crm'
-  commands :crm_attribute => 'crm_attribute'
 
   def self.instances
 
