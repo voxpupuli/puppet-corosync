@@ -12,7 +12,6 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
 
   # Path to the crm binary for interacting with the cluster configuration.
   commands :crm => 'crm'
-  commands :crm_attribute => 'crm_attribute'
 
   # given an XML element containing some <nvpair>s, return a hash. Return an
   # empty hash if `e` is nil.
