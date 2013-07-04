@@ -44,9 +44,10 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Corosync
       end
 
       order_instance = {
-        :score      => items['score'],
         :name           => items['id'],
+        :ensure         => :present,
         :first          => first,
+        :second         => second,
         :score          => items['score'],
         :symmetrical    => symmetrical,
         :provider       => self.name
