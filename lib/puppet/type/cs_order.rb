@@ -54,9 +54,13 @@ module Puppet
     autorequire(:cs_shadow) do
       [ @parameters[:cib] ]
     end
+    newproperty(:symmetrical) do
+      desc "Boolean specifying if the resources should stop in reverse order.
+        Default value: true."
 
     autorequire(:service) do
       [ 'corosync' ]
+      defaultto true
     end
 
     autorequire(:cs_primitive) do
