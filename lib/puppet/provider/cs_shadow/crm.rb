@@ -9,12 +9,12 @@ Puppet::Type.type(:cs_shadow).provide(:crm, :parent => Puppet::Provider::Corosyn
     []
   end
 
-  def sync(cib)
-    begin
-      crm('cib', 'delete', cib)
-    rescue => e
-      # If the CIB doesn't exist, we don't care.
-    end
-    crm('cib', 'new', cib)
+  def exists?
+	# Dummy. The shadow file is created in each of the providers supporting shadow files.
+    true
+  end
+
+  def refresh
+    flushShadow(@resource[:name])
   end
 end

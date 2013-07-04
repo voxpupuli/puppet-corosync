@@ -155,15 +155,6 @@ module Puppet
         defaultto :false
     end
 
-    autorequire(:cs_shadow) do
-      autos = []
-      if @parameters[:cib]
-        autos << @parameters[:cib].value
-      end
-
-      autos
-    end
-
     autorequire(:service) do
       [ 'corosync' ]
     end
