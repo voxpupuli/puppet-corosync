@@ -19,16 +19,16 @@ describe Puppet::Provider::Corosync do
       described_class.stubs(:command).with(:crm_attribute).returns 'crm_attribute'
     end
 
-    it 'returns true when crm_attribute exits successfully' do
-      Puppet::Util::SUIDManager.expects(:run_and_capture).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version']).returns(['', 0])
-
-      expect(described_class.ready?).to be_true
-    end
-
     it 'returns false when crm_attribute exits unsuccessfully' do
       Puppet::Util::SUIDManager.expects(:run_and_capture).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version']).returns(['', 1])
 
       expect(described_class.ready?).to be_false
+    end
+
+    it 'returns true when crm_attribute exits successfully' do
+      Puppet::Util::SUIDManager.expects(:run_and_capture).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version']).returns(['', 0])
+
+      expect(described_class.ready?).to be_true
     end
   end
 end
