@@ -30,30 +30,61 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
       rscs = []
       items = e.attributes
 
-      if items['rsc-role']
-        rscs << "#{items['rsc']}:#{items['rsc-role']}"
-      elsif items['rsc']
-        rscs << items['rsc']
-      end
+      if items['rsc']
+        # The colocation is defined as a single rsc_colocation element. This means
+        # the format is rsc and with-rsc. In the type we chose to always deal with
+        # ordering in a sequential way, which is why we reverse their order.
+        if items['rsc-role']
+          rsc = "#{items['rsc']}:#{items['rsc-role']}"
+        else
+          rsc = items['rsc']
+        end
 
-      if items ['with-rsc-role']
-        rscs << "#{items['with-rsc']}:#{items['with-rsc-role']}"
-      elsif items['with-rsc']
-        rscs << items['with-rsc']
-      end
+        if items ['with-rsc-role']
+          with_rsc = "#{items['with-rsc']}:#{items['with-rsc-role']}"
+        else
+          with_rsc = items['with-rsc']
+        end
 
-      if !items['rsc'] or !items['with-rsc']
-        e.elements['resource_set'].each_element('resource_ref') do |ref|
-          rscs << ref.attributes['id']
+        # Put primitives in chronological order, first 'with-rsc', then 'rsc'.
+        primitives = [with_rsc , rsc]
+      else
+        # The colocation is defined as a rsc_colocation element wrapped around a single resource_set.
+        # This happens automatically when you configure a colocation between more than 2 primitives.
+        # Notice, we can only interpret colocations of single sets, not multiple sets combined.
+        # In Pacemaker speak, this means we can support "A B C" but not e.g. "A B (C D) E".
+        # Feel free to contribute a patch for this.
+        e.each_element('resource_set') do |rset|
+          rsetitems = rset.attributes
+
+          # If the resource set has a role, it will apply to all referenced resources.
+          if rsetitems['role']
+            rsetrole = rsetitems['role']
+          else
+            rsetrole = nil
+          end
+
+          # Add all referenced resources to the primitives array.
+          primitives = []
+          rset.each_element('resource_ref') do |rref|
+            rrefitems = rref.attributes
+            if rsetrole
+              # Make sure the reference is stripped from a possible role
+              rrefprimitive = rrefitems['id'].split(':')[0]
+              # Always reuse the resource set role
+              primitives.push("#{rrefprimitive}:#{rsetrole}")
+            else
+              # No resource_set role was set: just push the complete reference.
+              primitives.push(rrefitems['id'])
+            end
+          end
         end
       end
 
-      # Sorting the array of primitives because order doesn't matter so someone
-      # switching the order around shouldn't generate an event.
       colocation_instance = {
         :name       => items['id'],
         :ensure     => :present,
-        :primitives => rscs.sort,
+        :primitives => primitives,
         :score      => items['score'],
         :provider   => self.name
       }
@@ -76,7 +107,7 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
 
   # Unlike create we actually immediately delete the item.
   def destroy
-    debug('Revmoving colocation')
+    debug('Removing colocation')
     crm('configure', 'delete', @resource[:name])
     @property_hash.clear
   end
@@ -98,7 +129,7 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
   # resource already exists so we just update the current value in the property
   # hash and doing this marks it to be flushed.
   def primitives=(should)
-    @property_hash[:primitives] = should.sort
+    @property_hash[:primitives] = should
   end
 
   def score=(should)
@@ -111,8 +142,17 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
   # as stdin for the crm command.
   def flush
     unless @property_hash.empty?
+      if @property_hash[:primitives].count == 2
+      then
+        # crm configure colocation works backwards when exactly 2 primitives are
+        # defined. This is different from how >2 primitives are colocated, so to
+        # fix this the primitives are reversed.
+        primitives = @property_hash[:primitives].reverse
+      else
+        primitives = @property_hash[:primitives]
+      end
       updated = "colocation "
-      updated << "#{@property_hash[:name]} #{@property_hash[:score]}: #{@property_hash[:primitives].join(' ')}"
+      updated << "#{@property_hash[:name]} #{@property_hash[:score]}: #{primitives.join(' ')}"
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
