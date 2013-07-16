@@ -109,6 +109,8 @@ module Puppet
       validate do |value|
         raise Puppet::Error, "Puppet::Type::Cs_Primitive: utilization property must be a hash." unless value.is_a? Hash
       end
+
+      defaultto Hash.new
     end
 
     newproperty(:metadata) do
