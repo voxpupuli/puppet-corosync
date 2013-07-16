@@ -107,4 +107,66 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
       end
     end
   end
+
+  context 'when flushing' do
+    let :resource do
+      Puppet::Type.type(:cs_primitive).new(
+        :name => 'testResource',
+        :provider => :crm,
+        :primitive_class => 'ocf',
+        :provided_by => 'heartbeat',
+        :primitive_type => 'IPaddr2')
+    end
+
+    let :instance do
+      instance = described_class.new(resource)
+      instance.create
+      instance
+    end
+
+    def expect_update(pattern)
+      instance.expects(:crm).with { |*args|
+        if args.slice(0..2) == ['configure', 'load', 'update']
+          expect(File.read(args[3])).to match(pattern)
+          true
+        else
+          false
+        end
+      }
+    end
+
+    it 'can flush without changes' do
+      expect_update(//)
+      instance.flush
+    end
+
+    it 'sets operations' do
+      instance.operations = {'monitor' => {'interval' => '10s'}}
+      expect_update(/op monitor interval=10s/)
+      instance.flush
+    end
+
+    it 'sets utilization' do
+      instance.utilization = {'waffles' => '5'}
+      expect_update(/utilization waffles=5/)
+      instance.flush
+    end
+
+    it 'sets parameters' do
+      instance.parameters = {'fluffyness' => '12'}
+      expect_update(/params fluffyness=12/)
+      instance.flush
+    end
+
+    it 'sets metadata' do
+      instance.metadata = {'target-role' => 'Started'}
+      expect_update(/meta target-role=Started/)
+      instance.flush
+    end
+
+    it 'sets the primitive name and type' do
+      expect_update(/primitive testResource ocf:heartbeat:IPaddr2/)
+      instance.flush
+    end
+  end
 end
