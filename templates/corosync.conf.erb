@@ -10,13 +10,13 @@ totem {
   max_messages:                        20
   clear_node_high_bit:                 yes
   rrp_mode:                            none
-  secauth:                             <%= enable_secauth_real %>
-  threads:                             <%= threads_real %>
+  secauth:                             <%= @enable_secauth_real %>
+  threads:                             <%= @threads_real %>
   interface {
     ringnumber:  0
-    bindnetaddr: <%= bind_address_real %>
-    mcastaddr:   <%= multicast_address_real %>
-    mcastport:   <%= port_real %>
+    bindnetaddr: <%= @bind_address_real %>
+    mcastaddr:   <%= @multicast_address_real %>
+    mcastport:   <%= @port_real %>
   }
 }
 
