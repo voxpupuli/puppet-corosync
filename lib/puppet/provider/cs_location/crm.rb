@@ -126,6 +126,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
         updated << "#{@property_hash[:score]}: #{@property_hash[:host]}"
       else
         unless @property_hash[:rules].empty?
+          @property_hash[:rules] = [ @property_hash[:rules] ] unless @property_hash[:rules].is_a? Array
           @property_hash[:rules].each do |r|
             updated << "rule #{r['score']}: "
             unless r['expressions'].empty?
