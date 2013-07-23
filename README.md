@@ -112,13 +112,13 @@ cs_primitive { 'ping':
   primitive_class => 'ocf',
   primitive_type  => 'ping',
   provided_by     => 'pacemaker',
-  parameters      => { 'name' => "pingd", 'host_list' => "192.168.56.254" },
+  parameters      => { 'name' => 'pingd', 'host_list' => '192.168.56.254' },
   operations      => { 'monitor' => { 'interval' => '10s', 'timeout' => '5s' }, },
 }
 
 cs_location { 'ip_on_connected_node':
   rsc => 'cluster-ip',
-  rules => [ { 'score' => '-INFINITY', 'operation' => 'or', expressions => ['not_defined pingd', 'pingd lte 0'], }, ],
+  rules => [ { 'score' => '-INFINITY', 'operation' => 'or', 'expressions' => ['not_defined pingd', 'pingd lte 0'], }, ],
 }
 ```
 
