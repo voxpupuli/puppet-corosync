@@ -70,7 +70,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
 
   # Unlike create we actually immediately delete the item.
   def destroy
-    debug('Revmoving location')
+    debug('Removing location')
     crm('configure', 'delete', @resource[:name])
     @property_hash.clear
   end
