@@ -37,10 +37,8 @@ module Puppet
       desc "The node of the preferred location."
     end
 
-    newproperty(:rules, :array_matching => :all) do
-      desc "Identifier of the colocation entry.  This value needs to be unique
-        across the entire Corosync/Pacemaker configuration since it doesn't have
-        the concept of name spaces per type."
+    newproperty(:rules) do
+      desc "Array of rules for this location entry."
     end
 
     newproperty(:score) do
