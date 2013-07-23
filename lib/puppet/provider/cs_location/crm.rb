@@ -45,7 +45,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
         :ensure     => :present,
         :rsc        => items['rsc'],
         :host       => items['node'],
-        :rules      => rule.to_s,
+        :rules      => rule,
         :score      => items['score'],
         :provider   => self.name
       }
@@ -93,7 +93,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
   end
 
   def rules
-    @property_hash[:rules].sort
+    @property_hash[:rules]
   end
 
   # Our setters for the primitives array and score.  Setters are used when the
@@ -112,7 +112,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
   end
 
   def rules=(should)
-    @property_hash[:rules] = should.sort
+    @property_hash[:rules] = should
   end
 
   # Flush is triggered on anything that has been detected as being
