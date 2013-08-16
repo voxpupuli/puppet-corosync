@@ -74,6 +74,8 @@ class corosync(
   $force_online       = false,
   $check_standby      = false,
   $debug              = false,
+  $rrp_mode           = 'none',
+  $ttl                = false,
 ) {
 
   # Making it possible to provide data with parameterized class declarations or
