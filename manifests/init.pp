@@ -30,6 +30,7 @@
 # [*multicast_address*]
 #   An IP address that has been reserved for multicast traffic.  This is the
 #   default way that Corosync accomplishes communication across the cluster.
+#   Use 'broadcast' to have broadcast instead
 #   Can be specified as an array to have multiple rings (multcast only).
 #
 # [*unicast_addresses*]
