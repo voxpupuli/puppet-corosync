@@ -160,7 +160,7 @@ class corosync(
     }
   }
 
-  package { [ 'corosync', 'pacemaker' ]: ensure => present }
+  package { [ 'corosync', 'pacemaker', 'cman', 'pcs' ]: ensure => present }
 
   # Template uses:
   # - $unicast_addresses
