@@ -17,11 +17,11 @@ totem {
     ringnumber:  <%= i %>
     bindnetaddr: <%= [@bind_address_real].flatten[i] %>
 <% if [@multicast_address_real].flatten[i] == 'broadcast' -%>
-    broadcast: yes
+    broadcast:   yes
 <% else -%>
     mcastaddr:   <%= [@multicast_address_real].flatten[i] %>
-<% end -%>
     mcastport:   <%= [@port_real].flatten[i] %>
+<% end -%>
 <% if @ttl -%>
     ttl:         <%= @ttl %>
 <% end -%>
