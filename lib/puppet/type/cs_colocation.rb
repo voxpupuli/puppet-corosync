@@ -32,7 +32,7 @@ module Puppet
       def should=(value)
         super
         if value.is_a? Array
-          raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be a two value array." unless value.size == 2
+          raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be a two value array." unless value.size >= 2
           @should.sort!
         else
           raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be a two value array."

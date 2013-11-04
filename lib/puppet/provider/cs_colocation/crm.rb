@@ -22,18 +22,25 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Cor
     doc = REXML::Document.new(raw)
 
     doc.root.elements['configuration'].elements['constraints'].each_element('rsc_colocation') do |e|
+      rscs = []
       items = e.attributes
 
       if items['rsc-role']
-        rsc = "#{items['rsc']}:#{items['rsc-role']}"
-      else
-        rsc = items['rsc']
+        rscs << "#{items['rsc']}:#{items['rsc-role']}"
+      elsif items['rsc']
+        rscs << items['rsc']
       end
 
       if items ['with-rsc-role']
-        with_rsc = "#{items['with-rsc']}:#{items['with-rsc-role']}"
-      else
-        with_rsc = items['with-rsc']
+        rscs << "#{items['with-rsc']}:#{items['with-rsc-role']}"
+      elsif items['with-rsc']
+        rscs << items['with-rsc']
+      end
+
+      if !items['rsc'] or !items['with-rsc']
+        e.elements['resource_set'].each_element('resource_ref') do |ref|
+          rscs << ref.attributes['id']
+        end
       end
 
       # Sorting the array of primitives because order doesn't matter so someone
@@ -41,7 +48,7 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Cor
       colocation_instance = {
         :name       => items['id'],
         :ensure     => :present,
-        :primitives => [rsc, with_rsc].sort,
+        :primitives => rscs.sort,
         :score      => items['score'],
         :provider   => self.name
       }
