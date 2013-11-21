@@ -20,6 +20,19 @@ class Puppet::Provider::Corosync < Puppet::Provider
     end
   end
 
+  def exec_withenv(cmd,env=nil)
+    self.class.exec_withenv(cmd,env)
+  end
+  
+  def self.exec_withenv(cmd,env=nil)
+    Process.fork  do
+      ENV.update(env) if !env.nil?
+      Process.exec(cmd)
+    end
+    Process.wait
+    $?.exitstatus
+  end
+
   def self.block_until_ready(timeout = 120)
     Timeout::timeout(timeout) do
       until ready?

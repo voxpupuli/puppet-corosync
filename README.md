@@ -106,6 +106,38 @@ cs_order { 'vip_before_service':
 }
 ```
 
+Configuring fencing topologies
+------------------------------
+
+Fencing topology defines a fencing plan - a sequence the fence agents would be 
+asked to perform the fencing actions. 
+See http://clusterlabs.org/wiki/Fencing_topology for example.
+
+*Make corosync configure fencing topology*
+
+```puppet
+  $fence_topology = {
+    '1' => [
+      'ipmi_reset',
+    ],
+    '2' => [
+      'psu_off','psu_on'
+    ],
+  }
+  $nodes = [ 'node-1.test.local', 'node-2.test.local' ]
+  $res_name = 'fencing_topology'
+  $cib_name = "stonith__${::hostname}"
+
+  cs_shadow { $cib_name: cib => $cib_name } ->
+  cs_fencetopo { $res_name:
+    ensure         => present,
+    cib            => $cib_name,
+    fence_topology => $fence_topology,
+    nodes          => $nodes,
+  } ->
+  cs_commit { $cib_name: cib => $cib_name }
+```
+
 Dependencies
 ------------
 

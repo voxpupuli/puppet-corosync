@@ -1,0 +1,15 @@
+<cib epoch="521" num_updates="0" admin_epoch="0" validate-with="pacemaker-1.2" crm_feature_set="3.0.5" update-origin="ubuntu-1" update-client="crmd" cib-last-written="Mon Jan 28 20:34:13 2013" have-quorum="1" dc-uuid="ubuntu-1">
+	<configuration>
+		<crm_config>
+			<cluster_property_set id="cib-bootstrap-options">
+				<nvpair id="cib-bootstrap-options-dc-version" name="dc-version" value="1.1.6-9971ebba4494012a93c03b40a2c58ec0eb60f50c"/>
+			</cluster_property_set>
+		</crm_config>
+		<fencing-topology>
+			<fencing-level devices="stonith__ipmi_reset__node-1" id="fencing" index="1" target="node-1.test.local"/>
+			<fencing-level devices="stonith__psu_off__node-1,stonith__psu_on__node-1" id="fencing-0" index="2" target="node-1.test.local"/>
+			<fencing-level devices="stonith__ipmi_reset__node-2" id="fencing-1" index="1" target="node-2.test.local"/>
+			<fencing-level devices="stonith__psu_off__node-2,stonith__psu_on__node-2" id="fencing-2" index="2" target="node-2.test.local"/>
+		</fencing-topology>
+	</configuration>
+</cib>
