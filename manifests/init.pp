@@ -20,18 +20,18 @@
 #
 # [*bind_address*]
 #   The ip address we are going to bind the corosync daemon too.
-#   Can be specified as an array to have multiple rings (multcast only).
+#   Can be specified as an array to have multiple rings (multicast only).
 #
 # [*port*]
-#   The udp port that corosync will use to do its multcast communication.  Be
+#   The udp port that corosync will use to do its multicast communication.  Be
 #   aware that corosync used this defined port plus minus one.
-#   Can be specified as an array to have multiple rings (multcast only).
+#   Can be specified as an array to have multiple rings (multicast only).
 #
 # [*multicast_address*]
 #   An IP address that has been reserved for multicast traffic.  This is the
 #   default way that Corosync accomplishes communication across the cluster.
 #   Use 'broadcast' to have broadcast instead
-#   Can be specified as an array to have multiple rings (multcast only).
+#   Can be specified as an array to have multiple rings (multicast only).
 #
 # [*unicast_addresses*]
 #   An array of IP addresses that make up the cluster's members.  These are
@@ -50,6 +50,12 @@
 # [*debug*]
 #   True/false parameter specifying whether Corosync should produce debug
 #   output in its logs.
+#
+# [*rrp_mode*]
+#   Mode of redundant ring. May be none, active, or passive.
+#
+# [*ttl*]
+#   Time To Live (multicast only).
 #
 # === Examples
 #
