@@ -157,6 +157,7 @@ class corosync(
       owner   => 'root',
       group   => 'root',
       notify  => Service['corosync'],
+      require => Package['corosync'],
     }
   }
 
