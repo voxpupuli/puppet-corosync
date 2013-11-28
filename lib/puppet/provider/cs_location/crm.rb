@@ -28,16 +28,16 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
       rule = {}
 
       if ! e.elements['rule'].nil?
-         e.elements.each("rule") do |r|
-	 rule = { 'score' => r.attributes['score'], 'operation' => r.attributes['boolean-op'], 'expressions' => [] }
-            r.elements.each("expression") do |x|
-               if x.attributes['value']
-                  rule['expressions'] << "#{x.attributes['attribute']} #{x.attributes['operation']} #{x.attributes['value']}"
-               else
-                  rule['expressions'] << "#{x.attributes['operation']} #{x.attributes['attribute']}"
-               end
-           end
-         end
+        e.elements.each('rule') do |r|
+          rule = { 'score' => r.attributes['score'], 'operation' => r.attributes['boolean-op'], 'expressions' => [] }
+          r.elements.each('expression') do |x|
+            if x.attributes['value']
+              rule['expressions'] << "#{x.attributes['attribute']} #{x.attributes['operation']} #{x.attributes['value']}"
+            else
+              rule['expressions'] << "#{x.attributes['operation']} #{x.attributes['attribute']}"
+            end
+          end
+        end
       end
 
       location_instance = {
@@ -45,7 +45,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
         :ensure     => :present,
         :rsc        => items['rsc'],
         :host       => items['node'],
-        :rules      => rule.to_s,
+        :rules      => rule,
         :score      => items['score'],
         :provider   => self.name
       }
@@ -70,7 +70,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
 
   # Unlike create we actually immediately delete the item.
   def destroy
-    debug('Revmoving location')
+    debug('Removing location')
     crm('configure', 'delete', @resource[:name])
     @property_hash.clear
   end
@@ -93,7 +93,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
   end
 
   def rules
-    @property_hash[:rules].sort
+    @property_hash[:rules]
   end
 
   # Our setters for the primitives array and score.  Setters are used when the
@@ -112,7 +112,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
   end
 
   def rules=(should)
-    @property_hash[:rules] = should.sort
+    @property_hash[:rules] = should
   end
 
   # Flush is triggered on anything that has been detected as being
@@ -120,25 +120,25 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
   # the updates that need to be made.  The temporary file is then used
   # as stdin for the crm command.
   def flush
-
     unless @property_hash.empty?
       updated = "location #{@property_hash[:name]} #{@property_hash[:rsc]} "
       if ! @property_hash[:host].nil? and ! @property_hash[:score].nil?
-         updated << "#{@property_hash[:score]}: #{@property_hash[:host]}"
+        updated << "#{@property_hash[:score]}: #{@property_hash[:host]}"
       else
-         unless @property_hash[:rules].empty?
-            @property_hash[:rules].each do |r|
-               updated << "rule #{r['score']}: "
-               unless r['expressions'].empty?
-                  i = r['expressions'].size
-                  r['expressions'].each do |e|
-                     i = i - 1
-                     updated << "#{e} "
-                     updated << "#{r['operation']} " if i > 0
-                  end
-               end
+        unless @property_hash[:rules].empty?
+          @property_hash[:rules] = [ @property_hash[:rules] ] unless @property_hash[:rules].is_a? Array
+          @property_hash[:rules].each do |r|
+            updated << "rule #{r['score']}: "
+            unless r['expressions'].empty?
+              i = r['expressions'].size
+              r['expressions'].each do |e|
+                i = i - 1
+                updated << "#{e} "
+                updated << "#{r['operation']} " if i > 0
+              end
             end
-         end
+          end
+        end
       end
 
       Tempfile.open('puppet_crm_update') do |tmpfile|
