@@ -128,7 +128,7 @@ Cloning primitives
 ```puppet
 cs_clone { 'pingclone':
   primitive => 'ping',
-  metadata => { 'globally-unique' => "false", 'clone-max' => "2", 'target-role' => "Started" },
+  metadata => { 'globally-unique' => 'false', 'clone-max' => '2', 'target-role' => 'Started' },
 }
 ```
 

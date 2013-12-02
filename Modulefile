@@ -1,5 +1,5 @@
 name    'puppetlabs-corosync'
-version '0.1.1'
+version '0.1.0'
 source 'https://github.com/puppetlabs/puppetlabs-corosync.git'
 author 'puppetlabs'
 license 'APL 2.0'
