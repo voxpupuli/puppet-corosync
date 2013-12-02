@@ -1,3 +1,10 @@
+2013-12-02 - Version 0.1.0
+- Merged https://github.com/lbetz/puppetlabs-corosync/pull/1
+- Added test resource_new.pp for `cs_clone` and `cs_location`
+2013-05-14 - Version 0.1.0
+- Added `cs_location` type
+- Added `cs_clone` type
+- Added `rsc_defaults` type
 2012-10-14 - Version 0.1.0
 - Added robustness for general corosync management (read the merges)
 - Added `cs_group` type

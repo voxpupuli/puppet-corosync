@@ -16,7 +16,7 @@ totem {
   interface {
 <% @unicast_addresses.each do |addr| -%>
     member {
-      memberaddr: <%= addr %>
+      memberaddr: <%= @addr %>
     }
 <% end -%>
     ringnumber:  0
