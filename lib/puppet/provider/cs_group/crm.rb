@@ -14,7 +14,12 @@ Puppet::Type.type(:cs_group).provide(:crm, :parent => Puppet::Provider::Corosync
     instances = []
 
     cmd = [ command(:crm), 'configure', 'show', 'xml' ]
-    raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+    if Puppet::PUPPETVERSION.to_f < 3.4
+      raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+    else
+      raw = Puppet::Util::Execution.execute(cmd)
+      status = raw.exitstatus
+    end
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//group') do |e|
