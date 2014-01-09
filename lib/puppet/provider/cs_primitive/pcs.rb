@@ -1,7 +1,7 @@
 require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'corosync'
+require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
 
-Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Corosync) do
+Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pacemaker) do
   desc 'Specific provider for a rather specific type since I currently have no
         plan to abstract corosync/pacemaker vs. keepalived.  Primitives in
         Corosync are the thing we desire to monitor; websites, ipaddresses,
@@ -12,6 +12,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Coro
 
   commands :pcs => 'pcs'
 
+  defaultfor :operatingsystem => [:fedora, :centos, :redhat]
   # given an XML element containing some <nvpair>s, return a hash. Return an
   # empty hash if `e` is nil.
   def self.nvpairs_to_hash(e)
@@ -29,27 +30,40 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Coro
   # for creating a new provider instance.
   def self.element_to_hash(e)
     hash = {
-      :primitive_class  => e.attributes['class'],
-      :primitive_type   => e.attributes['type'],
-      :provided_by      => e.attributes['provider'],
-      :name             => e.attributes['id'].to_sym,
-      :ensure           => :present,
-      :provider         => self.name,
-      :parameters       => nvpairs_to_hash(e.elements['instance_attributes']),
-      :operations       => {},
-      :utilization      => nvpairs_to_hash(e.elements['utilization']),
-      :metadata         => nvpairs_to_hash(e.elements['meta_attributes']),
-      :ms_metadata      => {},
-      :promotable       => :false
+      :primitive_class          => e.attributes['class'],
+      :primitive_type           => e.attributes['type'],
+      :provided_by              => e.attributes['provider'],
+      :name                     => e.attributes['id'].to_sym,
+      :ensure                   => :present,
+      :provider                 => self.name,
+      :parameters               => nvpairs_to_hash(e.elements['instance_attributes']),
+      :operations               => {},
+      :utilization              => nvpairs_to_hash(e.elements['utilization']),
+      :metadata                 => nvpairs_to_hash(e.elements['meta_attributes']),
+      :ms_metadata              => {},
+      :promotable               => :false,
+      :existing_resource        => :true,
+      :existing_primitive_class => e.attributes['class'],
+      :existing_primitive_type  => e.attributes['type'],
+      :existing_provided_by     => e.attributes['provider'],
+      :existing_operations      => {}
     }
 
     if ! e.elements['operations'].nil?
       e.elements['operations'].each_element do |o|
         valids = o.attributes.reject do |k,v| k == 'id' end
-        hash[:operations][valids['name']] = {}
-        valids.each do |k,v|
-          hash[:operations][valids['name']][k] = v if k != 'name'
+        if ! valids['role'].nil?
+          name = valids['name']
+          name << ":"
+          name << valids['role']
+        else
+          name = valids['name']
         end
+        hash[:operations][name] = {}
+        valids.each do |k,v|
+          hash[:operations][name][k] = v if k != 'name' and k != 'role'
+        end
+        hash[:existing_operations] = hash[:operations].dup
       end
     end
     if e.parent.name == 'master'
@@ -70,8 +84,8 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Coro
 
     instances = []
 
-    cmd = [ command(:pcs), 'configure', 'show', 'xml' ]
-    raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+    cmd = [ command(:pcs), 'cluster', 'cib' ]
+    raw, status = run_pcs_command(cmd)
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//primitive') do |e|
@@ -82,14 +96,17 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Coro
 
   # Create just adds our resource to the property_hash and flush will take care
   # of actually doing the work.
+  # The existing_resource is there because pcs does not have a single command that
+  # updates or create a resource, so we flag the resources with that parameter
   def create
     @property_hash = {
-      :name            => @resource[:name],
-      :ensure          => :present,
-      :primitive_class => @resource[:primitive_class],
-      :provided_by     => @resource[:provided_by],
-      :primitive_type  => @resource[:primitive_type],
-      :promotable      => @resource[:promotable]
+      :name              => @resource[:name],
+      :ensure            => :present,
+      :primitive_class   => @resource[:primitive_class],
+      :provided_by       => @resource[:provided_by],
+      :primitive_type    => @resource[:primitive_type],
+      :promotable        => @resource[:promotable],
+      :existing_resource => :false
     }
     @property_hash[:parameters] = @resource[:parameters] if ! @resource[:parameters].nil?
     @property_hash[:operations] = @resource[:operations] if ! @resource[:operations].nil?
@@ -99,33 +116,11 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Coro
     @property_hash[:cib] = @resource[:cib] if ! @resource[:cib].nil?
   end
 
-  # Unlike create we actually immediately delete the item.  Corosync forces us
-  # to "stop" the primitive before we are able to remove it.
+  # Unlike create we actually immediately delete the item.
   def destroy
-    debug('Stopping primitive before removing it')
-    pcs('resource', 'stop', @resource[:name])
-    debug('Revmoving primitive')
-    pcs('resource', 'delete', @resource[:name])
+    debug('Removing primitive')
+    Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'delete', @property_hash[:name]])
     @property_hash.clear
-  end
-
-  # test to see if the resource is already defined
-  def exists?
-    tmpfile = Tempfile.new('puppet_crm_update')
-    pcs('cluster', 'cib', tmpfile.path.to_s)
-
-    has_resource = false
-    begin
-      debug('Checking for existing declaration of primitive')
-      pcs('-f', tmpfile.path.to_s, 'resource', 'show', @property_hash[:name])
-      has_resource = true
-    rescue
-      has_resource = false
-    end
-
-    pcs('cluster', 'push', 'cib', tmpfile.path.to_s)
-    tmpfile.close
-    tmpfile.unlink
   end
 
   # Getters that obtains the parameters and operations defined in our primitive
@@ -133,6 +128,18 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Coro
   # puppet resource or not).
   def parameters
     @property_hash[:parameters]
+  end
+
+  def primitive_class
+    @property_hash[:primitive_class]
+  end
+
+  def provided_by
+    @property_hash[:provided_by]
+  end
+
+  def primitive_type
+    @property_hash[:primitive_type]
   end
 
   def operations
@@ -162,6 +169,17 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Coro
     @property_hash[:parameters] = should
   end
 
+  def primitive_class=(should)
+    @property_hash[:primitive_class] = should
+  end
+
+  def provided_by=(should)
+    @property_hash[:provided_by] = should
+  end
+
+  def primitive_type=(should)
+    @property_hash[:primitive_type] = should
+  end
   def operations=(should)
     @property_hash[:operations] = should
   end
@@ -184,94 +202,128 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Coro
       @property_hash[:promotable] = should
     when :false
       @property_hash[:promotable] = should
-      pcs('resource', 'stop', "ms_#{@resource[:name]}")
       pcs('resource', 'delete', "ms_#{@resource[:name]}")
     end
   end
 
   # Flush is triggered on anything that has been detected as being
-  # modified in the property_hash.  It generates a temporary file with
-  # the updates that need to be made.  The temporary file is then used
-  # as stdin for the crm command.  We have to do a bit of munging of our
-  # operations and parameters hash to eventually flatten them into a string
-  # that can be used by the crm command.
+  # modified in the property_hash.
+  # It calls several pcs commands to make the resource look like the
+  # params.
   def flush
-    tmpfile = Tempfile.new('puppet_crm_update')
-
-    pcs('cluster', 'cib', tmpfile.path.to_s)
-
     unless @property_hash.empty?
+      # The ressource_type variable is used to check if one of the class,
+      # provider or type has changed
+      ressource_type = "#{@property_hash[:primitive_class]}:"
+      if @property_hash[:provided_by]
+        ressource_type << "#{@property_hash[:provided_by]}:"
+      end
+      ressource_type << "#{@property_hash[:primitive_type]}"
+
       unless @property_hash[:operations].empty?
-        operations = ''
+        operations = []
         @property_hash[:operations].each do |o|
-          operations << "op #{o[0]} "
+          op_name = o[0]
+          operations << "op"
+          if op_name.include? ':'
+            items = op_name.split(':')
+            operations << items[0]
+            operations << "role=#{items[1]}"
+          else
+            operations << op_name
+          end
           o[1].each_pair do |k,v|
-            operations << "#{k}=#{v} "
+            operations << "#{k}=#{v}"
           end
         end
       end
       unless @property_hash[:parameters].empty?
-        parameters = ''
+        parameters = []
         @property_hash[:parameters].each_pair do |k,v|
-          parameters << "#{k}=#{v} "
+          parameters << "#{k}=#{v}"
         end
       end
       unless @property_hash[:utilization].empty?
-        utilization = 'utilization '
+        utilization = [ 'utilization' ]
         @property_hash[:utilization].each_pair do |k,v|
-          utilization << "#{k}=#{v} "
+          utilization << "#{k}=#{v}"
         end
       end
       unless @property_hash[:metadata].empty?
-        metadatas = ''
+        metadatas = [ 'meta' ]
         @property_hash[:metadata].each_pair do |k,v|
-          metadatas << "#{k}=#{v} "
+          metadatas << "#{k}=#{v}"
         end
       end
 
-      updated = ''
-      updated << "#{@property_hash[:name]} #{@property_hash[:primitive_class]}:"
-      updated << "#{@property_hash[:provided_by]}:" if @property_hash[:provided_by]
-      updated << "#{@property_hash[:primitive_type]} "
-      updated << "#{parameters} " unless parameters.nil?
-      updated << "#{utilization} " unless utilization.nil?
-      updated << "#{metadatas} " unless metadatas.nil?
-      updated << "#{operations} " unless operations.nil?
-
-      # test to see if the resource is already defined
-      has_resource = false
-      begin
-        debug('Checking for existing declaration of primitive')
-        pcs('-f', tmpfile.path.to_s, 'resource', 'show', @property_hash[:name])
-        has_resource = true
-      rescue
-        has_resource = false
+      # We destroy the ressource if it's type, class or provider has changed
+      unless @property_hash[:existing_resource] == :false
+        existing_ressource_type = "#{@property_hash[:existing_primitive_class]}:"
+        existing_ressource_type << "#{@property_hash[:existing_provided_by]}:" if @property_hash[:existing_provided_by]
+        existing_ressource_type << "#{@property_hash[:existing_primitive_type]}"
+        if existing_ressource_type != ressource_type
+          debug('Removing primitive')
+          Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'delete', @property_hash[:name]])
+          force_reinstall = :true
+        end
       end
 
-      if has_resource
-        debug('Updating primitive definition')
-        pcs('-f', tmpfile.path.to_s, 'resource', 'update', updated.split(/\s+/))
+      ENV['CIB_shadow'] = @property_hash[:cib]
+
+      if @property_hash[:existing_resource] == :false or force_reinstall == :true
+        cmd = [ command(:pcs), 'resource', 'create', "#{@property_hash[:name]}" ]
+        cmd << ressource_type
+        cmd += parameters unless parameters.nil?
+        cmd += operations unless operations.nil?
+        cmd += utilization unless utilization.nil?
+        cmd += metadatas unless metadatas.nil?
+        raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+        # if we are using a master/slave resource, prepend ms_ before its name
+        # and declare it as a master/slave resource
+        if @property_hash[:promotable] == :true
+          cmd = [ command(:pcs), 'resource', 'master', "ms_#{@property_hash[:name]}", "#{@property_hash[:name]}" ]
+          unless @property_hash[:ms_metadata].empty?
+            cmd << 'meta'
+            @property_hash[:ms_metadata].each_pair do |k,v|
+              cmd << "#{k}=#{v}"
+            end
+          end
+          raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+        end
+        # try to remove the default monitor operation
+        if @property_hash[:operations]["monitor"].nil?
+          cmd = [ command(:pcs), 'resource', 'op', 'remove', "#{@property_hash[:name]}", 'monitor', 'interval=60s' ]
+          Puppet::Provider::Pacemaker::run_pcs_command(cmd, false)
+        end
       else
-        debug('Creating new primitive')
-        pcs('-f', tmpfile.path.to_s, 'resource', 'create', updated.split(/\s+/))
-      end
-
-      if @property_hash[:promotable] == :true
-        master = ''
-        master << "master create ms_#{@property_hash[:name]} #{@property_hash[:name]} "
-        unless @property_hash[:ms_metadata].empty?
-          @property_hash[:ms_metadata].each_pair do |k,v|
-            master << "#{k}=#{v} "
+        # if there is no operations defined, we ensure that they are not present
+        if @property_hash[:operations].empty? and not @property_hash[:existing_operations].empty?
+          @property_hash[:existing_operations].each do |o|
+            cmd = [ command(:pcs), 'resource', 'op', 'remove', "#{@property_hash[:name]}" ]
+            cmd << "#{o[0]}"
+            o[1].each_pair do |k,v|
+              cmd << "#{k}=#{v}"
+            end
+            Puppet::Provider::Pacemaker::run_pcs_command(cmd)
           end
         end
-
-        pcs('-f', tmpfile.path.to_s, master.split(/\s+/))
+        cmd = [ command(:pcs), 'resource', 'update', "#{@property_hash[:name]}" ]
+        cmd += parameters unless parameters.nil?
+        cmd += operations unless operations.nil?
+        cmd += utilization unless utilization.nil?
+        cmd += metadatas unless metadatas.nil?
+        raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+        if @property_hash[:promotable] == :true
+          cmd = [ command(:pcs), 'resource', 'update', "ms_#{@property_hash[:name]}", "#{@property_hash[:name]}" ]
+          unless @property_hash[:ms_metadata].empty?
+            cmd << 'meta'
+            @property_hash[:ms_metadata].each_pair do |k,v|
+              cmd << "#{k}=#{v}"
+            end
+          end
+          raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+        end
       end
-
-      pcs('cluster', 'push', 'cib', tmpfile.path.to_s)
-
-      tmpfile.close
-      tmpfile.unlink
     end
   end
 end

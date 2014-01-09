@@ -1,18 +1,34 @@
-class Puppet::Provider::Corosync < Puppet::Provider
+class Puppet::Provider::Pacemaker < Puppet::Provider
 
   # Yep, that's right we are parsing XML...FUN! (It really wasn't that bad)
   require 'rexml/document'
 
   initvars
-  commands :crm_attribute => 'crm_attribute'
+  commands :pcs => 'pcs'
+
+  def self.run_pcs_command(pcs_cmd, failonfail = true)
+    if Puppet::PUPPETVERSION.to_f < 3.4
+      raw, status = Puppet::Util::SUIDManager.run_and_capture(pcs_cmd)
+    else
+      raw = Puppet::Util::Execution.execute(pcs_cmd, {:failonfail => failonfail})
+      status = raw.exitstatus
+    end
+    if status == 0 or failonfail == false
+      return raw, status
+    else
+      fail("command #{pcs_cmd.join(" ")} failed")
+    end
+  end
+
+
 
   # Corosync takes a while to build the initial CIB configuration once the
   # service is started for the first time.  This provides us a way to wait
   # until we're up so we can make changes that don't disappear in to a black
   # hole.
   def self.ready?
-    cmd =  [ command(:crm_attribute), '--type', 'crm_config', '--query', '--name', 'dc-version' ]
-    raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+    cmd =  [ command(:pcs), 'property', 'show', 'dc-version' ]
+    raw, status = run_pcs_command(cmd, false)
     if status == 0
       return true
     else
