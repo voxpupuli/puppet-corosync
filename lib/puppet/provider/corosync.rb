@@ -15,7 +15,7 @@ class Puppet::Provider::Corosync < Puppet::Provider
     if Puppet::PUPPETVERSION.to_f < 3.4
       raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
     else
-      raw = Puppet::Util::Execution.execute(cmd)
+      raw = Puppet::Util::Execution.execute(cmd, :failonfail => false)
       status = raw.exitstatus
     end
     if status == 0
