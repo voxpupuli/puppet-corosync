@@ -51,6 +51,11 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Coro
         valids.each do |k,v|
           hash[:operations][valids['name']][k] = v if k != 'name'
         end
+        if ! o.elements['instance_attributes'].nil?
+          o.elements['instance_attributes'].each_element do |i|
+            hash[:operations][valids['name']][(i.attributes['name'])] = i.attributes['value']
+          end
+        end
       end
     end
     if e.parent.name == 'master'
