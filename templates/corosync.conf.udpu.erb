@@ -9,7 +9,7 @@ totem {
   vsftype:                             none
   max_messages:                        20
   clear_node_high_bit:                 yes
-  rrp_mode:                            none
+  rrp_mode:                            <%= @rrp_mode %>
   secauth:                             <%= @enable_secauth_real %>
   threads:                             <%= @threads_real %>
   transport:                           udpu
@@ -22,6 +22,9 @@ totem {
     ringnumber:  0
     bindnetaddr: <%= @bind_address_real %>
     mcastport:   <%= @port_real %>
+<% if @ttl -%>
+    ttl:         <%= @ttl %>
+<% end -%>
   }
 }
 
