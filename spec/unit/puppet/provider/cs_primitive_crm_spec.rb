@@ -26,6 +26,11 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
               <operations>
                 <op id="example_vm-start-0" interval="0" name="start" timeout="60"/>
                 <op id="example_vm-stop-0" interval="0" name="stop" timeout="40"/>
+                <op id="nginx-monitor-15s" interval="15" name="monitor" on-fail="standby" timeout="10">
+                  <instance_attributes id="nginx-monitor-15s-instance_attributes">
+                    <nvpair id="nginx-monitor-15s-instance_attributes-OCF_CHECK_LEVEL" name="OCF_CHECK_LEVEL" value="10"/>
+                  </instance_attributes>
+                </op>
               </operations>
             </primitive>
           </resources>
@@ -78,6 +83,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
 
       it 'has an operations property corresponding to <operations>' do
         expect(instance.operations).to eq({
+          "monitor" => {"interval" => "15", "timeout" => "10", "on-fail" => "standby", "OCF_CHECK_LEVEL" => "10"},
           "start" => {"interval" => "0", "timeout" => "60"},
           "stop" => {"interval" => "0", "timeout" => "40"},
         })
