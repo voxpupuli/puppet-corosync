@@ -43,10 +43,6 @@ module Puppet
         also be added to your manifest."
     end
 
-    autorequire(:cs_shadow) do
-      [ @parameters[:cib] ]
-    end
-
     autorequire(:service) do
       [ 'corosync' ]
     end

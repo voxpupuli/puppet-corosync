@@ -87,7 +87,7 @@ Puppet::Type.type(:cs_group).provide(:crm, :parent => Puppet::Provider::Corosync
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        ENV['CIB_shadow'] = @resource[:cib]
+        setupShadow(@resource[:cib]) if @resource[:cib]
         crm('configure', 'load', 'update', tmpfile.path.to_s)
       end
     end

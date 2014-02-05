@@ -5,30 +5,14 @@ module Puppet
       will not become active until all other resources with the same cib
       value have also been applied."
 
-    newproperty(:cib) do
-      def sync
-        provider.sync(self.should)
-      end
-
-      def retrieve
-        :absent
-      end
-
-      def insync?(is)
-        false
-      end
-
-      defaultto { @resource[:name] }
-    end
-
     newparam(:name) do
       desc "Name of the shadow CIB to create and manage"
       isnamevar
     end
 
-    def generate
-      options = { :name => @title }
-      [ Puppet::Type.type(:cs_commit).new(options) ]
+    feature :refreshable, "Refreshing Cs_shadow causes CIB to be applied.", :methods => [:refresh]
+    def refresh
+        provider.refresh
     end
 
     autorequire(:service) do
