@@ -57,6 +57,9 @@
 # [*ttl*]
 #   Time To Live (multicast only).
 #
+# [*packages*]
+#   Define the list of software packages which should be installed.
+#
 # === Examples
 #
 #  class { 'corosync':
@@ -86,6 +89,7 @@ class corosync(
   $debug              = false,
   $rrp_mode           = 'none',
   $ttl                = false,
+  $packages           = ['corosync', 'pacemaker'],
 ) {
 
   # Making it possible to provide data with parameterized class declarations or
@@ -173,7 +177,9 @@ class corosync(
     }
   }
 
-  package { [ 'corosync', 'pacemaker' ]: ensure => present }
+  package {$packages:
+    ensure => present,
+  }
 
   # Template uses:
   # - $unicast_addresses
