@@ -54,6 +54,9 @@ module Puppet
     autorequire(:cs_shadow) do
       [ @parameters[:cib] ]
     end
+    newproperty(:symmetrical) do
+      desc "Boolean specifying if the resources should stop in reverse order.
+        Default value: true."
 
     valid_resource_types = [:cs_primitive, :cs_group]
     newparam(:resources_type) do
@@ -69,6 +72,7 @@ module Puppet
 
     autorequire(:service) do
       [ 'corosync' ]
+      defaultto true
     end
 
     valid_resource_types.each{ |possible_resource_type|
