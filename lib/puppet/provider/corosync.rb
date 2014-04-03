@@ -12,7 +12,12 @@ class Puppet::Provider::Corosync < Puppet::Provider
   # hole.
   def self.ready?
     cmd =  [ command(:crm_attribute), '--type', 'crm_config', '--query', '--name', 'dc-version' ]
-    raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+    if Puppet::PUPPETVERSION.to_f < 3.4
+      raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+    else
+      raw = Puppet::Util::Execution.execute(cmd, :failonfail => false)
+      status = raw.exitstatus
+    end
     if status == 0
       return true
     else

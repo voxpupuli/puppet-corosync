@@ -22,7 +22,13 @@ describe Puppet::Type.type(:cs_property).provider(:crm) do
       EOS
 
       described_class.expects(:block_until_ready).returns(nil)
-      Puppet::Util::SUIDManager.expects(:run_and_capture).with(['crm', 'configure', 'show', 'xml']).at_least_once.returns([test_cib, 0])
+      if Puppet::PUPPETVERSION.to_f < 3.4
+        Puppet::Util::SUIDManager.expects(:run_and_capture).with(['crm', 'configure', 'show', 'xml']).at_least_once.returns([test_cib, 0])
+      else
+        Puppet::Util::Execution.expects(:execute).with(['crm', 'configure', 'show', 'xml']).at_least_once.returns(
+          Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
+        )
+      end
       instances = described_class.instances
     end
 
