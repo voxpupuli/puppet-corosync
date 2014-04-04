@@ -120,11 +120,20 @@ cs_order { 'vip_before_service':
 
 Crosync Properties
 ------------------
+A few gloabal settings can be changed with the "cs_property" section.
+
 
 Disable STONITH if required.
 ```puppet
 cs_property { 'stonith-enabled' :
   value   => 'false',
+}
+```
+
+Change quorum policy 
+```
+cs_property { 'no-quorum-policy' :
+  value   => 'ignore',
 }
 ```
 
