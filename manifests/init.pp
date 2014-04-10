@@ -209,13 +209,13 @@ class corosync(
   }
 
   case $::osfamily {
-    'RedHat', 'CentOS': {
+    'RedHat': {
       exec { 'enable corosync':
         require => Package['corosync'],
         before  => Service['corosync'],
       }
     }
-    /^(Debian|Ubuntu)$/: {
+    'Debian': {
       exec { 'enable corosync':
         command => 'sed -i s/START=no/START=yes/ /etc/default/corosync',
         path    => [ '/bin', '/usr/bin' ],
