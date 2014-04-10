@@ -208,14 +208,23 @@ class corosync(
     require => Package['corosync']
   }
 
-  if $::osfamily == 'Debian' {
-    exec { 'enable corosync':
-      command => 'sed -i s/START=no/START=yes/ /etc/default/corosync',
-      path    => [ '/bin', '/usr/bin' ],
-      unless  => 'grep START=yes /etc/default/corosync',
-      require => Package['corosync'],
-      before  => Service['corosync'],
+  case $::osfamily {
+    'RedHat', 'CentOS': {
+      exec { 'enable corosync':
+        require => Package['corosync'],
+        before  => Service['corosync'],
+      }
     }
+    /^(Debian|Ubuntu)$/: {
+      exec { 'enable corosync':
+        command => 'sed -i s/START=no/START=yes/ /etc/default/corosync',
+        path    => [ '/bin', '/usr/bin' ],
+        unless  => 'grep START=yes /etc/default/corosync',
+        require => Package['corosync'],
+        before  => Service['corosync'],
+      }
+    }
+    default: {}
   }
 
   if $check_standby == true {
