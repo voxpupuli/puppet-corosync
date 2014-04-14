@@ -29,7 +29,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
         :name       => items['id'],
         :ensure     => :present,
         :primitive  => items['rsc'],
-        :node       => items['node'],
+        :node_name  => items['node_name'],
         :score      => items['score'],
         :provider   => self.name
       }
@@ -45,7 +45,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
       :name       => @resource[:name],
       :ensure     => :present,
       :primitive  => @resource[:primitive],
-      :node       => @resource[:node],
+      :node_name  => @resource[:node_name],
       :score      => @resource[:score],
       :cib        => @resource[:cib],
     }
@@ -64,10 +64,10 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
     @property_hash[:primitive]
   end
 
-  # Getter that obtains the our node that should have been populated by
+  # Getter that obtains the our node_name that should have been populated by
   # prefetch or instances (depends on if your using puppet resource or not).
-  def node
-    @property_hash[:node]
+  def node_name
+    @property_hash[:node_name]
   end
 
   # Getter that obtains the our score that should have been populated by
@@ -76,7 +76,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
     @property_hash[:score]
   end
 
-  # Our setters for the node and score.  Setters are used when the
+  # Our setters for the node_name and score.  Setters are used when the
   # resource already exists so we just update the current value in the property
   # hash and doing this marks it to be flushed.
 
@@ -84,8 +84,8 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
     @property_hash[:primitive] = should
   end
 
-  def node=(should)
-    @property_hash[:node] = should
+  def node_name=(should)
+    @property_hash[:node_name] = should
   end
 
   def score=(should)
@@ -99,7 +99,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
   def flush
     unless @property_hash.empty?
       updated = "location "
-      updated << "#{@property_hash[:name]} #{@property_hash[:primitive]} #{@property_hash[:score]}: #{@property_hash[:node]}"
+      updated << "#{@property_hash[:name]} #{@property_hash[:primitive]} #{@property_hash[:score]}: #{@property_hash[:node_name]}"
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
