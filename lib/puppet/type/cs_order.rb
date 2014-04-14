@@ -57,6 +57,8 @@ module Puppet
     newproperty(:symmetrical) do
       desc "Boolean specifying if the resources should stop in reverse order.
         Default value: true."
+      defaultto true
+    end
 
     valid_resource_types = [:cs_primitive, :cs_group]
     newparam(:resources_type) do
@@ -72,7 +74,6 @@ module Puppet
 
     autorequire(:service) do
       [ 'corosync' ]
-      defaultto true
     end
 
     valid_resource_types.each{ |possible_resource_type|
