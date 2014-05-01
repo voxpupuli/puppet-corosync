@@ -118,6 +118,26 @@ cs_order { 'vip_before_service':
 }
 ```
 
+Crosync Properties
+------------------
+A few gloabal settings can be changed with the "cs_property" section.
+
+
+Disable STONITH if required.
+```puppet
+cs_property { 'stonith-enabled' :
+  value   => 'false',
+}
+```
+
+Change quorum policy 
+```
+cs_property { 'no-quorum-policy' :
+  value   => 'ignore',
+}
+```
+
+
 Dependencies
 ------------
 
@@ -132,7 +152,6 @@ and automation easier.  Things that are currently outstanding...
 
  * Needs a lot more tests.
  * There is already a handful of bugs that need to be worked out.
- * Doesn't have any way to configure STONITH
  * Plus a other things since Corosync and Pacemaker do a lot.
 
 We suggest you at least go read the [Clusters from Scratch](http://www.clusterlabs.org/doc/en-US/Pacemaker/1.1/html-single/Clusters_from_Scratch) document
