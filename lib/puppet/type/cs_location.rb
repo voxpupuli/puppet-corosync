@@ -19,8 +19,8 @@ module Puppet
       desc "The corosync resource primitive to have a location applied.  "
     end
 
-    newproperty(:node) do
-      desc "The corosync node where the resource should be located.  "
+    newproperty(:node_name) do
+      desc "The corosync node_name where the resource should be located.  "
     end
 
     newparam(:cib) do
