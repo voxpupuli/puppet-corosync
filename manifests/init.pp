@@ -10,8 +10,13 @@
 # [*enable_secauth*]
 #   Controls corosync's ability to authenticate and encrypt multicast messages.
 #
+# [*authkey_source*]
+#   Allows to use either a file or a string as a authkey.
+#   Defaults to 'file'. Can be set to 'string'.
+#
 # [*authkey*]
-#   Specifies the path to the CA which is used to sign Corosync's certificate.
+#   Specifies the path to the CA which is used to sign Corosync's certificate if
+#   authkey_source is 'file' or the actual authkey if 'string' is used instead.
 #
 # [*threads*]
 #   How many threads you are going to let corosync use to encode and decode
@@ -78,6 +83,7 @@
 #
 class corosync(
   $enable_secauth     = 'UNSET',
+  $authkey_source     = 'file',
   $authkey            = '/etc/puppet/ssl/certs/ca.pem',
   $threads            = 'UNSET',
   $port               = 'UNSET',
@@ -166,14 +172,32 @@ class corosync(
   # Puppet can join the cluster.  Totally not ideal, going to come up with
   # something better.
   if $enable_secauth_real == 'on' {
-    file { '/etc/corosync/authkey':
-      ensure  => file,
-      source  => $authkey,
-      mode    => '0400',
-      owner   => 'root',
-      group   => 'root',
-      notify  => Service['corosync'],
-      require => Package['corosync'],
+    case $authkey_source {
+      'file': {
+        file { '/etc/corosync/authkey':
+          ensure  => file,
+          source  => $authkey,
+          mode    => '0400',
+          owner   => 'root',
+          group   => 'root',
+          notify  => Service['corosync'],
+          require => Package['corosync'],
+        }
+      }
+      'string': {
+        file { '/etc/corosync/authkey':
+          ensure  => file,
+          content => $authkey,
+          mode    => '0400',
+          owner   => 'root',
+          group   => 'root',
+          notify  => Service['corosync'],
+          require => Package['corosync'],
+        }
+      }
+      default: {
+        fail("authkey_source must be either 'file' or 'string'.")
+      }
     }
   }
 
