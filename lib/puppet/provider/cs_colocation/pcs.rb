@@ -38,12 +38,11 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
         with_rsc = items['with-rsc']
       end
 
-      # Sorting the array of primitives because order doesn't matter so someone
-      # switching the order around shouldn't generate an event.
       colocation_instance = {
         :name       => items['id'],
         :ensure     => :present,
-        :primitives => [rsc, with_rsc].sort,
+        :rsc        => rsc,
+        :with_rsc   => with_rsc,
         :score      => items['score'],
         :provider   => self.name,
         :new        => false
@@ -59,7 +58,8 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
     @property_hash = {
       :name       => @resource[:name],
       :ensure     => :present,
-      :primitives => @resource[:primitives],
+      :rsc        => @resource[:rsc],
+      :with_rsc   => @resource[:with_rsc],
       :score      => @resource[:score],
       :cib        => @resource[:cib],
       :new        => true
@@ -77,7 +77,11 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
   # Getter that obtains the primitives array for us that should have
   # been populated by prefetch or instances (depends on if your using
   # puppet resource or not).
-  def primitives
+  def rsc
+    @property_hash[:primitives]
+  end
+
+  def with_rsc
     @property_hash[:primitives]
   end
 
@@ -90,8 +94,13 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
   # Our setters for the primitives array and score.  Setters are used when the
   # resource already exists so we just update the current value in the property
   # hash and doing this marks it to be flushed.
-  def primitives=(should)
-    @property_hash[:primitives] = should.sort
+  #
+  def with_rsc=(should)
+    @property_hash[:with_rsc] = should
+  end
+
+  def rsc=(should)
+    @property_hash[:rsc] = should
   end
 
   def score=(should)
@@ -112,7 +121,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
 
       cmd = [ command(:pcs), 'constraint', 'colocation' ]
       cmd << "add"
-      rsc = @property_hash[:primitives].pop
+      rsc = @property_hash[:rsc]
       if rsc.include? ':'
         items = rsc.split[':']
         if items[1] == 'Master'
@@ -125,7 +134,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
         cmd << rsc
       end
       cmd << 'with'
-      rsc = @property_hash[:primitives].pop
+      rsc = @property_hash[:with_rsc].pop
       if rsc.include? ':'
         items = rsc.split(':')
         if items[1] == 'Master'
