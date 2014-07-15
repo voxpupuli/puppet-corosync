@@ -1,3 +1,13 @@
+2014-07-15 Release 0.6.0
+
+Summary:
+
+This release adds support for the PCS provider.  It also updates metadata.json
+so the module can be uninstalled and upgraded via the puppet module command.
+
+Features:
+- Add support for PCS provider
+
 2014-06-24 - Version 0.5.0
 
 Summary:
