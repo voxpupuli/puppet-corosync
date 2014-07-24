@@ -235,8 +235,12 @@ class corosync(
   case $::osfamily {
     'RedHat': {
       exec { 'enable corosync':
-        require => Package['corosync'],
-        before  => Service['corosync'],
+        command     => 'chkconfig corosync on',
+        path        => [ '/bin', '/sbin', '/usr/bin' ],
+        unless      => 'chkconfig --list corosync | grep "3:on"',
+        environment => 'LANG=C',
+        require     => Package['corosync'],
+        before      => Service['corosync'],
       }
     }
     'Debian': {
