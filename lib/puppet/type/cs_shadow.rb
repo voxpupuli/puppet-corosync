@@ -27,7 +27,7 @@ module Puppet
     end
 
     def generate
-      options = { :name => @title }
+      options = { :name => @title, :provider => provider.class.name }
       [ Puppet::Type.type(:cs_commit).new(options) ]
     end
 
