@@ -120,9 +120,9 @@ cs_order { 'vip_before_service':
 }
 ```
 
-Crosync Properties
+Corosync Properties
 ------------------
-A few gloabal settings can be changed with the "cs_property" section.
+A few global settings can be changed with the "cs_property" section.
 
 
 Disable STONITH if required.
