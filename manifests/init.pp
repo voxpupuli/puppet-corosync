@@ -233,13 +233,6 @@ class corosync(
   }
 
   case $::osfamily {
-    'RedHat': {
-      exec { 'enable corosync':
-        command => '/bin/true',
-        require => Package['corosync'],
-        before  => Service['corosync'],
-      }
-    }
     'Debian': {
       exec { 'enable corosync':
         command => 'sed -i s/START=no/START=yes/ /etc/default/corosync',
