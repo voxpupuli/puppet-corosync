@@ -235,6 +235,7 @@ class corosync(
   case $::osfamily {
     'RedHat': {
       exec { 'enable corosync':
+        command => '/bin/true',
         require => Package['corosync'],
         before  => Service['corosync'],
       }
