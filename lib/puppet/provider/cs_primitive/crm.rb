@@ -192,9 +192,18 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
       unless @property_hash[:operations].empty?
         operations = ''
         @property_hash[:operations].each do |o|
-          operations << "op #{o[0]} "
-          o[1].each do |k,v|
-            operations << "#{k}=#{v} "
+          if o[1].is_a?(Hash)
+            operations << "op #{o[0]} "
+            o[1].each_pair do |k,v|
+              operations << "#{k}=#{v} "
+            end
+          elsif o[1].is_a?(Array)
+            o[1].each do |p|
+              operations << "op #{o[0]} "
+              p.each_pair do |k,v|
+                operations << "#{k}=#{v} "
+              end
+            end
           end
         end
       end
