@@ -193,26 +193,26 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
         operations = ''
         @property_hash[:operations].each do |o|
           operations << "op #{o[0]} "
-          o[1].each_pair do |k,v|
+          o[1].each do |k,v|
             operations << "#{k}=#{v} "
           end
         end
       end
       unless @property_hash[:parameters].empty?
         parameters = 'params '
-        @property_hash[:parameters].each_pair do |k,v|
+        @property_hash[:parameters].each do |k,v|
           parameters << "#{k}=#{v} "
         end
       end
       unless @property_hash[:utilization].empty?
         utilization = 'utilization '
-        @property_hash[:utilization].each_pair do |k,v|
+        @property_hash[:utilization].each do |k,v|
           utilization << "#{k}=#{v} "
         end
       end
       unless @property_hash[:metadata].empty?
         metadatas = 'meta '
-        @property_hash[:metadata].each_pair do |k,v|
+        @property_hash[:metadata].each do |k,v|
           metadatas << "#{k}=#{v} "
         end
       end
@@ -229,7 +229,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
         updated << "ms ms_#{@property_hash[:name]} #{@property_hash[:name]} "
         unless @property_hash[:ms_metadata].empty?
           updated << 'meta '
-          @property_hash[:ms_metadata].each_pair do |k,v|
+          @property_hash[:ms_metadata].each do |k,v|
             updated << "#{k}=#{v} "
           end
         end
