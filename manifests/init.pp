@@ -82,7 +82,7 @@
 # Copyright 2012, Puppet Labs, LLC.
 #
 class corosync(
-  $enable_secauth     = 'UNSET',
+  $enable_secauth     = true,
   $authkey_source     = 'file',
   $authkey            = '/etc/puppet/ssl/certs/ca.pem',
   $threads            = 'UNSET',
@@ -152,26 +152,12 @@ class corosync(
     $multicast_address_real = $multicast_address
   }
 
-  if $enable_secauth == 'UNSET' {
-    case $::enable_secauth {
-      true:  { $enable_secauth_real = 'on' }
-      false: { $enable_secauth_real = 'off' }
-      undef:   { $enable_secauth_real = 'on' }
-      '':      { $enable_secauth_real = 'on' }
-      default: { validate_re($::enable_secauth, '^true$|^false$') }
-    }
-  } else {
-      case $enable_secauth {
-        true:   { $enable_secauth_real = 'on' }
-        false:  { $enable_secauth_real = 'off' }
-        default: { fail('The enable_secauth class parameter requires a true or false boolean') }
-      }
-  }
+  $enable_secauth_real = str2bool($enable_secauth)
 
   # Using the Puppet infrastructure's ca as the authkey, this means any node in
   # Puppet can join the cluster.  Totally not ideal, going to come up with
   # something better.
-  if $enable_secauth_real == 'on' {
+  if $enable_secauth_real {
     case $authkey_source {
       'file': {
         file { '/etc/corosync/authkey':
@@ -269,4 +255,5 @@ class corosync(
     enable    => true,
     subscribe => File[ [ '/etc/corosync/corosync.conf', '/etc/corosync/service.d' ] ],
   }
+
 }

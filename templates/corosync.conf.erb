@@ -10,7 +10,7 @@ totem {
   max_messages:                        20
   clear_node_high_bit:                 yes
   rrp_mode:                            <%= @rrp_mode %>
-  secauth:                             <%= @enable_secauth_real %>
+  secauth:                             <%= @enable_secauth_real ? 'on' : 'off' %>
   threads:                             <%= @threads_real %>
 <% [@bind_address_real].flatten.each_index do |i| -%>
   interface {
