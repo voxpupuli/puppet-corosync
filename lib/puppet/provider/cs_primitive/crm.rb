@@ -26,6 +26,42 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
     hash
   end
 
+  def self.operations_to_hash(e)
+    return {} if e.nil?
+    
+    hash = {}
+
+    e.each_element do |op|
+    
+      # Extract the name
+      operation_name = op.attributes['name']
+      if hash[operation_name].nil?
+        hash[operation_name] = []
+      end
+
+      # Populate a hash with its attributes
+      operation = {}
+      op.attributes.each do |operation_attribute_name, operation_attribute_value|
+        # id we don't care about. name we already have.
+        next if operation_attribute_name == 'id'
+        next if operation_attribute_name == 'name'
+
+        operation[operation_attribute_name] = operation_attribute_value
+      end
+
+      # Pull out the instance attributes too if there are any
+      unless op.elements['instance_attributes'].nil?
+        op.elements['instance_attributes'].each_element do |ia|
+          operation[ia.attributes['name']] = ia.attributes['value']
+        end
+      end
+
+      hash[operation_name] << operation
+    end
+
+    hash
+  end
+
   # given an XML element (a <primitive> from cibadmin), produce a hash suitible
   # for creating a new provider instance.
   def self.element_to_hash(e)
@@ -37,27 +73,13 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
       :ensure           => :present,
       :provider         => self.name,
       :parameters       => nvpairs_to_hash(e.elements['instance_attributes']),
-      :operations       => {},
+      :operations       => operations_to_hash(e.elements['operations']),
       :utilization      => nvpairs_to_hash(e.elements['utilization']),
       :metadata         => nvpairs_to_hash(e.elements['meta_attributes']),
       :ms_metadata      => {},
       :promotable       => :false
     }
 
-    if ! e.elements['operations'].nil?
-      e.elements['operations'].each_element do |o|
-        valids = o.attributes.reject do |k,v| k == 'id' end
-        hash[:operations][valids['name']] = {}
-        valids.each do |k,v|
-          hash[:operations][valids['name']][k] = v if k != 'name'
-        end
-        if ! o.elements['instance_attributes'].nil?
-          o.elements['instance_attributes'].each_element do |i|
-            hash[:operations][valids['name']][(i.attributes['name'])] = i.attributes['value']
-          end
-        end
-      end
-    end
     if e.parent.name == 'master'
       hash[:promotable] = :true
       if ! e.parent.elements['meta_attributes'].nil?
