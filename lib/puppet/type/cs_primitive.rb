@@ -94,6 +94,19 @@ module Puppet
       end
 
       defaultto Hash.new
+
+      def is_to_s(value)
+        value.inspect
+      end
+
+      def change_to_s(current, desired)
+        "changing #{current.inspect} to #{desired.inspect}"
+      end
+
+      def should_to_s(current, desired)
+        "current value #{current.inspect}, should be #{desired.inspect}"
+      end
+
     end
 
     newproperty(:utilization) do
