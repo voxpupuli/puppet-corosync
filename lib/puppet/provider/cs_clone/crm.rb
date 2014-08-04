@@ -55,15 +55,16 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Crmsh) d
       :ensure     => :present,
       :primitive  => @resource[:primitive],
       :metadata   => @resource[:metadata],
+      :cib        => @resource[:cib],
     }
-    @property_hash[:cib] = @resource[:cib] if ! @resource[:cib].nil?
+    debug("created cs_clone: #{@property_hash.inspect}")
   end
 
   
   def destroy
     debug('Stopping primitive before removing it')
     crm('resource', 'stop', @resource[:name])
-    debug('Revmoving primitive')
+    debug('Removing primitive')
     crm('configure', 'delete', @resource[:name])
     @property_hash.clear
   end
@@ -102,6 +103,7 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Crmsh) d
         tmpfile.write(updated)
         tmpfile.flush
         ENV['CIB_shadow'] = @resource[:cib]
+        debug("Sending to crm (with CIB_shadow=#{ENV['CIB_shadow']}): '#{updated}'")
         crm('configure', 'load', 'update', tmpfile.path.to_s)
       end
     end
