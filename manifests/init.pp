@@ -205,6 +205,12 @@ class corosync(
     ensure => present,
   }
 
+  if $::osfamily == 'RedHat' {
+    package { 'pcs':
+      ensure => present,
+    }
+  }
+  
   # Template uses:
   # - $unicast_addresses
   # - $multicast_address
@@ -233,12 +239,6 @@ class corosync(
   }
 
   case $::osfamily {
-    'RedHat': {
-      exec { 'enable corosync':
-        require => Package['corosync'],
-        before  => Service['corosync'],
-      }
-    }
     'Debian': {
       exec { 'enable corosync':
         command => 'sed -i s/START=no/START=yes/ /etc/default/corosync',
