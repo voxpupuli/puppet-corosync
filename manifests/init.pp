@@ -82,20 +82,22 @@
 # Copyright 2012, Puppet Labs, LLC.
 #
 class corosync(
-  $enable_secauth     = 'UNSET',
-  $authkey_source     = 'file',
-  $authkey            = '/etc/puppet/ssl/certs/ca.pem',
-  $threads            = 'UNSET',
-  $port               = 'UNSET',
-  $bind_address       = 'UNSET',
-  $multicast_address  = 'UNSET',
-  $unicast_addresses  = 'UNSET',
-  $force_online       = false,
-  $check_standby      = false,
-  $debug              = false,
-  $rrp_mode           = 'none',
-  $ttl                = false,
-  $packages           = ['corosync', 'pacemaker'],
+  $enable_secauth                                   = 'UNSET',
+  $authkey_source                                   = 'file',
+  $authkey                                          = '/etc/puppet/ssl/certs/ca.pem',
+  $threads                                          = 'UNSET',
+  $port                                             = 'UNSET',
+  $bind_address                                     = 'UNSET',
+  $multicast_address                                = 'UNSET',
+  $unicast_addresses                                = 'UNSET',
+  $force_online                                     = false,
+  $check_standby                                    = false,
+  $debug                                            = false,
+  $rrp_mode                                         = 'none',
+  $ttl                                              = false,
+  $packages                                         = ['corosync', 'pacemaker'],
+  $param_totem_token                                = 3000,
+  $param_totem_token_retransmits_before_loss_const  = 10,
 ) {
 
   # Making it possible to provide data with parameterized class declarations or
