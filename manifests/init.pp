@@ -65,9 +65,6 @@
 # [*packages*]
 #   Define the list of software packages which should be installed.
 #
-# [*token*]
-#   Time (in ms) to wait for a token
-#
 # [*set_votequorum*]
 #   Set to true if corosync_votequorum should be used as quorum provider.
 #   Defaults to false.
@@ -76,6 +73,12 @@
 #   Array of quorum member hostname. This is required if set_votequorum
 #   is set to true.
 #   Defaults to undef,
+#
+# [*token*]
+#   Time (in ms) to wait for a token
+#
+# [*token_retransmits_before_loss_const*]
+#   How many token retransmits before forming a new configuration
 #
 # === Examples
 #
@@ -94,23 +97,24 @@
 # Copyright 2012, Puppet Labs, LLC.
 #
 class corosync(
-  $enable_secauth    = $::corosync::params::enable_secauth,
-  $authkey_source    = $::corosync::params::authkey_source,
-  $authkey           = $::corosync::params::authkey,
-  $threads           = $::corosync::params::threads,
-  $port              = $::corosync::params::port,
-  $bind_address      = $::corosync::params::bind_address,
-  $multicast_address = $::corosync::params::multicast_address,
-  $unicast_addresses = $::corosync::params::unicast_addresses,
-  $force_online      = $::corosync::params::force_online,
-  $check_standby     = $::corosync::params::check_standby,
-  $debug             = $::corosync::params::debug,
-  $rrp_mode          = $::corosync::params::rrp_mode,
-  $ttl               = $::corosync::params::ttl,
-  $packages          = $::corosync::params::packages,
-  $token             = $::corosync::params::token,
-  $set_votequorum    = $::corosync::params::set_votequorum,
-  $quorum_members    = ['localhost'],
+  $enable_secauth                      = $::corosync::params::enable_secauth,
+  $authkey_source                      = $::corosync::params::authkey_source,
+  $authkey                             = $::corosync::params::authkey,
+  $threads                             = $::corosync::params::threads,
+  $port                                = $::corosync::params::port,
+  $bind_address                        = $::corosync::params::bind_address,
+  $multicast_address                   = $::corosync::params::multicast_address,
+  $unicast_addresses                   = $::corosync::params::unicast_addresses,
+  $force_online                        = $::corosync::params::force_online,
+  $check_standby                       = $::corosync::params::check_standby,
+  $debug                               = $::corosync::params::debug,
+  $rrp_mode                            = $::corosync::params::rrp_mode,
+  $ttl                                 = $::corosync::params::ttl,
+  $packages                            = $::corosync::params::packages,
+  $set_votequorum                      = $::corosync::params::set_votequorum,
+  $quorum_members                      = ['localhost'],
+  $token                               = $::corosync::params::token,
+  $token_retransmits_before_loss_const = $::corosync::params::token_retransmits_before_lost_const,
 ) inherits ::corosync::params {
 
   if $set_votequorum and !$quorum_members {
