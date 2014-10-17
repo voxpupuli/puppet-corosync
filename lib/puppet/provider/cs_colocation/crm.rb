@@ -53,7 +53,7 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
       colocation_instance = {
         :name       => items['id'],
         :ensure     => :present,
-        :primitives => rscs.sort,
+        :primitives => rscs,
         :score      => items['score'],
         :provider   => self.name
       }
@@ -98,7 +98,7 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
   # resource already exists so we just update the current value in the property
   # hash and doing this marks it to be flushed.
   def primitives=(should)
-    @property_hash[:primitives] = should.sort
+    @property_hash[:primitives] = should
   end
 
   def score=(should)
