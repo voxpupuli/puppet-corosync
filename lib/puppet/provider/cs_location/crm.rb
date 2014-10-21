@@ -1,7 +1,7 @@
 require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'corosync'
+require Pathname.new(__FILE__).dirname.dirname.expand_path + 'crmsh'
 
-Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Corosync) do
+Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Crmsh) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived.  This provider will check the state
         of current primitive locations on the system; add, delete, or adjust various
@@ -10,7 +10,6 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Coros
   # Path to the crm binary for interacting with the cluster configuration.
   # Decided to just go with relative.
   commands :crm => 'crm'
-  commands :crm_attribute => 'crm_attribute'
 
   def self.instances
 
