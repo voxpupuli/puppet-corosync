@@ -232,26 +232,26 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
           else
             operations << op_name
           end
-          o[1].each_pair do |k,v|
+          o[1].each do |k,v|
             operations << "#{k}=#{v}"
           end
         end
       end
       unless @property_hash[:parameters].empty?
         parameters = []
-        @property_hash[:parameters].each_pair do |k,v|
+        @property_hash[:parameters].each do |k,v|
           parameters << "#{k}=#{v}"
         end
       end
       unless @property_hash[:utilization].empty?
         utilization = [ 'utilization' ]
-        @property_hash[:utilization].each_pair do |k,v|
+        @property_hash[:utilization].each do |k,v|
           utilization << "#{k}=#{v}"
         end
       end
       unless @property_hash[:metadata].empty?
         metadatas = [ 'meta' ]
-        @property_hash[:metadata].each_pair do |k,v|
+        @property_hash[:metadata].each do |k,v|
           metadatas << "#{k}=#{v}"
         end
       end
@@ -284,7 +284,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
           cmd = [ command(:pcs), 'resource', 'master', "ms_#{@property_hash[:name]}", "#{@property_hash[:name]}" ]
           unless @property_hash[:ms_metadata].empty?
             cmd << 'meta'
-            @property_hash[:ms_metadata].each_pair do |k,v|
+            @property_hash[:ms_metadata].each do |k,v|
               cmd << "#{k}=#{v}"
             end
           end
@@ -301,7 +301,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
           @property_hash[:existing_operations].each do |o|
             cmd = [ command(:pcs), 'resource', 'op', 'remove', "#{@property_hash[:name]}" ]
             cmd << "#{o[0]}"
-            o[1].each_pair do |k,v|
+            o[1].each do |k,v|
               cmd << "#{k}=#{v}"
             end
             Puppet::Provider::Pacemaker::run_pcs_command(cmd)
@@ -317,7 +317,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
           cmd = [ command(:pcs), 'resource', 'update', "ms_#{@property_hash[:name]}", "#{@property_hash[:name]}" ]
           unless @property_hash[:ms_metadata].empty?
             cmd << 'meta'
-            @property_hash[:ms_metadata].each_pair do |k,v|
+            @property_hash[:ms_metadata].each do |k,v|
               cmd << "#{k}=#{v}"
             end
           end

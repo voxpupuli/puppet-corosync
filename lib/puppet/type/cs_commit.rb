@@ -41,6 +41,9 @@ module Puppet
       resources_with_cib :cs_location
     end
 
+    autorequire(:cs_clone) do
+      resources_with_cib :cs_clone
+    end
 
     autorequire(:cs_order) do
       resources_with_cib :cs_order

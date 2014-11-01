@@ -89,9 +89,9 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
 
       it 'has an operations property corresponding to <operations>' do
         expect(instance.operations).to eq({
-          "monitor" => {"interval" => "15", "timeout" => "10", "on-fail" => "standby", "OCF_CHECK_LEVEL" => "10"},
-          "start" => {"interval" => "0", "timeout" => "60"},
-          "stop" => {"interval" => "0", "timeout" => "40"},
+          "monitor" => [ {"interval" => "15", "timeout" => "10", "on-fail" => "standby", "OCF_CHECK_LEVEL" => "10"} ],
+          "start" => [ {"interval" => "0", "timeout" => "60"} ],
+          "stop" => [ {"interval" => "0", "timeout" => "40"} ],
         })
       end
 

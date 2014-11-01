@@ -48,6 +48,10 @@ module Puppet
       [ @parameters[:cib] ]
     end
 
+    autorequire(:cs_primitive) do
+      [ self[:primitive] ]
+    end
+
     autorequire(:service) do
       [ 'corosync' ]
     end
