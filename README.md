@@ -80,6 +80,23 @@ cs_primitive { 'nginx_service':
 }
 ```
 
+Note: Operations with the same names should be declared as an Array. Example:
+```puppet
+cs_primitive { 'pgsql_service':
+  primitive_class => 'ocf',
+  primitive_type  => 'pgsql',
+  provided_by     => 'heartbeat',
+  operations      => {
+    'monitor' => [
+      { 'interval' => '10s', 'timeout' => '30s' },
+      { 'interval' => '5s', 'timeout' => '30s', 'role' => 'Master' },
+    ],
+    'start'   => { 'interval' => '0', 'timeout' => '30s', 'on-fail' => 'restart' }
+  },
+}
+```
+
+
 Configuring locations
 -----------------------
 
