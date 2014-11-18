@@ -191,7 +191,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
 
     it 'sets parameters' do
       instance.parameters = {'fluffyness' => '12'}
-      expect_update(/(pcs resource op remove|fluffyness=12)/)
+      expect_update(/(pcs resource op remove|fluffyness="12")/)
       instance.flush
     end
 
