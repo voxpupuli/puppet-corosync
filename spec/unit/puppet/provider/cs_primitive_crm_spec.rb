@@ -164,7 +164,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
 
     it 'sets parameters' do
       instance.parameters = {'fluffyness' => '12'}
-      expect_update(/params fluffyness=12/)
+      expect_update(/params 'fluffyness=12'/)
       instance.flush
     end
 

@@ -201,7 +201,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
       unless @property_hash[:parameters].empty?
         parameters = 'params '
         @property_hash[:parameters].each_pair do |k,v|
-          parameters << "#{k}=#{v} "
+          parameters << "'#{k}=#{v}' "
         end
       end
       unless @property_hash[:utilization].empty?
