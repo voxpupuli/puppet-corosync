@@ -90,12 +90,10 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
       end
 
       it 'has an ms_metadata property' do
-        pending 'investigation into what should be asserted here'
         expect(instance).to respond_to(:ms_metadata)
       end
 
       it "has a promotable property that is :false" do
-        pending "more investigation into what is appropriate to assert here"
         expect(instance.promotable).to eq(:false)
       end
     end

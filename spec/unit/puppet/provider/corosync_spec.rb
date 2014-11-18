@@ -28,7 +28,7 @@ describe Puppet::Provider::Crmsh do
         )
       end
 
-      expect(described_class.ready?).to be_true
+      expect(described_class.ready?).to be_truthy
     end
 
     it 'returns false when crm_attribute exits unsuccessfully' do
@@ -40,7 +40,7 @@ describe Puppet::Provider::Crmsh do
         )
       end
 
-      expect(described_class.ready?).to be_false
+      expect(described_class.ready?).to be_falsey
     end
   end
 end
