@@ -65,6 +65,27 @@
 # [*packages*]
 #   Define the list of software packages which should be installed.
 #
+# [*param_totem_token*]
+#   Parameter for totem token (Time (in ms) to wait for a token)
+#   Default: 3000
+#
+# [*param_totem_token_retransmit_before_loss_const*]
+#   Parameter for totem token_retransmit_before_loss_const
+#   (How many token retransmits before forming a new configuration)
+#   Default: 10
+#
+# [*manage_service*]
+#   Enable or disable control of service status
+#   Default: true (managed)
+#
+# [*enable_service*]
+#   Enforced state of corosync service
+#   Default state: running
+#
+# [*enable_boot*]
+#   Enable or disable service boot
+#   Default: true (boot the service at node startup)
+#
 # === Examples
 #
 #  class { 'corosync':
@@ -82,20 +103,24 @@
 # Copyright 2012, Puppet Labs, LLC.
 #
 class corosync(
-  $enable_secauth     = 'UNSET',
-  $authkey_source     = 'file',
-  $authkey            = '/etc/puppet/ssl/certs/ca.pem',
-  $threads            = 'UNSET',
-  $port               = 'UNSET',
-  $bind_address       = 'UNSET',
-  $multicast_address  = 'UNSET',
-  $unicast_addresses  = 'UNSET',
-  $force_online       = false,
-  $check_standby      = false,
-  $debug              = false,
-  $rrp_mode           = 'none',
-  $ttl                = false,
-  $packages           = ['corosync', 'pacemaker'],
+  $enable_secauth                                   = 'UNSET',
+  $authkey_source                                   = 'file',
+  $authkey                                          = '/etc/puppet/ssl/certs/ca.pem',
+  $threads                                          = 'UNSET',
+  $port                                             = 'UNSET',
+  $bind_address                                     = 'UNSET',
+  $multicast_address                                = 'UNSET',
+  $unicast_addresses                                = 'UNSET',
+  $force_online                                     = false,
+  $check_standby                                    = false,
+  $debug                                            = false,
+  $rrp_mode                                         = 'none',
+  $ttl                                              = false,
+  $packages                                         = ['corosync', 'pacemaker'],
+  $param_totem_token                                = 3000,
+  $param_totem_token_retransmits_before_loss_const  = 10,
+  $enable_service                                   = running,
+  $enable_boot                                      = true,
 ) {
 
   # Making it possible to provide data with parameterized class declarations or
@@ -264,9 +289,14 @@ class corosync(
     }
   }
 
+  $service_status = str2bool($manage_service) ? {
+    true    => $enable_service,
+    false   => undef,
+  }
+
   service { 'corosync':
-    ensure    => running,
-    enable    => true,
+    ensure    => $service_status,
+    enable    => $enable_boot,
     subscribe => File[ [ '/etc/corosync/corosync.conf', '/etc/corosync/service.d' ] ],
   }
 }
