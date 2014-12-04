@@ -65,6 +65,9 @@
 # [*packages*]
 #   Define the list of software packages which should be installed.
 #
+# [*token*]
+#   Time (in ms) to wait for a token
+#
 # === Examples
 #
 #  class { 'corosync':
@@ -96,6 +99,7 @@ class corosync(
   $rrp_mode          = $::corosync::params::rrp_mode,
   $ttl               = $::corosync::params::ttl,
   $packages          = $::corosync::params::packages,
+  $token             = $::corosync::params::token,
 ) inherits ::corosync::params {
 
   if ! is_bool($enable_secauth) {
@@ -166,6 +170,7 @@ class corosync(
   # - $port_real
   # - $enable_secauth_real
   # - $threads_real
+  # - $token
   file { '/etc/corosync/corosync.conf':
     ensure  => file,
     mode    => '0644',
