@@ -11,16 +11,16 @@ totem {
   clear_node_high_bit:                 yes
   rrp_mode:                            <%= @rrp_mode %>
   secauth:                             <%= @enable_secauth_real %>
-  threads:                             <%= @threads_real %>
-<% [@bind_address_real].flatten.each_index do |i| -%>
+  threads:                             <%= @threads %>
+<% [@bind_address].flatten.each_index do |i| -%>
   interface {
     ringnumber:  <%= i %>
-    bindnetaddr: <%= [@bind_address_real].flatten[i] %>
-<% if [@multicast_address_real].flatten[i] == 'broadcast' -%>
+    bindnetaddr: <%= [@bind_address].flatten[i] %>
+<% if [@multicast_address].flatten[i] == 'broadcast' -%>
     broadcast:   yes
 <% else -%>
-    mcastaddr:   <%= [@multicast_address_real].flatten[i] %>
-    mcastport:   <%= [@port_real].flatten[i] %>
+    mcastaddr:   <%= [@multicast_address].flatten[i] %>
+    mcastport:   <%= [@port].flatten[i] %>
 <% end -%>
 <% if @ttl -%>
     ttl:         <%= @ttl %>
