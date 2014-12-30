@@ -166,10 +166,10 @@ class corosync(
   # - $unicast_addresses
   # - $multicast_address
   # - $debug
-  # - $bind_address_real
-  # - $port_real
+  # - $bind_address
+  # - $port
   # - $enable_secauth_real
-  # - $threads_real
+  # - $threads
   # - $token
   file { '/etc/corosync/corosync.conf':
     ensure  => file,
