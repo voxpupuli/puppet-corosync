@@ -114,6 +114,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
     @property_hash[:metadata] = @resource[:metadata] if ! @resource[:metadata].nil?
     @property_hash[:ms_metadata] = @resource[:ms_metadata] if ! @resource[:ms_metadata].nil?
     @property_hash[:cib] = @resource[:cib] if ! @resource[:cib].nil?
+    @property_hash[:force] = @resource[:force] if ! @resource[:force].nil?
   end
 
   # Unlike create we actually immediately delete the item.
@@ -162,6 +163,10 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
     @property_hash[:promotable]
   end
 
+  def force
+    @property_hash[:force]
+  end
+
   # Our setters for parameters and operations.  Setters are used when the
   # resource already exists so we just update the current value in the
   # property_hash and doing this marks it to be flushed.
@@ -204,6 +209,10 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
       @property_hash[:promotable] = should
       pcs('resource', 'delete', "ms_#{@resource[:name]}")
     end
+  end
+
+  def force=(should)
+    @property_hash[:force] = should
   end
 
   # Flush is triggered on anything that has been detected as being
@@ -277,6 +286,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
         cmd += operations unless operations.nil?
         cmd += utilization unless utilization.nil?
         cmd += metadatas unless metadatas.nil?
+        cmd << '--force' if @property_hash[:force] == :true
         raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
         # if we are using a master/slave resource, prepend ms_ before its name
         # and declare it as a master/slave resource
@@ -312,6 +322,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
         cmd += operations unless operations.nil?
         cmd += utilization unless utilization.nil?
         cmd += metadatas unless metadatas.nil?
+        cmd << '--force' if @property_hash[:force] == :true
         raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
         if @property_hash[:promotable] == :true
           cmd = [ command(:pcs), 'resource', 'update', "ms_#{@property_hash[:name]}", "#{@property_hash[:name]}" ]
