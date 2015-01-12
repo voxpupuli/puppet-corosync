@@ -118,6 +118,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
     @property_hash[:metadata] = @resource[:metadata] if ! @resource[:metadata].nil?
     @property_hash[:ms_metadata] = @resource[:ms_metadata] if ! @resource[:ms_metadata].nil?
     @property_hash[:cib] = @resource[:cib] if ! @resource[:cib].nil?
+    @property_hash[:force] = @resource[:force] if ! @resource[:force].nil?
   end
 
   # Unlike create we actually immediately delete the item.  Corosync forces us
@@ -157,6 +158,10 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
     @property_hash[:promotable]
   end
 
+  def force
+    @property_hash[:force]
+  end
+
   # Our setters for parameters and operations.  Setters are used when the
   # resource already exists so we just update the current value in the
   # property_hash and doing this marks it to be flushed.
@@ -189,6 +194,10 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
       crm('resource', 'stop', "ms_#{@resource[:name]}")
       crm('configure', 'delete', "ms_#{@resource[:name]}")
     end
+  end
+
+  def force=(should)
+    @property_hash[:force] = should
   end
 
   # Flush is triggered on anything that has been detected as being
@@ -250,7 +259,12 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
         tmpfile.write(updated)
         tmpfile.flush
         ENV['CIB_shadow'] = @resource[:cib]
-        crm('configure', 'load', 'update', tmpfile.path.to_s)
+        if @property_hash[:force] == :true
+            crm_force = '-F'
+        else
+            crm_force = ''
+        end
+        crm(crm_force, 'configure', 'load', 'update', tmpfile.path.to_s)
       end
     end
   end

@@ -157,6 +157,14 @@ module Puppet
         defaultto :false
     end
 
+    newproperty(:force) do
+      desc "Forces the primitive creation, even if it should fail."
+
+        newvalues(:true, :false)
+
+        defaultto :false
+    end
+
     autorequire(:cs_shadow) do
       autos = []
       if @parameters[:cib]
