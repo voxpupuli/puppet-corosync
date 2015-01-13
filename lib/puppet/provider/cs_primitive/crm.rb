@@ -260,11 +260,10 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
         tmpfile.flush
         ENV['CIB_shadow'] = @resource[:cib]
         if @property_hash[:force] == :true
-            crm_force = '-F'
+          crm('-F', 'configure', 'load', 'update', tmpfile.path.to_s)   
         else
-            crm_force = ''
+          crm('configure', 'load', 'update', tmpfile.path.to_s)      
         end
-        crm(crm_force, 'configure', 'load', 'update', tmpfile.path.to_s)
       end
     end
   end
