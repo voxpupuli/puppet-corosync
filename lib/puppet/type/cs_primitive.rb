@@ -64,6 +64,14 @@ module Puppet
         also be added to your manifest."
     end
 
+    newparam(:force) do
+      desc "Forces the primitive creation."
+
+        newvalues(:true, :false)
+
+        defaultto :false
+    end
+
     # Our parameters and operations properties must be hashes.
     newproperty(:parameters) do
       desc "A hash of params for the primitive.  Parameters in a primitive are

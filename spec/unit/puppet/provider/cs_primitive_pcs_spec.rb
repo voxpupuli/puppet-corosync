@@ -155,7 +155,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
     let :resource do
       Puppet::Type.type(:cs_primitive).new(
         :name => 'testResource',
-        :provider => :crm,
+        :provider => :pcs,
         :primitive_class => 'ocf',
         :provided_by => 'heartbeat',
         :primitive_type => 'IPaddr2')
@@ -223,6 +223,52 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
       expect_update(/resource (create|delete|op remove) example_vip/)
       vip_instance.flush
     end
+  end
 
+  context 'when forcing creation' do
+    let :resource do
+      Puppet::Type.type(:cs_primitive).new(
+        :name => 'testForce',
+        :provider => :pcs,
+        :primitive_class => 'ocf',
+        :provided_by => 'heartbeat',
+        :primitive_type => 'IPaddr2',
+        :force => true)
+    end
+
+    let :instance do
+      instance = described_class.new(resource)
+      instance.create
+      instance
+    end
+
+    def expect_force
+      if Puppet::PUPPETVERSION.to_f < 3.4
+        Puppet::Util::SUIDManager.expects(:run_and_capture).with { |*args|
+          cmdline=args[0].join(" ")
+          if cmdline.match(/^pcs resource create testForce/)
+            cmdline.match(/--force$/)
+          else
+            true
+          end
+        }.at_least_once.returns(['', 0])
+      else
+        Puppet::Util::Execution.expects(:execute).with{ |*args|
+          cmdline=args[0].join(" ")
+          if cmdline.match(/^pcs resource create testForce/)
+            cmdline.match(/--force$/)
+          else
+            true
+          end
+        }.at_least_once.returns(
+          Puppet::Util::Execution::ProcessOutput.new('', 0)
+        )
+      end
+    end
+
+    it 'can flush without changes' do
+      expect_force
+      instance.flush
+    end
   end
 end

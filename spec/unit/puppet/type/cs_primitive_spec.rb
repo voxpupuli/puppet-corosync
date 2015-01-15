@@ -69,5 +69,23 @@ describe Puppet::Type.type(:cs_primitive) do
         ) }.to raise_error Puppet::Error, /(true|false)/
       end
     end
+
+    it "should validate that the force attribute can be true/false" do
+      [true, false].each do |value|
+        expect(subject.new(
+          :name       => "mock_primitive",
+          :force => value
+        )[:force]).to eq(value.to_s.to_sym)
+      end
+    end
+
+    it "should validate that the force attribute cannot be other values" do
+      ["fail", 42].each do |value|
+        expect { subject.new(
+          :name       => "mock_primitive",
+          :force => value
+        ) }.to raise_error Puppet::Error, /(true|false)/
+      end
+    end
   end
 end
