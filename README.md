@@ -137,6 +137,21 @@ cs_order { 'vip_before_service':
 }
 ```
 
+Configuring cloned resources
+----------------------------
+
+Cloned resources should be active on multiple hosts at the same time. You can
+clone any existing resource provided the resource agent supports it.
+
+```puppet
+cs_clone { 'nginx_service-clone' :
+  ensure    => present,
+  primitive => 'nginx_service',
+  clone_max => 3,
+  require   => Cs_primitive['nginx_service'],
+}
+```
+
 Corosync Properties
 ------------------
 A few gloabal settings can be changed with the "cs_property" section.
