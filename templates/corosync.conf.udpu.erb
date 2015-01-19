@@ -51,3 +51,18 @@ aisexec {
   user:  root
   group: root
 }
+
+<% if @set_votequorum -%>
+quorum {
+  provider: corosync_votequorum
+}
+
+nodelist {
+<% [@quorum_members].flatten.each_index do |i| -%>
+  node {
+    ring0_addr: <%= [@quorum_members].flatten[i] %>
+    nodeid: <%= i %>
+  }
+<% end -%>
+}
+<% end -%>

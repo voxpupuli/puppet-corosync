@@ -14,4 +14,19 @@ class corosync::params {
   $ttl               = false
   $packages          = ['corosync', 'pacemaker']
   $token             = 3000
+
+  case $::osfamily {
+    'RedHat': {
+      $set_votequorum = true
+    }
+
+    'Debian': {
+      $set_votequorum = false
+    }
+
+    default: {
+      fail('Not supported OS')
+    }
+  }
+
 }
