@@ -139,7 +139,7 @@ cs_order { 'vip_before_service':
 
 Corosync Properties
 ------------------
-A few gloabal settings can be changed with the "cs_property" section.
+A few global settings can be changed with the "cs_property" section.
 
 
 Disable STONITH if required.
@@ -156,6 +156,16 @@ cs_property { 'no-quorum-policy' :
 }
 ```
 
+Resource defaults
+-----------------
+A few global settings can be changed with the "cs_rsc_defaults" section.
+
+Don't move resources.
+```puppet
+cs_rsc_defaults { 'resource-stickiness' :
+  value => 'INFINITY',
+}
+```
 
 Dependencies
 ------------
