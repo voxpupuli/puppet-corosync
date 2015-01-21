@@ -183,4 +183,39 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
       instance.flush
     end
   end
+
+
+  context 'when forcing creation' do
+    let :resource do
+      Puppet::Type.type(:cs_primitive).new(
+        :name => 'testResource',
+        :provider => :crm,
+        :primitive_class => 'ocf',
+        :provided_by => 'heartbeat',
+        :primitive_type => 'IPaddr2',
+        :force => true)
+    end
+
+    let :instance do
+      instance = described_class.new(resource)
+      instance.create
+      instance
+    end
+
+    def expect_update(pattern)
+      instance.expects(:crm).with { |*args|
+        if args.slice(0..3) == ['-F', 'configure', 'load', 'update']
+          expect(File.read(args[4])).to match(pattern)
+          true
+        else
+          false
+        end
+      }
+    end
+
+    it 'can flush without changes' do
+      expect_update(//)
+      instance.flush
+    end
+  end
 end
