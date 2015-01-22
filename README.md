@@ -13,7 +13,7 @@ clusters that can respond to node and resource level events.
 Basic usage
 -----------
 
-*To install and configure Corosync*
+*To install and configure Corosync v1.x*
 
 ```puppet
 class { 'corosync':
@@ -21,6 +21,19 @@ class { 'corosync':
   authkey           => '/var/lib/puppet/ssl/certs/ca.pem',
   bind_address      => $ipaddress,
   multicast_address => '239.1.1.2',
+}
+```
+
+*To install and configure Corosync v2.x*
+
+```puppet
+class { 'corosync':
+  enable_secauth    => true,
+  authkey           => '/var/lib/puppet/ssl/certs/ca.pem',
+  bind_address      => $ipaddress,
+  multicast_address => '239.1.1.2',
+  packages          => [ 'corosync', 'pacemaker', 'crmsh' ],
+  corosync_version  => '2'
 }
 ```
 
