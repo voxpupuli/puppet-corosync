@@ -1,4 +1,25 @@
+<% if @corosync_version == '2' %>
 compatibility: whitetank
+
+quorum {
+  provider: corosync_votequorum
+   <% if @unicast_addresses.length  == 2 %>
+     two_node: 1
+   <% else %>
+     two_node: 0
+   <% end %>
+}
+
+nodelist {
+  <% id = 0 %>
+  <% @unicast_addresses.each do |node| %>
+  node {
+    ring0_addr: <%= node %>
+    nodeid: <%= id+=1 %>
+  }
+  <% end %>
+}
+<% end %>
 
 totem {
   version:                             2

@@ -14,4 +14,5 @@ class corosync::params {
   $ttl               = false
   $packages          = ['corosync', 'pacemaker']
   $token             = 3000
+  $corosync_version  = '1'
 }
