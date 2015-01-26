@@ -68,6 +68,15 @@
 # [*token*]
 #   Time (in ms) to wait for a token
 #
+# [*set_votequorum*]
+#   Set to true if corosync_votequorum should be used as quorum provider.
+#   Defaults to false.
+#
+# [*quorum_members*]
+#   Array of quorum member hostname. This is required if set_votequorum
+#   is set to true.
+#   Defaults to undef,
+#
 # === Examples
 #
 #  class { 'corosync':
@@ -100,7 +109,13 @@ class corosync(
   $ttl               = $::corosync::params::ttl,
   $packages          = $::corosync::params::packages,
   $token             = $::corosync::params::token,
+  $set_votequorum    = $::corosync::params::set_votequorum,
+  $quorum_members    = ['localhost'],
 ) inherits ::corosync::params {
+
+  if $set_votequorum and !$quorum_members {
+    fail('set_votequorum is true, but no quorum_members have been passed.')
+  }
 
   if ! is_bool($enable_secauth) {
     validate_re($enable_secauth, '^(on|off)$')
