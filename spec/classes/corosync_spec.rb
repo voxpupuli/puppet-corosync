@@ -65,10 +65,7 @@ describe 'corosync' do
       it 'raises error' do
         expect {
           is_expected.to compile
-        }.to raise_error(
-            Puppet::Error,
-            /set_votequorum is true, but no quorum_members have been passed./
-        )
+        }.to raise_error(/set_votequorum is true, but no quorum_members have been passed./)
       end
     end
   end
