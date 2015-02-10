@@ -27,19 +27,18 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
     doc = REXML::Document.new(raw)
 
     doc.root.elements['configuration'].elements['constraints'].each_element('rsc_colocation') do |e|
-      rscs = []
       items = e.attributes
 
       if items['rsc-role']
-        rscs << "#{items['rsc']}:#{items['rsc-role']}"
+        rsc = "#{items['rsc']}:#{items['rsc-role']}"
       elsif items['rsc']
-        rscs << items['rsc']
+        rsc = items['rsc']
       end
 
       if items ['with-rsc-role']
-        rscs << "#{items['with-rsc']}:#{items['with-rsc-role']}"
+        with_rsc = "#{items['with-rsc']}:#{items['with-rsc-role']}"
       elsif items['with-rsc']
-        rscs << items['with-rsc']
+        with_rsc = items['with-rsc']
       end
 
       if !items['rsc'] or !items['with-rsc']
@@ -48,12 +47,11 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
         end
       end
 
-      # Sorting the array of primitives because order doesn't matter so someone
-      # switching the order around shouldn't generate an event.
       colocation_instance = {
         :name       => items['id'],
         :ensure     => :present,
-        :primitives => rscs.sort,
+        :rsc        => rsc,
+        :with_rsc   => with_rsc,
         :score      => items['score'],
         :provider   => self.name
       }
@@ -68,7 +66,8 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
     @property_hash = {
       :name       => @resource[:name],
       :ensure     => :present,
-      :primitives => @resource[:primitives],
+      :rsc        => @resource[:rsc],
+      :with_rsc   => @resource[:with_rsc],
       :score      => @resource[:score],
       :cib        => @resource[:cib],
     }
@@ -112,7 +111,7 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
   def flush
     unless @property_hash.empty?
       updated = "colocation "
-      updated << "#{@property_hash[:name]} #{@property_hash[:score]}: #{@property_hash[:primitives].join(' ')}"
+      updated << "#{@property_hash[:name]} #{@property_hash[:score]}: #{@property_hash[:rsc]} #{@property_hash[:with_rsc]}"
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush

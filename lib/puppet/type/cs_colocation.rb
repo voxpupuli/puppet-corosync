@@ -20,25 +20,12 @@ module Puppet
       isnamevar
     end
 
-    newproperty(:primitives, :array_matching => :all) do
-      desc "Two Corosync primitives to be grouped together.  Colocation groups
-        come in twos and order is irrelavent.  Property will raise an error if
-        you do not provide a two value array."
+    newparam(:rsc) do
+      desc "Corosync primitives to be grouped together."
+    end
 
-      # Have to redefine should= here so we can sort the array that is given to
-      # us by the manifest.  While were checking on the class of our value we
-      # are going to go ahead and do some validation too.  The way Corosync
-      # colocation works we need to only accept two value arrays.
-      def should=(value)
-        super
-        if value.is_a? Array
-          raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be a two value array." unless value.size >= 2
-          @should.sort!
-        else
-          raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be a two value array."
-          @should
-        end
-      end
+    newparam(:with_rsc) do
+      desc "Corosync primitives to be grouped together."
     end
 
     newparam(:cib) do
@@ -72,10 +59,8 @@ module Puppet
 
     autorequire(:cs_primitive) do
       autos = []
-      @parameters[:primitives].should.each do |val|
-        autos << unmunge_cs_primitive(val)
-      end
-
+      autos << unmunge_cs_primitive(@parameters[:rsc].value)
+      autos << unmunge_cs_primitive(@parameters[:with_rsc].value)
       autos
     end
 
