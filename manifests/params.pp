@@ -1,3 +1,6 @@
+#
+#
+#
 class corosync::params {
   $enable_secauth                      = true
   $authkey_source                      = 'file'
@@ -15,6 +18,7 @@ class corosync::params {
   $packages                            = ['corosync', 'pacemaker']
   $token                               = 3000
   $token_retransmits_before_lost_const = 10
+  $set_expected_votes                  = '2'
 
   case $::osfamily {
     'RedHat': {

@@ -69,8 +69,12 @@
 #   Set to true if corosync_votequorum should be used as quorum provider.
 #   Defaults to false.
 #
+# [*set_expected_votes*]
+#   How many votes required to create a quorum?? (How many nodes assuming each node is 1 vote)
+#   Defaults to 2.
+#
 # [*quorum_members*]
-#   Array of quorum member hostname. This is required if set_votequorum
+#   Array of quorum member hostname. 
 #   is set to true.
 #   Defaults to undef,
 #
@@ -112,14 +116,11 @@ class corosync(
   $ttl                                 = $::corosync::params::ttl,
   $packages                            = $::corosync::params::packages,
   $set_votequorum                      = $::corosync::params::set_votequorum,
+  $set_expected_votes                  = $::corosync::params::set_expected_votes,
   $quorum_members                      = ['localhost'],
   $token                               = $::corosync::params::token,
   $token_retransmits_before_loss_const = $::corosync::params::token_retransmits_before_lost_const,
 ) inherits ::corosync::params {
-
-  if $set_votequorum and !$quorum_members {
-    fail('set_votequorum is true, but no quorum_members have been passed.')
-  }
 
   if ! is_bool($enable_secauth) {
     validate_re($enable_secauth, '^(on|off)$')
