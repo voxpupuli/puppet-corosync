@@ -20,8 +20,8 @@ totem {
     broadcast:   yes
 <% else -%>
     mcastaddr:   <%= [@multicast_address].flatten[i] %>
-    mcastport:   <%= [@port].flatten[i] %>
 <% end -%>
+    mcastport:   <%= [@port].flatten[i] %>
 <% if @ttl -%>
     ttl:         <%= @ttl %>
 <% end -%>
