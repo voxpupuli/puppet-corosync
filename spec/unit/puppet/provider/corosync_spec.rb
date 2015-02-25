@@ -19,18 +19,6 @@ describe Puppet::Provider::Crmsh do
       described_class.stubs(:command).with(:crm_attribute).returns 'crm_attribute'
     end
 
-    it 'returns true when crm_attribute exits successfully' do
-      if Puppet::PUPPETVERSION.to_f < 3.4
-        Puppet::Util::SUIDManager.expects(:run_and_capture).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version']).returns(['', 0])
-      else
-        Puppet::Util::Execution.expects(:execute).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version'],{:failonfail => false}).returns(
-          Puppet::Util::Execution::ProcessOutput.new('', 0)
-        )
-      end
-
-      expect(described_class.ready?).to be_true
-    end
-
     it 'returns false when crm_attribute exits unsuccessfully' do
       if Puppet::PUPPETVERSION.to_f < 3.4
         Puppet::Util::SUIDManager.expects(:run_and_capture).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version']).returns(['', 1])
@@ -40,7 +28,19 @@ describe Puppet::Provider::Crmsh do
         )
       end
 
-      expect(described_class.ready?).to be_false
+      expect(described_class.ready?).to be_falsey
+    end
+
+    it 'returns true when crm_attribute exits successfully' do
+      if Puppet::PUPPETVERSION.to_f < 3.4
+        Puppet::Util::SUIDManager.expects(:run_and_capture).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version']).returns(['', 0])
+      else
+        Puppet::Util::Execution.expects(:execute).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version'],{:failonfail => false}).returns(
+          Puppet::Util::Execution::ProcessOutput.new('', 0)
+        )
+      end
+
+      expect(described_class.ready?).to be_truthy
     end
   end
 end

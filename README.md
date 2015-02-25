@@ -80,6 +80,23 @@ cs_primitive { 'nginx_service':
 }
 ```
 
+Note: Operations with the same names should be declared as an Array. Example:
+```puppet
+cs_primitive { 'pgsql_service':
+  primitive_class => 'ocf',
+  primitive_type  => 'pgsql',
+  provided_by     => 'heartbeat',
+  operations      => {
+    'monitor' => [
+      { 'interval' => '10s', 'timeout' => '30s' },
+      { 'interval' => '5s', 'timeout' => '30s', 'role' => 'Master' },
+    ],
+    'start'   => { 'interval' => '0', 'timeout' => '30s', 'on-fail' => 'restart' }
+  },
+}
+```
+
+
 Configuring locations
 -----------------------
 
@@ -120,9 +137,24 @@ cs_order { 'vip_before_service':
 }
 ```
 
-Crosync Properties
+Configuring cloned resources
+----------------------------
+
+Cloned resources should be active on multiple hosts at the same time. You can
+clone any existing resource provided the resource agent supports it.
+
+```puppet
+cs_clone { 'nginx_service-clone' :
+  ensure    => present,
+  primitive => 'nginx_service',
+  clone_max => 3,
+  require   => Cs_primitive['nginx_service'],
+}
+```
+
+Corosync Properties
 ------------------
-A few gloabal settings can be changed with the "cs_property" section.
+A few global settings can be changed with the "cs_property" section.
 
 
 Disable STONITH if required.
@@ -139,6 +171,16 @@ cs_property { 'no-quorum-policy' :
 }
 ```
 
+Resource defaults
+-----------------
+A few global settings can be changed with the "cs_rsc_defaults" section.
+
+Don't move resources.
+```puppet
+cs_rsc_defaults { 'resource-stickiness' :
+  value => 'INFINITY',
+}
+```
 
 Dependencies
 ------------

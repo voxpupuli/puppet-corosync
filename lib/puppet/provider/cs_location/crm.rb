@@ -10,7 +10,6 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Crmsh
   # Path to the crm binary for interacting with the cluster configuration.
   # Decided to just go with relative.
   commands :crm => 'crm'
-  commands :crm_attribute => 'crm_attribute'
 
   def self.instances
 
@@ -29,7 +28,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Crmsh
         :name       => items['id'],
         :ensure     => :present,
         :primitive  => items['rsc'],
-        :node_name  => items['node_name'],
+        :node_name  => items['node'],
         :score      => items['score'],
         :provider   => self.name
       }

@@ -31,6 +31,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
                     <nvpair id="nginx-monitor-15s-instance_attributes-OCF_CHECK_LEVEL" name="OCF_CHECK_LEVEL" value="10"/>
                   </instance_attributes>
                 </op>
+                <op id="nginx-monitor-5s" interval="5" name="monitor" on-fail="standby" timeout="10" role="Master"/>
               </operations>
             </primitive>
           </resources>
@@ -89,7 +90,10 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
 
       it 'has an operations property corresponding to <operations>' do
         expect(instance.operations).to eq({
-          "monitor" => {"interval" => "15", "timeout" => "10", "on-fail" => "standby", "OCF_CHECK_LEVEL" => "10"},
+          "monitor" => [
+            {"interval" => "15", "timeout" => "10", "on-fail" => "standby", "OCF_CHECK_LEVEL" => "10"},
+            {"interval" => "5", "timeout" => "10", "on-fail" => "standby", "role" => "Master"}
+          ],
           "start" => {"interval" => "0", "timeout" => "60"},
           "stop" => {"interval" => "0", "timeout" => "40"},
         })
@@ -109,12 +113,10 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
       end
 
       it 'has an ms_metadata property' do
-        pending 'investigation into what should be asserted here'
         expect(instance).to respond_to(:ms_metadata)
       end
 
       it "has a promotable property that is :false" do
-        pending "more investigation into what is appropriate to assert here"
         expect(instance.promotable).to eq(:false)
       end
     end
@@ -166,7 +168,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
 
     it 'sets parameters' do
       instance.parameters = {'fluffyness' => '12'}
-      expect_update(/params fluffyness=12/)
+      expect_update(/params 'fluffyness=12'/)
       instance.flush
     end
 

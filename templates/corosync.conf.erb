@@ -2,7 +2,7 @@ compatibility: whitetank
 
 totem {
   version:                             2
-  token:                               3000
+  token:                               <%= @token %>
   token_retransmits_before_loss_const: 10
   join:                                60
   consensus:                           3600
@@ -11,17 +11,17 @@ totem {
   clear_node_high_bit:                 yes
   rrp_mode:                            <%= @rrp_mode %>
   secauth:                             <%= @enable_secauth_real %>
-  threads:                             <%= @threads_real %>
-<% [@bind_address_real].flatten.each_index do |i| -%>
+  threads:                             <%= @threads %>
+<% [@bind_address].flatten.each_index do |i| -%>
   interface {
     ringnumber:  <%= i %>
-    bindnetaddr: <%= [@bind_address_real].flatten[i] %>
-<% if [@multicast_address_real].flatten[i] == 'broadcast' -%>
+    bindnetaddr: <%= [@bind_address].flatten[i] %>
+<% if [@multicast_address].flatten[i] == 'broadcast' -%>
     broadcast:   yes
 <% else -%>
-    mcastaddr:   <%= [@multicast_address_real].flatten[i] %>
-    mcastport:   <%= [@port_real].flatten[i] %>
+    mcastaddr:   <%= [@multicast_address].flatten[i] %>
 <% end -%>
+    mcastport:   <%= [@port].flatten[i] %>
 <% if @ttl -%>
     ttl:         <%= @ttl %>
 <% end -%>
@@ -52,3 +52,18 @@ aisexec {
   user:  root
   group: root
 }
+
+<% if @set_votequorum -%>
+quorum {
+  provider: corosync_votequorum
+}
+
+nodelist {
+<% [@quorum_members].flatten.each_index do |i| -%>
+  node {
+    ring0_addr: <%= [@quorum_members].flatten[i] %>
+    nodeid: <%= i+1 %>
+  }
+<% end -%>
+}
+<% end -%>

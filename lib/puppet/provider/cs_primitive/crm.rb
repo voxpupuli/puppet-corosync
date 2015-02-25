@@ -47,14 +47,24 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
     if ! e.elements['operations'].nil?
       e.elements['operations'].each_element do |o|
         valids = o.attributes.reject do |k,v| k == 'id' end
-        hash[:operations][valids['name']] = {}
+        currentop = {}
         valids.each do |k,v|
-          hash[:operations][valids['name']][k] = v if k != 'name'
+          currentop[k] = v if k != 'name'
         end
         if ! o.elements['instance_attributes'].nil?
           o.elements['instance_attributes'].each_element do |i|
-            hash[:operations][valids['name']][(i.attributes['name'])] = i.attributes['value']
+            currentop[(i.attributes['name'])] = i.attributes['value']
           end
+        end
+        if hash[:operations][valids['name']].instance_of?(Hash)
+          # There is already an operation with the same name, change to Array
+          hash[:operations][valids['name']] = [hash[:operations][valids['name']]]
+        end
+        if hash[:operations][valids['name']].instance_of?(Array)
+          # Append to an existing list
+          hash[:operations][valids['name']] += [currentop]
+        else
+          hash[:operations][valids['name']] = currentop
         end
       end
     end
@@ -192,16 +202,18 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
       unless @property_hash[:operations].empty?
         operations = ''
         @property_hash[:operations].each do |o|
-          operations << "op #{o[0]} "
-          o[1].each_pair do |k,v|
-            operations << "#{k}=#{v} "
+          [o[1]].flatten.each do |o2|
+            operations << "op #{o[0]} "
+            o2.each_pair do |k,v|
+              operations << "#{k}=#{v} "
+            end
           end
         end
       end
       unless @property_hash[:parameters].empty?
         parameters = 'params '
         @property_hash[:parameters].each_pair do |k,v|
-          parameters << "#{k}=#{v} "
+          parameters << "'#{k}=#{v}' "
         end
       end
       unless @property_hash[:utilization].empty?

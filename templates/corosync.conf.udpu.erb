@@ -2,7 +2,7 @@ compatibility: whitetank
 
 totem {
   version:                             2
-  token:                               3000
+  token:                               <%= @token %>
   token_retransmits_before_loss_const: 10
   join:                                60
   consensus:                           3600
@@ -11,7 +11,7 @@ totem {
   clear_node_high_bit:                 yes
   rrp_mode:                            <%= @rrp_mode %>
   secauth:                             <%= @enable_secauth_real %>
-  threads:                             <%= @threads_real %>
+  threads:                             <%= @threads %>
   transport:                           udpu
   interface {
 <% @unicast_addresses.each do |addr| -%>
@@ -20,8 +20,8 @@ totem {
     }
 <% end -%>
     ringnumber:  0
-    bindnetaddr: <%= @bind_address_real %>
-    mcastport:   <%= @port_real %>
+    bindnetaddr: <%= @bind_address %>
+    mcastport:   <%= @port %>
 <% if @ttl -%>
     ttl:         <%= @ttl %>
 <% end -%>
@@ -51,3 +51,18 @@ aisexec {
   user:  root
   group: root
 }
+
+<% if @set_votequorum -%>
+quorum {
+  provider: corosync_votequorum
+}
+
+nodelist {
+<% [@quorum_members].flatten.each_index do |i| -%>
+  node {
+    ring0_addr: <%= [@quorum_members].flatten[i] %>
+    nodeid: <%= i+1 %>
+  }
+<% end -%>
+}
+<% end -%>
