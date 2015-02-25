@@ -28,7 +28,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Crmsh
         :name       => items['id'],
         :ensure     => :present,
         :primitive  => items['rsc'],
-        :node_name  => items['node_name'],
+        :node_name  => items['node'],
         :score      => items['score'],
         :provider   => self.name
       }
