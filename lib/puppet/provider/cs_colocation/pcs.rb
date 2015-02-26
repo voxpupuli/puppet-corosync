@@ -9,8 +9,6 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
 
   defaultfor :operatingsystem => [:fedora, :centos, :redhat]
 
-  # Path to the crm binary for interacting with the cluster configuration.
-  # Decided to just go with relative.
   commands :pcs => 'pcs'
 
   def self.instances

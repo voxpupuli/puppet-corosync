@@ -9,7 +9,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
 
   defaultfor :operatingsystem => [:fedora, :centos, :redhat]
 
-  # Path to the crm binary for interacting with the cluster configuration.
+  # Path to the pcs binary for interacting with the cluster configuration.
   commands :pcs => 'pcs'
 
   def self.instances
