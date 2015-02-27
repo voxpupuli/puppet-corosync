@@ -177,6 +177,12 @@ class corosync(
     ensure => present,
   }
 
+  if $::osfamily == 'RedHat' {
+    package { 'pcs':
+      ensure => present,
+    }
+  }
+  
   # Template uses:
   # - $unicast_addresses
   # - $multicast_address
