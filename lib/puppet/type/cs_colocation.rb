@@ -21,32 +21,21 @@ module Puppet
     end
 
     newproperty(:primitives, :array_matching => :all) do
-      desc "At least two Pacemaker primitives to be located together. Order of primitives
-        in colocation groups is important. In Pacemaker, a colocation of 2 primitives
-        behaves different than a colocation between more than 2 primitives. Here the
-        behavior is altered to be more consistent.
-        Examples on how to define colocations here:
-        - 2 primitives: [A, B] will cause A to be located first, and B will be located
-          with A. This is different than how crm configure colocation works, because
-          there [A, B] would mean colocate A with B, thus B should be located first.
-        - multiple primitives: [A, B, C] will cause A to be located first, B next, and
-          finally C. This is identical to how crm configure colocation works with
-          multiple resources, it will add a colocated set.
-        Property will raise an error if you do not provide an array containing at least
-        two values. Values can be either the name of the primitive, or primitive:role.
-        Notice, we can only interpret colocations of single sets, not multiple sets
-        combined. In Pacemaker speak, this means we can support 'A B C' but not e.g.
-        'A B (C D) E'. Feel free to contribute a patch for this."
+      desc "Two Corosync primitives to be grouped together.  Colocation groups
+        come in twos and order is absolutely relevant.  Property will raise an error if
+        you do not provide a two value array."
 
-      # Do some validation: the way Pacemaker colocation works we need to only accept
-      # arrays with at least 2 values.
+      # Have to redefine should= here so we can sort the array that is given to
+      # us by the manifest.  While were checking on the class of our value we
+      # are going to go ahead and do some validation too.  The way Corosync
+      # colocation works we need to only accept two value arrays.
       def should=(value)
         super
         if value.is_a? Array
-          raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be an array of at least two primitives." unless value.size >= 2
+          raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be a two value array." unless value.size >= 2
           @should
         else
-          raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be an array."
+          raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be a two value array."
           @should
         end
       end
