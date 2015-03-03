@@ -72,8 +72,12 @@
 #   Set to true if corosync_votequorum should be used as quorum provider.
 #   Defaults to false.
 #
+# [*set_expected_votes*]
+#   How many votes required to create a quorum?? (How many nodes assuming each node is 1 vote)
+#   Defaults to 2.
+#
 # [*quorum_members*]
-#   Array of quorum member hostname. This is required if set_votequorum
+#   Array of quorum member hostname. 
 #   is set to true.
 #   Defaults to undef,
 #
@@ -94,28 +98,25 @@
 # Copyright 2012, Puppet Labs, LLC.
 #
 class corosync(
-  $enable_secauth    = $::corosync::params::enable_secauth,
-  $authkey_source    = $::corosync::params::authkey_source,
-  $authkey           = $::corosync::params::authkey,
-  $threads           = $::corosync::params::threads,
-  $port              = $::corosync::params::port,
-  $bind_address      = $::corosync::params::bind_address,
-  $multicast_address = $::corosync::params::multicast_address,
-  $unicast_addresses = $::corosync::params::unicast_addresses,
-  $force_online      = $::corosync::params::force_online,
-  $check_standby     = $::corosync::params::check_standby,
-  $debug             = $::corosync::params::debug,
-  $rrp_mode          = $::corosync::params::rrp_mode,
-  $ttl               = $::corosync::params::ttl,
-  $packages          = $::corosync::params::packages,
-  $token             = $::corosync::params::token,
-  $set_votequorum    = $::corosync::params::set_votequorum,
-  $quorum_members    = ['localhost'],
+  $enable_secauth     = $::corosync::params::enable_secauth,
+  $authkey_source     = $::corosync::params::authkey_source,
+  $authkey            = $::corosync::params::authkey,
+  $threads            = $::corosync::params::threads,
+  $port               = $::corosync::params::port,
+  $bind_address       = $::corosync::params::bind_address,
+  $multicast_address  = $::corosync::params::multicast_address,
+  $unicast_addresses  = $::corosync::params::unicast_addresses,
+  $force_online       = $::corosync::params::force_online,
+  $check_standby      = $::corosync::params::check_standby,
+  $debug              = $::corosync::params::debug,
+  $rrp_mode           = $::corosync::params::rrp_mode,
+  $ttl                = $::corosync::params::ttl,
+  $packages           = $::corosync::params::packages,
+  $token              = $::corosync::params::token,
+  $set_votequorum     = $::corosync::params::set_votequorum,
+  $set_expected_votes = $::corosync::params::set_expected_votes,
+  $quorum_members     = ['localhost'],
 ) inherits ::corosync::params {
-
-  if $set_votequorum and !$quorum_members {
-    fail('set_votequorum is true, but no quorum_members have been passed.')
-  }
 
   if ! is_bool($enable_secauth) {
     validate_re($enable_secauth, '^(on|off)$')
