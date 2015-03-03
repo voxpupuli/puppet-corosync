@@ -67,13 +67,14 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
   # of actually doing the work.
   def create
     @property_hash = {
-      :name       => @resource[:name],
-      :ensure     => :present,
-      :first      => @resource[:first],
-      :second     => @resource[:second],
-      :score      => @resource[:score],
-      :cib        => @resource[:cib],
-      :new        => true,
+      :name             => @resource[:name],
+      :ensure           => :present,
+      :first            => @resource[:first],
+      :second           => @resource[:second],
+      :score            => @resource[:score],
+      :symmetrical      => @resource[:symmetrical],
+      :cib              => @resource[:cib],
+      :new              => true,
     }
   end
 
@@ -100,6 +101,10 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
     @property_hash[:score]
   end
 
+  def symmetrical
+    @property_hash[:symmetrical]
+  end
+
   # Our setters for the first and second primitives and score.  Setters are
   # used when the resource already exists so we just update the current value
   # in the property hash and doing this marks it to be flushed.
@@ -113,6 +118,10 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
 
   def score=(should)
     @property_hash[:score] = should
+  end
+
+  def symmetrical=(should)
+    @property_hash[:symmetrical] = should
   end
 
   # Flush is triggered on anything that has been detected as being
@@ -146,6 +155,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
         cmd << rsc
       end
       cmd << @property_hash[:score]
+      cmd << @property_hash[:symmetrical]
       cmd << "id=#{@property_hash[:name]}"
       raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
     end
