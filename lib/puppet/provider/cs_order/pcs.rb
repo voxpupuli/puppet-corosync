@@ -41,15 +41,22 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
       else
         score = 'INFINITY'
       end
+      if items['symmetrical']
+        symmetrical = (items['symmetrical'] == 'true')
+      else
+        # Default: symmetrical is true unless explicitly defined.
+        symmetrical = true
+      end
 
       order_instance = {
-        :name       => items['id'],
-        :ensure     => :present,
-        :first      => first,
-        :second     => second,
-        :score      => score,
-        :provider   => self.name,
-        :new        => false
+        :name           => items['id'],
+        :ensure         => :present,
+        :first          => first,
+        :second         => second,
+        :score          => score,
+        :symmetrical    => symmetrical,
+        :provider       => self.name,
+        :new            => false
       }
       instances << new(order_instance)
     end
