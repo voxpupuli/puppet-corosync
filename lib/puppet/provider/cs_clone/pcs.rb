@@ -162,7 +162,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemake
         cmd << "interleave=#{@property_hash[:interleave]}" if @property_hash[:interleave]
         raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
       else
-        debug ('Updating clone resource')
+        debug('Updating clone resource')
         # pcs versions earlier than 0.9.116 do not allow updating a cloned
         # resource. Being conservative, we will unclone then create a new clone
         # with the new parameters.

@@ -173,7 +173,7 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Crmsh) d
           crm('configure', 'load', 'update', tmpfile.path.to_s)
         end
       else
-        debug ('Updating clone resource')
+        debug('Updating clone resource')
         updated = "resource meta "
         updated << "#{@property_hash[:name]} "
         meta = "set "
