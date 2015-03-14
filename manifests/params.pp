@@ -15,6 +15,7 @@ class corosync::params {
   $packages                            = ['corosync', 'pacemaker']
   $expected_votes                      = undef
   $quorum_members                      = undef
+  $two_node                            = undef
   $token                               = 3000
   $token_retransmits_before_lost_const = 10
 

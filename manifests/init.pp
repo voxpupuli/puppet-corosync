@@ -77,6 +77,9 @@
 #   Array of quorum member hostname. 
 #   Defaults to undef.
 #
+# [*two_node*]
+#   Set to 1 to enable special quorum behaviour when only using two nodes.
+#
 # [*token*]
 #   Time (in ms) to wait for a token
 #
@@ -117,6 +120,7 @@ class corosync(
   $set_votequorum                      = $::corosync::params::set_votequorum,
   $expected_votes                      = $::corosync::params::expected_votes,
   $quorum_members                      = $::corosync::params::quorum_members,
+  $two_node                            = $::corosync::params::two_node,
   $token                               = $::corosync::params::token,
   $token_retransmits_before_loss_const = $::corosync::params::token_retransmits_before_lost_const,
 ) inherits ::corosync::params {

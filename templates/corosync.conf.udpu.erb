@@ -55,7 +55,12 @@ aisexec {
 <% if @set_votequorum -%>
 quorum {
   provider: corosync_votequorum
+<% if @expected_votes -%>
   expected_votes: <%= @expected_votes %>
+<% end -%>
+<% if @two_node -%>
+  two_node: <%= @two_node %>
+<% end -%>
 }
 <% end -%>
 

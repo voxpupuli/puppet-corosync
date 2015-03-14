@@ -59,6 +59,9 @@ quorum {
 <% if @expected_votes -%>
   expected_votes: <%= @expected_votes %>
 <% end -%>
+<% if @two_node -%>
+  two_node: <%= @two_node %>
+<% end -%>
 }
 <% end -%>
 
