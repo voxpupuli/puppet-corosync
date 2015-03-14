@@ -54,10 +54,26 @@ describe 'corosync' do
       end
     end
 
-    context 'when set_quorum is true and quorum_members are not set' do
+    context 'when set_quorum is true and expected_votes is set' do
       before :each do
         params.merge!(
           { :set_votequorum => true,
+            :expected_votes => '2' }
+        )
+      end
+
+      it 'configures votequorum' do
+        should contain_file('/etc/corosync/corosync.conf').with_content(
+          /expected_votes: 2/
+        )
+      end
+    end
+
+    context 'when set_quorum is true and neither expected_votes or quorum_members are set' do
+      before :each do
+        params.merge!(
+          { :set_votequorum => true,
+            :expected_votes => false,
             :quorum_members => false }
         )
       end
@@ -65,7 +81,32 @@ describe 'corosync' do
       it 'raises error' do
         should raise_error(
             Puppet::Error,
-            /set_votequorum is true, but no quorum_members have been passed./
+            /One of expected_votes or quorum_members needs to be set./
+        )
+      end
+    end
+
+    context 'when set_quorum is true, members are given and two_node is set' do
+      before :each do
+        params.merge!(
+          { :set_votequorum => true,
+            :quorum_members => ['node1.test.org', 'node2.test.org'],
+            :two_node => '1' }
+        )
+      end
+
+      it 'configures votequorum' do
+        should contain_file('/etc/corosync/corosync.conf').with_content(
+          /nodelist/
+        )
+        should contain_file('/etc/corosync/corosync.conf').with_content(
+          /ring0_addr\: node1\.test\.org/
+        )
+        should contain_file('/etc/corosync/corosync.conf').with_content(
+          /ring0_addr\: node2\.test\.org/
+        )
+        should contain_file('/etc/corosync/corosync.conf').with_content(
+          /two_node: 1/
         )
       end
     end
