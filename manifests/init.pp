@@ -145,9 +145,11 @@ class corosync(
   $package_pcs                         = undef,
   $version_pcs                         = undef,
   $set_votequorum                      = $::corosync::params::set_votequorum,
+  $votequorum_expected_votes           = $::corosync::params::votequorum_expected_votes,
   $quorum_members                      = ['localhost'],
   $token                               = $::corosync::params::token,
   $token_retransmits_before_loss_const = $::corosync::params::token_retransmits_before_lost_const,
+  $compatiblity                        = $::corosync::params::compatibility,
 ) inherits ::corosync::params {
 
   if $set_votequorum and !$quorum_members {
@@ -289,7 +291,7 @@ class corosync(
       }
     }
   }
-  
+
   # Template uses:
   # - $unicast_addresses
   # - $multicast_address
@@ -347,6 +349,18 @@ class corosync(
       path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
       onlyif  => "crm node status|grep ${::hostname}-standby|grep 'value=\"on\"'",
       require => Service['corosync'],
+    }
+  }
+
+  case $::operatingsystem {
+    'Ubuntu': {
+      if $lsbmajdistrelease >= 14 {
+        service { 'pacemaker':
+          ensure    => running,
+          enable    => true,
+          subscribe => Service['corosync'],
+        }
+      }
     }
   }
 

@@ -14,14 +14,36 @@ class corosync::params {
   $ttl                                 = false
   $token                               = 3000
   $token_retransmits_before_lost_const = 10
+  $votequorum_expected_votes           = false
 
   case $::osfamily {
     'RedHat': {
       $set_votequorum = true
+      $compatibility = 'whitetank'
     }
 
     'Debian': {
-      $set_votequorum = false
+      case $::operatingsystem {
+        'Ubuntu': {
+          if $lsbmajdistrelease >= 14 {
+            $compatibility = false
+            $set_votequorum = true
+
+            file {'/etc/default/cman':
+              ensure => present,
+              content => template('corosync/cman.erb'),
+            }
+
+          } else {
+            $compatibility = 'whitetank'
+            $set_votequorum = false
+          }
+        }
+        default : {
+          $compatibility = 'whitetank'
+          $set_votequorum = false
+        }
+      }
     }
 
     default: {
