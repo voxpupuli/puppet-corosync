@@ -28,7 +28,7 @@ module Puppet
       # This is not actually true, in a master/slave group you can specifiy a single primitive
       def should=(value)
         super
-        raise Puppet::Error, "Puppet::Type::Cs_Group: primitives property must be at least a 1-element array." unless value.is_a? Array and value.length >= 1
+        raise Puppet::Error, "Puppet::Type::Cs_Group: primitives property must be at least a 1-element array." unless value.is_a? Array and value.length > 0
         @should
       end
     end
