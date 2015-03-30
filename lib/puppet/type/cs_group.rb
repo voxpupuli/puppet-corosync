@@ -20,17 +20,6 @@ module Puppet
     newproperty(:primitives, :array_matching => :all) do
       desc "An array of primitives to have in this group.  Must be listed in the
           order that you wish them to start."
-
-      # Have to redefine should= here so we can sort the array that is given to
-      # us by the manifest.  While were checking on the class of our value we
-      # are going to go ahead and do some validation too.  The way Corosync
-      # colocation works we need to only accept two value arrays.
-      # This is not actually true, in a master/slave group you can specifiy a single primitive
-      def should=(value)
-        super
-        raise Puppet::Error, "Puppet::Type::Cs_Group: primitives property must be at least a 1-element array." unless value.is_a? Array
-        @should
-      end
     end
 
     newparam(:cib) do
