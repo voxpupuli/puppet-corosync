@@ -220,8 +220,8 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
       end
       ressource_type << "#{@property_hash[:primitive_type]}"
 
+      operations = []
       unless @property_hash[:operations].empty?
-        operations = []
         @property_hash[:operations].each do |k,v|
           op_name = k
           if v.is_a?(Array)
