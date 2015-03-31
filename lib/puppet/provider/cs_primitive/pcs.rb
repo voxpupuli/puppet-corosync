@@ -222,22 +222,18 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
 
       operations = []
       unless @property_hash[:operations].empty?
-        @property_hash[:operations].each do |k,v|
-          op_name = k
-          if v.is_a?(Array)
-            v.each do |h|
-              operations << 'op'
-              operations << op_name
-              h.each do |sk,sv|
-                operations << "#{sk}=#{sv}"
-              end
-            end
+        @property_hash[:operations].each do |o|
+          op_name = o[0]
+          operations << "op"
+          if op_name.include? ':'
+            items = op_name.split(':')
+            operations << items[0]
+            operations << "role=#{items[1]}"
           else
-            operations << 'op'
             operations << op_name
-            v.each_pair do |sk,sv|
-              operations << "#{sk}=#{sv}"
-            end
+          end
+          o[1].each_pair do |k,v|
+            operations << "#{k}=#{v}"
           end
         end
       end
