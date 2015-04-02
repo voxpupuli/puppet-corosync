@@ -3,7 +3,7 @@ require 'rexml/document'
 
 
 if Facter.value(:facterversion).split('.').first == '2'
-  Facter.add(:corosync_resource_status_hash) do
+  Facter.add(:corosync_resource_status) do
     confine :kernel => :linux
     confine do
       Facter::Core::Execution.which('crm_mon')
