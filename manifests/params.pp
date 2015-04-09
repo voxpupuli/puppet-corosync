@@ -12,7 +12,7 @@ class corosync::params {
   $debug                               = false
   $rrp_mode                            = 'none'
   $ttl                                 = false
-  $packages                            = ['cman', 'pacemaker']
+  $packages                            = ['corosync', 'cman', 'pacemaker']
   $token                               = 3000
   $token_retransmits_before_lost_const = 10
 
