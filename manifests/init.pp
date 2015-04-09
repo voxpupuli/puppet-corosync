@@ -247,7 +247,7 @@ class corosync(
     }
   }
 
-  service { 'corosync':
+  service { 'cman':
     ensure    => running,
     enable    => true,
     subscribe => File[ [ '/etc/corosync/corosync.conf', '/etc/corosync/service.d' ] ],
