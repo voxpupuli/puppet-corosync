@@ -158,8 +158,8 @@ class corosync(
           mode    => '0400',
           owner   => 'root',
           group   => 'root',
-          notify  => Service['corosync'],
-          require => Package['corosync'],
+          notify  => Service['cman'],
+          require => Package['cman'],
         }
       }
       'string': {
@@ -169,8 +169,8 @@ class corosync(
           mode    => '0400',
           owner   => 'root',
           group   => 'root',
-          notify  => Service['corosync'],
-          require => Package['corosync'],
+          notify  => Service['cman'],
+          require => Package['cman'],
         }
       }
       default: {}
@@ -186,7 +186,7 @@ class corosync(
       ensure => present,
     }
   }
-  
+
   # Template uses:
   # - $unicast_addresses
   # - $multicast_address
@@ -221,8 +221,8 @@ class corosync(
         command => 'sed -i s/START=no/START=yes/ /etc/default/corosync',
         path    => [ '/bin', '/usr/bin' ],
         unless  => 'grep START=yes /etc/default/corosync',
-        require => Package['corosync'],
-        before  => Service['corosync'],
+        require => Package['cman'],
+        before  => Service['cman'],
       }
     }
     default: {}
@@ -234,7 +234,7 @@ class corosync(
       command => 'echo "Node appears to be on standby" && false',
       path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
       onlyif  => "crm node status|grep ${::hostname}-standby|grep 'value=\"on\"'",
-      require => Service['corosync'],
+      require => Service['cman'],
     }
   }
 
@@ -243,7 +243,7 @@ class corosync(
       command => 'crm node online',
       path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
       onlyif  => "crm node status|grep ${::hostname}-standby|grep 'value=\"on\"'",
-      require => Service['corosync'],
+      require => Service['cman'],
     }
   }
 
