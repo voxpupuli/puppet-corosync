@@ -252,4 +252,9 @@ class corosync(
     enable    => true,
     subscribe => File[ [ '/etc/corosync/corosync.conf', '/etc/corosync/service.d' ] ],
   }
+  service { 'pacemaker':
+    ensure    => running,
+    enable    => true,
+    subscribe => File[ [ '/etc/corosync/corosync.conf', '/etc/corosync/service.d' ] ],
+  }
 }
