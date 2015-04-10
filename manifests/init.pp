@@ -189,20 +189,24 @@ class corosync(
       ensure => present,
     }
     # this does NOT take into account cluster_nodes changing
-    service { 'cman':
-      ensure    => running,
-      enable    => true,
-      require   => Package['cman'],
+    exec {'pcs setup cluster':
+      command => "/usr/sbin/pcs cluster setup --local --start --enable ${cluster_nodes}",
+      creates => '/etc/cluster/cluster.conf',
+      require => Package['pcs','pacemaker','cman'],
     }
     service { 'pacemaker':
       ensure    => running,
       enable    => true,
       require   => Package['pacemaker'],
     }
-    exec {'pcs setup cluster':
-      command => "/usr/sbin/pcs cluster setup --local --start --enable ${cluster_nodes}",
-      creates => '/etc/cluster/cluster.conf',
-      require => Package['pcs','pacemaker','cman'],
+    service { 'cman':
+      ensure    => running,
+      enable    => true,
+      require   => [
+        Exec['pcs setup cluster'],
+        Package['cman'],
+        Service['pacemaker'],
+      ],
     }
   }
   else {
