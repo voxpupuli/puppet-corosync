@@ -7,6 +7,8 @@ class Puppet::Provider::Pacemaker < Puppet::Provider
   commands :pcs => 'pcs'
 
   def self.run_pcs_command(pcs_cmd, failonfail = true)
+    debug("Puppet::Provider::Pacemaker::run_pcs_command: #{pcs_cmd}")
+    File.open('/tmp/pcs_cmds.debug', 'a') {|f| f.write("#{pcs_cmd}") }
     if Puppet::PUPPETVERSION.to_f < 3.4
       raw, status = Puppet::Util::SUIDManager.run_and_capture(pcs_cmd)
     else
