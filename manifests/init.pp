@@ -97,6 +97,8 @@
 # Copyright 2012, Puppet Labs, LLC.
 #
 class corosync(
+  $cluster_nodes                       = [],
+  $cluster_name                        = 'cluster',
   $enable_secauth                      = $::corosync::params::enable_secauth,
   $authkey_source                      = $::corosync::params::authkey_source,
   $authkey                             = $::corosync::params::authkey,
@@ -181,80 +183,87 @@ class corosync(
     ensure => present,
   }
 
+  # XXX do this more elgantly
   if $::osfamily == 'RedHat' {
-    package { 'pcs':
+    package { ['pcs', 'pacemaker', 'cman']:
       ensure => present,
     }
+    # this does NOT take into account cluster_nodes changing
+    service { 'cman':
+      ensure    => running,
+      enable    => true,
+      require   => Package['cman'],
+    }
+    service { 'pacemaker':
+      ensure    => running,
+      enable    => true,
+      require   => Package['pacemaker'],
+    }
+    exec {'pcs setup cluster':
+      command => "/usr/sbin/pcs cluster setup --local --start --enable ${cluster_nodes}",
+      creates => '/etc/cluster/cluster.conf',
+      require => Package['pcs','pacemaker','cman'],
+    }
   }
+  else {
+    # Template uses:
+    # - $unicast_addresses
+    # - $multicast_address
+    # - $debug
+    # - $bind_address
+    # - $port
+    # - $enable_secauth_real
+    # - $threads
+    # - $token
+    file { '/etc/corosync/corosync.conf':
+      ensure  => file,
+      mode    => '0644',
+      owner   => 'root',
+      group   => 'root',
+      content => template($corosync_conf),
+      require => Package['corosync'],
+    }
 
-  # Template uses:
-  # - $unicast_addresses
-  # - $multicast_address
-  # - $debug
-  # - $bind_address
-  # - $port
-  # - $enable_secauth_real
-  # - $threads
-  # - $token
-  file { '/etc/corosync/corosync.conf':
-    ensure  => file,
-    mode    => '0644',
-    owner   => 'root',
-    group   => 'root',
-    content => template($corosync_conf),
-    require => Package['corosync'],
-  }
+    file { '/etc/corosync/service.d':
+      ensure  => directory,
+      mode    => '0755',
+      owner   => 'root',
+      group   => 'root',
+      recurse => true,
+      purge   => true,
+      require => Package['corosync']
+    }
 
-  file { '/etc/corosync/service.d':
-    ensure  => directory,
-    mode    => '0755',
-    owner   => 'root',
-    group   => 'root',
-    recurse => true,
-    purge   => true,
-    require => Package['corosync']
-  }
+    case $::osfamily {
+      'Debian': {
+        exec { 'enable corosync':
+          command => 'sed -i s/START=no/START=yes/ /etc/default/corosync',
+          path    => [ '/bin', '/usr/bin' ],
+          unless  => 'grep START=yes /etc/default/corosync',
+          require => Package['cman'],
+          before  => Service['cman'],
+        }
+      }
+      default: {}
+    }
 
-  case $::osfamily {
-    'Debian': {
-      exec { 'enable corosync':
-        command => 'sed -i s/START=no/START=yes/ /etc/default/corosync',
-        path    => [ '/bin', '/usr/bin' ],
-        unless  => 'grep START=yes /etc/default/corosync',
-        require => Package['cman'],
-        before  => Service['cman'],
+    if $check_standby {
+      # Throws a puppet error if node is on standby
+      exec { 'check_standby node':
+        command => 'echo "Node appears to be on standby" && false',
+        path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
+        onlyif  => "crm node status|grep ${::hostname}-standby|grep 'value=\"on\"'",
+        require => Service['cman'],
       }
     }
-    default: {}
-  }
 
-  if $check_standby {
-    # Throws a puppet error if node is on standby
-    exec { 'check_standby node':
-      command => 'echo "Node appears to be on standby" && false',
-      path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
-      onlyif  => "crm node status|grep ${::hostname}-standby|grep 'value=\"on\"'",
-      require => Service['cman'],
+    if $force_online {
+      exec { 'force_online node':
+        command => 'crm node online',
+        path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
+        onlyif  => "crm node status|grep ${::hostname}-standby|grep 'value=\"on\"'",
+        require => Service['cman'],
+      }
     }
-  }
-
-  if $force_online {
-    exec { 'force_online node':
-      command => 'crm node online',
-      path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
-      onlyif  => "crm node status|grep ${::hostname}-standby|grep 'value=\"on\"'",
-      require => Service['cman'],
-    }
-  }
-
-  service { 'cman':
-    ensure    => running,
-    enable    => true,
-    subscribe => File[ [ '/etc/corosync/corosync.conf', '/etc/corosync/service.d' ] ],
-  }
-  service { 'pacemaker':
-    ensure    => running,
-    enable    => true,
-    subscribe => File[ [ '/etc/corosync/corosync.conf', '/etc/corosync/service.d' ] ],
   }
 }
