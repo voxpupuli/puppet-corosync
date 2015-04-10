@@ -190,7 +190,7 @@ class corosync(
     }
     # this does NOT take into account cluster_nodes changing
     exec {'pcs setup cluster':
-      command => "/usr/sbin/pcs cluster setup ${cluster_name} --local --start --enable ${cluster_nodes}",
+      command => "/usr/sbin/pcs cluster setup --local --start --enable --name ${cluster_name} ${cluster_nodes}",
       creates => '/etc/cluster/cluster.conf',
       require => Package['pcs','pacemaker','cman'],
     }
