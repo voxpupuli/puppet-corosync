@@ -12,17 +12,19 @@ class corosync::params {
   $debug                               = false
   $rrp_mode                            = 'none'
   $ttl                                 = false
-  $packages                            = ['corosync', 'pacemaker', 'fence-agents-all', ]
+  $packages                            = ['corosync', 'pacemaker']
   $token                               = 3000
   $token_retransmits_before_lost_const = 10
 
   case $::osfamily {
     'RedHat': {
       $set_votequorum = true
+      $packages      += ['fence-agents-all']
     }
 
     'Debian': {
       $set_votequorum = false
+      $packages      += ['fence-agents']
     }
 
     default: {
