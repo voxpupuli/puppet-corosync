@@ -34,11 +34,29 @@ Puppet::Type.type(:cs_stonith).provide(:pcs, :parent => Puppet::Provider::Pacema
       :ensure                   => :present,
       :provider                 => self.name,
       :device_options           => nvpairs_to_hash(e.elements['instance_attributes']),
+      :operations               => {}
       :existing_resource        => :true,
-      :existing_primitive_class => e.attributes['class'],
       :existing_fence_type      => e.attributes['type'],
-      #:existing_operations      => {}
+      :existing_operations      => {}
     }
+
+    if ! e.elements['operations'].nil?
+      e.elements['operations'].each_element do |o|
+        valids = o.attributes.reject do |k,v| k == 'id' end
+        if ! valids['role'].nil?
+          name = valids['name']
+          name << ":"
+          name << valids['role']
+        else
+          name = valids['name']
+        end
+        hash[:operations][name] = {}
+        valids.each do |k,v|
+          hash[:operations][name][k] = v if k != 'name' and k != 'role'
+        end
+        hash[:existing_operations] = hash[:operations].dup
+      end
+    end
 
   def self.instances
 
@@ -70,39 +88,44 @@ Puppet::Type.type(:cs_stonith).provide(:pcs, :parent => Puppet::Provider::Pacema
     }
     @property_hash[:device_options] = @resource[:device_options] if ! @resource[:device_options].nil?
     @property_hash[:operations] = @resource[:operations] if ! @resource[:operations].nil?
-    @property_hash[:utilization] = @resource[:utilization] if ! @resource[:utilization].nil?
-    @property_hash[:metadata] = @resource[:metadata] if ! @resource[:metadata].nil?
-    @property_hash[:ms_metadata] = @resource[:ms_metadata] if ! @resource[:ms_metadata].nil?
     @property_hash[:cib] = @resource[:cib] if ! @resource[:cib].nil?
   end
 
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing STONITH fence')
-    Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'delete', @property_hash[:name]])
+    Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'stonith', 'delete', @property_hash[:name]])
     @property_hash.clear
   end
 
   # Getters that obtains the device_options and operations defined in our primitive
   # that have been populated by prefetch or instances (depends on if your using
   # puppet resource or not).
+  def fence_type
+    @property_hash[:fence_type]
+  end
+
   def device_options
     @property_hash[:device_options]
   end
 
-  def fence_type
-    @property_hash[:fence_type]
+  def operations
+    @property_hash[:operations]
   end
 
   # Our setters for device_options and operations.  Setters are used when the
   # resource already exists so we just update the current value in the
   # property_hash and doing this marks it to be flushed.
+  def fence_type=(should)
+    @property_hash[:fence_type] = should
+  end
+
   def device_options=(should)
     @property_hash[:device_options] = should
   end
 
-  def fence_type=(should)
-    @property_hash[:fence_type] = should
+  def operations=(should)
+    @property_hash[:operations] = should
   end
 
   # Flush is triggered on anything that has been detected as being
@@ -119,6 +142,24 @@ Puppet::Type.type(:cs_stonith).provide(:pcs, :parent => Puppet::Provider::Pacema
         device_options = []
         @property_hash[:device_options].each_pair do |k,v|
           device_options << "#{k}=#{v}"
+        end
+      end
+
+      unless @property_hash[:operations].empty?
+        operations = []
+        @property_hash[:operations].each do |o|
+          op_name = o[0]
+          operations << "op"
+          if op_name.include? ':'
+            items = op_name.split(':')
+            operations << items[0]
+            operations << "role=#{items[1]}"
+          else
+            operations << op_name
+          end
+          o[1].each_pair do |k,v|
+            operations << "#{k}=#{v}"
+          end
         end
       end
 
@@ -140,10 +181,29 @@ Puppet::Type.type(:cs_stonith).provide(:pcs, :parent => Puppet::Provider::Pacema
         cmd = [ command(:pcs), 'stonith', 'create', "#{@property_hash[:name]}" ]
         cmd << resource_type
         cmd += device_options unless device_options.nil?
+        cmd += operations unless operations.nil?
         raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+
+	# try to remoe the default monitor operation (with 'pcs resource')
+        if @property_hash[:operations]["monitor"].nil?
+          cmd = [ command(:pcs), 'resource', 'op', 'remove', "#{@property_hash[:name]}", 'monitor', 'interval=60s' ]
+          Puppet::Provider::Pacemaker::run_pcs_command(cmd, false)
+        end
       else
+        # if there is no operations defined, we ensure that they are not present
+        if @property_hash[:operations].empty? and not @property_hash[:existing_operations].empty?
+          @property_hash[:existing_operations].each do |o|
+            cmd = [ command(:pcs), 'resource', 'op', 'remove', "#{@property_hash[:name]}" ]
+            cmd << "#{o[0]}"
+            o[1].each_pair do |k,v|
+              cmd << "#{k}=#{v}"
+            end
+            Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+          end
+        end
         cmd = [ command(:pcs), 'stonith', 'update', "#{@property_hash[:name]}" ]
         cmd += device_options unless device_options.nil?
+        cmd += operations unless operations.nil?
         raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
       end
     end
