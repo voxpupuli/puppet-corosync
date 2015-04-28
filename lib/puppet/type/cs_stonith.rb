@@ -27,7 +27,23 @@ module Puppet
         defining a model and just accept a hash."
 
       validate do |value|
-        raise Puppet::Error, "Puppet::Type::cs_stonith: fence device options must be a hash." unless value.is_a? Hash
+        raise Puppet::Error, "Puppet::Type::Cs_Stonith: fence device options must be a hash." unless value.is_a? Hash
+      end
+
+      defaultto Hash.new
+    end
+
+    newproperty(:operations) do
+      desc "A hash of operations for the primitive.  Operations defined in a
+        primitive are little more predictable as they are commonly things like
+        monitor or start and their values are in seconds.  Since each resource
+        agent can define its own set of operations we are going to defer again
+        and just accept a hash.  There maybe room to model this one but it
+        would require a review of all resource agents to see if each operation
+        is valid."
+
+      validate do |value|
+        raise Puppet::Error, "Puppet::Type::Cs_Stonith: operations property must be a hash." unless value.is_a? Hash
       end
 
       defaultto Hash.new
