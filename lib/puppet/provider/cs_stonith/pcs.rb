@@ -29,15 +29,15 @@ Puppet::Type.type(:cs_stonith).provide(:pcs, :parent => Puppet::Provider::Pacema
   # for creating a new provider instance.
   def self.element_to_hash(e)
     hash = {
-      :fence_type               => e.attributes['type'],
+      :primitive_type           => e.attributes['type'],
       :name                     => e.attributes['id'].to_sym,
       :ensure                   => :present,
       :provider                 => self.name,
       :device_options           => nvpairs_to_hash(e.elements['instance_attributes']),
-      :operations               => {}
+      :operations               => {},
       :existing_resource        => :true,
-      :existing_fence_type      => e.attributes['type'],
-      :existing_operations      => {}
+      :existing_primitive_type  => e.attributes['type'],
+      :existing_operations      => {},
     }
 
     if ! e.elements['operations'].nil?
@@ -57,6 +57,8 @@ Puppet::Type.type(:cs_stonith).provide(:pcs, :parent => Puppet::Provider::Pacema
         hash[:existing_operations] = hash[:operations].dup
       end
     end
+    hash
+  end
 
   def self.instances
 
@@ -69,7 +71,7 @@ Puppet::Type.type(:cs_stonith).provide(:pcs, :parent => Puppet::Provider::Pacema
     doc = REXML::Document.new(raw)
 
     # What does this mean? Is stonith correct?
-    REXML::XPath.each(doc, '//stonith') do |e|
+    REXML::XPath.each(doc, '//primitive') do |e|
       instances << new(element_to_hash(e))
     end
     instances
@@ -83,12 +85,11 @@ Puppet::Type.type(:cs_stonith).provide(:pcs, :parent => Puppet::Provider::Pacema
     @property_hash = {
       :name              => @resource[:name],
       :ensure            => :present,
-      :fence_type        => @resource[:fence_type],
+      :primitive_type    => @resource[:primitive_type],
       :existing_resource => :false
     }
     @property_hash[:device_options] = @resource[:device_options] if ! @resource[:device_options].nil?
     @property_hash[:operations] = @resource[:operations] if ! @resource[:operations].nil?
-    @property_hash[:cib] = @resource[:cib] if ! @resource[:cib].nil?
   end
 
   # Unlike create we actually immediately delete the item.
@@ -101,8 +102,8 @@ Puppet::Type.type(:cs_stonith).provide(:pcs, :parent => Puppet::Provider::Pacema
   # Getters that obtains the device_options and operations defined in our primitive
   # that have been populated by prefetch or instances (depends on if your using
   # puppet resource or not).
-  def fence_type
-    @property_hash[:fence_type]
+  def primitive_type
+    @property_hash[:primitive_type]
   end
 
   def device_options
@@ -134,9 +135,9 @@ Puppet::Type.type(:cs_stonith).provide(:pcs, :parent => Puppet::Provider::Pacema
   # params.
   def flush
     unless @property_hash.empty?
-      # The resource_type variable is used to check if one of the class,
+      # The primitive_type variable is used to check if one of the class,
       # provider or type has changed
-      resource_type = "#{@property_hash[:fence_type]}:"
+      primitive_type = "#{@property_hash[:primitive_type]}"
 
       unless @property_hash[:device_options].empty?
         device_options = []
@@ -163,19 +164,15 @@ Puppet::Type.type(:cs_stonith).provide(:pcs, :parent => Puppet::Provider::Pacema
         end
       end
 
-      # We destroy the ressource if it's type, class or provider has changed
+      # We destroy the resource if it's primitive type has changed
       unless @property_hash[:existing_resource] == :false
-        existing_resource_type = "#{@property_hash[:existing_fence_type]}:"
-	# do I need a condition if no parameters are specified
-        existing_resource_type << "#{@property_hash[:existing_fence_type]}"
-        if existing_resource_type != resource_type
+        existing_primitive_type = "#{@property_hash[:existing_primitive_type]}"
+        if existing_primitive_type != primitive_type
           debug('Removing fence device')
           Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'stonith', 'delete', @property_hash[:name]])
           force_reinstall = :true
         end
       end
-
-      ENV['CIB_shadow'] = @property_hash[:cib]
 
       if @property_hash[:existing_resource] == :false or force_reinstall == :true
         cmd = [ command(:pcs), 'stonith', 'create', "#{@property_hash[:name]}" ]
@@ -202,6 +199,7 @@ Puppet::Type.type(:cs_stonith).provide(:pcs, :parent => Puppet::Provider::Pacema
           end
         end
         cmd = [ command(:pcs), 'stonith', 'update', "#{@property_hash[:name]}" ]
+	cmd << primitive_type
         cmd += device_options unless device_options.nil?
         cmd += operations unless operations.nil?
         raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)

@@ -16,7 +16,7 @@ module Puppet
       isnamevar
     end
 
-    newparam(:fence_type) do
+    newproperty(:primitive_type) do
       desc "The fence decvice type to use. Examples are fence_ilo fence_ilo2 fence_apc"
     end
 
