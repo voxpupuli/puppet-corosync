@@ -12,9 +12,9 @@ class corosync::params {
   $debug                               = false
   $rrp_mode                            = 'none'
   $ttl                                 = false
+  $packages       		       = ['corosync', 'pacemaker', 'fence-agents']
   $token                               = 3000
   $token_retransmits_before_lost_const = 10
-  $packages       		       = ['corosync', 'pacemaker', 'fence-agents']
 
   case $::osfamily {
     'RedHat': {
