@@ -152,6 +152,29 @@ cs_clone { 'nginx_service-clone' :
 }
 ```
 
+Configuring stonith resources
+----------------------------
+
+Stonith resources allow the cluster to protect its resources from running on
+unresponsive nodes. This can be achieved by a number of means with the aid of the
+fence-agents package.
+
+```puppet
+cs_stonith { 'poweroff-node01' :
+  ensure    => present,
+  primitive_type => 'fence_ilo4',
+  device_options => {
+    'pcmk_host_list' => 'node01',
+    'action' 	     => 'off',
+    'ipaddr'         => 'node01-console',
+    'login'          => 'administrator',
+    'passwd_script'  => '/root/.console_password',
+  },
+  operations     => { 'monitor' => { 'interval' => '30s' } },
+  require        => File['/root/.console_password'],
+}
+```
+
 Corosync Properties
 ------------------
 A few global settings can be changed with the "cs_property" section.
