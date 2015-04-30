@@ -78,7 +78,7 @@ Puppet::Type.type(:cs_group).provide(:crm, :parent => Puppet::Provider::Crmsh) d
   # resource already exists so we just update the current value in the property
   # hash and doing this marks it to be flushed.
   def primitives=(should)
-    @property_hash[:primitives] = should.sort
+    @property_hash[:primitives] = should
   end
 
   # Flush is triggered on anything that has been detected as being
