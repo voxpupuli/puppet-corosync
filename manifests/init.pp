@@ -251,7 +251,7 @@ class corosync(
 
   case $::operatingsystem {
     'Ubuntu': {
-      if $::osversion >= 14.04 {
+      if $lsbmajdistrelease >= 14 {
         service { 'pacemaker':
           ensure    => running,
           enable    => true,

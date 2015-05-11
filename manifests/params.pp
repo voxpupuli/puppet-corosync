@@ -26,7 +26,7 @@ class corosync::params {
     'Debian': {
       case $::operatingsystem {
         'Ubuntu': {
-          if $::osversion >= 14.04 {
+          if $lsbmajdistrelease >= 14 {
             $compatibility = false
             $set_votequorum = true
 
