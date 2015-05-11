@@ -44,6 +44,12 @@
 #   the udpu transport.  You need a relatively recent version of Corosync to
 #   make this possible.
 #
+# [*corosync_nodes*]
+#   An array of node structures for the nodelist directive. These are an
+#   alternative for the unicast_addresses list. Will override the
+#   unicast_address list, if given. You need a relatively recent version of
+#   Corosync to make this possible.
+#
 # [*force_online*]
 #   True/false parameter specifying whether to force nodes that have been put
 #   in standby back online.
@@ -76,6 +82,15 @@
 #    multicast_address => '239.1.1.2',
 #  }
 #
+#  class { 'corosync':
+#    enable_secauth    => false,
+#    bind_address      => '192.168.2.10',
+#    corosync_nodes    => { 'node-1' => { 'ip' =>
+#                           [ 'ring0_addr' => '10.0.0.1',
+#                             'ring1_addr' => '10.1.0.1' ],
+#                           'id' => '1' }, },
+#  }
+#
 # === Authors
 #
 # Cody Herriges <cody@puppetlabs.com>
@@ -93,6 +108,7 @@ class corosync(
   $bind_address      = $::corosync::params::bind_address,
   $multicast_address = $::corosync::params::multicast_address,
   $unicast_addresses = $::corosync::params::unicast_addresses,
+  $corosync_nodes    = $::corosync::params::corosync_nodes,
   $force_online      = $::corosync::params::force_online,
   $check_standby     = $::corosync::params::check_standby,
   $debug             = $::corosync::params::debug,
@@ -110,14 +126,15 @@ class corosync(
   validate_bool($check_standby)
   validate_bool($debug)
 
-  if $unicast_addresses == 'UNSET' {
+  if $unicast_addresses == 'UNSET' and $corosync_nodes == 'UNSET' {
     $corosync_conf = "${module_name}/corosync.conf.erb"
   } else {
     $corosync_conf = "${module_name}/corosync.conf.udpu.erb"
   }
 
   # $multicast_address is NOT required if $unicast_address is provided
-  if $multicast_address == 'UNSET' and $unicast_addresses == 'UNSET' {
+  if $multicast_address == 'UNSET' and $unicast_addresses == 'UNSET'
+     and $corosync_nodes == 'UNSET' {
       fail('You must provide a value for multicast_address')
   }
 

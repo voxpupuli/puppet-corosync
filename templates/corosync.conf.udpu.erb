@@ -1,5 +1,28 @@
 compatibility: whitetank
 
+quorum {
+  provider: corosync_votequorum
+   <% if @corosync_nodes.length  == 2 or @unicast_addresses.length == 2 -%>
+    two_node: 1
+   <% else -%>
+    two_node: 0
+   <% end -%>
+}
+
+<% if @corosync_nodes.is_a?(Array) -%>
+nodelist {
+  <% @corosync_nodes.sort.each do |name, node| -%>
+  node {
+    # <%= name %>
+    <% node['ip'].sort.each do |ring, ip| -%>
+    <%= ring %>: <%= ip %>
+    <% end -%>
+    nodeid: <%= node['id'] %>
+  }
+  <% end -%>
+}
+<% end -%>
+
 totem {
   version:                             2
   token:                               <%= @token %>

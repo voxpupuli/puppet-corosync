@@ -7,6 +7,7 @@ class corosync::params {
   $bind_address      = $::ipaddress
   $multicast_address = 'UNSET'
   $unicast_addresses = 'UNSET'
+  $corosync_nodes    = 'UNSET'
   $force_online      = false
   $check_standby     = false
   $debug             = false
