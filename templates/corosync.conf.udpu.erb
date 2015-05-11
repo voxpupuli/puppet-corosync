@@ -14,20 +14,21 @@ totem {
   rrp_mode:                            <%= @rrp_mode %>
   secauth:                             <%= @enable_secauth_real %>
   threads:                             <%= @threads %>
-  transport:                           udpu
+<% [@bind_address].flatten.each_index do |i| -%>
   interface {
-<% @unicast_addresses.each do |addr| -%>
-    member {
-      memberaddr: <%= addr %>
-    }
+    ringnumber:  <%= i %>
+    bindnetaddr: <%= [@bind_address].flatten[i] %>
+<% if [@multicast_address].flatten[i] == 'broadcast' -%>
+    broadcast:   yes
+<% else -%>
+    mcastaddr:   <%= [@multicast_address].flatten[i] %>
 <% end -%>
-    ringnumber:  0
-    bindnetaddr: <%= @bind_address %>
-    mcastport:   <%= @port %>
+    mcastport:   <%= [@port].flatten[i] %>
 <% if @ttl -%>
     ttl:         <%= @ttl %>
 <% end -%>
   }
+<% end -%>
 }
 
 logging {
@@ -77,5 +78,4 @@ nodelist {
 <% end -%>
 }
 <% end -%>
-}
 <% end -%>
