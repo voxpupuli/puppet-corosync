@@ -102,7 +102,7 @@ Configuring locations
 
 Locations determine where primitive resources should run. This can be a simple
 node-based constraint to bind a service to a node, or you can couple a rule-constraint
-with a defined primitive such as ```puppet ocf:heartbeat:ethmonitor``` to prevent a primitive from
+with a defined primitive such as ```ocf:heartbeat:ethmonitor``` to prevent a primitive from
 running on a server that is having network problems.
 
 
