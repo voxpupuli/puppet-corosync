@@ -12,7 +12,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
   commands :pcs      => 'pcs'
   commands :cibadmin => 'cibadmin'
 
-  def element_to_hash(e)
+  def self.element_to_hash(e)
     hash = {
       :name      => e.attributes['id'],
       :ensure    => :present,
@@ -139,11 +139,11 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
 
       doc = REXML::Document.new
 
-      unless @property_hash[:node].empty?
+      if @property_hash[:node]
         rsc_location = doc.add_element 'rsc_location', {
           'id'    => "#{@property_hash[:name]}",
           'node'  => "#{@property_hash[:node]}",
-          'rsc'   => "#{@property_hash[:rsc]}",
+          'rsc'   => "#{@property_hash[:primitive]}",
           'score' => "#{@property_hash[:score]}",
         }
       end
@@ -151,10 +151,10 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
       unless @property_hash[:rule].empty?
         rsc_location = doc.add_element 'rsc_location', {
           'id'  => "#{@property_hash[:name]}",
-          'rsc' => "#{@property_hash[:rsc]}",
+          'rsc' => "#{@property_hash[:primitive]}",
         }
 
-        rsc_location.elements['rsc_location'].add_element 'rule', {
+        rsc_location.add_element 'rule', {
           'boolean-op' => "#{@property_hash[:boolean]}",
           'id'         => "#{@property_hash[:name]}-rule",
           'score'      => "#{@property_hash[:score]}",
@@ -162,7 +162,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
 
         @property_hash[:rule].each_with_index { |expression, index|
           expression['id'] = "#{@property_hash[:name]}-rule-expr-#{index+1}"
-          rsc_location.elements['rsc_location'].elements['rule'].add_element 'expression', expression
+          rsc_location.elements['rule'].add_element 'expression', expression
         }
       end
 

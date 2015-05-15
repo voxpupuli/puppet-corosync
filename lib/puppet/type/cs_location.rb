@@ -54,15 +54,11 @@ module Puppet
         defaultto 'and'
     end
 
-    newproperty(:rule) do
+    newproperty(:rule, :array_matching => :all) do
       desc "An array of hashes for the rule expression. The expression is used
         to determine a suitablity of a node to run a collection of resources. This 
         is used in conjunction with the boolean property if you define more than one
         object in the expression."
-
-      validate do |value|
-        raise Puppet::Error, "Puppet::Type::Cs_Location: rule property must be an array" unless value.is_a? Array
-      end
 
       defaultto Array.new
     end
@@ -80,8 +76,9 @@ module Puppet
       if [
         self[:node_name],
         self[:rule],
-      ].compact_length > 1
+      ].compact.length > 1
         err "Type can only be node-based or rule-based. Only one of node_name, or expression may be specifed."
       end
     end
+  end
 end
