@@ -3,7 +3,8 @@ module Puppet
     @doc = "Type for manipulating corosync/pacemaker resource location.
       More information on Corosync/Pacemaker colocation can be found here:
 
-      * http://www.clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Clusters_from_Scratch/_ensuring_resources_run_on_the_same_host.html"
+      * http://www.clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Clusters_from_Scratch/_ensuring_resources_run_on_the_same_host.html
+      * http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch08.html"
 
     ensurable
 
@@ -44,6 +45,29 @@ module Puppet
         defaultto 'INFINITY'
     end
 
+    newproperty(:boolean) do
+      desc "This allows you to define multiple rules in an expression.
+        You may want to move a collection of resources away from a node
+        if the ping resource agent score is below a threshold OR the ping
+        resource isn't even defined."
+
+        defaultto 'and'
+    end
+
+    newproperty(:rule) do
+      desc "An array of hashes for the rule expression. The expression is used
+        to determine a suitablity of a node to run a collection of resources. This 
+        is used in conjunction with the boolean property if you define more than one
+        object in the expression."
+
+      validate do |value|
+        raise Puppet::Error, "Puppet::Type::Cs_Location: rule property must be an array" unless value.is_a? Array
+      end
+
+      defaultto Array.new
+    end
+
+
     autorequire(:cs_shadow) do
       [ @parameters[:cib] ]
     end
@@ -52,5 +76,12 @@ module Puppet
       [ 'corosync' ]
     end
 
-  end
+    validate do
+      if [
+        self[:node_name],
+        self[:rule],
+      ].compact_length > 1
+        err "Type can only be node-based or rule-based. Only one of node_name, or expression may be specifed."
+      end
+    end
 end
