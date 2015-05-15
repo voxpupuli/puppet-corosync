@@ -148,7 +148,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
         }
       end
 
-      unless @property_hash[:expression].empty?
+      unless @property_hash[:rule].empty?
         rsc_location = doc.add_element 'rsc_location', {
           'id'  => "#{@property_hash[:name]}",
           'rsc' => "#{@property_hash[:rsc]}",
