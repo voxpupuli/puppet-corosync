@@ -156,12 +156,12 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
 
         rsc_location.elements['rsc_location'].add_element 'rule', {
           'boolean-op' => "#{@property_hash[:boolean]}",
-          'id'         => "location-#{@property_hash[:name]}",
+          'id'         => "#{@property_hash[:name]}-rule",
           'score'      => "#{@property_hash[:score]}",
         }
 
         @property_hash[:rule].each_with_index { |expression, index|
-          expression['id'] = "location-#{@property_hash[:name]}-expr-#{index+1}"
+          expression['id'] = "#{@property_hash[:name]}-rule-expr-#{index+1}"
           rsc_location.elements['rsc_location'].elements['rule'].add_element 'expression', expression
         }
       end
