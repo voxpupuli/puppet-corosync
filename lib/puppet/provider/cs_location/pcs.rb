@@ -99,11 +99,11 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
     @property_hash[:score]
   end
 
-  def score
+  def boolean
     @property_hash[:boolean]
   end
 
-  def score
+  def rule
     @property_hash[:rule]
   end
 
