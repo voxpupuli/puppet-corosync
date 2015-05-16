@@ -13,6 +13,9 @@ class corosync::params {
   $rrp_mode                            = 'none'
   $ttl                                 = false
   $packages                            = ['corosync', 'pacemaker']
+  $expected_votes                      = undef
+  $quorum_members                      = undef
+  $two_node                            = undef
   $token                               = 3000
   $token_retransmits_before_lost_const = 10
 
@@ -22,7 +25,12 @@ class corosync::params {
     }
 
     'Debian': {
-      $set_votequorum = false
+      if ($::operatingsystem == 'Ubuntu' and
+          $::operatingsystemrelease >= '14.04') {
+        $set_votequorum = true
+      } else {
+        $set_votequorum = false
+      }
     }
 
     default: {
