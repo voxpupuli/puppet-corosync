@@ -25,7 +25,7 @@ module Puppet
       isnamevar
     end
 
-    newproperty(:primitive_class) do
+    newparam(:primitive_class) do
       desc "Corosync class of the primitive.  Examples of classes are lsb or ocf.
         Lsb funtions a lot like the init provider in Puppet for services, an init
         script is ran periodically on each host to identify status, or to start
@@ -33,14 +33,14 @@ module Puppet
         meta-data and stucture that is specific to Corosync and Pacemaker."
     end
 
-    newproperty(:primitive_type) do
+    newparam(:primitive_type) do
       desc "Corosync primitive type.  Type generally matches to the specific
         'thing' your managing, i.e. ip address or vhost.  Though, they can be
         completely arbitarily named and manage any number of underlying
         applications or resources."
     end
 
-    newproperty(:provided_by) do
+    newparam(:provided_by) do
       desc "Corosync primitive provider.  All resource agents used in a primitve
         have something that provides them to the system, be it the Pacemaker or
         redhat plugins...they're not always obvious though so currently you're
