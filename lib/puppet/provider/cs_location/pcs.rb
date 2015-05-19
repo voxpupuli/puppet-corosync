@@ -149,7 +149,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
           'rsc'   => "#{@property_hash[:primitive]}",
           'score' => "#{@property_hash[:score]}",
         }
-        cmd_action = '--modify --allow-create'
+        cmd_action = [ '--modify', '--allow-create', ]
       end
 
       # add a new rsc_location XML element for a rule-based constraint 
@@ -192,7 +192,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
         if (@property_hash[:existing_rule] and @property_hash[:rule].length < @property_hash[:existing_rule].length)
           cmd_action = '--replace'
         else
-          cmd_action = '--modify --allow-create'
+          cmd_action = [ '--modify', '--allow-create', ]
         end
       end
 
