@@ -51,7 +51,6 @@ module Puppet
         if the ping resource agent score is below a threshold OR the ping
         resource isn't even defined."
 
-        defaultto 'and'
     end
 
     newproperty(:rule, :array_matching => :all) do
@@ -77,8 +76,9 @@ module Puppet
         self[:node_name],
         self[:rule],
       ].compact.length > 1
-        err "Type can only be node-based or rule-based. Only one of node_name, or expression may be specifed."
+        fail('Location constraints dictate that node_name and rule cannot co-exist for this type.') unless self[:rule].empty?
       end
+
     end
   end
 end

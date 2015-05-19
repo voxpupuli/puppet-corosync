@@ -14,15 +14,16 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
 
   def self.element_to_hash(e)
     hash = {
-      :name      => e.attributes['id'],
-      :ensure    => :present,
-      :primitive => e.attributes['rsc'],
-      :rule      => [],
-      :provider  => self.name
+      :name          => e.attributes['id'],
+      :ensure        => :present,
+      :primitive     => e.attributes['rsc'],
+      :rule          => [],
+      :provider      => self.name
+      :existing_rule => [],
     }
 
     if ! e.attributes['node'].nil?
-      hash[:node] = e.attributes['node']
+      hash[:node_name] = e.attributes['node']
       hash[:score] = e.attributes['score']
     end
 
@@ -42,6 +43,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
         hash[:rule].push(expression_hash)
       end
     end
+    hash[:existing_rule] = hash[:rule].dup
     hash
   end
 
@@ -139,34 +141,55 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
 
       doc = REXML::Document.new
 
-      if @property_hash[:node]
+      # add a new rsc_location XML element for a node-based constraint 
+      if @property_hash[:node_name]
         rsc_location = doc.add_element 'rsc_location', {
           'id'    => "#{@property_hash[:name]}",
-          'node'  => "#{@property_hash[:node]}",
+          'node'  => "#{@property_hash[:node_name]}",
           'rsc'   => "#{@property_hash[:primitive]}",
           'score' => "#{@property_hash[:score]}",
         }
+        cmd_action = '--modify --allow-create'
       end
 
+      # add a new rsc_location XML element for a rule-based constraint 
       unless @property_hash[:rule].empty?
         rsc_location = doc.add_element 'rsc_location', {
           'id'  => "#{@property_hash[:name]}",
           'rsc' => "#{@property_hash[:primitive]}",
         }
 
-        rsc_location.add_element 'rule', {
-          'boolean-op' => "#{@property_hash[:boolean]}",
-          'id'         => "#{@property_hash[:name]}-rule",
-          'score'      => "#{@property_hash[:score]}",
-        }
+        # if there are more than 1 expressions defined in the array
+        # a boolean attribute is required in the rule element.
+        # 'and' is specified if no boolean parameter is present in the 
+        # property_hash
+        if @property_hash[:rule].length > 1
+          boolean = 'and' unless @property_hash[:boolean]
+          rsc_location.add_element 'rule', {
+            'boolean-op' => boolean,
+            'id'         => "#{@property_hash[:name]}-rule",
+            'score'      => "#{@property_hash[:score]}",
+          }
+        else
+          rsc_location.add_element 'rule', {
+            'id'    => "#{@property_hash[:name]}-rule",
+            'score' => "#{@property_hash[:score]}",
+          }
+        end
 
+        # Add each expression hash to the  expression XML element in order.
         @property_hash[:rule].each_with_index { |expression, index|
           expression['id'] = "#{@property_hash[:name]}-rule-expr-#{index+1}"
           rsc_location.elements['rule'].add_element 'expression', expression
         }
+        if @property_hash[:rule].length < @property_hash[:existing_rule].length
+          cmd_action = '--replace'
+        else
+          cmd_action = '--modify --allow-create'
       end
 
-      cmd = [ command(:cibadmin), '--modify', '--allow-create', '--scope=constraints', '--xml-text', doc ]
+      # create / modify rsc_location elements using cibadmin.
+      cmd = [ command(:cibadmin), cmd_action, '--scope=constraints', '--xml-text', doc ]
 
       Puppet::Provider::Pacemaker::run_pcs_command(cmd)
 
