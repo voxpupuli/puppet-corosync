@@ -18,7 +18,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
       :ensure        => :present,
       :primitive     => e.attributes['rsc'],
       :rule          => [],
-      :provider      => self.name
+      :provider      => self.name,
       :existing_rule => [],
     }
 
@@ -164,7 +164,11 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
         # 'and' is specified if no boolean parameter is present in the 
         # property_hash
         if @property_hash[:rule].length > 1
-          boolean = 'and' unless @property_hash[:boolean]
+          if @property_hash[:boolean].nil?
+            boolean = 'and'
+          else
+            boolean = @property_hash[:boolean]
+          end
           rsc_location.add_element 'rule', {
             'boolean-op' => boolean,
             'id'         => "#{@property_hash[:name]}-rule",
@@ -182,14 +186,18 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
           expression['id'] = "#{@property_hash[:name]}-rule-expr-#{index+1}"
           rsc_location.elements['rule'].add_element 'expression', expression
         }
-        if @property_hash[:rule].length < @property_hash[:existing_rule].length
+
+        # if you remove an expression from the cib, the replace switch is required,
+        # as the expression you want to get rid of will be ignored when using the modify switch
+        if (@property_hash[:existing_rule] and @property_hash[:rule].length < @property_hash[:existing_rule].length)
           cmd_action = '--replace'
         else
           cmd_action = '--modify --allow-create'
+        end
       end
 
       # create / modify rsc_location elements using cibadmin.
-      cmd = [ command(:cibadmin), cmd_action, '--scope=constraints', '--xml-text', doc ]
+      cmd = [ command(:cibadmin), cmd_action, '--scope=constraints', '--xml-text', "#{doc}" ]
 
       Puppet::Provider::Pacemaker::run_pcs_command(cmd)
 

@@ -176,7 +176,7 @@ Puppet::Type.type(:cs_stonith).provide(:pcs, :parent => Puppet::Provider::Pacema
 
       if @property_hash[:existing_resource] == :false or force_reinstall == :true
         cmd = [ command(:pcs), 'stonith', 'create', "#{@property_hash[:name]}" ]
-        cmd << resource_type
+        cmd << primitive_type
         cmd += device_options unless device_options.nil?
         cmd += operations unless operations.nil?
         raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
