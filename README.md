@@ -100,13 +100,33 @@ cs_primitive { 'pgsql_service':
 Configuring locations
 -----------------------
 
-Locations determine on which nodes primitive resources run. 
+Locations determine where primitive resources should run. This can be a simple
+node-based constraint to bind a service to a node, or you can couple a rule-constraint
+with a defined primitive such as ```ocf:heartbeat:ethmonitor``` to prevent a primitive from
+running on a server that is having network problems.
+
+
+*Use a node-based constraint to make the nginx_service run on the node 'hostname'*
 
 ```puppet
 cs_location { 'nginx_service_location':
   primitive => 'nginx_service',
   node_name => 'hostname',
   score     => 'INFINITY'
+}
+```
+
+*A rule-based constraint to prevent nginx_service running on a node where the ethmonitor score is less than 1*
+
+```puppet
+cs_location { 'nginx_service_location':
+  primitive => 'nginx_service',
+  score     => '-INFINITY',
+  boolean   => 'or',
+  rule      => [
+    { attribute => 'ethmonitor', operation => 'lt', value => '1' },
+    { attribute => 'ethmonitor', operation => 'not_defined' },
+  ],
 }
 ```
 Configuring colocations
@@ -149,6 +169,29 @@ cs_clone { 'nginx_service-clone' :
   primitive => 'nginx_service',
   clone_max => 3,
   require   => Cs_primitive['nginx_service'],
+}
+```
+
+Configuring stonith resources
+----------------------------
+
+Stonith resources allow the cluster to protect its resources from running on
+unresponsive nodes. This can be achieved by a number of means with the aid of the
+fence-agents package.
+
+```puppet
+cs_stonith { 'poweroff-node01' :
+  ensure    => present,
+  primitive_type => 'fence_ilo4',
+  device_options => {
+    'pcmk_host_list' => 'node01',
+    'action' 	     => 'off',
+    'ipaddr'         => 'node01-console',
+    'login'          => 'administrator',
+    'passwd_script'  => '/root/.console_password',
+  },
+  operations     => { 'monitor' => { 'interval' => '30s' } },
+  require        => File['/root/.console_password'],
 }
 ```
 
