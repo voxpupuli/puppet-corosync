@@ -62,8 +62,21 @@
 # [*ttl*]
 #   Time To Live (multicast only).
 #
-# [*packages*]
-#   Define the list of software packages which should be installed.
+# [*package_corosync*]
+#   Define if package corosync should be installed.
+#   Defaults to true
+#
+# [*version_corosync*]
+#   Define what version of corosync should be installed.
+#   Defaults to present
+#
+# [*package_pacemaker*]
+#   Define if package pacemaker should be installed.
+#   Defaults to true
+#
+# [*version_pacemaker*]
+#   Define what version of pacemaker should be installed.
+#   Defaults to present
 #
 # [*set_votequorum*]
 #   Set to true if corosync_votequorum should be used as quorum provider.
@@ -79,6 +92,12 @@
 #
 # [*token_retransmits_before_loss_const*]
 #   How many token retransmits before forming a new configuration
+#
+# === Deprecated Parameters
+#
+# [*packages*]
+#   Deprecated in favour of package_{corosync,pacemaker} and
+#   version_{corosync,pacemaker}. Array of packages to install.
 #
 # === Examples
 #
@@ -110,7 +129,11 @@ class corosync(
   $debug                               = $::corosync::params::debug,
   $rrp_mode                            = $::corosync::params::rrp_mode,
   $ttl                                 = $::corosync::params::ttl,
-  $packages                            = $::corosync::params::packages,
+  $packages                            = undef,
+  $package_corosync                    = undef,
+  $version_corosync                    = undef,
+  $package_pacemaker                   = undef,
+  $version_pacemaker                   = undef,
   $set_votequorum                      = $::corosync::params::set_votequorum,
   $quorum_members                      = ['localhost'],
   $token                               = $::corosync::params::token,
@@ -120,6 +143,66 @@ class corosync(
   if $set_votequorum and !$quorum_members {
     fail('set_votequorum is true, but no quorum_members have been passed.')
   }
+
+  if $packages {
+    warning('$corosync::packages is deprecated, use $corosync::package_{corosync,pacemaker} instead!')
+
+    package{ $packages:
+      ensure => present,
+    }
+
+    # Ensure no options conflicting with $packages are set:
+
+    if $package_corosync {
+      fail('$corosync::package_corosync and $corosync::packages must not be mixed!')
+    }
+    if $package_pacemaker {
+      fail('$corosync::package_pacemaker and $corosync::packages must not be mixed!')
+    }
+    if $version_corosync {
+      fail('$corosync::version_corosync and $corosync::packages must not be mixed!')
+    }
+    if $version_pacemaker {
+      fail('$corosync::version_pacemaker and $corosync::packages must not be mixed!')
+    }
+  } else {
+      # Handle defaults for new-style package parameters here to allow co-existence with $packages.
+      if $package_corosync == undef {
+        $_package_corosync = true
+      } else {
+        $_package_corosync = $package_corosync
+      }
+
+      if $package_pacemaker == undef {
+        $_package_pacemaker = true
+      } else {
+        $_package_pacemaker = $package_pacemaker
+      }
+
+      if $version_corosync == undef {
+        $_version_corosync = present
+      } else {
+        $_version_corosync = $version_corosync
+      }
+
+      if $version_pacemaker == undef {
+        $_version_pacemaker = present
+      } else {
+        $_version_pacemaker = $version_pacemaker
+      }
+
+      if $_package_corosync == true {
+        package { 'corosync':
+          ensure => $_version_corosync,
+        }
+      }
+
+      if $_package_pacemaker == true {
+        package { 'pacemaker':
+          ensure => $_version_pacemaker,
+        }
+      }
+    }
 
   if ! is_bool($enable_secauth) {
     validate_re($enable_secauth, '^(on|off)$')
@@ -175,10 +258,6 @@ class corosync(
       }
       default: {}
     }
-  }
-
-  package {$packages:
-    ensure => present,
   }
 
   if $::osfamily == 'RedHat' {

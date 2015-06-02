@@ -54,6 +54,76 @@ describe 'corosync' do
       end
     end
 
+
+    [ :package_corosync, :package_pacemaker, :version_corosync, :version_pacemaker ].each { |package_param|
+      context "new-style package parameter $#{package_param} mixed with deprecated $packages parameter" do
+        before :each do
+          params.merge!(
+            {
+              package_param => true, # value does not really matter here: these
+                                     # two params must not both be defined
+                                     # at the same time.
+              :packages => ['corosync', 'pacemaker'],
+            }
+          )
+        end
+
+        it 'raises error' do
+          should raise_error(
+              Puppet::Error,
+              /\$corosync::#{package_param} and \$corosync::packages must not be mixed!/
+          )
+        end
+      end
+    }
+
+
+    [ :corosync, :pacemaker ].each { |package|
+      context "install package #{package} with default version" do
+        before :each do
+          params.merge!( { "package_#{package}" => true, } )
+        end
+
+        it "does install #{package}" do
+          should contain_package(package).with(
+            :ensure => 'present'
+          )
+        end
+
+      end
+
+
+      context "install package #{package} with custom version" do
+        before :each do
+          params.merge!(
+                        { "package_#{package}" => true,
+                          "version_#{package}" => '1.1.1' }
+                       )
+        end
+
+        it "does install #{package} with version 1.1.1" do
+          should contain_package(package).with(
+            :ensure => '1.1.1'
+          )
+        end
+
+      end
+
+
+      context "do not install #{package}" do
+        before :each do
+          params.merge!( { "package_#{package}" => false, } )
+        end
+
+        it "does not install #{package}" do
+          should_not contain_package(package)
+        end
+
+      end
+
+    }
+
+
     context 'when set_quorum is true and quorum_members are not set' do
       before :each do
         params.merge!(
