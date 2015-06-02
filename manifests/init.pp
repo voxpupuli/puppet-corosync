@@ -74,6 +74,10 @@
 #   is set to true.
 #   Defaults to undef,
 #
+# [*quorum_expected_votes*]
+#   Number of expected votes.
+#   Defaults to false
+#
 # [*token*]
 #   Time (in ms) to wait for a token
 #
@@ -112,6 +116,7 @@ class corosync(
   $ttl                                 = $::corosync::params::ttl,
   $packages                            = $::corosync::params::packages,
   $set_votequorum                      = $::corosync::params::set_votequorum,
+  $quorum_expected_votes               = $::corosync::params::quorum_expected_votes,
   $quorum_members                      = ['localhost'],
   $token                               = $::corosync::params::token,
   $token_retransmits_before_loss_const = $::corosync::params::token_retransmits_before_lost_const,

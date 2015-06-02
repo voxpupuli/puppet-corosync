@@ -55,6 +55,9 @@ aisexec {
 <% if @set_votequorum -%>
 quorum {
   provider: corosync_votequorum
+<% if @quorum_expected_votes -%>
+  expected_votes: <%= @quorum_expected_votes %>
+<% end -%>
 }
 
 nodelist {

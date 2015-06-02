@@ -15,6 +15,7 @@ class corosync::params {
   $packages                            = ['corosync', 'pacemaker']
   $token                               = 3000
   $token_retransmits_before_lost_const = 10
+  $quorum_expected_votes               = false
 
   case $::osfamily {
     'RedHat': {
