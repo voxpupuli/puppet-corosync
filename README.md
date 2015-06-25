@@ -1,7 +1,7 @@
 Puppet Labs module for Corosync
 ============================
 
-[![Build Status](https://travis-ci.org/puppetlabs/puppetlabs-corosync.png?branch=master)](https://travis-ci.org/puppetlabs/puppetlabs-corosync)
+[![Build Status](https://travis-ci.org/puppet-community/puppet-corosync.png?branch=master)](https://travis-ci.org/puppet-community/puppet-corosync)
 
 Corosync is a cluster stack written as a reimplementation of all the core
 functionalities required by openais.  Meant to provide 100% correct operation
