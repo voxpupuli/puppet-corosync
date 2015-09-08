@@ -68,7 +68,7 @@ cs_primitive { 'nginx_service':
 *Make Corosync manage and monitor the state of Apache using a LSB agent*
 
 ```puppet
-cs_primitive { 'nginx_service':
+cs_primitive { 'apache_service':
   primitive_class => 'lsb',
   primitive_type  => 'apache2',
   provided_by     => 'heartbeat',
