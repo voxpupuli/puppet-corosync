@@ -93,6 +93,8 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
   # It calls several pcs commands to make the resource look like the
   # params.
   def flush
+    ENV['CIB_shadow'] = @property_hash[:cib]
+
     unless @property_hash.empty?
       cmd = [ command(:pcs), 'constraint', 'location', 'add', @property_hash[:name], @property_hash[:primitive], @property_hash[:node_name], @property_hash[:score]]
       Puppet::Provider::Pacemaker::run_pcs_command(cmd)

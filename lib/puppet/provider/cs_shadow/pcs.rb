@@ -11,7 +11,7 @@ Puppet::Type.type(:cs_shadow).provide(:pcs, :parent => Puppet::Provider::Pacemak
 
   def sync(cib)
     begin
-      crm_shadow('--delete', cib)
+      crm_shadow('--force', '--delete', cib)
     rescue => e
       # If the CIB doesn't exist, we don't care.
     end
