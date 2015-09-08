@@ -165,6 +165,15 @@ Puppet::Type.newtype(:cs_primitive) do
     autos
   end
 
+  autobefore(:cs_commit) do
+    autos = []
+    if @parameters[:cib]
+      autos << @parameters[:cib].value
+    end
+
+    autos
+  end
+
   autorequire(:service) do
     [ 'corosync' ]
   end

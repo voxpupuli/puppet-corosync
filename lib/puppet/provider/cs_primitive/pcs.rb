@@ -211,6 +211,8 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
   # It calls several pcs commands to make the resource look like the
   # params.
   def flush
+    ENV['CIB_shadow'] = @property_hash[:cib]
+
     unless @property_hash.empty?
       # The ressource_type variable is used to check if one of the class,
       # provider or type has changed
@@ -267,8 +269,6 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
           force_reinstall = :true
         end
       end
-
-      ENV['CIB_shadow'] = @property_hash[:cib]
 
       if @property_hash[:existing_resource] == :false or force_reinstall == :true
         cmd = [ command(:pcs), 'resource', 'create', "#{@property_hash[:name]}" ]
