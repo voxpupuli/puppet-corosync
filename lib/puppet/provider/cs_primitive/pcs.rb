@@ -46,7 +46,9 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
       :existing_primitive_class => e.attributes['class'],
       :existing_primitive_type  => e.attributes['type'],
       :existing_provided_by     => e.attributes['provider'],
-      :existing_operations      => {}
+      :existing_operations      => {},
+      :existing_metadata        => nvpairs_to_hash(e.elements['meta_attributes']),
+      :existing_ms_metadata     => {},
     }
 
     if ! e.elements['operations'].nil?
@@ -73,6 +75,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
           hash[:ms_metadata][(m.attributes['name'])] = m.attributes['value']
         end
       end
+      hash[:existing_ms_metadata] = hash[:ms_metadata].dup
     end
 
     hash
@@ -100,13 +103,15 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
   # updates or create a resource, so we flag the resources with that parameter
   def create
     @property_hash = {
-      :name              => @resource[:name],
-      :ensure            => :present,
-      :primitive_class   => @resource[:primitive_class],
-      :provided_by       => @resource[:provided_by],
-      :primitive_type    => @resource[:primitive_type],
-      :promotable        => @resource[:promotable],
-      :existing_resource => :false
+      :name                 => @resource[:name],
+      :ensure               => :present,
+      :primitive_class      => @resource[:primitive_class],
+      :provided_by          => @resource[:provided_by],
+      :primitive_type       => @resource[:primitive_type],
+      :promotable           => @resource[:promotable],
+      :existing_metadata    => {},
+      :existing_ms_metadata => {},
+      :existing_resource    => :false,
     }
     @property_hash[:parameters] = @resource[:parameters] if ! @resource[:parameters].nil?
     @property_hash[:operations] = @resource[:operations] if ! @resource[:operations].nil?
@@ -249,10 +254,15 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
           utilization << "#{k}=#{v}"
         end
       end
-      unless @property_hash[:metadata].empty?
+      unless @property_hash[:metadata].empty? and @property_hash[:existing_metadata].empty?
         metadatas = [ 'meta' ]
         @property_hash[:metadata].each_pair do |k,v|
           metadatas << "#{k}=#{v}"
+        end
+        @property_hash[:existing_metadata].keys.reject{
+          | key | @property_hash[:metadata].key?(key)
+        }.each do | k |
+          metadatas << "#{k}="
         end
       end
 
@@ -327,10 +337,15 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
         raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd, cib)
         if @property_hash[:promotable] == :true
           cmd = [ command(:pcs), 'resource', 'update', "ms_#{@property_hash[:name]}", "#{@property_hash[:name]}" ]
-          unless @property_hash[:ms_metadata].empty?
+          unless @property_hash[:ms_metadata].empty? and @property_hash[:existing_ms_metadata].empty?
             cmd << 'meta'
             @property_hash[:ms_metadata].each_pair do |k,v|
               cmd << "#{k}=#{v}"
+            end
+            @property_hash[:existing_ms_metadata].keys.reject{
+              | key | @property_hash[:ms_metadata].key?(key)
+            }.each do | k |
+              cmd << "#{k}="
             end
           end
           raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd, cib)
