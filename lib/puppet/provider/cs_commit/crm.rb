@@ -9,7 +9,7 @@ Puppet::Type.type(:cs_commit).provide(:crm, :parent => Puppet::Provider::Crmsh) 
     []
   end
 
-  def sync(cib)
-    crm('cib', 'commit', cib)
+  def commit
+    crm('cib', 'commit', @resource[:name])
   end
 end

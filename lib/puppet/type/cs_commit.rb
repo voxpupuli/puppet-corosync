@@ -1,6 +1,10 @@
 Puppet::Type.newtype(:cs_commit) do
   @doc = "This type is an implementation detail. DO NOT use it directly"
-  newproperty(:cib) do
+
+  feature :refreshable, "The provider can execute the commit.",
+    :methods => [:commit]
+
+  newparam(:cib) do
     def sync
       provider.sync(self.should)
     end
@@ -20,35 +24,38 @@ Puppet::Type.newtype(:cs_commit) do
     isnamevar
   end
 
+  def refresh
+    provider.commit
+  end
+
   autorequire(:cs_shadow) do
-    [ @parameters[:cib].should ]
+    [ @parameters[:cib] ]
   end
 
   autorequire(:service) do
     [ 'corosync' ]
   end
 
-  autorequire(:cs_primitive) do
+  autosubscribe(:cs_primitive) do
     resources_with_cib :cs_primitive
   end
 
-  autorequire(:cs_colocation) do
+  autosubscribe(:cs_colocation) do
     resources_with_cib :cs_colocation
   end
 
-  autorequire(:cs_location) do
+  autosubscribe(:cs_location) do
     resources_with_cib :cs_location
   end
 
-
-  autorequire(:cs_order) do
+  autosubscribe(:cs_order) do
     resources_with_cib :cs_order
   end
 
   def resources_with_cib(cib)
     autos = []
 
-    catalog.resources.find_all { |r| r.is_a?(Puppet::Type.type(cib)) and param = r.parameter(:cib) and param.value == @parameters[:cib].should }.each do |r|
+    catalog.resources.find_all { |r| r.is_a?(Puppet::Type.type(cib)) and param = r.parameter(:cib) and param.value == @parameters[:cib] }.each do |r|
       autos << r
     end
 
