@@ -182,6 +182,40 @@ cs_rsc_defaults { 'resource-stickiness' :
 }
 ```
 
+Shadow Cluster
+--------------
+
+By using `cs_shadow` and `cs_commit` you can make all the changes in a sandbox and
+apply them atomically. See [upstream documentation](http://clusterlabs.org/doc/en-US/Pacemaker/1.0/html/Pacemaker_Explained/s-config-sandboxes.html)
+for more details.
+
+It is then needed to add the `cib` parameter to the `cs_*` resources.
+
+Both `cs_shadow` and `cs_commit` are required. If you do not create `cs_commit`, it
+will be automatically generated but you will need to specify explicitly
+the dependencies between `cs_*` resources and `cs_commit`.
+
+```puppet
+cs_shadow {
+    'puppet':
+}
+cs_commit {
+    'puppet':
+}
+cs_primitive { 'nginx_service':
+  primitive_class => 'ocf',
+  primitive_type  => 'nginx_fixed',
+  provided_by     => 'pacemaker',
+  cib             => 'puppet',
+}
+cs_location { 'nginx_service_location':
+  primitive => 'nginx_service',
+  node_name => 'hostname',
+  score     => 'INFINITY'
+  cib       => 'puppet',
+}
+```
+
 Dependencies
 ------------
 

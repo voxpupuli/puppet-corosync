@@ -113,13 +113,13 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
     @property_hash[:utilization] = @resource[:utilization] if ! @resource[:utilization].nil?
     @property_hash[:metadata] = @resource[:metadata] if ! @resource[:metadata].nil?
     @property_hash[:ms_metadata] = @resource[:ms_metadata] if ! @resource[:ms_metadata].nil?
-    @property_hash[:cib] = @resource[:cib] if ! @resource[:cib].nil?
   end
 
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing primitive')
-    Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'delete', @property_hash[:name]])
+    cib = @resource[:cib]
+    Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'delete', @property_hash[:name]], cib)
     @property_hash.clear
   end
 
@@ -256,6 +256,10 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
         end
       end
 
+      unless @resource[:cib].empty?
+        cib = @resource[:cib]
+      end
+
       # We destroy the ressource if it's type, class or provider has changed
       unless @property_hash[:existing_resource] == :false
         existing_ressource_type = "#{@property_hash[:existing_primitive_class]}:"
@@ -263,12 +267,10 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
         existing_ressource_type << "#{@property_hash[:existing_primitive_type]}"
         if existing_ressource_type != ressource_type
           debug('Removing primitive')
-          Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'delete', @property_hash[:name]])
+          Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'delete', @property_hash[:name]], cib)
           force_reinstall = :true
         end
       end
-
-      ENV['CIB_shadow'] = @property_hash[:cib]
 
       if @property_hash[:existing_resource] == :false or force_reinstall == :true
         cmd = [ command(:pcs), 'resource', 'create', "#{@property_hash[:name]}" ]
@@ -277,7 +279,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
         cmd += operations unless operations.nil?
         cmd += utilization unless utilization.nil?
         cmd += metadatas unless metadatas.nil?
-        raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+        raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd, cib)
         # if we are using a master/slave resource, prepend ms_ before its name
         # and declare it as a master/slave resource
         if @property_hash[:promotable] == :true
@@ -288,12 +290,12 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
               cmd << "#{k}=#{v}"
             end
           end
-          raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+          raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd, cib)
         end
         # try to remove the default monitor operation
         if @property_hash[:operations]["monitor"].nil?
           cmd = [ command(:pcs), 'resource', 'op', 'remove', "#{@property_hash[:name]}", 'monitor', 'interval=60s' ]
-          Puppet::Provider::Pacemaker::run_pcs_command(cmd, false)
+          Puppet::Provider::Pacemaker::run_pcs_command(cmd, cib, false)
         end
       else
         # if there is no operations defined, we ensure that they are not present
@@ -304,7 +306,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
             o[1].each_pair do |k,v|
               cmd << "#{k}=#{v}"
             end
-            Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+            Puppet::Provider::Pacemaker::run_pcs_command(cmd, cib)
           end
         end
         cmd = [ command(:pcs), 'resource', 'update', "#{@property_hash[:name]}" ]
@@ -312,7 +314,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
         cmd += operations unless operations.nil?
         cmd += utilization unless utilization.nil?
         cmd += metadatas unless metadatas.nil?
-        raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+        raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd, cib)
         if @property_hash[:promotable] == :true
           cmd = [ command(:pcs), 'resource', 'update', "ms_#{@property_hash[:name]}", "#{@property_hash[:name]}" ]
           unless @property_hash[:ms_metadata].empty?
@@ -321,7 +323,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
               cmd << "#{k}=#{v}"
             end
           end
-          raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+          raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd, cib)
         end
       end
     end
