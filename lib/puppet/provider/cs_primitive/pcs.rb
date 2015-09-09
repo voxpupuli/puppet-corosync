@@ -273,7 +273,18 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
       end
 
       if @property_hash[:existing_resource] == :false or force_reinstall == :true
-        cmd = [ command(:pcs), 'resource', 'create', "#{@property_hash[:name]}" ]
+        default_cmd = [ command(:pcs), 'resource', 'create', "#{@property_hash[:name]}" ]
+        case Facter.value(:osfamily)
+        when 'RedHat'
+          case Facter.value(:operatingsystemmajrelease).to_s
+          when '7'
+            cmd = [ command(:pcs), 'resource', 'create', '--no-default-ops', "#{@property_hash[:name]}" ]
+          else
+            cmd = default_cmd
+          end
+        else
+          cmd = default_cmd
+        end
         cmd << ressource_type
         cmd += parameters unless parameters.nil?
         cmd += operations unless operations.nil?
