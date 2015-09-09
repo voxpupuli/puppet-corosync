@@ -309,16 +309,15 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
           Puppet::Provider::Pacemaker::run_pcs_command(cmd, cib, false)
         end
       else
-        # if there is no operations defined, we ensure that they are not present
-        if @property_hash[:operations].empty? and not @property_hash[:existing_operations].empty?
-          @property_hash[:existing_operations].each do |o|
-            cmd = [ command(:pcs), 'resource', 'op', 'remove', "#{@property_hash[:name]}" ]
-            cmd << "#{o[0]}"
-            o[1].each_pair do |k,v|
-              cmd << "#{k}=#{v}"
-            end
-            Puppet::Provider::Pacemaker::run_pcs_command(cmd, cib)
+        @property_hash[:existing_operations].reject{
+          |op, params| @property_hash[:operations].key?(op) and @property_hash[:operations][op] == params
+        }.each do |o|
+          cmd = [ command(:pcs), 'resource', 'op', 'remove', "#{@property_hash[:name]}" ]
+          cmd << "#{o[0]}"
+          o[1].each_pair do |k,v|
+            cmd << "#{k}=#{v}"
           end
+          Puppet::Provider::Pacemaker::run_pcs_command(cmd, cib)
         end
         cmd = [ command(:pcs), 'resource', 'update', "#{@property_hash[:name]}" ]
         cmd += parameters unless parameters.nil?
