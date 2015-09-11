@@ -42,7 +42,8 @@ Puppet::Type.newtype(:cs_colocation) do
     def should=(value)
       super
       if value.is_a? Array
-        raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be an array of at least two primitives." unless value.size >= 2
+        raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be an array of at least one element." unless value.size > 0
+        raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be an array of two primitives or an array of resource_hash." unless value[0].is_a?(Hash) or (value.size == 2 and value[0].is_a?(String))
         @should
       else
         raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be an array."
@@ -82,8 +83,10 @@ Puppet::Type.newtype(:cs_colocation) do
 
   autorequire(:cs_primitive) do
     autos = []
-    @parameters[:primitives].should.each do |val|
-      autos << unmunge_cs_primitive(val)
+    if @parameters[:primitives].should.first.is_a?(String)
+      @parameters[:primitives].should.each do |val|
+        autos << unmunge_cs_primitive(val)
+      end
     end
 
     autos

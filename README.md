@@ -121,6 +121,20 @@ cs_colocation { 'vip_with_service':
 }
 ```
 
+Advanced colocations are also possible with colocation sets like this:
+
+```puppet
+cs_colocation { 'mysql_and_ptheartbeat':
+  primitives    => [
+    {
+      resources   => ['mysql'],
+      options     => {'role' => 'master'},
+    },
+    { resources   => 'ptheartbeat' }
+  ],
+}
+```
+
 Configuring migration or state order
 ------------------------------------
 
