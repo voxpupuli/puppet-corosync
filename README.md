@@ -125,12 +125,12 @@ Advanced colocations are also possible with colocation sets like this:
 
 ```puppet
 cs_colocation { 'mysql_and_ptheartbeat':
-  primitives    => [
+  primitives => [
     {
-      resources   => ['mysql'],
-      options     => {'role' => 'master'},
+      primitives => ['mysql'],
+      options    => {'role' => 'master'},
     },
-    { resources   => 'ptheartbeat' }
+    { primitives => 'ptheartbeat' }
   ],
 }
 ```

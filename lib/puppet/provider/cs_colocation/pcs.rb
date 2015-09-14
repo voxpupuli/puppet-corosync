@@ -38,9 +38,9 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
           if options.keys.size > 0
             resource_set['options'] = options
           end
-          resource_set['resources'] = Array.new
+          resource_set['primitives'] = Array.new
           rs.each_element('resource_ref') do |rr|
-            resource_set['resources'] << rr.attributes['id']
+            resource_set['primitives'] << rr.attributes['id']
           end
           resource_sets << resource_set
         end
@@ -128,8 +128,8 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
   # Format a resource set for the pcs constraint colocation set
   def format_resource_set(rs)
     r = Array.new
-    until rs['resources'].empty?
-      r << rs['resources'].shift
+    until rs['primitives'].empty?
+      r << rs['primitives'].shift
     end
     if not rs['options'].nil?
       rs['options'].each do |o,v|
