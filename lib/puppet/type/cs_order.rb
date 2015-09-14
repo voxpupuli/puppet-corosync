@@ -29,6 +29,14 @@ Puppet::Type.newtype(:cs_order) do
       desired state after the first primitive."
   end
 
+  newproperty(:score) do
+    desc "The priority of the this ordered grouping.  Primitives can be a part
+      of multiple order groups and so there is a way to control which
+      primitives get priority when forcing the order of state changes on
+      other primitives.  This value can be an integer but is often defined
+      as the string INFINITY."
+   end
+
   newparam(:cib) do
     desc "Corosync applies its configuration immediately. Using a CIB allows
       you to group multiple primitives and relationships to be applied at
@@ -40,19 +48,10 @@ Puppet::Type.newtype(:cs_order) do
       also be added to your manifest."
   end
 
-  newproperty(:score) do
-    desc "The priority of the this ordered grouping.  Primitives can be a part
-      of multiple order groups and so there is a way to control which
-      primitives get priority when forcing the order of state changes on
-      other primitives.  This value can be an integer but is often defined
-      as the string INFINITY."
-
-    defaultto 'INFINITY'
+  newproperty(:kind) do
+    desc "The kind property. See upstream documentation."
   end
 
-  autorequire(:cs_shadow) do
-    [ @parameters[:cib] ]
-  end
   newproperty(:symmetrical) do
     desc "Boolean specifying if the resources should stop in reverse order.
         Default value: true."
@@ -60,6 +59,7 @@ Puppet::Type.newtype(:cs_order) do
   end
 
   valid_resource_types = [:cs_primitive, :cs_group]
+
   newparam(:resources_type) do
     desc "String to specify which HA resource type is used for this order,
       e.g. when you want to order groups (cs_group) instead of primitives.
@@ -71,10 +71,6 @@ Puppet::Type.newtype(:cs_order) do
     end
   end
 
-  autorequire(:service) do
-    [ 'corosync' ]
-  end
-
   valid_resource_types.each{ |possible_resource_type|
     # We're generating autorequire blocks for all possible cs_ types because
     # accessing the @parameters[:resources_type].value doesn't seem possible
@@ -83,8 +79,16 @@ Puppet::Type.newtype(:cs_order) do
       autos = []
       resource_type = @parameters[:resources_type].value
       if resource_type.to_sym == possible_resource_type.to_sym
-        autos << unmunge_cs_resourcename(@parameters[:first].should)
-        autos << unmunge_cs_resourcename(@parameters[:second].should)
+        first = unmunge_cs_resourcename(@parameters[:first].should)
+        second = unmunge_cs_resourcename(@parameters[:second].should)
+        [first, second].each do | rsc |
+          if rsc.include? ':'
+            items = rsc.split(':')
+            autos << items[0]
+          else
+            autos << rsc
+          end
+        end
       end
 
       autos
@@ -99,4 +103,27 @@ Puppet::Type.newtype(:cs_order) do
 
     name
   end
+
+  autorequire(:cs_shadow) do
+    autos = []
+    if @parameters[:cib]
+      autos << @parameters[:cib].value
+    end
+
+    autos
+  end
+
+  autonotify(:cs_commit) do
+    autos = []
+    if @parameters[:cib]
+      autos << @parameters[:cib].value
+    end
+
+    autos
+  end
+
+  autorequire(:service) do
+    [ 'corosync' ]
+  end
+
 end
