@@ -82,13 +82,15 @@ Puppet::Type.newtype(:cs_colocation) do
     autos
   end
 
-  autonotify(:cs_commit) do
-    autos = []
-    if @parameters[:cib]
-      autos << @parameters[:cib].value
-    end
+  if Puppet::PUPPETVERSION.to_f >= 4.0
+    autonotify(:cs_commit) do
+      autos = []
+      if @parameters[:cib]
+        autos << @parameters[:cib].value
+      end
 
-    autos
+      autos
+    end
   end
 
   autorequire(:service) do

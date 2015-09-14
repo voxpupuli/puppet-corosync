@@ -209,6 +209,8 @@ Both `cs_shadow` and `cs_commit` are required. If you do not create `cs_commit`,
 will be automatically generated but you will need to specify explicitly
 the dependencies between `cs_*` resources and `cs_commit`.
 
+In Puppet 3.x you will need to notify `cs_commit`: `Cs_primitive <||> ~> Cs_commit<||>`
+
 ```puppet
 cs_shadow {
     'puppet':
