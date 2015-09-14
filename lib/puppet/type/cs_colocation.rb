@@ -43,7 +43,7 @@ Puppet::Type.newtype(:cs_colocation) do
       super
       if value.is_a? Array
         raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be an array of at least one element." unless value.size > 0
-        raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be an array of two primitives or an array of resource_hash." unless value[0].is_a?(Hash) or (value.size == 2 and value[0].is_a?(String))
+        raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be an array of primitives or an array of resource_hash." unless value[0].is_a?(Hash) or (value.size >= 2 and value[0].is_a?(String))
         @should
       else
         raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be an array."

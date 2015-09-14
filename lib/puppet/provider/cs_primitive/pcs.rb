@@ -118,12 +118,15 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
     @property_hash[:utilization] = @resource[:utilization] if ! @resource[:utilization].nil?
     @property_hash[:metadata] = @resource[:metadata] if ! @resource[:metadata].nil?
     @property_hash[:ms_metadata] = @resource[:ms_metadata] if ! @resource[:ms_metadata].nil?
+    @property_hash[:cib] = @resource[:cib] if ! @resource[:cib].nil?
   end
 
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing primitive')
-    cib = @resource[:cib]
+    if @property_hash[:cib]
+      cib = @property_hash[:cib]
+    end
     Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'delete', @property_hash[:name]], cib)
     @property_hash.clear
   end
@@ -266,8 +269,8 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
         end
       end
 
-      unless @resource[:cib].empty?
-        cib = @resource[:cib]
+      if @property_hash[:cib] and not @property_hash[:cib].empty?
+        cib = @property_hash[:cib]
       end
 
       # We destroy the ressource if it's type, class or provider has changed
