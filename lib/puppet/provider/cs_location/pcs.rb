@@ -53,7 +53,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
   def destroy
     debug('Removing location')
     cmd = [ command(:pcs), 'constraint', 'resource', 'remove', @resource[:name] ]
-    Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+    Puppet::Provider::Pacemaker::run_pcs_command(cmd, @resource[:cib])
     @property_hash.clear
   end
 
@@ -93,9 +93,8 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
   # params.
   def flush
     unless @property_hash.empty?
-      cib = @resource[:cib]
       cmd = [ command(:pcs), 'constraint', 'location', 'add', @property_hash[:name], @property_hash[:primitive], @property_hash[:node_name], @property_hash[:score]]
-      Puppet::Provider::Pacemaker::run_pcs_command(cmd, cib)
+      Puppet::Provider::Pacemaker::run_pcs_command(cmd, cib, @resource[:cib])
     end
   end
 end
