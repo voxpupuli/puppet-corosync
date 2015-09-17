@@ -46,4 +46,24 @@ Puppet::Type.newtype(:cs_property) do
   autorequire(:service) do
     [ 'corosync' ]
   end
+
+  autorequire(:cs_shadow) do
+    autos = []
+    if @parameters[:cib]
+      autos << @parameters[:cib].value
+    end
+
+    autos
+  end
+
+  if Puppet::PUPPETVERSION.to_f >= 4.0
+    autonotify(:cs_commit) do
+      autos = []
+      if @parameters[:cib]
+        autos << @parameters[:cib].value
+      end
+
+      autos
+    end
+  end
 end
