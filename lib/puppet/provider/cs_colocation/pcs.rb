@@ -88,7 +88,6 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
       :ensure     => :present,
       :primitives => @resource[:primitives],
       :score      => @resource[:score],
-      :cib        => @resource[:cib],
       :new        => true
     }
   end
@@ -148,7 +147,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
       if @property_hash[:new] == false
         debug('Removing colocation')
         cmd=[ command(:pcs), 'constraint', 'remove', @resource[:name]]
-        Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+        Puppet::Provider::Pacemaker::run_pcs_command(cmd, @resource[:cib])
       end
       first_item = @property_hash[:primitives].shift
       cmd = [ command(:pcs), 'constraint', 'colocation' ]
