@@ -50,7 +50,7 @@ Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacem
   def destroy
     debug('Removing cluster property')
     cmd = [ command(:pcs), 'property', 'unset', "#{@property_hash[:name]}" ]
-    raw, status = run_pcs_command(cmd)
+    raw, status = run_pcs_command(cmd, @resource[:cib])
     @property_hash.clear
   end
 
@@ -76,9 +76,8 @@ Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacem
     unless @property_hash.empty?
       # clear this on properties, in case it's set from a previous
       # run of a different corosync type
-      ENV['CIB_shadow'] = nil
       cmd = [ command(:pcs), 'property', 'set', "#{@property_hash[:name]}=#{@property_hash[:value]}" ]
-      raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+      raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd, @resource[:cib])
     end
   end
 end
