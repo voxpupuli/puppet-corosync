@@ -22,47 +22,50 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
     raw, status = run_pcs_command(cmd)
     doc = REXML::Document.new(raw)
 
-    doc.root.elements['configuration'].elements['constraints'].each_element('rsc_order') do |e|
-      items = e.attributes
+    constraints = doc.root.elements['configuration'].elements['constraints']
+    unless constraints.nil?
+      constraints.each_element('rsc_order') do |e|
+        items = e.attributes
 
-      if items['first-action'] and items['first-action'] != 'start'
-        first = "#{items['first']}:#{items['first-action']}"
-      else
-        first = items['first']
+        if items['first-action'] and items['first-action'] != 'start'
+          first = "#{items['first']}:#{items['first-action']}"
+        else
+          first = items['first']
+        end
+
+        if items['then-action'] and items['then-action'] != 'start'
+          second = "#{items['then']}:#{items['then-action']}"
+        else
+          second = items['then']
+        end
+
+        if items['score']
+          score = items['score']
+        end
+
+        if items['symmetrical']
+          symmetrical = (items['symmetrical'] == 'true')
+        else
+          symmetrical = true
+        end
+
+        if items['kind']
+          kind = items['kind'].downcase
+        end
+
+        order_instance = {
+          :name        => items['id'],
+          :ensure      => :present,
+          :first       => first,
+          :second      => second,
+          :kind        => kind,
+          :symmetrical => symmetrical,
+          :score       => score,
+          :provider    => self.name,
+          :new         => false
+        }
+        instances << new(order_instance)
       end
-
-      if items['then-action'] and items['then-action'] != 'start'
-        second = "#{items['then']}:#{items['then-action']}"
-      else
-        second = items['then']
-      end
-
-      if items['score']
-        score = items['score']
-      end
-
-      if items['symmetrical']
-        symmetrical = (items['symmetrical'] == 'true')
-      else
-        symmetrical = true
-      end
-
-      if items['kind']
-        kind = items['kind'].downcase
-      end
-
-      order_instance = {
-        :name        => items['id'],
-        :ensure      => :present,
-        :first       => first,
-        :second      => second,
-        :kind        => kind,
-        :symmetrical => symmetrical,
-        :score       => score,
-        :provider    => self.name,
-        :new         => false
-      }
-      instances << new(order_instance)
     end
     instances
   end

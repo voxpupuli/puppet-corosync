@@ -22,59 +22,62 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
     doc = REXML::Document.new(raw)
     resource_set_options = ['sequential', 'require-all', 'action', 'role']
 
-    doc.root.elements['configuration'].elements['constraints'].each_element('rsc_colocation') do |e|
-      items = e.attributes
+    constraints = doc.root.elements['configuration'].elements['constraints']
+    unless constraints.nil?
+      constraints.each_element('rsc_colocation') do |e|
+        items = e.attributes
 
-      if e.has_elements?
-        resource_sets = []
-        e.each_element('resource_set') do |rs|
-          resource_set = {}
-          options = {}
-          resource_set_options.each do |o|
-            if rs.attributes[o]
-              options[o] = rs.attributes[o]
+        if e.has_elements?
+          resource_sets = []
+          e.each_element('resource_set') do |rs|
+            resource_set = {}
+            options = {}
+            resource_set_options.each do |o|
+              if rs.attributes[o]
+                options[o] = rs.attributes[o]
+              end
             end
+            if options.keys.size > 0
+              resource_set['options'] = options
+            end
+            resource_set['primitives'] = Array.new
+            rs.each_element('resource_ref') do |rr|
+              resource_set['primitives'] << rr.attributes['id']
+            end
+            resource_sets << resource_set
           end
-          if options.keys.size > 0
-            resource_set['options'] = options
-          end
-          resource_set['primitives'] = Array.new
-          rs.each_element('resource_ref') do |rr|
-            resource_set['primitives'] << rr.attributes['id']
-          end
-          resource_sets << resource_set
-        end
-        colocation_instance = {
-          :name       => items['id'],
-          :ensure     => :present,
-          :primitives => resource_sets,
-          :score      => items['score'],
-          :provider   => self.name,
-          :new        => false
-        }
-      else
-        if items['rsc-role'] and items['rsc-role'] != "Started"
-          rsc = "#{items['rsc']}:#{items['rsc-role']}"
+          colocation_instance = {
+            :name       => items['id'],
+            :ensure     => :present,
+            :primitives => resource_sets,
+            :score      => items['score'],
+            :provider   => self.name,
+            :new        => false
+          }
         else
-          rsc = items['rsc']
-        end
+          if items['rsc-role'] and items['rsc-role'] != "Started"
+            rsc = "#{items['rsc']}:#{items['rsc-role']}"
+          else
+            rsc = items['rsc']
+          end
 
-        if items ['with-rsc-role'] and items['with-rsc-role'] != "Started"
-          with_rsc = "#{items['with-rsc']}:#{items['with-rsc-role']}"
-        else
-          with_rsc = items['with-rsc']
-        end
+          if items ['with-rsc-role'] and items['with-rsc-role'] != "Started"
+            with_rsc = "#{items['with-rsc']}:#{items['with-rsc-role']}"
+          else
+            with_rsc = items['with-rsc']
+          end
 
-        colocation_instance = {
-          :name       => items['id'],
-          :ensure     => :present,
-          :primitives => [rsc, with_rsc],
-          :score      => items['score'],
-          :provider   => self.name,
-          :new        => false
-        }
+          colocation_instance = {
+            :name       => items['id'],
+            :ensure     => :present,
+            :primitives => [rsc, with_rsc],
+            :score      => items['score'],
+            :provider   => self.name,
+            :new        => false
+          }
+        end
+        instances << new(colocation_instance)
       end
-      instances << new(colocation_instance)
     end
     instances
   end
