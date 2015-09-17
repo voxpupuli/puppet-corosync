@@ -97,7 +97,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
   def flush
     unless @property_hash.empty?
       cmd = [ command(:pcs), 'constraint', 'location', 'add', @property_hash[:name], @property_hash[:primitive], @property_hash[:node_name], @property_hash[:score]]
-      Puppet::Provider::Pacemaker::run_pcs_command(cmd, cib, @resource[:cib])
+      Puppet::Provider::Pacemaker::run_pcs_command(cmd, @resource[:cib])
     end
   end
 end
