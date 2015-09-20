@@ -26,6 +26,19 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
     hash
   end
 
+  def self.get_primitive_hash(name, cib)
+    cmd = [ command(:pcs), 'cluster', 'cib' ]
+    raw, status = run_pcs_command(cmd, cib)
+    doc = REXML::Document.new(raw)
+
+    primitive = nil
+    REXML::XPath.each(doc, '//primitive') do |e|
+      if e.attributes['id'].to_sym == name.to_sym
+        primitive = element_to_hash(e)
+      end
+    end
+  end
+
   # given an XML element (a <primitive> from cibadmin), produce a hash suitible
   # for creating a new provider instance.
   def self.element_to_hash(e)
