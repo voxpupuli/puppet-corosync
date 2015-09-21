@@ -139,6 +139,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
   # params.
   def flush
     unless @property_hash.empty?
+      @resource = Hash.new if @resource.nil?
       # The ressource_type variable is used to check if one of the class,
       # provider or type has changed
       ressource_type = "#{@property_hash[:primitive_class]}:"
