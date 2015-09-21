@@ -63,7 +63,6 @@ class Puppet::Provider::Pacemaker < Puppet::Provider
   end
 
   def exists?
-    self.class.block_until_ready
     debug(@property_hash.inspect)
     !(@property_hash[:ensure] == :absent or @property_hash.empty?)
   end
