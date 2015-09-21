@@ -25,7 +25,18 @@ class Puppet::Provider::Pacemaker < Puppet::Provider
     end
   end
 
+  # given an XML element containing some <nvpair>s, return a hash. Return an
+  # empty hash if `e` is nil.
+  def self.nvpairs_to_hash(e)
+    return {} if e.nil?
 
+    hash = {}
+    e.each_element do |i|
+      hash[(i.attributes['name'])] = i.attributes['value']
+    end
+
+    hash
+  end
 
   # Corosync takes a while to build the initial CIB configuration once the
   # service is started for the first time.  This provides us a way to wait
@@ -63,6 +74,7 @@ class Puppet::Provider::Pacemaker < Puppet::Provider
   end
 
   def exists?
+    #self.class.block_until_ready
     debug(@property_hash.inspect)
     !(@property_hash[:ensure] == :absent or @property_hash.empty?)
   end
