@@ -39,15 +39,6 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
     end
   end
 
-  # http://garylarizza.com/blog/2013/12/15/seriously-what-is-this-provider-doing/
-  def self.prefetch(resources)
-    instances.each do |prov|
-      if resource = resources[prov.name]
-        resource.provider = prov
-      end
-    end
-  end
-
   # given an XML element (a <primitive> from cibadmin), produce a hash suitible
   # for creating a new provider instance.
   def self.element_to_hash(e)
