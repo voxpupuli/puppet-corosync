@@ -12,6 +12,8 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
 
   commands :pcs => 'pcs'
 
+  mk_resource_methods
+
   defaultfor :operatingsystem => [:fedora, :centos, :redhat]
 
   def self.get_primitive_hash(name, cib)
@@ -43,6 +45,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
       :metadata                 => nvpairs_to_hash(e.elements['meta_attributes']),
       :ms_metadata              => {},
       :promotable               => :false,
+      :existing_promotable      => :false,
       :existing_resource        => :true,
       :existing_primitive_class => e.attributes['class'],
       :existing_primitive_type  => e.attributes['type'],
@@ -71,6 +74,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
     end
     if e.parent.name == 'master'
       hash[:promotable] = :true
+      hash[:existing_promotable] = :true
       if ! e.parent.elements['meta_attributes'].nil?
         e.parent.elements['meta_attributes'].each_element do |m|
           hash[:ms_metadata][(m.attributes['name'])] = m.attributes['value']
@@ -110,6 +114,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
       :provided_by          => @resource[:provided_by],
       :primitive_type       => @resource[:primitive_type],
       :promotable           => @resource[:promotable],
+      :existing_promotable           => @resource[:promotable],
       :existing_metadata    => {},
       :existing_ms_metadata => {},
       :existing_resource    => :false,
@@ -126,89 +131,6 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
     debug('Removing primitive')
     Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'delete', @property_hash[:name]], @resource[:cib])
     @property_hash.clear
-  end
-
-  # Getters that obtains the parameters and operations defined in our primitive
-  # that have been populated by prefetch or instances (depends on if your using
-  # puppet resource or not).
-  def parameters
-    @property_hash[:parameters]
-  end
-
-  def primitive_class
-    @property_hash[:primitive_class]
-  end
-
-  def provided_by
-    @property_hash[:provided_by]
-  end
-
-  def primitive_type
-    @property_hash[:primitive_type]
-  end
-
-  def operations
-    @property_hash[:operations]
-  end
-
-  def utilization
-    @property_hash[:utilization]
-  end
-
-  def metadata
-    @property_hash[:metadata]
-  end
-
-  def ms_metadata
-    @property_hash[:ms_metadata]
-  end
-
-  def promotable
-    @property_hash[:promotable]
-  end
-
-  # Our setters for parameters and operations.  Setters are used when the
-  # resource already exists so we just update the current value in the
-  # property_hash and doing this marks it to be flushed.
-  def parameters=(should)
-    @property_hash[:parameters] = should
-  end
-
-  def primitive_class=(should)
-    @property_hash[:primitive_class] = should
-  end
-
-  def provided_by=(should)
-    @property_hash[:provided_by] = should
-  end
-
-  def primitive_type=(should)
-    @property_hash[:primitive_type] = should
-  end
-  def operations=(should)
-    @property_hash[:operations] = should
-  end
-
-  def utilization=(should)
-    @property_hash[:utilization] = should
-  end
-
-  def metadata=(should)
-    @property_hash[:metadata] = should
-  end
-
-  def ms_metadata=(should)
-    @property_hash[:ms_metadata] = should
-  end
-
-  def promotable=(should)
-    case should
-    when :true
-      @property_hash[:promotable] = should
-    when :false
-      @property_hash[:promotable] = should
-      Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'delete', "ms_#{@resource[:name]}"], @resource[:cib])
-    end
   end
 
   # Flush is triggered on anything that has been detected as being
@@ -315,6 +237,9 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
           Puppet::Provider::Pacemaker::run_pcs_command(cmd, @resource[:cib], false)
         end
       else
+        if @property_hash[:promotable] == :false and @property_hash[:existing_promotable] == :true
+          Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'delete', "ms_#{@resource[:name]}"], @resource[:cib])
+        end
         @property_hash[:existing_operations].reject{
           |op, params| @property_hash[:operations].key?(op) and @property_hash[:operations][op] == params
         }.each do |o|
