@@ -129,7 +129,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing primitive')
-    Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'delete', @property_hash[:name]], @resource[:cib])
+    Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'delete', '--force', @property_hash[:name]], @resource[:cib])
     @property_hash.clear
   end
 
@@ -195,8 +195,8 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
         existing_ressource_type << "#{@property_hash[:existing_provided_by]}:" if @property_hash[:existing_provided_by]
         existing_ressource_type << "#{@property_hash[:existing_primitive_type]}"
         if existing_ressource_type != ressource_type
-          debug('Removing primitive')
-          Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'delete', @property_hash[:name]], @resource[:cib])
+          debug("Removing primitive #{@property_hash[:name]} in shadow cib #{@resource[:cib]}")
+          Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'delete', '--force', @property_hash[:name]], @resource[:cib])
           force_reinstall = :true
         end
       end
@@ -239,7 +239,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
         end
       else
         if @property_hash[:promotable] == :false and @property_hash[:existing_promotable] == :true
-          Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'delete', "ms_#{@resource[:name]}"], @resource[:cib])
+          Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'delete', '--force', "ms_#{@resource[:name]}"], @resource[:cib])
         end
         @property_hash[:existing_operations].reject{
           |op, params| @property_hash[:operations].key?(op) and @property_hash[:operations][op] == params
