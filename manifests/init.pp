@@ -78,6 +78,14 @@
 #   Define what version of pacemaker should be installed.
 #   Defaults to present
 #
+# [*package_pcs*]
+#   Define if package pcs should be installed.
+#   Defaults to true
+#
+# [*version_pcs*]
+#   Define what version of pcs should be installed.
+#   Defaults to present
+#
 # [*set_votequorum*]
 #   Set to true if corosync_votequorum should be used as quorum provider.
 #   Defaults to false.
@@ -134,6 +142,8 @@ class corosync(
   $version_corosync                    = undef,
   $package_pacemaker                   = undef,
   $version_pacemaker                   = undef,
+  $package_pcs                         = undef,
+  $version_pcs                         = undef,
   $set_votequorum                      = $::corosync::params::set_votequorum,
   $quorum_members                      = ['localhost'],
   $token                               = $::corosync::params::token,
@@ -261,8 +271,22 @@ class corosync(
   }
 
   if $::osfamily == 'RedHat' {
-    package { 'pcs':
-      ensure => present,
+    if $package_pcs == undef {
+      $_package_pcs = true
+    } else {
+      $_package_pcs = $package_pcs
+    }
+  
+    if $version_pcs == undef {
+      $_version_pcs = present
+    } else {
+      $_version_pcs = $version_pcs
+    }
+
+    if $_package_pcs {
+      package { 'pcs':
+        ensure => $_version_pcs,
+      }
     }
   }
   
