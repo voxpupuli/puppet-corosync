@@ -66,18 +66,6 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
         expect(instance.name).to eq(:example_vm)
       end
 
-      it "has an primitive_class parameter corresponding to the <primitive>'s class attribute" do
-        pending 'knowing the proper way to assert this'
-      end
-
-      it "has an primitive_type parameter corresponding to the <primitive>'s type attribute" do
-        pending 'knowing the proper way to assert this'
-      end
-
-      it "has an provided_by parameter corresponding to the <primitive>'s provider attribute" do
-        pending 'knowing the proper way to assert this'
-      end
-
       it 'has a parameters property corresponding to <instance_attributes>' do
         expect(instance.parameters).to eq({
           "xmfile" => "/etc/xen/example_vm.cfg",
