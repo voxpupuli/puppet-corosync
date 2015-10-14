@@ -61,6 +61,7 @@ cs_primitive { 'nginx_service':
     'monitor' => { 'interval' => '10s', 'timeout' => '30s' },
     'start'   => { 'interval' => '0', 'timeout' => '30s', 'on-fail' => 'restart' }
   },
+  metadata        => { 'migration-threshold' => '3'},
   require         => Cs_primitive['nginx_vip'],
 }
 ```
@@ -118,6 +119,20 @@ because web01 just hit the dirt it will drag the nginx service with it.
 ```puppet
 cs_colocation { 'vip_with_service':
   primitives => [ 'nginx_vip', 'nginx_service' ],
+}
+```
+
+Advanced colocations are also possible with colocation sets like this:
+
+```puppet
+cs_colocation { 'mysql_and_ptheartbeat':
+  primitives => [
+    {
+      primitives => ['mysql'],
+      options    => {'role' => 'master'},
+    },
+    { primitives => 'ptheartbeat' }
+  ],
 }
 ```
 
@@ -179,6 +194,42 @@ Don't move resources.
 ```puppet
 cs_rsc_defaults { 'resource-stickiness' :
   value => 'INFINITY',
+}
+```
+
+Shadow Cluster
+--------------
+
+By using `cs_shadow` and `cs_commit` you can make all the changes in a sandbox and
+apply them atomically. See [upstream documentation](http://clusterlabs.org/doc/en-US/Pacemaker/1.0/html/Pacemaker_Explained/s-config-sandboxes.html)
+for more details.
+
+It is then needed to add the `cib` parameter to the `cs_*` resources.
+
+Both `cs_shadow` and `cs_commit` are required. If you do not create `cs_commit`, it
+will be automatically generated but you will need to specify explicitly
+the dependencies between `cs_*` resources and `cs_commit`.
+
+In Puppet 3.x you will need to notify `cs_commit`: `Cs_primitive <||> ~> Cs_commit<||>`
+
+```puppet
+cs_shadow {
+    'puppet':
+}
+cs_commit {
+    'puppet':
+}
+cs_primitive { 'nginx_service':
+  primitive_class => 'ocf',
+  primitive_type  => 'nginx_fixed',
+  provided_by     => 'pacemaker',
+  cib             => 'puppet',
+}
+cs_location { 'nginx_service_location':
+  primitive => 'nginx_service',
+  node_name => 'hostname',
+  score     => 'INFINITY'
+  cib       => 'puppet',
 }
 ```
 

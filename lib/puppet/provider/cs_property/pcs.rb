@@ -9,7 +9,7 @@ Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacem
   defaultfor :operatingsystem => [:fedora, :centos, :redhat]
 
   # Path to the pcs binary for interacting with the cluster configuration.
-  commands :pcs           => 'pcs'
+  commands :pcs => 'pcs'
 
   def self.instances
 
@@ -21,17 +21,20 @@ Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacem
     raw, status = run_pcs_command(cmd)
     doc = REXML::Document.new(raw)
 
-    doc.root.elements['configuration/crm_config/cluster_property_set'].each_element do |e|
-      items = e.attributes
-      property = { :name => items['name'], :value => items['value'] }
+    properties = doc.root.elements['configuration/crm_config/cluster_property_set']
+    unless properties.nil?
+      properties.each_element do |e|
+        items = e.attributes
+        property = { :name => items['name'], :value => items['value'] }
 
-      property_instance = {
-        :name       => property[:name],
-        :ensure     => :present,
-        :value      => property[:value],
-        :provider   => self.name
-      }
-      instances << new(property_instance)
+        property_instance = {
+          :name       => property[:name],
+          :ensure     => :present,
+          :value      => property[:value],
+          :provider   => self.name
+        }
+        instances << new(property_instance)
+      end
     end
     instances
   end
@@ -50,7 +53,7 @@ Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacem
   def destroy
     debug('Removing cluster property')
     cmd = [ command(:pcs), 'property', 'unset', "#{@property_hash[:name]}" ]
-    raw, status = run_pcs_command(cmd)
+    raw, status = run_pcs_command(cmd, @resource[:cib])
     @property_hash.clear
   end
 
@@ -76,9 +79,8 @@ Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacem
     unless @property_hash.empty?
       # clear this on properties, in case it's set from a previous
       # run of a different corosync type
-      ENV['CIB_shadow'] = nil
       cmd = [ command(:pcs), 'property', 'set', "#{@property_hash[:name]}=#{@property_hash[:value]}" ]
-      raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+      raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd, @resource[:cib])
     end
   end
 end

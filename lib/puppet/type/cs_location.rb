@@ -44,7 +44,23 @@ Puppet::Type.newtype(:cs_location) do
   end
 
   autorequire(:cs_shadow) do
-    [ @parameters[:cib] ]
+    autos = []
+    if @parameters[:cib]
+      autos << @parameters[:cib].value
+    end
+
+    autos
+  end
+
+  if Puppet::PUPPETVERSION.to_f >= 4.0
+    autonotify(:cs_commit) do
+      autos = []
+      if @parameters[:cib]
+        autos << @parameters[:cib].value
+      end
+
+      autos
+    end
   end
 
   autorequire(:service) do

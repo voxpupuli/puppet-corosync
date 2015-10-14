@@ -8,19 +8,6 @@ Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemake
 
   defaultfor :operatingsystem => [:fedora, :centos, :redhat]
 
-  # given an XML element containing some <nvpair>s, return a hash. Return an
-  # empty hash if `e` is nil.
-  def self.nvpairs_to_hash(e)
-    return {} if e.nil?
-
-    hash = {}
-    e.each_element do |i|
-      hash[(i.attributes['name'])] = i.attributes['value'].strip
-    end
-
-    hash
-  end
-
   def self.instances
 
     block_until_ready
@@ -31,23 +18,26 @@ Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemake
     raw, status = run_pcs_command(cmd)
     doc = REXML::Document.new(raw)
 
-    doc.root.elements['configuration'].elements['resources'].each_element('clone') do |e|
-      primitive_id = e.elements['primitive'].attributes['id']
-      items = nvpairs_to_hash(e.elements['meta_attributes'])
+    clones = doc.root.elements['configuration'].elements['resources']
+    unless clones.nil?
+      clones.each_element('clone') do |e|
+        primitive_id = e.elements['primitive'].attributes['id']
+        items = nvpairs_to_hash(e.elements['meta_attributes'])
 
-      clone_instance = {
-        :name              => e.attributes['id'],
-        :ensure            => :present,
-        :primitive         => primitive_id,
-        :clone_max         => items['clone-max'],
-        :clone_node_max    => items['clone-node-max'],
-        :notify_clones     => items['notify'],
-        :globally_unique   => items['globally-unique'],
-        :ordered           => items['ordered'],
-        :interleave        => items['interleave'],
-        :existing_resource => :true,
-      }
-      instances << new(clone_instance)
+        clone_instance = {
+          :name              => e.attributes['id'],
+          :ensure            => :present,
+          :primitive         => primitive_id,
+          :clone_max         => items['clone-max'],
+          :clone_node_max    => items['clone-node-max'],
+          :notify_clones     => items['notify'],
+          :globally_unique   => items['globally-unique'],
+          :ordered           => items['ordered'],
+          :interleave        => items['interleave'],
+          :existing_resource => :true,
+        }
+        instances << new(clone_instance)
+      end
     end
     instances
   end
