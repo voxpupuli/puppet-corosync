@@ -61,6 +61,7 @@ cs_primitive { 'nginx_service':
     'monitor' => { 'interval' => '10s', 'timeout' => '30s' },
     'start'   => { 'interval' => '0', 'timeout' => '30s', 'on-fail' => 'restart' }
   },
+  metadata        => { 'migration-threshold' => '3'},
   require         => Cs_primitive['nginx_vip'],
 }
 ```
