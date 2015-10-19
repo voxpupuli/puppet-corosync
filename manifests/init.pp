@@ -265,7 +265,7 @@ class corosync(
       ensure => present,
     }
   }
-  
+
   # Template uses:
   # - $unicast_addresses
   # - $multicast_address
