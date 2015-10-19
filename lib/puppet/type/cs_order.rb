@@ -119,10 +119,10 @@ Puppet::Type.newtype(:cs_order) do
   autorequire(:cs_clone) do
     autos = []
     if @parameters[:first]
-      autos << @parameters[:first].value.slice("-clone")
+      autos << @parameters[:first].value
     end
     if @parameters[:second]
-      autos << @parameters[:second].value.slice("-clone")
+      autos << @parameters[:second].value
     end
 
     autos

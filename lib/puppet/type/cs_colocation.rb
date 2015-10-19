@@ -97,15 +97,30 @@ Puppet::Type.newtype(:cs_colocation) do
     [ 'corosync' ]
   end
 
-  autorequire(:cs_primitive) do
-    autos = []
-    if @parameters[:primitives].should.first.is_a?(String)
-      @parameters[:primitives].should.each do |val|
-        autos << unmunge_cs_primitive(val)
+
+  def extract_primitives
+    result = []
+    if @parameters[:primitives].should.first.is_a?(Hash)
+      @parameters[:primitives].should.each do |colocation_set|
+        if colocation_set.has_key?('primitives')
+          result << colocation_set['primitives']
+        end
       end
     end
+    if @parameters[:primitives].should.first.is_a?(String)
+      @parameters[:primitives].should.each do |val|
+        result << unmunge_cs_primitive(val)
+      end
+    end
+    result.flatten
+  end
 
-    autos
+  autorequire(:cs_clone) do
+    extract_primitives
+  end
+
+  autorequire(:cs_primitive) do
+    extract_primitives
   end
 
   def unmunge_cs_primitive(name)
