@@ -52,6 +52,25 @@ Puppet::Type.newtype(:cs_location) do
     autos
   end
 
+  autorequire(:cs_primitive) do
+    autos = []
+    if @parameters[:primitive]
+      autos << @parameters[:primitive].value
+    end
+
+    autos
+  end
+
+  autorequire(:cs_clone) do
+    autos = []
+    if @parameters[:primitive]
+      autos << @parameters[:primitive].value.slice("-clone")
+    end
+
+    autos
+  end
+
+
   if Puppet::PUPPETVERSION.to_f >= 4.0
     autonotify(:cs_commit) do
       autos = []

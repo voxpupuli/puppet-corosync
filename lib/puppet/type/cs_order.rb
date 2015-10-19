@@ -104,6 +104,30 @@ Puppet::Type.newtype(:cs_order) do
     name
   end
 
+  autorequire(:cs_primitive) do
+    autos = []
+    if @parameters[:first]
+      autos << @parameters[:first].value
+    end
+    if @parameters[:second]
+      autos << @parameters[:second].value
+    end
+
+    autos
+  end
+
+  autorequire(:cs_clone) do
+    autos = []
+    if @parameters[:first]
+      autos << @parameters[:first].value.slice("-clone")
+    end
+    if @parameters[:second]
+      autos << @parameters[:second].value.slice("-clone")
+    end
+
+    autos
+  end
+
   autorequire(:cs_shadow) do
     autos = []
     if @parameters[:cib]
