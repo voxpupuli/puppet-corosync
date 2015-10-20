@@ -3,7 +3,7 @@
   "version": "0.8.0",
   "author": "puppet-community",
   "summary": "This module is a set of manifests and types/providers for quickly setting up highly available clusters using Corosync",
-  "license": "Apache License, Version 2.0",
+  "license": "Apache-2.0",
   "source": "https://github.com/puppet-community/puppet-corosync",
   "project_page": "https://github.com/puppet-community/puppet-corosync",
   "issues_url": "https://github.com/puppet-community/puppet-corosync/issues",
