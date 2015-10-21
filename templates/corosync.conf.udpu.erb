@@ -13,21 +13,19 @@ totem {
   secauth:                             <%= @enable_secauth_real %>
   threads:                             <%= @threads %>
   transport:                           udpu
-<% Array(@bind_address).each_index do |i| -%>
   interface {
-<% Array(@unicast_addresses)[i].each do |addr| -%>
+<% @unicast_addresses.each do |addr| -%>
     member {
       memberaddr: <%= addr %>
     }
 <% end -%>
     ringnumber:  0
-    bindnetaddr: <%= Array(@bind_address)[i] %>
+    bindnetaddr: <%= @bind_address %>
     mcastport:   <%= @port %>
 <% if @ttl -%>
     ttl:         <%= @ttl %>
 <% end -%>
   }
-<% end -%>
 }
 
 logging {

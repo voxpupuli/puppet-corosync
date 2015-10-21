@@ -208,19 +208,19 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
 
     it "sets a primitive_class parameter corresponding to the <primitive>'s class attribute" do
       vip_instance.primitive_class = 'IPaddr3'
-      expect_update(/resource (create --force|delete --force|op remove) example_vip/)
+      expect_update(/resource (create --force|unclone|delete --force|op remove) example_vip/)
       vip_instance.flush
     end
 
     it "sets an primitive_type parameter corresponding to the <primitive>'s type attribute" do
       vip_instance.primitive_type = 'stonith'
-      expect_update(/resource (create --force|delete --force|op remove) example_vip/)
+      expect_update(/resource (create --force|unclone|delete --force|op remove) example_vip/)
       vip_instance.flush
     end
 
     it "sets an provided_by parameter corresponding to the <primitive>'s provider attribute" do
       vip_instance.provided_by = 'inuits'
-      expect_update(/resource (create --force|delete --force|op remove) example_vip/)
+      expect_update(/resource (create --force|unclone|delete --force|op remove) example_vip/)
       vip_instance.flush
     end
 
