@@ -71,7 +71,7 @@ Puppet::Type.newtype(:cs_location) do
   end
 
 
-  if Puppet::PUPPETVERSION.to_f >= 4.0
+  if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '4.0') >= 0
     autonotify(:cs_commit) do
       autos = []
       if @parameters[:cib]

@@ -12,7 +12,7 @@ class Puppet::Provider::Pacemaker < Puppet::Provider
     else
       custom_environment = {:custom_environment => {'CIB_shadow' => cib}}
     end
-    if Puppet::PUPPETVERSION.to_f < 3.4
+    if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
       raw, status = Puppet::Util::SUIDManager.run_and_capture(pcs_cmd, nil, nil, custom_environment)
     else
       raw = Puppet::Util::Execution.execute(pcs_cmd, {:failonfail => failonfail}.merge(custom_environment))

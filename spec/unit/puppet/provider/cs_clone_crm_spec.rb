@@ -25,7 +25,7 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
       EOS
 
       described_class.expects(:block_until_ready).returns(nil)
-      if Puppet::PUPPETVERSION.to_f < 3.4
+      if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with(['crm', 'configure', 'show', 'xml']).at_least_once.returns([test_cib, 0])
       else
         Puppet::Util::Execution.expects(:execute).with(['crm', 'configure', 'show', 'xml']).at_least_once.returns(
