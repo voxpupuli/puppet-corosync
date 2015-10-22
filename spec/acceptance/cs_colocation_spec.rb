@@ -24,6 +24,9 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   File.open('/tmp/ca.pem', 'w') { |f| f.write(cert) }
   it 'with defaults' do
     pp = <<-EOS
+      package{ 'pcs':
+        ensure => installed,
+      } ->
       file { '/tmp/ca.pem':
         ensure  => file,
         content => '#{cert}'
