@@ -24,9 +24,6 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   File.open('/tmp/ca.pem', 'w') { |f| f.write(cert) }
   it 'with defaults' do
     pp = <<-EOS
-      package{ 'pcs':
-        ensure => installed,
-      } ->
       file { '/tmp/ca.pem':
         ensure  => file,
         content => '#{cert}'
@@ -37,7 +34,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         bind_address      => '127.0.0.1',
         set_votequorum    => true,
         quorum_members    => ['127.0.0.1'],
-      }
+      } ->
       corosync::service { 'pacemaker':
         version => '1',
         before  => Service['pacemaker'],
@@ -54,7 +51,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       service { 'pacemaker':
         ensure    => running,
         subscribe => Service['corosync'],
-      }
+      } ->
       cs_property { 'stonith-enabled' :
         value   => 'false',
       } ->
@@ -78,9 +75,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     EOS
 
     apply_manifest(pp, :catch_failures => true)
-    unless fact('osfamily') == 'RedHat' # Something's wrong with the pcs provider
-      apply_manifest(pp, :catch_changes => true)
-    end
+    apply_manifest(pp, :catch_changes => true)
   end
 
   describe service('corosync') do
