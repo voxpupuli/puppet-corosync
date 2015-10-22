@@ -107,6 +107,17 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
   end
 
+  it 'read journalctl logs' do
+    if fact('osfamily') == 'RedHat'
+      command = 'journalctl -xn > /dev/stderr'
+    else
+      command = 'echo not relevant'
+    end
+    shell(command) do |r|
+      expect(r.stdout).to match(/./)
+    end
+  end
+
 end
 
 
