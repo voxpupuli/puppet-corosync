@@ -1,4 +1,10 @@
 #! /usr/bin/env ruby -S rspec
+
+# This file comes from puppetlabs-stdlib
+# which is licensed under the Apache-2.0 License.
+# https://github.com/puppetlabs/puppetlabs-stdlib
+# (c) 2015-2015 Puppetlabs and puppetlabs-stdlib contributors
+
 require 'beaker-rspec'
 require 'beaker/puppet_install_helper'
 
