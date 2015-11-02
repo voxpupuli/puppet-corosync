@@ -11,6 +11,8 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
 
   commands :pcs => 'pcs'
 
+  mk_resource_methods
+
   def self.instances
 
     block_until_ready
@@ -27,13 +29,14 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
         items = e.attributes
 
         location_instance = {
-          :name       => items['id'],
-          :ensure     => :present,
-          :primitive  => items['rsc'],
-          :node_name  => items['node'],
-          :score      => items['score'],
-          :provider   => self.name
+          :name               => items['id'],
+          :ensure             => :present,
+          :primitive          => items['rsc'],
+          :node_name          => items['node'],
+          :score              => items['score'],
+          :provider           => self.name
         }
+        location_instance[:resource_discovery] = items['resource-discovery'] unless items['resource-discovery'].nil?
         instances << new(location_instance)
       end
     end
@@ -48,8 +51,10 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
       :ensure     => :present,
       :primitive  => @resource[:primitive],
       :node_name  => @resource[:node_name],
+      :resource_discovery  => @resource[:resource_discovery],
       :score      => @resource[:score],
     }
+    @property_hash[:resource_discovery] = @resource['resource_discovery'] unless @resource['resource_discovery'].nil?
   end
 
   # Unlike create we actually immediately delete the item.
@@ -60,43 +65,18 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
     @property_hash.clear
   end
 
-  # Getters that obtains the parameters defined in our location that have been
-  # populated by prefetch or instances (depends on if your using puppet resource
-  # or not).
-  def primitive
-    @property_hash[:primitive]
-  end
-
-  def node_name
-    @property_hash[:node_name]
-  end
-
-  def score
-    @property_hash[:score]
-  end
-
-  # Our setters for parameters.  Setters are used when the resource already
-  # exists so we just update the current value in the location_hash and doing
-  # this marks it to be flushed.
-  def primitive=(should)
-    @property_hash[:primitive] = should
-  end
-
-  def node_name=(should)
-    @property_hash[:node_name] = should
-  end
-
-  def score=(should)
-    @property_hash[:score] = should
-  end
-
   # Flush is triggered on anything that has been detected as being
   # modified in the location_hash.
   # It calls several pcs commands to make the resource look like the
   # params.
   def flush
     unless @property_hash.empty?
+      cmd = [ command(:pcs), 'constraint', 'resource', 'remove', @resource[:name] ]
+      Puppet::Provider::Pacemaker::run_pcs_command(cmd, @resource[:cib], false)
       cmd = [ command(:pcs), 'constraint', 'location', 'add', @property_hash[:name], @property_hash[:primitive], @property_hash[:node_name], @property_hash[:score]]
+      unless @property_hash[:resource_discovery].nil?
+        cmd << "resource-discovery=#{@property_hash[:resource_discovery]}"
+      end
       Puppet::Provider::Pacemaker::run_pcs_command(cmd, @resource[:cib])
     end
   end
