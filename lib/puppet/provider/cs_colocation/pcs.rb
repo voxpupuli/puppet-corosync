@@ -36,12 +36,10 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
         with_rsc = items['with-rsc']
       end
 
-      # Sorting the array of primitives because order doesn't matter so someone
-      # switching the order around shouldn't generate an event.
       colocation_instance = {
         :name       => items['id'],
         :ensure     => :present,
-        :primitives => [rsc, with_rsc].sort,
+        :primitives => [with_rsc, rsc],
         :score      => items['score'],
         :provider   => self.name,
         :new        => false
@@ -89,7 +87,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
   # resource already exists so we just update the current value in the property
   # hash and doing this marks it to be flushed.
   def primitives=(should)
-    @property_hash[:primitives] = should.sort
+    @property_hash[:primitives]
   end
 
   def score=(should)
