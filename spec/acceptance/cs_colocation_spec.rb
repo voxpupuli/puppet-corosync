@@ -51,7 +51,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       service { 'pacemaker':
         ensure    => running,
         subscribe => Service['corosync'],
-      }
+      } ->
       cs_property { 'stonith-enabled' :
         value   => 'false',
       } ->
