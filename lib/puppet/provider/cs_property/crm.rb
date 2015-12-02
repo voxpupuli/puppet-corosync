@@ -76,6 +76,7 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Crmsh
   # the updates that need to be made.  The temporary file is then used
   # as stdin for the crm command.
   def flush
+    self.class.block_until_ready
     unless @property_hash.empty?
       # clear this on properties, in case it's set from a previous
       # run of a different corosync type
