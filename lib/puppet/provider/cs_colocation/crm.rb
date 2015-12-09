@@ -54,6 +54,7 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
         # Notice, we can only interpret colocations of single sets, not multiple sets combined.
         # In Pacemaker speak, this means we can support "A B C" but not e.g. "A B (C D) E".
         # Feel free to contribute a patch for this.
+        primitives = []
         e.each_element('resource_set') do |rset|
           rsetitems = rset.attributes
 
@@ -65,7 +66,6 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
           end
 
           # Add all referenced resources to the primitives array.
-          primitives = []
           rset.each_element('resource_ref') do |rref|
             rrefitems = rref.attributes
             if rsetrole
