@@ -184,6 +184,7 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Crmsh) d
         meta << "ordered=#{@property_hash[:ordered]} " if @property_hash[:ordered]
         meta << "interleave=#{@property_hash[:interleave]}" if @property_hash[:interleave]
         updated << meta if not meta.empty?
+        debug("Loading update: #{updated}")
         Tempfile.open('puppet_crm_update') do |tmpfile|
           tmpfile.write(updated)
           tmpfile.flush
