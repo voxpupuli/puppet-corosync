@@ -153,6 +153,7 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
       end
       updated = "colocation "
       updated << "#{@property_hash[:name]} #{@property_hash[:score]}: #{primitives.join(' ')}"
+      debug("Loading update: #{updated}")
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
