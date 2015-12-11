@@ -17,7 +17,7 @@ class Puppet::Provider::Crmsh < Puppet::Provider
     if Puppet::PUPPETVERSION.to_f < 3.4
       raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
     else
-      raw = Puppet::Util::Execution.execute(cmd, :failonfail => false)
+      raw = Puppet::Util::Execution.execute(cmd, :failonfail => false, :combine => true)
       status = raw.exitstatus
     end
     if status == 0
@@ -28,6 +28,7 @@ class Puppet::Provider::Crmsh < Puppet::Provider
       sleep 2
       return true
     else
+      debug("Corosync not ready, retrying: #{raw}")
       return false
     end
   end
@@ -35,7 +36,6 @@ class Puppet::Provider::Crmsh < Puppet::Provider
   def self.block_until_ready(timeout = 120)
     Timeout::timeout(timeout) do
       until ready?
-        debug('Corosync not ready, retrying')
         sleep 2
       end
     end

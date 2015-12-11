@@ -32,6 +32,7 @@ class Puppet::Provider::Pacemaker < Puppet::Provider
     if status == 0
       return true
     else
+      debug("Corosync not ready, retrying: #{raw}")
       return false
     end
   end
@@ -39,7 +40,6 @@ class Puppet::Provider::Pacemaker < Puppet::Provider
   def self.block_until_ready(timeout = 120)
     Timeout::timeout(timeout) do
       until ready?
-        debug('Corosync not ready, retrying')
         sleep 2
       end
       # Sleeping a spare two since it seems that dc-version is returning before
