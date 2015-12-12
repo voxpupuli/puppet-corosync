@@ -62,13 +62,13 @@ quorum {
 <% if @votequorum_expected_votes.to_i > 2 -%>
   expected_votes: <%= @votequorum_expected_votes %>
 <% else -%>
-  expected_votes:<%= @votequorum_expected_votes %>
+  expected_votes: <%= @votequorum_expected_votes %>
   two_node: 1
 <% end -%>
-}
-<% else -%>
+<% end -%>
 }
 
+<% unless @votequorum_expected_votes -%>
 nodelist {
 <% [@quorum_members].flatten.each_index do |i| -%>
   node {

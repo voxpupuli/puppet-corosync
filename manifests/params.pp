@@ -20,34 +20,38 @@ class corosync::params {
     'RedHat': {
       $set_votequorum = true
       $compatibility = 'whitetank'
+      $manage_pacemaker_service = false
     }
 
     'Debian': {
       case $::operatingsystem {
         'Ubuntu': {
-          if $lsbmajdistrelease >= 14 {
+          if versioncmp($::operatingsystemrelease, '14.04') >= 0 {
             $compatibility = false
             $set_votequorum = true
+            $manage_pacemaker_service = true
 
             file {'/etc/default/cman':
-              ensure => present,
+              ensure  => present,
               content => template('corosync/cman.erb'),
             }
 
           } else {
             $compatibility = 'whitetank'
             $set_votequorum = false
+            $manage_pacemaker_service = false
           }
         }
         default : {
           $compatibility = 'whitetank'
           $set_votequorum = false
+          $manage_pacemaker_service = false
         }
       }
     }
 
     default: {
-      fail('Not supported OS')
+      fail("Unsupported operating system: ${::operatingsystem}")
     }
   }
 

@@ -101,6 +101,11 @@
 # [*token_retransmits_before_loss_const*]
 #   How many token retransmits before forming a new configuration
 #
+# [*manage_pacemaker_service*]
+#   Whether the module should try to manage the pacemaker service in
+#   addition to the corosync service.
+#   Defaults to false, except on Ubuntu 14.04+ where it defaults to true.
+#
 # === Deprecated Parameters
 #
 # [*packages*]
@@ -149,7 +154,8 @@ class corosync(
   $quorum_members                      = ['localhost'],
   $token                               = $::corosync::params::token,
   $token_retransmits_before_loss_const = $::corosync::params::token_retransmits_before_lost_const,
-  $compatiblity                        = $::corosync::params::compatibility,
+  $compatibility                       = $::corosync::params::compatibility,
+  $manage_pacemaker_service            = $::corosync::params::manage_pacemaker_service,
 ) inherits ::corosync::params {
 
   if $set_votequorum and !$quorum_members {
@@ -352,15 +358,12 @@ class corosync(
     }
   }
 
-  case $::operatingsystem {
-    'Ubuntu': {
-      if $lsbmajdistrelease >= 14 {
-        service { 'pacemaker':
-          ensure    => running,
-          enable    => true,
-          subscribe => Service['corosync'],
-        }
-      }
+  if $manage_pacemaker_service {
+    service { 'pacemaker':
+      ensure     => running,
+      enable     => true,
+      hasrestart => true,
+      subscribe  => Service['corosync'],
     }
   }
 
