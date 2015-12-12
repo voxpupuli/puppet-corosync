@@ -47,6 +47,10 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     apply_manifest(pp, :catch_changes => true)
   end
 
+  if (fact('osfamily') == 'RedHat' && fact('operatingsystemmajrelease') == '7')
+    shell('sudo journalctl -u corosync.service')
+  end
+
   describe service('corosync') do
     it { is_expected.to be_running }
   end
