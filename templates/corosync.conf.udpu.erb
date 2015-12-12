@@ -55,6 +55,9 @@ aisexec {
 <% if @set_votequorum -%>
 quorum {
   provider: corosync_votequorum
+<% if [@quorum_members].flatten.count == 2 -%>
+  two_node: 1
+<% end -%>
 }
 
 nodelist {
