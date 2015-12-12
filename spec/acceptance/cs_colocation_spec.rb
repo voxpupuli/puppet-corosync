@@ -37,7 +37,6 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       }
       corosync::service { 'pacemaker':
         version => '1',
-        before  => Service['pacemaker'],
       }
       if $::osfamily == 'RedHat' {
         exec { 'stop_pacemaker':
@@ -48,10 +47,14 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           subscribe   => File['/etc/corosync/corosync.conf'],
         }
       }
-      service { 'pacemaker':
-        ensure    => running,
-        subscribe => Service['corosync'],
-      } ->
+      unless $::corosync::params::manage_pacemaker_service {
+        service { 'pacemaker':
+          ensure    => running,
+          subscribe => Service['corosync'],
+          require   => Corosync::Service['pacemaker'],
+          before    => Cs_property['stonith-enabled'],
+        }
+      }
       cs_property { 'stonith-enabled' :
         value   => 'false',
       } ->
