@@ -5,7 +5,7 @@ Puppet::Type.type(:cs_shadow).provide(:pcs, :parent => Puppet::Provider::Pacemak
   commands :crm_shadow => 'crm_shadow'
 
   def self.instances
-    block_until_ready
+    block_until_ready(120, 15)
     []
   end
 

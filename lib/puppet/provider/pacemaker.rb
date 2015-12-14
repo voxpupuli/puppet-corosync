@@ -52,7 +52,7 @@ class Puppet::Provider::Pacemaker < Puppet::Provider
     end
   end
 
-  def self.block_until_ready(timeout = 120)
+  def self.block_until_ready(timeout = 120, extra_wait = 2)
     Timeout::timeout(timeout) do
       until ready?
         debug('Corosync not ready, retrying')
@@ -61,7 +61,7 @@ class Puppet::Provider::Pacemaker < Puppet::Provider
       # Sleeping a spare two since it seems that dc-version is returning before
       # It is really ready to take config changes, but it is close enough.
       # Probably need to find a better way to check for reediness.
-      sleep 2
+      sleep extra_wait
     end
   end
 
