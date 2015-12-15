@@ -1,4 +1,6 @@
-compatibility: whitetank
+<% if @compatibility -%>
+compatibility: <%= @compatibility %>
+<% end -%>
 
 totem {
   version:                             2
@@ -55,8 +57,21 @@ aisexec {
 <% if @set_votequorum -%>
 quorum {
   provider: corosync_votequorum
+<% if @votequorum_expected_votes -%>
+<% if @votequorum_expected_votes.to_i > 2 -%>
+  expected_votes: <%= @votequorum_expected_votes %>
+<% else -%>
+  expected_votes: <%= @votequorum_expected_votes %>
+  two_node: 1
+<% end -%>
+<% else -%>
+<% if [@quorum_members].flatten.count == 2 -%>
+  two_node: 1
+<% end -%>
+<% end -%>
 }
 
+<% unless @votequorum_expected_votes -%>
 nodelist {
 <% [@quorum_members].flatten.each_index do |i| -%>
   node {
@@ -65,4 +80,5 @@ nodelist {
   }
 <% end -%>
 }
+<% end -%>
 <% end -%>
