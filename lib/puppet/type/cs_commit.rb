@@ -40,6 +40,9 @@ Puppet::Type.newtype(:cs_commit) do
     resources_with_cib :cs_location
   end
 
+  autorequire(:cs_group) do
+    resources_with_cib :cs_group
+  end
 
   autorequire(:cs_order) do
     resources_with_cib :cs_order
