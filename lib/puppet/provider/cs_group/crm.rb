@@ -89,6 +89,7 @@ Puppet::Type.type(:cs_group).provide(:crm, :parent => Puppet::Provider::Crmsh) d
     unless @property_hash.empty?
       updated = 'group '
       updated << "#{@property_hash[:name]} #{@property_hash[:primitives].join(' ')}"
+      debug("Loading update: #{updated}")
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush

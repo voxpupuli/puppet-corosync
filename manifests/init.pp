@@ -78,6 +78,14 @@
 #   Define what version of pacemaker should be installed.
 #   Defaults to present
 #
+# [*package_pcs*]
+#   Define if package pcs should be installed.
+#   Defaults to true
+#
+# [*version_pcs*]
+#   Define what version of pcs should be installed.
+#   Defaults to present
+#
 # [*set_votequorum*]
 #   Set to true if corosync_votequorum should be used as quorum provider.
 #   Defaults to false.
@@ -92,6 +100,11 @@
 #
 # [*token_retransmits_before_loss_const*]
 #   How many token retransmits before forming a new configuration
+#
+# [*manage_pacemaker_service*]
+#   Whether the module should try to manage the pacemaker service in
+#   addition to the corosync service.
+#   Defaults to false, except on Ubuntu 14.04+ where it defaults to true.
 #
 # === Deprecated Parameters
 #
@@ -134,10 +147,15 @@ class corosync(
   $version_corosync                    = undef,
   $package_pacemaker                   = undef,
   $version_pacemaker                   = undef,
+  $package_pcs                         = undef,
+  $version_pcs                         = undef,
   $set_votequorum                      = $::corosync::params::set_votequorum,
+  $votequorum_expected_votes           = $::corosync::params::votequorum_expected_votes,
   $quorum_members                      = ['localhost'],
   $token                               = $::corosync::params::token,
   $token_retransmits_before_loss_const = $::corosync::params::token_retransmits_before_lost_const,
+  $compatibility                       = $::corosync::params::compatibility,
+  $manage_pacemaker_service            = $::corosync::params::manage_pacemaker_service,
 ) inherits ::corosync::params {
 
   if $set_votequorum and !$quorum_members {
@@ -261,8 +279,22 @@ class corosync(
   }
 
   if $::osfamily == 'RedHat' {
-    package { 'pcs':
-      ensure => present,
+    if $package_pcs == undef {
+      $_package_pcs = true
+    } else {
+      $_package_pcs = $package_pcs
+    }
+  
+    if $version_pcs == undef {
+      $_version_pcs = present
+    } else {
+      $_version_pcs = $version_pcs
+    }
+
+    if $_package_pcs {
+      package { 'pcs':
+        ensure => $_version_pcs,
+      }
     }
   }
 
@@ -323,6 +355,15 @@ class corosync(
       path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
       onlyif  => "crm node status|grep ${::hostname}-standby|grep 'value=\"on\"'",
       require => Service['corosync'],
+    }
+  }
+
+  if $manage_pacemaker_service {
+    service { 'pacemaker':
+      ensure     => running,
+      enable     => true,
+      hasrestart => true,
+      subscribe  => Service['corosync'],
     }
   }
 

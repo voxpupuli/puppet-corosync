@@ -1,3 +1,32 @@
+##2015-10-14 - Release 0.8.0
+###Summary
+- manage package and version for pcs
+- Use Puppet::Type.newtype instead of Puppet.newtype
+- Fix deprecation warning for SUIDManager.
+- Fix acceptance tests for RHEL6 and Ubuntu 14.04
+- Implement ensure => $version for pacemaker and corosync package
+- Made pacemaker and corosync version configurable
+  - Added variables to manage pacemaker or corosync package.
+  - Added variables to manage pacemaker and corosync version.
+  - Moved package parameters to init.pp. Required to accomodate the logic that allows new style $package\_{corosync,pacemaker} parameters, and the old-style $packages to co-exist in a safe manner.
+  - Added deprecation warning for $packages parameter and fail() for mixed use of $packages and $package\_{corosync,pacemaker}.
+  - Added spec tests for new package parameters.
+- Added failure spec test for mixed use of $packages and $package\_\*.
+- Made token\_retransmits\_before\_loss\_const a parameter to allow hearbeat tuning
+- Move beaker to system-tests group
+- Add spec for cs\_colocation 
+- Add basic beaker-rspec testing
+- Colocation is allowed on _at least_ 2 primitives
+- Bugfix,  crmsh cs\_location provider
+- param mcastport is still used when using broadcast mode
+- Fixed ordering of self.ready? tests
+- Added caching on self.ready
+- Ensure node IDs for votequorum are not "0"
+- Add votequorum setting to corosync.conf
+- Add cs\_clone provider and type (complete)
+- Implement rsc\_defaults
+- make token value configurable
+
 ##2014-12-2 - Release 0.7.0
 ###Summary
 This release refactors the main class to use `corosync::params` for defaults and no longer checks global variables for the parameters. It also includes strict variable support, a few other features, and a bugfix for EL platforms.

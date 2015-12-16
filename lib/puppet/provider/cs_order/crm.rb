@@ -129,6 +129,7 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Crmsh) d
       updated = 'order '
       updated << "#{@property_hash[:name]} #{@property_hash[:score]}: "
       updated << "#{@property_hash[:first]} #{@property_hash[:second]} symmetrical=#{@property_hash[:symmetrical].to_s}"
+      debug("Loading update: #{updated}")
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush

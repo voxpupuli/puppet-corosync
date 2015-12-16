@@ -25,7 +25,7 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Crmsh
     end
     doc = REXML::Document.new(raw)
 
-    doc.root.elements['configuration/crm_config/cluster_property_set'].each_element do |e|
+    doc.root.elements["configuration/crm_config/cluster_property_set[@id='cib-bootstrap-options']"].each_element do |e|
       items = e.attributes
       property = { :name => items['name'], :value => items['value'] }
 
@@ -76,6 +76,7 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Crmsh
   # the updates that need to be made.  The temporary file is then used
   # as stdin for the crm command.
   def flush
+    self.class.block_until_ready
     unless @property_hash.empty?
       # clear this on properties, in case it's set from a previous
       # run of a different corosync type

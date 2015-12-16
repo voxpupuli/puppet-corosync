@@ -33,13 +33,19 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       class { 'corosync':
         multicast_address => '224.0.0.1',
         authkey           => '/tmp/ca.pem',
-        bind_address => $ipaddress
+        bind_address      => '127.0.0.1',
+        set_votequorum    => true,
+        quorum_members    => ['127.0.0.1'],
       }
       corosync::service { 'pacemaker':
         version => '1',
-      } ->
-      service { 'pacemaker':
-        ensure => running,
+      }
+      unless $::corosync::params::manage_pacemaker_service {
+        service { 'pacemaker':
+          ensure    => running,
+          subscribe => Service['corosync'],
+          require   => Corosync::Service['pacemaker'],
+        }
       }
     EOS
 

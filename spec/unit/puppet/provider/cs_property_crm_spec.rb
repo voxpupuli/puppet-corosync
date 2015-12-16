@@ -12,9 +12,12 @@ describe Puppet::Type.type(:cs_property).provider(:crm) do
         <cib>
           <configuration>
             <crm_config>
-              <cluster_property_set>
+              <cluster_property_set id="cib-bootstrap-options">
                 <nvpair name="apples" value="red"/>
                 <nvpair name="oranges" value="orange"/>
+              </cluster_property_set>
+              <cluster_property_set id="redis_replication">
+                <nvpair id="redis_replication-p_redis_REPL_INFO" name="p_redis_REPL_INFO" value="node-1"/>
               </cluster_property_set>
             </crm_config>
           </configuration>
