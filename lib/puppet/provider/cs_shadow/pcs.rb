@@ -16,18 +16,16 @@ Puppet::Type.type(:cs_shadow).provide(:pcs, :parent => Puppet::Provider::Pacemak
 
   def get_epoch(cib=nil)
     cmd = [ command(:cibadmin), '--query', '--xpath', '/cib', '-l', '-n' ]
-    if cib.nil?
-      debug('epoch for main cib')
-    else
-      debug('epoch for other cib')
-    end
     raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd, cib, false)
     if status != 0
       return :absent
     else
     doc = REXML::Document.new(raw)
-    debug("#{REXML::XPath.first(doc, '/cib').attributes['epoch']}")
-    currentvalue = REXML::XPath.first(doc, '/cib').attributes['epoch']
+    current_epoch = REXML::XPath.first(doc, '/cib').attributes['epoch']
+    current_admin_epoch = REXML::XPath.first(doc, '/cib').attributes['admin_epoch']
+    if current_epoch and current_admin_epoch
+      currentvalue = "#{current_admin_epoch}.#{current_epoch}"
+    end
     currentvalue || :absent
     end
   end
