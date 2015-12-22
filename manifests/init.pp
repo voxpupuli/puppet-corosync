@@ -123,6 +123,12 @@
 #   consensus value.
 #   Defaults to false,
 #
+# [*max_messages*]
+#   This constant specifies the maximum number of messages that may be sent by
+#   one processor on receipt of the token. The max_messages parameter is limited
+#   to 256000 / netmtu to prevent overflow of the kernel transmit buffers.
+#   Defaults to 17
+#
 # === Deprecated Parameters
 #
 # [*packages*]
@@ -176,6 +182,7 @@ class corosync(
   $cluster_name                        = $::corosync::params::cluster_name,
   $join                                = $::corosync::params::join,
   $consensus                           = $::corosync::params::consensus,
+  $max_messages                        = $::corosync::params::max_messages,
 ) inherits ::corosync::params {
 
   if $set_votequorum and !$quorum_members {
@@ -329,6 +336,7 @@ class corosync(
   # - $token
   # - $join
   # - $consensus
+  # - $max_messages
   file { '/etc/corosync/corosync.conf':
     ensure  => file,
     mode    => '0644',

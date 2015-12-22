@@ -18,6 +18,7 @@ class corosync::params {
   $cluster_name                        = undef
   $join                                = 50
   $consensus                           = false
+  $max_messages                        = 17
 
   case $::osfamily {
     'RedHat': {
