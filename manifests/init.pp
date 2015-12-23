@@ -106,6 +106,10 @@
 #   addition to the corosync service.
 #   Defaults to false, except on Ubuntu 14.04+ where it defaults to true.
 #
+# [*cluster_name*]
+#   This specifies the name of cluster and it's used for automatic
+#   generating of multicast address.
+#
 # === Deprecated Parameters
 #
 # [*packages*]
@@ -156,6 +160,7 @@ class corosync(
   $token_retransmits_before_loss_const = $::corosync::params::token_retransmits_before_lost_const,
   $compatibility                       = $::corosync::params::compatibility,
   $manage_pacemaker_service            = $::corosync::params::manage_pacemaker_service,
+  $cluster_name                        = $::corosync::params::cluster_name,
 ) inherits ::corosync::params {
 
   if $set_votequorum and !$quorum_members {
