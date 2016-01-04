@@ -87,7 +87,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
     instances = []
 
     cmd = [ command(:crm), 'configure', 'show', 'xml' ]
-    if Puppet::PUPPETVERSION.to_f < 3.4
+    if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
       raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
     else
       raw = Puppet::Util::Execution.execute(cmd)
@@ -133,6 +133,18 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
   # Getters that obtains the parameters and operations defined in our primitive
   # that have been populated by prefetch or instances (depends on if your using
   # puppet resource or not).
+  def primitive_type
+    @property_hash[:primitive_type]
+  end
+
+  def provided_by
+    @property_hash[:provided_by]
+  end
+
+  def primitive_class
+    @property_hash[:primitive_class]
+  end
+
   def parameters
     @property_hash[:parameters]
   end
@@ -160,6 +172,18 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
   # Our setters for parameters and operations.  Setters are used when the
   # resource already exists so we just update the current value in the
   # property_hash and doing this marks it to be flushed.
+  def primitive_class=(should)
+    @property_hash[:primitive_class] = should
+  end
+
+  def primitive_type=(should)
+    @property_hash[:primitive_type] = should
+  end
+
+  def provided_by=(should)
+    @property_hash[:provided_by] = should
+  end
+
   def parameters=(should)
     @property_hash[:parameters] = should
   end

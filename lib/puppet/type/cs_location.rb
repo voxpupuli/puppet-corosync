@@ -22,6 +22,10 @@ Puppet::Type.newtype(:cs_location) do
     desc "The corosync node_name where the resource should be located.  "
   end
 
+  newproperty(:resource_discovery) do
+    desc "Whether Pacemaker should perform resource discovery on this node for the specified resource."
+  end
+
   newparam(:cib) do
     desc "Corosync applies its configuration immediately. Using a CIB allows
       you to group multiple primitives and relationships to be applied at
@@ -44,7 +48,42 @@ Puppet::Type.newtype(:cs_location) do
   end
 
   autorequire(:cs_shadow) do
-    [ @parameters[:cib] ]
+    autos = []
+    if @parameters[:cib]
+      autos << @parameters[:cib].value
+    end
+
+    autos
+  end
+
+  autorequire(:cs_primitive) do
+    autos = []
+    if @parameters[:primitive]
+      autos << @parameters[:primitive].value
+    end
+
+    autos
+  end
+
+  autorequire(:cs_clone) do
+    autos = []
+    if @parameters[:primitive]
+      autos << @parameters[:primitive].value.slice("-clone")
+    end
+
+    autos
+  end
+
+
+  if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '4.0') >= 0
+    autonotify(:cs_commit) do
+      autos = []
+      if @parameters[:cib]
+        autos << @parameters[:cib].value
+      end
+
+      autos
+    end
   end
 
   autorequire(:service) do

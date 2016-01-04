@@ -33,7 +33,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
       EOS
 
       described_class.expects(:block_until_ready).returns(nil)
-      if Puppet::PUPPETVERSION.to_f < 3.4
+      if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with(['pcs', 'cluster', 'cib']).at_least_once.returns([test_cib, 0])
       else
         Puppet::Util::Execution.expects(:execute).with(['pcs', 'cluster', 'cib'], {:failonfail => true}).at_least_once.returns(
@@ -120,7 +120,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
       EOS
 
       described_class.expects(:block_until_ready).returns(nil)
-      if Puppet::PUPPETVERSION.to_f < 3.4
+      if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with(['pcs', 'cluster', 'cib']).at_least_once.returns([test_cib, 0])
       else
         Puppet::Util::Execution.expects(:execute).with(['pcs', 'cluster', 'cib'], {:failonfail => true}).at_least_once.returns(
@@ -131,7 +131,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
     end
 
     def expect_update(pattern)
-      if Puppet::PUPPETVERSION.to_f < 3.4
+      if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with { |*args|
           cmdline=args[0].join(" ")
           expect(cmdline).to match(pattern)
@@ -202,25 +202,25 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
     end
 
     it 'sets the primitive name and type' do
-      expect_update(/^pcs resource (create testResource ocf:heartbeat:IPaddr2|op remove testResource monitor interval=60s)/)
+      expect_update(/^pcs resource (create --force testResource ocf:heartbeat:IPaddr2|op remove testResource monitor interval=60s)/)
       instance.flush
     end
 
     it "sets a primitive_class parameter corresponding to the <primitive>'s class attribute" do
       vip_instance.primitive_class = 'IPaddr3'
-      expect_update(/resource (create|delete|op remove) example_vip/)
+      expect_update(/resource (create --force|unclone|delete --force|op remove) example_vip/)
       vip_instance.flush
     end
 
     it "sets an primitive_type parameter corresponding to the <primitive>'s type attribute" do
       vip_instance.primitive_type = 'stonith'
-      expect_update(/resource (create|delete|op remove) example_vip/)
+      expect_update(/resource (create --force|unclone|delete --force|op remove) example_vip/)
       vip_instance.flush
     end
 
     it "sets an provided_by parameter corresponding to the <primitive>'s provider attribute" do
       vip_instance.provided_by = 'inuits'
-      expect_update(/resource (create|delete|op remove) example_vip/)
+      expect_update(/resource (create --force|unclone|delete --force|op remove) example_vip/)
       vip_instance.flush
     end
 

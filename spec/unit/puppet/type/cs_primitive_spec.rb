@@ -17,7 +17,7 @@ describe Puppet::Type.type(:cs_primitive) do
       expect(subject.new(:name => "mock_primitive")).to_not be_nil
     end
 
-    [:name, :primitive_class, :primitive_type, :provided_by, :cib].each do |param|
+    [:name, :cib].each do |param|
       it "should have a #{param} parameter" do
         expect(subject.validparameter?(param)).to be_truthy
       end
@@ -27,7 +27,8 @@ describe Puppet::Type.type(:cs_primitive) do
       end
     end
 
-    [:parameters, :operations, :metadata, :ms_metadata, :promotable].each do |property|
+    [:primitive_class, :primitive_type, :provided_by,
+     :parameters, :operations, :metadata, :ms_metadata, :promotable].each do |property|
       it "should have a #{property} property" do
         expect(subject.validproperty?(property)).to be_truthy
       end

@@ -34,7 +34,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         bind_address      => '127.0.0.1',
         set_votequorum    => true,
         quorum_members    => ['127.0.0.1'],
-      }
+      } ->
       corosync::service { 'pacemaker':
         version => '1',
       }
@@ -78,9 +78,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     EOS
 
     apply_manifest(pp, :catch_failures => true)
-    unless fact('osfamily') == 'RedHat' # Something's wrong with the pcs provider
-      apply_manifest(pp, :catch_changes => true)
-    end
+    apply_manifest(pp, :catch_changes => true)
   end
 
   describe service('corosync') do
@@ -107,6 +105,17 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
     shell("#{command} | grep vip_with_service") do |r|
       expect(r.stdout).to match(/colocation.*nginx_service.*nginx_vip/)
+    end
+  end
+
+  it 'read journalctl logs' do
+    if fact('osfamily') == 'RedHat'
+      command = 'journalctl -xn > /dev/stderr'
+    else
+      command = 'echo not relevant'
+    end
+    shell(command) do |r|
+      expect(r.stdout).to match(/./)
     end
   end
 

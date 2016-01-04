@@ -39,7 +39,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
       EOS
 
       described_class.expects(:block_until_ready).returns(nil)
-      if Puppet::PUPPETVERSION.to_f < 3.4
+      if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with(['crm', 'configure', 'show', 'xml']).at_least_once.returns([test_cib, 0])
       else
         Puppet::Util::Execution.expects(:execute).with(['crm', 'configure', 'show', 'xml']).at_least_once.returns(
@@ -64,21 +64,6 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
 
       it "is named by the <primitive>'s id attribute" do
         expect(instance.name).to eq(:example_vm)
-      end
-
-      it "has an primitive_class parameter corresponding to the <primitive>'s class attribute" do
-        pending 'knowing the proper way to assert this'
-        expect(instance.primitive_class).to eq("ocf")
-      end
-
-      it "has an primitive_type parameter corresponding to the <primitive>'s type attribute" do
-        pending 'knowing the proper way to assert this'
-        expect(instance.primitive_type).to eq("Xen")
-      end
-
-      it "has an provided_by parameter corresponding to the <primitive>'s provider attribute" do
-        pending 'knowing the proper way to assert this'
-        expect(instance.provided_by).to eq("heartbeat")
       end
 
       it 'has a parameters property corresponding to <instance_attributes>' do

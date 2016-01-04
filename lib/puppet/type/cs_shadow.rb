@@ -4,25 +4,28 @@ Puppet::Type.newtype(:cs_shadow) do
     will not become active until all other resources with the same cib
     value have also been applied."
 
-  newproperty(:cib) do
+  newparam(:cib) do
+    isnamevar
+  end
+
+  newproperty(:epoch) do
     def sync
-      provider.sync(self.should)
+      provider.sync(@resource[:cib])
     end
 
     def retrieve
-      :absent
+      provider.get_epoch(@resource[:cib])
     end
 
     def insync?(is)
-      false
+      provider.insync?(@resource[:cib])
     end
 
-    defaultto { @resource[:name] }
-  end
+    def change_to_s(currentvalue, newvalue)
+      super(currentvalue, provider.get_epoch(@resource[:cib]))
+    end
 
-  newparam(:name) do
-    desc "Name of the shadow CIB to create and manage"
-    isnamevar
+    defaultto :latest
   end
 
   def generate
