@@ -20,16 +20,22 @@ class Puppet::Provider::Pacemaker < Puppet::Provider
     end
   end
 
-
-
   # Corosync takes a while to build the initial CIB configuration once the
   # service is started for the first time.  This provides us a way to wait
   # until we're up so we can make changes that don't disappear in to a black
   # hole.
+  @@pcsready = nil
   def self.ready?
-    cmd =  [ command(:pcs), 'property', 'show', 'dc-version' ]
+    return true if @@pcsready
+    cmd = [ command(:pcs), 'property', 'show', 'dc-version' ]
     raw, status = run_pcs_command(cmd, false)
     if status == 0
+      @@pcsready = true
+      # Sleeping a spare five since it seems that dc-version is returning before
+      # It is really ready to take config changes, but it is close enough.
+      # Probably need to find a better way to check for reediness.
+      debug("Corosync seems to be ready, sleeping 5 more seconds for safety")
+      sleep 5
       return true
     else
       debug("Corosync not ready, retrying: #{raw}")
@@ -42,10 +48,6 @@ class Puppet::Provider::Pacemaker < Puppet::Provider
       until ready?
         sleep 2
       end
-      # Sleeping a spare two since it seems that dc-version is returning before
-      # It is really ready to take config changes, but it is close enough.
-      # Probably need to find a better way to check for reediness.
-      sleep 2
     end
   end
 
