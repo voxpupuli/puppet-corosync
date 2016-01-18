@@ -10,7 +10,9 @@ totem {
   token:                               <%= @token %>
   token_retransmits_before_loss_const: <%= @token_retransmits_before_loss_const %>
   join:                                60
-  consensus:                           3600
+<% if @consensus -%>
+  consensus:                           <%= @consensus %>
+<% end -%>
   vsftype:                             none
   max_messages:                        20
   clear_node_high_bit:                 yes

@@ -110,6 +110,14 @@
 #   This specifies the name of cluster and it's used for automatic
 #   generating of multicast address.
 #
+# [*consensus*]
+#   This timeout specifies in milliseconds how long to wait for consensus to be
+#   achieved before starting a new round of membership configuration.
+#   The minimum value for consensus must be 1.2 * token. This value will be
+#   automatically calculated at 1.2 * token if the user doesn't specify a
+#   consensus value.
+#   Defaults to false,
+#
 # === Deprecated Parameters
 #
 # [*packages*]
@@ -161,6 +169,7 @@ class corosync(
   $compatibility                       = $::corosync::params::compatibility,
   $manage_pacemaker_service            = $::corosync::params::manage_pacemaker_service,
   $cluster_name                        = $::corosync::params::cluster_name,
+  $consensus                           = $::corosync::params::consensus,
 ) inherits ::corosync::params {
 
   if $set_votequorum and !$quorum_members {
@@ -312,6 +321,7 @@ class corosync(
   # - $enable_secauth_real
   # - $threads
   # - $token
+  # - $consensus
   file { '/etc/corosync/corosync.conf':
     ensure  => file,
     mode    => '0644',
