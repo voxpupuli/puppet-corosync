@@ -19,37 +19,25 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
     instances = []
 
     cmd = [ command(:pcs), 'cluster', 'cib' ]
-    raw, status = run_pcs_command(cmd)
+    raw, _ = run_pcs_command(cmd)
     doc = REXML::Document.new(raw)
 
     doc.root.elements['configuration'].elements['constraints'].each_element('rsc_order') do |e|
       items = e.attributes
 
-      if items['first-action']
-        first = "#{items['first']}:#{items['first-action']}"
-      else
-        first = items['first']
-      end
+      first = items['first']
+      second = items['then']
 
-      if items['then-action']
-        second = "#{items['then']}:#{items['then-action']}"
-      else
-        second = items['then']
-      end
-      if items['score']
-        score = items['score']
-      else
-        score = 'INFINITY'
-      end
+      symmetrical = items['symmetrical']
 
       order_instance = {
-        :name       => items['id'],
-        :ensure     => :present,
-        :first      => first,
-        :second     => second,
-        :score      => score,
-        :provider   => self.name,
-        :new        => false
+        :name        => items['id'],
+        :ensure      => :present,
+        :first       => first,
+        :second      => second,
+        :symmetrical => symmetrical,
+        :provider    => self.name,
+        :new         => false
       }
       instances << new(order_instance)
     end
@@ -60,13 +48,13 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
   # of actually doing the work.
   def create
     @property_hash = {
-      :name       => @resource[:name],
-      :ensure     => :present,
-      :first      => @resource[:first],
-      :second     => @resource[:second],
-      :score      => @resource[:score],
-      :cib        => @resource[:cib],
-      :new        => true,
+      :name        => @resource[:name],
+      :ensure      => :present,
+      :first       => @resource[:first],
+      :second      => @resource[:second],
+      :cib         => @resource[:cib],
+      :symmetrical => @resource[:symmetrical],
+      :new         => true,
     }
   end
 
@@ -89,8 +77,8 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
     @property_hash[:second]
   end
 
-  def score
-    @property_hash[:score]
+  def symmetrical
+    @property_hash[:symmetrical]
   end
 
   # Our setters for the first and second primitives and score.  Setters are
@@ -104,8 +92,8 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
     @property_hash[:second] = should
   end
 
-  def score=(should)
-    @property_hash[:score] = should
+  def symmetrical=(should)
+    @property_hash[:symmetrical] = should
   end
 
   # Flush is triggered on anything that has been detected as being
@@ -138,9 +126,9 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
       else
         cmd << rsc
       end
-      cmd << @property_hash[:score]
+      cmd << "symmetrical=#{@property_hash[:symmetrical]}"
       cmd << "id=#{@property_hash[:name]}"
-      raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+      Puppet::Provider::Pacemaker::run_pcs_command(cmd)
     end
   end
 end
