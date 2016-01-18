@@ -54,6 +54,26 @@ describe 'corosync' do
       end
     end
 
+    context 'when cluster_name is not set' do
+      it { should contain_file('/etc/corosync/corosync.conf').without_content(
+          /cluster_name\:/
+        )
+      }
+    end
+
+    context 'when cluster_name is set' do
+      before :each do
+        params.merge!(
+          { :cluster_name => 'hacell', }
+        )
+      end
+
+      it 'configures cluster_name' do
+        should contain_file('/etc/corosync/corosync.conf').with_content(
+          /cluster_name\:\s*hacell$/
+        )
+      end
+    end
 
     [ :package_corosync, :package_pacemaker, :version_corosync, :version_pacemaker ].each { |package_param|
       context "new-style package parameter $#{package_param} mixed with deprecated $packages parameter" do

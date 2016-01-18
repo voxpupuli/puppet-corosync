@@ -4,6 +4,9 @@ compatibility: <%= @compatibility %>
 
 totem {
   version:                             2
+<% unless @cluster_name.nil? -%>
+  cluster_name:                        <%= @cluster_name %>
+<% end -%>
   token:                               <%= @token %>
   token_retransmits_before_loss_const: <%= @token_retransmits_before_loss_const %>
   join:                                60

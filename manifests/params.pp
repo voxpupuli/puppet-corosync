@@ -15,6 +15,7 @@ class corosync::params {
   $token                               = 3000
   $token_retransmits_before_lost_const = 10
   $votequorum_expected_votes           = false
+  $cluster_name                        = undef
 
   case $::osfamily {
     'RedHat': {
