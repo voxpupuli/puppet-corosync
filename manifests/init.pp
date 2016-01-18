@@ -110,6 +110,25 @@
 #   This specifies the name of cluster and it's used for automatic
 #   generating of multicast address.
 #
+# [*join*]
+#   This timeout specifies in milliseconds how long to wait for join messages
+#   in the membership protocol.
+#   Default to 50
+#
+# [*consensus*]
+#   This timeout specifies in milliseconds how long to wait for consensus to be
+#   achieved before starting a new round of membership configuration.
+#   The minimum value for consensus must be 1.2 * token. This value will be
+#   automatically calculated at 1.2 * token if the user doesn't specify a
+#   consensus value.
+#   Defaults to false,
+#
+# [*max_messages*]
+#   This constant specifies the maximum number of messages that may be sent by
+#   one processor on receipt of the token. The max_messages parameter is limited
+#   to 256000 / netmtu to prevent overflow of the kernel transmit buffers.
+#   Defaults to 17
+#
 # === Deprecated Parameters
 #
 # [*packages*]
@@ -161,6 +180,9 @@ class corosync(
   $compatibility                       = $::corosync::params::compatibility,
   $manage_pacemaker_service            = $::corosync::params::manage_pacemaker_service,
   $cluster_name                        = $::corosync::params::cluster_name,
+  $join                                = $::corosync::params::join,
+  $consensus                           = $::corosync::params::consensus,
+  $max_messages                        = $::corosync::params::max_messages,
 ) inherits ::corosync::params {
 
   if $set_votequorum and !$quorum_members {
@@ -312,6 +334,9 @@ class corosync(
   # - $enable_secauth_real
   # - $threads
   # - $token
+  # - $join
+  # - $consensus
+  # - $max_messages
   file { '/etc/corosync/corosync.conf':
     ensure  => file,
     mode    => '0644',

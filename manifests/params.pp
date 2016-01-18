@@ -16,6 +16,9 @@ class corosync::params {
   $token_retransmits_before_lost_const = 10
   $votequorum_expected_votes           = false
   $cluster_name                        = undef
+  $join                                = 50
+  $consensus                           = false
+  $max_messages                        = 17
 
   case $::osfamily {
     'RedHat': {
