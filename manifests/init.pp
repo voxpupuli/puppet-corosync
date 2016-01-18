@@ -110,6 +110,11 @@
 #   This specifies the name of cluster and it's used for automatic
 #   generating of multicast address.
 #
+# [*join*]
+#   This timeout specifies in milliseconds how long to wait for join messages
+#   in the membership protocol.
+#   Default to 50
+#
 # [*consensus*]
 #   This timeout specifies in milliseconds how long to wait for consensus to be
 #   achieved before starting a new round of membership configuration.
@@ -169,6 +174,7 @@ class corosync(
   $compatibility                       = $::corosync::params::compatibility,
   $manage_pacemaker_service            = $::corosync::params::manage_pacemaker_service,
   $cluster_name                        = $::corosync::params::cluster_name,
+  $join                                = $::corosync::params::join,
   $consensus                           = $::corosync::params::consensus,
 ) inherits ::corosync::params {
 
@@ -321,6 +327,7 @@ class corosync(
   # - $enable_secauth_real
   # - $threads
   # - $token
+  # - $join
   # - $consensus
   file { '/etc/corosync/corosync.conf':
     ensure  => file,

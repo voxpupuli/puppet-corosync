@@ -9,7 +9,7 @@ totem {
 <% end -%>
   token:                               <%= @token %>
   token_retransmits_before_loss_const: <%= @token_retransmits_before_loss_const %>
-  join:                                60
+  join:                                <%= @join %>
 <% if @consensus -%>
   consensus:                           <%= @consensus %>
 <% end -%>
