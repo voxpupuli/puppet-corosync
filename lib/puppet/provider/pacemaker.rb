@@ -61,7 +61,7 @@ class Puppet::Provider::Pacemaker < Puppet::Provider
     end
   end
 
-  def self.block_until_ready(timeout = 120, extra_wait = 2)
+  def self.block_until_ready(timeout = 120)
     Timeout::timeout(timeout) do
       until ready?
         sleep 2

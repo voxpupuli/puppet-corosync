@@ -6,7 +6,7 @@ Puppet::Type.type(:cs_shadow).provide(:pcs, :parent => Puppet::Provider::Pacemak
   commands :cibadmin => 'cibadmin'
 
   def self.instances
-    block_until_ready(120, 15)
+    block_until_ready(120)
     []
   end
 
