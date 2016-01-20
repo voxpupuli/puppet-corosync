@@ -47,15 +47,23 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
         kind = 'Mandatory'
       end
 
+      if items['symmetrical']
+        symmetrical = (items['symmetrical'] == 'true')
+      else
+        # Default: symmetrical is true unless explicitly defined.
+        symmetrical = true
+      end
+
       order_instance = {
-        :name       => items['id'],
-        :ensure     => :present,
-        :first      => first,
-        :second     => second,
-        :score      => score,
-        :kind       => kind,
-        :provider   => self.name,
-        :new        => false
+        :name        => items['id'],
+        :ensure      => :present,
+        :first       => first,
+        :second      => second,
+        :score       => score,
+        :kind        => kind,
+        :symmetrical => symmetrical,
+        :provider    => self.name,
+        :new         => false
       }
       instances << new(order_instance)
     end
@@ -66,14 +74,15 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
   # of actually doing the work.
   def create
     @property_hash = {
-      :name       => @resource[:name],
-      :ensure     => :present,
-      :first      => @resource[:first],
-      :second     => @resource[:second],
-      :score      => @resource[:score],
-      :kind       => @resource[:kind],
-      :cib        => @resource[:cib],
-      :new        => true,
+      :name        => @resource[:name],
+      :ensure      => :present,
+      :first       => @resource[:first],
+      :second      => @resource[:second],
+      :score       => @resource[:score],
+      :kind        => @resource[:kind],
+      :symmetrical => @resource[:symmetrical],
+      :cib         => @resource[:cib],
+      :new         => true,
     }
   end
 
@@ -123,6 +132,10 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
     @property_hash[:kind] = should
   end
 
+  def symmetrical=(should)
+    @property_hash[:symmetrical] = should
+  end
+
   # Flush is triggered on anything that has been detected as being
   # modified in the property_hash.  It generates a temporary file with
   # the updates that need to be made.  The temporary file is then used
@@ -156,6 +169,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
       cmd << @property_hash[:score]
       cmd << "kind=#{@property_hash[:kind]}"
       cmd << "id=#{@property_hash[:name]}"
+      cmd << "symmetrical=#{@property_hash[:symmetrical].to_s}"
       raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
     end
   end
