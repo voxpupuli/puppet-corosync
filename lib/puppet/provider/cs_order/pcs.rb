@@ -41,6 +41,11 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
       else
         score = 'INFINITY'
       end
+      if items['kind']
+        kind = items['kind']
+      else
+        kind = 'Mandatory'
+      end
 
       order_instance = {
         :name       => items['id'],
@@ -48,6 +53,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
         :first      => first,
         :second     => second,
         :score      => score,
+        :kind       => kind,
         :provider   => self.name,
         :new        => false
       }
@@ -65,6 +71,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
       :first      => @resource[:first],
       :second     => @resource[:second],
       :score      => @resource[:score],
+      :kind       => @resource[:kind],
       :cib        => @resource[:cib],
       :new        => true,
     }
@@ -93,6 +100,10 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
     @property_hash[:score]
   end
 
+  def kind
+    @property_hash[:kind]
+  end
+
   # Our setters for the first and second primitives and score.  Setters are
   # used when the resource already exists so we just update the current value
   # in the property hash and doing this marks it to be flushed.
@@ -106,6 +117,10 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
 
   def score=(should)
     @property_hash[:score] = should
+  end
+
+  def kind=(should)
+    @property_hash[:kind] = should
   end
 
   # Flush is triggered on anything that has been detected as being
@@ -139,6 +154,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
         cmd << rsc
       end
       cmd << @property_hash[:score]
+      cmd << "kind=#{@property_hash[:kind]}"
       cmd << "id=#{@property_hash[:name]}"
       raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
     end

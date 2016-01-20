@@ -50,6 +50,24 @@ Puppet::Type.newtype(:cs_order) do
     defaultto 'INFINITY'
   end
 
+  newproperty(:kind) do
+    desc "How to enforce the constraint.
+
+    Allowed values:
+    - Optional: Just a suggestion. Only applies if both resources are executing
+    the specified actions. Any change in state by the first resource will have
+    no effect on the then resource.
+    - Mandatory: Always. If first does not perform first-action, then will not
+    be allowed to performed then-action. If first is restarted, then
+    (if running) will be stopped beforehand and started afterward.
+    - Serialize: Ensure that no two stop/start actions occur concurrently for
+    the resources. First and then can start in either order, but one must
+    complete starting before the other can be started. A typical use case is
+    when resource start-up puts a high load on the host."
+
+    defaultto 'Mandatory'
+  end
+
   autorequire(:cs_shadow) do
     [ @parameters[:cib] ]
   end
