@@ -20,7 +20,7 @@ describe Puppet::Provider::Crmsh do
     end
 
     it 'returns false when crm_attribute exits unsuccessfully' do
-      if Puppet::PUPPETVERSION.to_f < 3.4
+      if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version']).returns(['', 1])
       else
         Puppet::Util::Execution.expects(:execute).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version'],{:combine => true, :failonfail => false}).returns(
@@ -32,7 +32,7 @@ describe Puppet::Provider::Crmsh do
     end
 
     it 'returns true when crm_attribute exits successfully' do
-      if Puppet::PUPPETVERSION.to_f < 3.4
+      if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version']).returns(['', 0])
       else
         Puppet::Util::Execution.expects(:execute).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version'],{:combine => true, :failonfail => false}).returns(

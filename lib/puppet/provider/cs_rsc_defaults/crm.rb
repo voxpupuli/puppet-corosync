@@ -17,7 +17,7 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:crm, :parent => Puppet::Provider::C
     instances = []
 
     cmd = [ command(:crm), 'configure', 'show', 'xml' ]
-    if Puppet::PUPPETVERSION.to_f < 3.4
+    if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
       raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
     else
       raw = Puppet::Util::Execution.execute(cmd)
