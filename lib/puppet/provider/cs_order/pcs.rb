@@ -113,6 +113,10 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
     @property_hash[:kind]
   end
 
+  def symmetrical
+    @property_hash[:symmetrical]
+  end
+
   # Our setters for the first and second primitives and score.  Setters are
   # used when the resource already exists so we just update the current value
   # in the property hash and doing this marks it to be flushed.
