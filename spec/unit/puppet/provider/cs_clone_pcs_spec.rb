@@ -25,7 +25,7 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
       EOS
 
       described_class.expects(:block_until_ready).returns(nil)
-      if Puppet::PUPPETVERSION.to_f < 3.4
+      if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with(['pcs', 'cluster', 'cib']).at_least_once.returns([test_cib, 0])
       else
         Puppet::Util::Execution.expects(:execute).with(['pcs', 'cluster', 'cib'], {:failonfail => true}).at_least_once.returns(
@@ -56,7 +56,7 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
 
   context 'when flushing' do
     def expect_update(pattern)
-      if Puppet::PUPPETVERSION.to_f < 3.4
+      if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with { |*args|
           cmdline=args[0].join(" ")
           expect(cmdline).to match(pattern)

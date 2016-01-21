@@ -14,7 +14,7 @@ class Puppet::Provider::Crmsh < Puppet::Provider
   def self.ready?
     return true if @@crmready
     cmd =  [ command(:crm_attribute), '--type', 'crm_config', '--query', '--name', 'dc-version' ]
-    if Puppet::PUPPETVERSION.to_f < 3.4
+    if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
       raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
     else
       raw = Puppet::Util::Execution.execute(cmd, :failonfail => false, :combine => true)
