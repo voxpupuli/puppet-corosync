@@ -159,6 +159,17 @@ describe 'corosync' do
         )
       end
     end
+
+    context 'when configuring defaults for logging' do
+      it 'should configure stderr, syslog priority, func names' do
+        should contain_file('/etc/corosync/corosync.conf').with_content(
+          /to_stderr:       yes/)
+        should contain_file('/etc/corosync/corosync.conf').with_content(
+          /syslog_priority: info/)
+        should_not contain_file('/etc/corosync/corosync.conf').with_content(
+          /function_name:   on/)
+      end
+    end
   end
 
   context 'on Debian platforms' do

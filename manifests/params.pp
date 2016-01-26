@@ -10,6 +10,9 @@ class corosync::params {
   $force_online                        = false
   $check_standby                       = false
   $debug                               = false
+  $log_stderr                          = true
+  $syslog_priority                     = 'info'
+  $log_function_name                   = false
   $rrp_mode                            = 'none'
   $ttl                                 = false
   $token                               = 3000
