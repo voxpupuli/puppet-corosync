@@ -31,6 +31,16 @@ corosync::service { 'pacemaker':
   version => '0',
 }
 ```
+*To configure advanced and (very) verbose logging settings*
+
+```puppet
+class { 'corosync':
+  log_stderr        => false,
+  log_function_name => true,
+  syslog_priority   => 'debug',
+  debug             => true,
+}
+```
 
 Configuring primitives
 ------------------------

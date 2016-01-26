@@ -37,11 +37,21 @@ totem {
 
 logging {
   fileline:        off
+<% if @log_stderr -%>
   to_stderr:       yes
+<% else -%>
+  to_stderr:       no
+<% end -%>
   to_logfile:      no
   to_syslog:       yes
   syslog_facility: daemon
-  debug:           <%= scope.lookupvar('debug') ? 'on' : 'off' %>
+<% if @syslog_priority -%>
+  syslog_priority: <%= @syslog_priority %>
+<% end -%>
+<% if @log_function_name -%>
+  function_name:   on
+<% end -%>
+  debug:           <%= @debug ? 'on' : 'off' %>
   timestamp:       on
   logger_subsys {
     subsys: AMF

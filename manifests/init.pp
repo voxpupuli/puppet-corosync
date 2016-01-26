@@ -56,6 +56,19 @@
 #   True/false parameter specifying whether Corosync should produce debug
 #   output in its logs.
 #
+# [*log_stderr*]
+#   True/false parameter specifying whether Corosync should log errors to
+#   stderr. Defaults to True.
+#
+# [*syslog_priority*]
+#   String parameter specifying the minimal log level for Corosync syslog
+#   messages. Allowed values: debug|info|notice|warning|err|emerg.
+#   Defaults to 'info'.
+#
+# [*log_function_name*]
+#   True/false parameter specifying whether Corosync should log called funcions
+#   names to. Defaults to False.
+#
 # [*rrp_mode*]
 #   Mode of redundant ring. May be none, active, or passive.
 #
@@ -163,6 +176,9 @@ class corosync(
   $force_online                        = $::corosync::params::force_online,
   $check_standby                       = $::corosync::params::check_standby,
   $debug                               = $::corosync::params::debug,
+  $log_stderr                          = $::corosync::params::log_stderr,
+  $syslog_priority                     = $::corosync::params::syslog_priority,
+  $log_function_name                   = $::corosync::params::log_function_name,
   $rrp_mode                            = $::corosync::params::rrp_mode,
   $ttl                                 = $::corosync::params::ttl,
   $packages                            = undef,
@@ -256,6 +272,9 @@ class corosync(
   validate_bool($force_online)
   validate_bool($check_standby)
   validate_bool($debug)
+  validate_bool($log_stderr)
+  validate_re($syslog_priority, '^(debug|info|notice|warning|err|emerg)$')
+  validate_bool($log_function_name)
 
   if $unicast_addresses == 'UNSET' {
     $corosync_conf = "${module_name}/corosync.conf.erb"
