@@ -42,6 +42,31 @@ class { 'corosync':
 }
 ```
 
+Configure votequorum
+--------------------
+
+*To enable Corosync 2 votequorum and define a nodelist
+of nodes named n1, n2, n3 with auto generated node IDs*
+
+```puppet
+class { 'corosync':
+  set_votequorum => true,
+  quorum_members => [ 'n1', 'n2', 'n3' ],
+}
+```
+
+*To do the same but with custom node IDs instead*
+```puppet
+class { 'corosync':
+  set_votequorum     => true,
+  quorum_members     => [ 'n1', 'n2', 'n3' ],
+  quorum_members_ids => [ 10, 11, 12 ],
+}
+```
+Note: custom IDs may be required when adding or removing
+nodes to a cluster on a fly. Then each node shall have an
+unique and persistent ID.
+
 Configuring primitives
 ------------------------
 
@@ -108,7 +133,7 @@ cs_primitive { 'pgsql_service':
 Configuring locations
 -----------------------
 
-Locations determine on which nodes primitive resources run. 
+Locations determine on which nodes primitive resources run.
 
 ```puppet
 cs_location { 'nginx_service_location':
@@ -172,7 +197,7 @@ cs_property { 'stonith-enabled' :
 }
 ```
 
-Change quorum policy 
+Change quorum policy
 ```
 cs_property { 'no-quorum-policy' :
   value   => 'ignore',
