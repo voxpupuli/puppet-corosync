@@ -100,6 +100,9 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
   # as stdin for the pcs command.
   def flush
     unless @property_hash.empty?
+
+      ENV['CIB_shadow'] = @property_hash[:cib]
+
       if @property_hash[:new] == false
         debug('Removing colocation')
         cmd=[ command(:pcs), 'constraint', 'remove', @resource[:name]]
