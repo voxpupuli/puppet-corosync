@@ -110,7 +110,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
       cmd << "add"
       rsc = @property_hash[:primitives].pop
       if rsc.include? ':'
-        items = rsc.split[':']
+        items = rsc.split(':')
         if items[1] == 'Master'
           cmd << 'master'
         elsif items[1] == 'Slave'
