@@ -146,6 +146,9 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
   # as stdin for the pcs command.
   def flush
     unless @property_hash.empty?
+
+      ENV['CIB_shadow'] = @property_hash[:cib]
+
       if @property_hash[:new] == false
         debug('Removing order directive')
         cmd=[ command(:pcs), 'constraint', 'remove', @resource[:name]]
