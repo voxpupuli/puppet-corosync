@@ -36,20 +36,38 @@ Puppet::Type.newtype(:cs_commit) do
     [ 'corosync' ]
   end
 
-  autosubscribe(:cs_primitive) do
-    resources_with_cib :cs_primitive
-  end
+  if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '4.0') >= 0
+    autosubscribe(:cs_primitive) do
+      resources_with_cib :cs_primitive
+    end
 
-  autosubscribe(:cs_colocation) do
-    resources_with_cib :cs_colocation
-  end
+    autosubscribe(:cs_colocation) do
+      resources_with_cib :cs_colocation
+    end
 
-  autosubscribe(:cs_location) do
-    resources_with_cib :cs_location
-  end
+    autosubscribe(:cs_location) do
+      resources_with_cib :cs_location
+    end
 
-  autosubscribe(:cs_order) do
-    resources_with_cib :cs_order
+    autosubscribe(:cs_order) do
+      resources_with_cib :cs_order
+    end
+  else 
+    autorequire(:cs_primitive) do
+      resources_with_cib :cs_primitive
+    end
+
+    autorequire(:cs_colocation) do
+      resources_with_cib :cs_colocation
+    end
+
+    autorequire(:cs_location) do
+      resources_with_cib :cs_location
+    end
+
+    autorequire(:cs_order) do
+      resources_with_cib :cs_order
+    end
   end
 
   def resources_with_cib(cib)
