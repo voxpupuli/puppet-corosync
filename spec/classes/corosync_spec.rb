@@ -23,10 +23,25 @@ describe 'corosync' do
           /nodelist/
         )
         should contain_file('/etc/corosync/corosync.conf').with_content(
-          /ring0_addr\: node1\.test\.org/
+          /ring0_addr\: node1\.test\.org\n\s*nodeid: 1/
         )
         should contain_file('/etc/corosync/corosync.conf').with_content(
-          /ring0_addr\: node2\.test\.org/
+          /ring0_addr\: node2\.test\.org\n\s*nodeid: 2/
+        )
+      end
+
+      it 'supports persistent node IDs' do
+        params.merge!( {
+          :quorum_members_ids => [3, 11] }
+        )
+        should contain_file('/etc/corosync/corosync.conf').with_content(
+          /nodelist/
+        )
+        should contain_file('/etc/corosync/corosync.conf').with_content(
+          /ring0_addr\: node1\.test\.org\n\s*nodeid: 3/
+        )
+        should contain_file('/etc/corosync/corosync.conf').with_content(
+          /ring0_addr\: node2\.test\.org\n\s*nodeid: 11/
         )
       end
     end

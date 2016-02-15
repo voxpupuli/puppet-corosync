@@ -106,7 +106,12 @@
 # [*quorum_members*]
 #   Array of quorum member hostname. This is required if set_votequorum
 #   is set to true.
-#   Defaults to undef,
+#   Defaults to ['localhost']
+#
+# [*quorum_members_ids*]                                                                                                                                                                  #   Array of quorum member IDs. Persistent IDs are required for the dynamic
+#   config of a corosync cluster and when_set_votequorum is set to true.
+#   Should be used only with the quorum_members parameter.
+#   Defaults to undef
 #
 # [*token*]
 #   Time (in ms) to wait for a token
@@ -191,6 +196,7 @@ class corosync(
   $set_votequorum                      = $::corosync::params::set_votequorum,
   $votequorum_expected_votes           = $::corosync::params::votequorum_expected_votes,
   $quorum_members                      = ['localhost'],
+  $quorum_members_ids                  = undef,
   $token                               = $::corosync::params::token,
   $token_retransmits_before_loss_const = $::corosync::params::token_retransmits_before_lost_const,
   $compatibility                       = $::corosync::params::compatibility,
@@ -203,6 +209,10 @@ class corosync(
 
   if $set_votequorum and !$quorum_members {
     fail('set_votequorum is true, but no quorum_members have been passed.')
+  }
+
+  if $quorum_members_ids and !$quorum_members {
+    fail('quorum_members_ids may not be used without the quorum_members.')
   }
 
   if $packages {
@@ -330,7 +340,7 @@ class corosync(
     } else {
       $_package_pcs = $package_pcs
     }
-  
+
     if $version_pcs == undef {
       $_version_pcs = present
     } else {

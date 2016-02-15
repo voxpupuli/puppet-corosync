@@ -92,7 +92,11 @@ nodelist {
 <% [@quorum_members].flatten.each_index do |i| -%>
   node {
     ring0_addr: <%= [@quorum_members].flatten[i] %>
+<% if @quorum_members_ids.nil? -%>
     nodeid: <%= i+1 %>
+<% else -%>
+    nodeid: <%= [@quorum_members_ids].flatten[i] %>
+<% end -%>
   }
 <% end -%>
 }
