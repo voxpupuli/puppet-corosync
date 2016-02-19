@@ -27,7 +27,11 @@ class corosync::params {
     'RedHat': {
       $set_votequorum = true
       $compatibility = 'whitetank'
-      $manage_pacemaker_service = false
+      if versioncmp($::operatingsystemrelease, '7') >= 0 {
+        $manage_pacemaker_service = false
+      } else {
+        $manage_pacemaker_service = true
+      }
     }
 
     'Debian': {
