@@ -20,31 +20,64 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
     cmd = [ command(:pcs), 'cluster', 'cib' ]
     raw, status = run_pcs_command(cmd)
     doc = REXML::Document.new(raw)
+    resource_set_options = ['sequential', 'require-all', 'action', 'role']
 
-    doc.root.elements['configuration'].elements['constraints'].each_element('rsc_colocation') do |e|
-      items = e.attributes
+    constraints = doc.root.elements['configuration'].elements['constraints']
+    unless constraints.nil?
+      constraints.each_element('rsc_colocation') do |e|
+        items = e.attributes
 
-      if items['rsc-role'] and items['rsc-role'] != "Started"
-        rsc = "#{items['rsc']}:#{items['rsc-role']}"
-      else
-        rsc = items['rsc']
+        if e.has_elements?
+          resource_sets = []
+          e.each_element('resource_set') do |rs|
+            resource_set = {}
+            options = {}
+            resource_set_options.each do |o|
+              if rs.attributes[o]
+                options[o] = rs.attributes[o]
+              end
+            end
+            if options.keys.size > 0
+              resource_set['options'] = options
+            end
+            resource_set['primitives'] = Array.new
+            rs.each_element('resource_ref') do |rr|
+              resource_set['primitives'] << rr.attributes['id']
+            end
+            resource_sets << resource_set
+          end
+          colocation_instance = {
+            :name       => items['id'],
+            :ensure     => :present,
+            :primitives => resource_sets,
+            :score      => items['score'],
+            :provider   => self.name,
+            :new        => false
+          }
+        else
+          if items['rsc-role'] and items['rsc-role'] != "Started"
+            rsc = "#{items['rsc']}:#{items['rsc-role']}"
+          else
+            rsc = items['rsc']
+          end
+
+          if items ['with-rsc-role'] and items['with-rsc-role'] != "Started"
+            with_rsc = "#{items['with-rsc']}:#{items['with-rsc-role']}"
+          else
+            with_rsc = items['with-rsc']
+          end
+
+          colocation_instance = {
+            :name       => items['id'],
+            :ensure     => :present,
+            :primitives => [rsc, with_rsc],
+            :score      => items['score'],
+            :provider   => self.name,
+            :new        => false
+          }
+        end
+        instances << new(colocation_instance)
       end
-
-      if items ['with-rsc-role'] and items['with-rsc-role'] != "Started"
-        with_rsc = "#{items['with-rsc']}:#{items['with-rsc-role']}"
-      else
-        with_rsc = items['with-rsc']
-      end
-
-      colocation_instance = {
-        :name       => items['id'],
-        :ensure     => :present,
-        :primitives => [with_rsc, rsc],
-        :score      => items['score'],
-        :provider   => self.name,
-        :new        => false
-      }
-      instances << new(colocation_instance)
     end
     instances
   end
@@ -52,12 +85,12 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
   # Create just adds our resource to the property_hash and flush will take care
   # of actually doing the work.
   def create
+    primitives = Array.new
     @property_hash = {
       :name       => @resource[:name],
       :ensure     => :present,
       :primitives => @resource[:primitives],
       :score      => @resource[:score],
-      :cib        => @resource[:cib],
       :new        => true
     }
   end
@@ -87,11 +120,26 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
   # resource already exists so we just update the current value in the property
   # hash and doing this marks it to be flushed.
   def primitives=(should)
-    @property_hash[:primitives]
+    @property_hash[:primitives] = should
   end
 
   def score=(should)
     @property_hash[:score] = should
+  end
+
+  # Format a resource set for the pcs constraint colocation set
+  def format_resource_set(rs)
+    r = Array.new
+    if rs.is_a?(Hash)
+      rs.each do |o,v|
+        r << "#{o}=#{v}"
+      end
+    elsif rs.is_a?(Array)
+      until rs.empty?
+        r << rs.shift
+      end
+    end
+    r
   end
 
   # Flush is triggered on anything that has been detected as being
@@ -106,39 +154,50 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
       if @property_hash[:new] == false
         debug('Removing colocation')
         cmd=[ command(:pcs), 'constraint', 'remove', @resource[:name]]
-        Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+        Puppet::Provider::Pacemaker::run_pcs_command(cmd, @resource[:cib])
       end
-
+      first_item = @property_hash[:primitives].shift
       cmd = [ command(:pcs), 'constraint', 'colocation' ]
-      cmd << "add"
-      rsc = @property_hash[:primitives].pop
-      if rsc.include? ':'
-        items = rsc.split(':')
-        if items[1] == 'Master'
-          cmd << 'master'
-        elsif items[1] == 'Slave'
-          cmd << 'slave'
+      if first_item.is_a?(Array)
+        cmd << "set"
+        cmd << format_resource_set(first_item)
+        until @property_hash[:primitives].empty?
+          cmd += format_resource_set(@property_hash[:primitives].shift)
         end
-        cmd << items[0]
+        cmd << "setoptions"
+        cmd << "id=#{@property_hash[:name]}"
+        cmd << "score=#{@property_hash[:score]}"
       else
-        cmd << rsc
-      end
-      cmd << 'with'
-      rsc = @property_hash[:primitives].pop
-      if rsc.include? ':'
-        items = rsc.split(':')
-        if items[1] == 'Master'
-          cmd << 'master'
-        elsif items[1] == 'Slave'
-          cmd << 'slave'
+        cmd << "add"
+        rsc = first_item
+        if rsc.include? ':'
+          items = rsc.split(':')
+          if items[1] == 'Master'
+            cmd << 'master'
+          elsif items[1] == 'Slave'
+            cmd << 'slave'
+          end
+          cmd << items[0]
+        else
+          cmd << rsc
         end
-        cmd << items[0]
-      else
-        cmd << rsc
+        cmd << 'with'
+        rsc = @property_hash[:primitives].shift
+        if rsc.include? ':'
+          items = rsc.split(':')
+          if items[1] == 'Master'
+            cmd << 'master'
+          elsif items[1] == 'Slave'
+            cmd << 'slave'
+          end
+          cmd << items[0]
+        else
+          cmd << rsc
+        end
+        cmd << @property_hash[:score]
+        cmd << "id=#{@property_hash[:name]}"
       end
-      cmd << @property_hash[:score]
-      cmd << "id=#{@property_hash[:name]}"
-      raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+      raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd, @resource[:cib])
     end
   end
 end

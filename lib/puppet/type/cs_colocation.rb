@@ -42,7 +42,7 @@ Puppet::Type.newtype(:cs_colocation) do
     def should=(value)
       super
       if value.is_a? Array
-        raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be an array of at least two primitives." unless value.size >= 2
+        raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be an array of at least one element." unless value.size > 0
         @should
       else
         raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be an array."
@@ -73,20 +73,53 @@ Puppet::Type.newtype(:cs_colocation) do
   end
 
   autorequire(:cs_shadow) do
-    [ @parameters[:cib] ]
+    autos = []
+    if @parameters[:cib]
+      autos << @parameters[:cib].value
+    end
+
+    autos
+  end
+
+  if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '4.0') >= 0
+    autonotify(:cs_commit) do
+      autos = []
+      if @parameters[:cib]
+        autos << @parameters[:cib].value
+      end
+
+      autos
+    end
   end
 
   autorequire(:service) do
     [ 'corosync' ]
   end
 
-  autorequire(:cs_primitive) do
-    autos = []
-    @parameters[:primitives].should.each do |val|
-      autos << unmunge_cs_primitive(val)
-    end
 
-    autos
+  def extract_primitives
+    result = []
+    if @parameters[:primitives].should.first.is_a?(Hash)
+      @parameters[:primitives].should.each do |colocation_set|
+        if colocation_set.has_key?('primitives')
+          result << colocation_set['primitives']
+        end
+      end
+    end
+    if @parameters[:primitives].should.first.is_a?(String)
+      @parameters[:primitives].should.each do |val|
+        result << unmunge_cs_primitive(val)
+      end
+    end
+    result.flatten
+  end
+
+  autorequire(:cs_clone) do
+    extract_primitives
+  end
+
+  autorequire(:cs_primitive) do
+    extract_primitives
   end
 
   def unmunge_cs_primitive(name)
