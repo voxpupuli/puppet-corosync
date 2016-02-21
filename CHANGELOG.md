@@ -14,7 +14,7 @@
 - Added failure spec test for mixed use of $packages and $package\_\*.
 - Made token\_retransmits\_before\_loss\_const a parameter to allow hearbeat tuning
 - Move beaker to system-tests group
-- Add spec for cs\_colocation 
+- Add spec for cs\_colocation
 - Add basic beaker-rspec testing
 - Colocation is allowed on _at least_ 2 primitives
 - Bugfix,  crmsh cs\_location provider

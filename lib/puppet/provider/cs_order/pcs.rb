@@ -13,46 +13,47 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
   commands :pcs => 'pcs'
 
   def self.instances
-
     block_until_ready
 
     instances = []
 
-    cmd = [ command(:pcs), 'cluster', 'cib' ]
+    cmd = [command(:pcs), 'cluster', 'cib']
+    # rubocop:disable Lint/UselessAssignment
     raw, status = run_pcs_command(cmd)
+    # rubocop:enable Lint/UselessAssignment
     doc = REXML::Document.new(raw)
 
     doc.root.elements['configuration'].elements['constraints'].each_element('rsc_order') do |e|
       items = e.attributes
 
-      if items['first-action']
-        first = "#{items['first']}:#{items['first-action']}"
-      else
-        first = items['first']
-      end
+      first = if items['first-action']
+                "#{items['first']}:#{items['first-action']}"
+              else
+                items['first']
+              end
 
-      if items['then-action']
-        second = "#{items['then']}:#{items['then-action']}"
-      else
-        second = items['then']
-      end
-      if items['score']
-        score = items['score']
-      else
-        score = 'INFINITY'
-      end
-      if items['kind']
-        kind = items['kind']
-      else
-        kind = 'Mandatory'
-      end
+      second = if items['then-action']
+                 "#{items['then']}:#{items['then-action']}"
+               else
+                 items['then']
+               end
+      score = if items['score']
+                items['score']
+              else
+                'INFINITY'
+              end
+      kind = if items['kind']
+               items['kind']
+             else
+               'Mandatory'
+             end
 
-      if items['symmetrical']
-        symmetrical = (items['symmetrical'] == 'true')
-      else
-        # Default: symmetrical is true unless explicitly defined.
-        symmetrical = true
-      end
+      symmetrical = if items['symmetrical']
+                      (items['symmetrical'] == 'true')
+                    else
+                      # Default: symmetrical is true unless explicitly defined.
+                      true
+                    end
 
       order_instance = {
         :name        => items['id'],
@@ -62,7 +63,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
         :score       => score,
         :kind        => kind,
         :symmetrical => symmetrical,
-        :provider    => self.name,
+        :provider    => name,
         :new         => false
       }
       instances << new(order_instance)
@@ -82,15 +83,15 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
       :kind        => @resource[:kind],
       :symmetrical => @resource[:symmetrical],
       :cib         => @resource[:cib],
-      :new         => true,
+      :new         => true
     }
   end
 
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing order directive')
-    cmd=[ command(:pcs), 'constraint', 'remove', @resource[:name]]
-    Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+    cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
+    Puppet::Provider::Pacemaker.run_pcs_command(cmd)
     @property_hash.clear
   end
 
@@ -151,11 +152,11 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
 
       if @property_hash[:new] == false
         debug('Removing order directive')
-        cmd=[ command(:pcs), 'constraint', 'remove', @resource[:name]]
-        Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+        cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
+        Puppet::Provider::Pacemaker.run_pcs_command(cmd)
       end
 
-      cmd = [ command(:pcs), 'constraint', 'order' ]
+      cmd = [command(:pcs), 'constraint', 'order']
       rsc = @property_hash[:first]
       if rsc.include? ':'
         items = rsc.split(':')
@@ -176,8 +177,10 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
       cmd << @property_hash[:score]
       cmd << "kind=#{@property_hash[:kind]}"
       cmd << "id=#{@property_hash[:name]}"
-      cmd << "symmetrical=#{@property_hash[:symmetrical].to_s}"
-      raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+      cmd << "symmetrical=#{@property_hash[:symmetrical]}"
+      # rubocop:disable Lint/UselessAssignment
+      raw, status = Puppet::Provider::Pacemaker.run_pcs_command(cmd)
+      # rubocop:enable Lint/UselessAssignment
     end
   end
 end

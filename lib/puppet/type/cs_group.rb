@@ -26,7 +26,7 @@ Puppet::Type.newtype(:cs_group) do
     # colocation works we need to only accept two value arrays.
     def should=(value)
       super
-      raise Puppet::Error, "Puppet::Type::Cs_Group: primitives property must be at least a 2-element array." unless value.is_a? Array and value.length > 1
+      raise Puppet::Error, 'Puppet::Type::Cs_Group: primitives property must be at least a 2-element array.' unless value.is_a?(Array) && value.length > 1
       @should
     end
   end
@@ -43,11 +43,11 @@ Puppet::Type.newtype(:cs_group) do
   end
 
   autorequire(:cs_shadow) do
-    [ @parameters[:cib] ]
+    [@parameters[:cib]]
   end
 
   autorequire(:service) do
-    [ 'corosync' ]
+    ['corosync']
   end
 
   autorequire(:cs_primitive) do
@@ -61,9 +61,7 @@ Puppet::Type.newtype(:cs_group) do
 
   def unmunge_cs_primitive(name)
     name = name.split(':')[0]
-    if name.start_with? 'ms_'
-      name = name[3..-1]
-    end
+    name = name[3..-1] if name.start_with? 'ms_'
 
     name
   end

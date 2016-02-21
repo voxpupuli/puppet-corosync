@@ -12,13 +12,14 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
   commands :pcs => 'pcs'
 
   def self.instances
-
     block_until_ready
 
     instances = []
 
-    cmd = [ command(:pcs), 'cluster', 'cib' ]
+    cmd = [command(:pcs), 'cluster', 'cib']
+    # rubocop:disable Lint/UselessAssignment
     raw, status = run_pcs_command(cmd)
+    # rubocop:enable Lint/UselessAssignment
     doc = REXML::Document.new(raw)
 
     doc.root.elements['configuration'].elements['constraints'].each_element('rsc_location') do |e|
@@ -30,7 +31,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
         :primitive  => items['rsc'],
         :node_name  => items['node'],
         :score      => items['score'],
-        :provider   => self.name
+        :provider   => name
       }
       instances << new(location_instance)
     end
@@ -53,8 +54,8 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing location')
-    cmd = [ command(:pcs), 'constraint', 'resource', 'remove', @resource[:name] ]
-    Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+    cmd = [command(:pcs), 'constraint', 'resource', 'remove', @resource[:name]]
+    Puppet::Provider::Pacemaker.run_pcs_command(cmd)
     @property_hash.clear
   end
 
@@ -93,12 +94,14 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
   # It calls several pcs commands to make the resource look like the
   # params.
   def flush
+    # rubocop:disable Style/GuardClause
     unless @property_hash.empty?
+      # rubocop:enable Style/GuardClause
 
       ENV['CIB_shadow'] = @property_hash[:cib]
 
-      cmd = [ command(:pcs), 'constraint', 'location', 'add', @property_hash[:name], @property_hash[:primitive], @property_hash[:node_name], @property_hash[:score]]
-      Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+      cmd = [command(:pcs), 'constraint', 'location', 'add', @property_hash[:name], @property_hash[:primitive], @property_hash[:node_name], @property_hash[:score]]
+      Puppet::Provider::Pacemaker.run_pcs_command(cmd)
     end
   end
 end

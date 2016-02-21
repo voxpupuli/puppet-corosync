@@ -15,20 +15,21 @@ Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemake
 
     hash = {}
     e.each_element do |i|
-      hash[(i.attributes['name'])] = i.attributes['value'].strip
+      hash[i.attributes['name']] = i.attributes['value'].strip
     end
 
     hash
   end
 
   def self.instances
-
     block_until_ready
 
     instances = []
 
-    cmd = [ command(:pcs), 'cluster', 'cib' ]
+    cmd = [command(:pcs), 'cluster', 'cib']
+    # rubocop:disable Lint/UselessAssignment
     raw, status = run_pcs_command(cmd)
+    # rubocop:enable Lint/UselessAssignment
     doc = REXML::Document.new(raw)
 
     doc.root.elements['configuration'].elements['resources'].each_element('clone') do |e|
@@ -45,7 +46,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemake
         :globally_unique   => items['globally-unique'],
         :ordered           => items['ordered'],
         :interleave        => items['interleave'],
-        :existing_resource => :true,
+        :existing_resource => :true
       }
       instances << new(clone_instance)
     end
@@ -56,7 +57,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemake
   # of actually doing the work.
   def create
     @property_hash = {
-      :name              => @resource[:primitive]+'-clone',
+      :name              => @resource[:primitive] + '-clone',
       :ensure            => :present,
       :primitive         => @resource[:primitive],
       :clone_max         => @resource[:clone_max],
@@ -66,16 +67,17 @@ Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemake
       :ordered           => @resource[:ordered],
       :interleave        => @resource[:interleave],
       :cib               => @resource[:cib],
-      :existing_resource => :false,
+      :existing_resource => :false
     }
   end
 
   # Unlike create we actually immediately delete the item.
   def destroy
-    debug('Removing clone')
-    Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'unclone', @resource[:name]])
+    debug 'Removing clone'
+    Puppet::Provider::Pacemaker.run_pcs_command([command(:pcs), 'resource', 'unclone', @resource[:name]])
     @property_hash.clear
   end
+
   #
   # Getter that obtains the our service that should have been populated by
   # prefetch or instances (depends on if your using puppet resource or not).
@@ -150,33 +152,26 @@ Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemake
   # the updates that need to be made.  The temporary file is then used
   # as stdin for the crm command.
   def flush
-    unless @property_hash.empty?     
+    unless @property_hash.empty?
       if @property_hash[:existing_resource] == :false
-        debug ('Creating clone resource')
-        cmd = [ command(:pcs), 'resource', 'clone', "#{@property_hash[:primitive]}" ]
-        cmd << "clone-max=#{@property_hash[:clone_max]}" if @property_hash[:clone_max]
-        cmd << "clone-node-max=#{@property_hash[:clone_node_max]}" if @property_hash[:clone_node_max]
-        cmd << "notify=#{@property_hash[:notify_clones]}" if @property_hash[:notify_clones]
-        cmd << "globally-unique=#{@property_hash[:globally_unique]}" if @property_hash[:globally_unique]
-        cmd << "ordered=#{@property_hash[:ordered]}" if @property_hash[:ordered]
-        cmd << "interleave=#{@property_hash[:interleave]}" if @property_hash[:interleave]
-        raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+        debug 'Creating clone resource'
       else
-        debug ('Updating clone resource')
+        debug 'Updating clone resource'
         # pcs versions earlier than 0.9.116 do not allow updating a cloned
         # resource. Being conservative, we will unclone then create a new clone
         # with the new parameters.
-        Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'unclone', @resource[:primitive]])
-        cmd = [ command(:pcs), 'resource', 'clone', "#{@property_hash[:primitive]}" ]
-        cmd << "clone-max=#{@property_hash[:clone_max]}" if @property_hash[:clone_max]
-        cmd << "clone-node-max=#{@property_hash[:clone_node_max]}" if @property_hash[:clone_node_max]
-        cmd << "notify=#{@property_hash[:notify_clones]}" if @property_hash[:notify_clones]
-        cmd << "globally-unique=#{@property_hash[:globally_unique]}" if @property_hash[:globally_unique]
-        cmd << "ordered=#{@property_hash[:ordered]}" if @property_hash[:ordered]
-        cmd << "interleave=#{@property_hash[:interleave]}" if @property_hash[:interleave]
-        raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+        Puppet::Provider::Pacemaker.run_pcs_command([command(:pcs), 'resource', 'unclone', @resource[:primitive]])
       end
+      cmd = [command(:pcs), 'resource', 'clone', (@property_hash[:primitive]).to_s]
+      cmd << "clone-max=#{@property_hash[:clone_max]}" if @property_hash[:clone_max]
+      cmd << "clone-node-max=#{@property_hash[:clone_node_max]}" if @property_hash[:clone_node_max]
+      cmd << "notify=#{@property_hash[:notify_clones]}" if @property_hash[:notify_clones]
+      cmd << "globally-unique=#{@property_hash[:globally_unique]}" if @property_hash[:globally_unique]
+      cmd << "ordered=#{@property_hash[:ordered]}" if @property_hash[:ordered]
+      cmd << "interleave=#{@property_hash[:interleave]}" if @property_hash[:interleave]
+      # rubocop:disable Lint/UselessAssignment
+      raw, status = Puppet::Provider::Pacemaker.run_pcs_command(cmd)
+      # rubocop:enable Lint/UselessAssignment
     end
   end
 end
-

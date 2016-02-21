@@ -272,7 +272,7 @@ there are more incomplete examples spread across the [Puppet Labs Github](https:
 Contributors
 ------------
 
-  * [See Github](https://github.com/puppet-community/puppet-community-corosync/graphs/contributors)
+  * [See Github](https://github.com/voxpupuli/puppet-corosync/graphs/contributors)
 
 Copyright and License
 ---------------------

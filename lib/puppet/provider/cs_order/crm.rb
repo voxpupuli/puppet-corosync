@@ -11,41 +11,44 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Crmsh) d
   commands :crm => 'crm'
 
   def self.instances
-
     block_until_ready
 
     instances = []
 
-    cmd = [ command(:crm), 'configure', 'show', 'xml' ]
+    cmd = [command(:crm), 'configure', 'show', 'xml']
     if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
+      # rubocop:disable Lint/UselessAssignment
       raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+      # rubocop:enable Lint/UselessAssignment
     else
       raw = Puppet::Util::Execution.execute(cmd)
+      # rubocop:disable Lint/UselessAssignment
       status = raw.exitstatus
+      # rubocop:enable Lint/UselessAssignment
     end
     doc = REXML::Document.new(raw)
 
     doc.root.elements['configuration'].elements['constraints'].each_element('rsc_order') do |e|
       items = e.attributes
 
-      if items['first-action']
-        first = "#{items['first']}:#{items['first-action']}"
-      else
-        first = items['first']
-      end
+      first = if items['first-action']
+                "#{items['first']}:#{items['first-action']}"
+              else
+                items['first']
+              end
 
-      if items['then-action']
-        second = "#{items['then']}:#{items['then-action']}"
-      else
-        second = items['then']
-      end
+      second = if items['then-action']
+                 "#{items['then']}:#{items['then-action']}"
+               else
+                 items['then']
+               end
 
-      if items['symmetrical']
-        symmetrical = (items['symmetrical'] == 'true')
-      else
-        # Default: symmetrical is true unless explicitly defined.
-        symmetrical = true
-      end
+      symmetrical = if items['symmetrical']
+                      (items['symmetrical'] == 'true')
+                    else
+                      # Default: symmetrical is true unless explicitly defined.
+                      true
+                    end
 
       order_instance = {
         :name           => items['id'],
@@ -54,7 +57,7 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Crmsh) d
         :second         => second,
         :score          => items['score'],
         :symmetrical    => symmetrical,
-        :provider       => self.name
+        :provider       => name
       }
       instances << new(order_instance)
     end
@@ -71,7 +74,7 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Crmsh) d
       :second       => @resource[:second],
       :score        => @resource[:score],
       :symmetrical  => @resource[:symmetrical],
-      :cib          => @resource[:cib],
+      :cib          => @resource[:cib]
     }
   end
 
@@ -128,7 +131,7 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Crmsh) d
     unless @property_hash.empty?
       updated = 'order '
       updated << "#{@property_hash[:name]} #{@property_hash[:score]}: "
-      updated << "#{@property_hash[:first]} #{@property_hash[:second]} symmetrical=#{@property_hash[:symmetrical].to_s}"
+      updated << "#{@property_hash[:first]} #{@property_hash[:second]} symmetrical=#{@property_hash[:symmetrical]}"
       debug("Loading update: #{updated}")
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)

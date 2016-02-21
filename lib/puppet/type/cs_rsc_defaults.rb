@@ -25,6 +25,6 @@ Puppet::Type.newtype(:cs_rsc_defaults) do
   end
 
   autorequire(:service) do
-    [ 'corosync' ]
+    ['corosync']
   end
 end

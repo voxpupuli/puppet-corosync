@@ -73,10 +73,12 @@ Puppet::Type.newtype(:cs_primitive) do
       defining a model and just accept a hash."
 
     validate do |value|
-      raise Puppet::Error, "Puppet::Type::Cs_Primitive: parameters property must be a hash." unless value.is_a? Hash
+      raise Puppet::Error, 'Puppet::Type::Cs_Primitive: parameters property must be a hash.' unless value.is_a? Hash
     end
 
+    # rubocop:disable Style/EmptyLiteral
     defaultto Hash.new
+    # rubocop:enable Style/EmptyLiteral
   end
 
   newproperty(:operations) do
@@ -89,10 +91,11 @@ Puppet::Type.newtype(:cs_primitive) do
       is valid."
 
     validate do |value|
-      raise Puppet::Error, "Puppet::Type::Cs_Primitive: operations property must be a hash." unless value.is_a? Hash
+      raise Puppet::Error, 'Puppet::Type::Cs_Primitive: operations property must be a hash.' unless value.is_a? Hash
     end
-
+    # rubocop:disable Style/EmptyLiteral
     defaultto Hash.new
+    # rubocop:enable Style/EmptyLiteral
   end
 
   newproperty(:utilization) do
@@ -106,10 +109,11 @@ Puppet::Type.newtype(:cs_primitive) do
       http://clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Pacemaker_Explained/ch11.html"
 
     validate do |value|
-      raise Puppet::Error, "Puppet::Type::Cs_Primitive: utilization property must be a hash." unless value.is_a? Hash
+      raise Puppet::Error, 'Puppet::Type::Cs_Primitive: utilization property must be a hash.' unless value.is_a? Hash
     end
-
+    # rubocop:disable Style/EmptyLiteral
     defaultto Hash.new
+    # rubocop:enable Style/EmptyLiteral
   end
 
   newproperty(:metadata) do
@@ -120,27 +124,32 @@ Puppet::Type.newtype(:cs_primitive) do
       behavior but have no affect of the data that is synced or manipulated."
 
     validate do |value|
-      raise Puppet::Error, "Puppet::Type::Cs_Primitive: metadata property must be a hash." unless value.is_a? Hash
+      raise Puppet::Error, 'Puppet::Type::Cs_Primitive: metadata property must be a hash.' unless value.is_a? Hash
     end
-
+    # rubocop:disable Style/EmptyLiteral
     defaultto Hash.new
+    # rubocop:enable Style/EmptyLiteral
   end
 
   newproperty(:ms_metadata) do
-    desc "A hash of metadata for the master/slave primitive state."
+    desc 'A hash of metadata for the master/slave primitive state.'
 
     munge do |value_hash|
-      value_hash.inject({}) do |memo,(key,value)|
+      # Ruby 1.8.7 does not support each_with_object
+      # rubocop:disable Style/EachWithObject
+      value_hash.inject({}) do |memo, (key, value)|
+        # rubocop:enable Style/EachWithObject
         memo[key] = String(value)
         memo
       end
     end
 
     validate do |value|
-      raise Puppet::Error, "Puppet::Type::Cs_Primitive: ms_metadata property must be a hash" unless value.is_a? Hash
+      raise Puppet::Error, 'Puppet::Type::Cs_Primitive: ms_metadata property must be a hash' unless value.is_a? Hash
     end
-
+    # rubocop:disable Style/EmptyLiteral
     defaultto Hash.new
+    # rubocop:enable Style/EmptyLiteral
   end
 
   newproperty(:promotable) do
@@ -158,14 +167,12 @@ Puppet::Type.newtype(:cs_primitive) do
 
   autorequire(:cs_shadow) do
     autos = []
-    if @parameters[:cib]
-      autos << @parameters[:cib].value
-    end
+    autos << @parameters[:cib].value if @parameters[:cib]
 
     autos
   end
 
   autorequire(:service) do
-    [ 'corosync' ]
+    ['corosync']
   end
 end

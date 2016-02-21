@@ -40,14 +40,14 @@ Puppet::Type.newtype(:cs_property) do
       value but we aren't validating string vs. integer vs. boolean because
       cluster properties can range the gambit."
 
-      def insync?(is)
-        return true if ! @resource.replace?
+    def insync?(is)
+      return true unless @resource.replace?
 
-        super
-      end
+      super
+    end
   end
 
   autorequire(:service) do
-    [ 'corosync' ]
+    ['corosync']
   end
 end

@@ -396,7 +396,7 @@ class corosync(
     group   => 'root',
     recurse => true,
     purge   => true,
-    require => Package['corosync']
+    require => Package['corosync'],
   }
 
   case $::osfamily {

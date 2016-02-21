@@ -41,13 +41,16 @@ Puppet::Type.newtype(:cs_colocation) do
     # arrays with at least 2 values.
     def should=(value)
       super
+      # rubocop:disable Style/GuardClause
       if value.is_a? Array
-        raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be an array of at least one element." unless value.size > 0
-        @should
+        # rubocop:enable Style/GuardClause
+        if value.empty?
+          raise Puppet::Error, 'Puppet::Type::Cs_Colocation: The primitives property must be an array of at least one element.'
+        end
       else
-        raise Puppet::Error, "Puppet::Type::Cs_Colocation: The primitives property must be an array."
-        @should
+        raise Puppet::Error, 'Puppet::Type::Cs_Colocation: The primitives property must be an array.'
       end
+      @should
     end
   end
 
@@ -74,9 +77,7 @@ Puppet::Type.newtype(:cs_colocation) do
 
   autorequire(:cs_shadow) do
     autos = []
-    if @parameters[:cib]
-      autos << @parameters[:cib].value
-    end
+    autos << @parameters[:cib].value if @parameters[:cib]
 
     autos
   end
@@ -84,24 +85,21 @@ Puppet::Type.newtype(:cs_colocation) do
   if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '4.0') >= 0
     autonotify(:cs_commit) do
       autos = []
-      if @parameters[:cib]
-        autos << @parameters[:cib].value
-      end
+      autos << @parameters[:cib].value if @parameters[:cib]
 
       autos
     end
   end
 
   autorequire(:service) do
-    [ 'corosync' ]
+    ['corosync']
   end
-
 
   def extract_primitives
     result = []
     if @parameters[:primitives].should.first.is_a?(Hash)
       @parameters[:primitives].should.each do |colocation_set|
-        if colocation_set.has_key?('primitives')
+        if colocation_set.key?('primitives')
           result << colocation_set['primitives']
         end
       end
@@ -124,9 +122,7 @@ Puppet::Type.newtype(:cs_colocation) do
 
   def unmunge_cs_primitive(name)
     name = name.split(':')[0]
-    if name.start_with? 'ms_'
-      name = name[3..-1]
-    end
+    name = name[3..-1] if name.start_with? 'ms_'
 
     name
   end

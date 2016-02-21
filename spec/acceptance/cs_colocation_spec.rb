@@ -88,11 +88,11 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'should create the resources' do
-    if fact('osfamily') == 'RedHat'
-      command = 'pcs resource show'
-    else
-      command = 'crm_resource --list'
-    end
+    command = if fact('osfamily') == 'RedHat'
+                'pcs resource show'
+              else
+                'crm_resource --list'
+              end
     shell(command) do |r|
       expect(r.stdout).to match(/nginx_service.*IPaddr2/)
       expect(r.stdout).to match(/nginx_vip.*IPaddr2/)
@@ -100,17 +100,13 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'should create the colocation' do
-    if fact('osfamily') == 'RedHat'
-      command = 'pcs cluster cib'
-    else
-      command = 'crm configure show'
-    end
+    command = if fact('osfamily') == 'RedHat'
+                'pcs cluster cib'
+              else
+                'crm configure show'
+              end
     shell("#{command} | grep vip_with_service") do |r|
       expect(r.stdout).to match(/colocation.*nginx_service.*nginx_vip/)
     end
   end
-
 end
-
-
-

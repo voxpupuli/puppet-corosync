@@ -10,23 +10,23 @@ Puppet::Type.type(:cs_group).provide(:pcs, :parent => Puppet::Provider::Pacemake
   commands :pcs => '/usr/sbin/pcs'
 
   def self.instances
-
     block_until_ready
 
     instances = []
 
-    cmd = [ command(:pcs), 'cluster', 'cib' ]
+    cmd = [command(:pcs), 'cluster', 'cib']
+    # rubocop:disable Lint/UselessAssignment
     raw, status = run_pcs_command(cmd)
+    # rubocop:enable Lint/UselessAssignment
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//group') do |e|
-
       items = e.attributes
       group = { :name => items['id'].to_sym }
 
       primitives = []
 
-      if ! e.elements['primitive'].nil?
+      unless e.elements['primitive'].nil?
         e.each_element do |p|
           primitives << p.attributes['id']
         end
@@ -36,7 +36,7 @@ Puppet::Type.type(:cs_group).provide(:pcs, :parent => Puppet::Provider::Pacemake
         :name       => group[:name],
         :ensure     => :present,
         :primitives => primitives,
-        :provider   => self.name,
+        :provider   => name,
         :new        => false
       }
       instances << new(group_instance)
@@ -53,14 +53,14 @@ Puppet::Type.type(:cs_group).provide(:pcs, :parent => Puppet::Provider::Pacemake
       :primitives => @resource[:primitives],
       :new        => true
     }
-    @property_hash[:cib] = @resource[:cib] if ! @resource[:cib].nil?
+    @property_hash[:cib] = @resource[:cib] unless @resource[:cib].nil?
   end
 
   # Unlike create we actually immediately delete the item but first, like primitives,
   # we need to stop the group.
   def destroy
     debug('Removing group')
-    Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'ungroup', @property_hash[:name]])
+    Puppet::Provider::Pacemaker.run_pcs_command([command(:pcs), 'resource', 'ungroup', @property_hash[:name]])
     @property_hash.clear
   end
 
@@ -89,12 +89,14 @@ Puppet::Type.type(:cs_group).provide(:pcs, :parent => Puppet::Provider::Pacemake
 
       if @property_hash[:new] == false
         debug('Removing group')
-        Puppet::Provider::Pacemaker::run_pcs_command([command(:pcs), 'resource', 'ungroup', @property_hash[:name]])
+        Puppet::Provider::Pacemaker.run_pcs_command([command(:pcs), 'resource', 'ungroup', @property_hash[:name]])
       end
 
-      cmd = [ command(:pcs), 'resource', 'group', 'add', "#{@property_hash[:name]}" ]
+      cmd = [command(:pcs), 'resource', 'group', 'add', (@property_hash[:name]).to_s]
       cmd += @property_hash[:primitives]
-      raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+      # rubocop:disable Lint/UselessAssignment
+      raw, status = Puppet::Provider::Pacemaker.run_pcs_command(cmd)
+      # rubocop:enable Lint/UselessAssignment
     end
   end
 end

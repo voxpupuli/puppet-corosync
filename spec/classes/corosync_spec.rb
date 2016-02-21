@@ -1,7 +1,6 @@
 require 'spec_helper'
 
 describe 'corosync' do
-
   let :params do
     { :set_votequorum => false,
       :multicast_address => '239.1.1.2' }
@@ -13,8 +12,8 @@ describe 'corosync' do
     context 'when set_quorum is true and quorum_members are set' do
       before :each do
         params.merge!(
-          { :set_votequorum => true,
-            :quorum_members => ['node1.test.org', 'node2.test.org'] }
+          :set_votequorum => true,
+          :quorum_members => ['node1.test.org', 'node2.test.org']
         )
       end
 
@@ -31,9 +30,7 @@ describe 'corosync' do
       end
 
       it 'supports persistent node IDs' do
-        params.merge!( {
-          :quorum_members_ids => [3, 11] }
-        )
+        params[:quorum_members_ids] = [3, 11]
         should contain_file('/etc/corosync/corosync.conf').with_content(
           /nodelist/
         )
@@ -49,10 +46,10 @@ describe 'corosync' do
     context 'when set_quorum is true and unicast is used' do
       before :each do
         params.merge!(
-          { :set_votequorum => true,
-            :quorum_members => ['node1.test.org', 'node2.test.org'],
-            :multicast_address => 'UNSET',
-            :unicast_addresses => ['192.168.1.1', '192.168.1.2'], }
+          :set_votequorum => true,
+          :quorum_members => ['node1.test.org', 'node2.test.org'],
+          :multicast_address => 'UNSET',
+          :unicast_addresses => ['192.168.1.1', '192.168.1.2']
         )
       end
 
@@ -71,7 +68,7 @@ describe 'corosync' do
 
     context 'when cluster_name is not set' do
       it { should contain_file('/etc/corosync/corosync.conf').without_content(
-          /cluster_name\:/
+        /cluster_name\:/
         )
       }
     end
@@ -79,7 +76,7 @@ describe 'corosync' do
     context 'when cluster_name is set' do
       before :each do
         params.merge!(
-          { :cluster_name => 'hacell', }
+          :cluster_name => 'hacell'
         )
       end
 
@@ -90,33 +87,30 @@ describe 'corosync' do
       end
     end
 
-    [ :package_corosync, :package_pacemaker, :version_corosync, :version_pacemaker ].each { |package_param|
+    [:package_corosync, :package_pacemaker, :version_corosync, :version_pacemaker].each { |package_param|
       context "new-style package parameter $#{package_param} mixed with deprecated $packages parameter" do
         before :each do
           params.merge!(
-            {
-              package_param => true, # value does not really matter here: these
-                                     # two params must not both be defined
-                                     # at the same time.
-              :packages => ['corosync', 'pacemaker'],
-            }
+            package_param => true, # value does not really matter here: these
+            # two params must not both be defined
+            # at the same time.
+            :packages => %w(corosync pacemaker)
           )
         end
 
         it 'raises error' do
           should raise_error(
-              Puppet::Error,
-              /\$corosync::#{package_param} and \$corosync::packages must not be mixed!/
+            Puppet::Error,
+            /\$corosync::#{package_param} and \$corosync::packages must not be mixed!/
           )
         end
       end
     }
 
-
-    [ :corosync, :pacemaker ].each { |package|
+    [:corosync, :pacemaker].each { |package|
       context "install package #{package} with default version" do
         before :each do
-          params.merge!( { "package_#{package}" => true, } )
+          params.merge!("package_#{package}" => true)
         end
 
         it "does install #{package}" do
@@ -124,15 +118,13 @@ describe 'corosync' do
             :ensure => 'present'
           )
         end
-
       end
-
 
       context "install package #{package} with custom version" do
         before :each do
           params.merge!(
-                        { "package_#{package}" => true,
-                          "version_#{package}" => '1.1.1' }
+            "package_#{package}" => true,
+            "version_#{package}" => '1.1.1'
                        )
         end
 
@@ -141,36 +133,31 @@ describe 'corosync' do
             :ensure => '1.1.1'
           )
         end
-
       end
-
 
       context "do not install #{package}" do
         before :each do
-          params.merge!( { "package_#{package}" => false, } )
+          params.merge!("package_#{package}" => false)
         end
 
         it "does not install #{package}" do
           should_not contain_package(package)
         end
-
       end
-
     }
-
 
     context 'when set_quorum is true and quorum_members are not set' do
       before :each do
         params.merge!(
-          { :set_votequorum => true,
-            :quorum_members => false }
+          :set_votequorum => true,
+          :quorum_members => false
         )
       end
 
       it 'raises error' do
         should raise_error(
-            Puppet::Error,
-            /set_votequorum is true, but no quorum_members have been passed./
+          Puppet::Error,
+          /set_votequorum is true, but no quorum_members have been passed./
         )
       end
     end
@@ -189,9 +176,10 @@ describe 'corosync' do
 
   context 'on Debian platforms' do
     let :facts do
-      { :osfamily       => 'Debian',
-        :processorcount => '3',
-        :ipaddress      => '127.0.0.1' }
+      { :osfamily        => 'Debian',
+        :operatingsystem => 'Debian',
+        :processorcount  => '3',
+        :ipaddress       => '127.0.0.1' }
     end
 
     it_configures 'corosync'

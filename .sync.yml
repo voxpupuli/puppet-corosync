@@ -1,0 +1,20 @@
+---
+spec/spec_helper.rb:
+  unmanaged: true
+.travis.yml:
+  includes:
+  - rvm: 1.9.3
+    env: PUPPET_VERSION="~> 3.0" STRICT_VARIABLES="yes" CHECK=test
+  - rvm: 2.1.8
+    env: PUPPET_VERSION="~> 3.0" STRICT_VARIABLES="yes" CHECK=test
+  - rvm: 1.9.3
+    env: PUPPET_VERSION="~> 3.0" STRICT_VARIABLES="yes" CHECK=test FUTURE_PARSER=yes
+  - rvm: 2.1.8
+    env: PUPPET_VERSION="~> 3.0" STRICT_VARIABLES="yes" CHECK=test FUTURE_PARSER=yes
+  - rvm: 2.1.8
+    env: PUPPET_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK=test
+  - rvm: 2.2.4
+    env: PUPPET_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK=rubocop
+  - rvm: 2.3.0
+    env: PUPPET_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK=test
+  secure: "OKYO+/kY1KB9EH0pB30AU6E2c5SZbNql+Klg+sb1/LMi+ADjyNEzcfTP6aUhnYedKJf5m8rfycc81UPuUeKaR/U/mPwR1R5OKh+S1KL1yzrRdxdpmLWMX14nBFbAZYvSTe/bPbxhngjW84uHRF2zkkSxKStsIzyy2DcTYayaWZ0="

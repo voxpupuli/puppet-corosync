@@ -6,14 +6,14 @@ Puppet::Type.newtype(:cs_shadow) do
 
   newproperty(:cib) do
     def sync
-      provider.sync(self.should)
+      provider.sync(should)
     end
 
     def retrieve
       :absent
     end
 
-    def insync?(is)
+    def insync?(_is)
       false
     end
 
@@ -21,16 +21,16 @@ Puppet::Type.newtype(:cs_shadow) do
   end
 
   newparam(:name) do
-    desc "Name of the shadow CIB to create and manage"
+    desc 'Name of the shadow CIB to create and manage'
     isnamevar
   end
 
   def generate
     options = { :name => @title }
-    [ Puppet::Type.type(:cs_commit).new(options) ]
+    [Puppet::Type.type(:cs_commit).new(options)]
   end
 
   autorequire(:service) do
-    [ 'corosync' ]
+    ['corosync']
   end
 end

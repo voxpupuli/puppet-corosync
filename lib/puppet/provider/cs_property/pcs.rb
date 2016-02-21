@@ -9,20 +9,21 @@ Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacem
   defaultfor :operatingsystem => [:fedora, :centos, :redhat]
 
   # Path to the pcs binary for interacting with the cluster configuration.
-  commands :pcs           => 'pcs'
+  commands :pcs => 'pcs'
 
   def self.instances
-
     block_until_ready
 
     instances = []
 
-    cmd = [ command(:pcs), 'cluster', 'cib' ]
+    cmd = [command(:pcs), 'cluster', 'cib']
+    # rubocop:disable Lint/UselessAssignment
     raw, status = run_pcs_command(cmd)
+    # rubocop:enable Lint/UselessAssignment
     doc = REXML::Document.new(raw)
 
     cluster_property_set = doc.root.elements['configuration/crm_config/cluster_property_set']
-    if not cluster_property_set.nil?
+    unless cluster_property_set.nil?
       cluster_property_set.each_element do |e|
         items = e.attributes
         property = { :name => items['name'], :value => items['value'] }
@@ -31,7 +32,7 @@ Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacem
           :name       => property[:name],
           :ensure     => :present,
           :value      => property[:value],
-          :provider   => self.name
+          :provider   => name
         }
         instances << new(property_instance)
       end
@@ -45,15 +46,17 @@ Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacem
     @property_hash = {
       :name   => @resource[:name],
       :ensure => :present,
-      :value  => @resource[:value],
+      :value  => @resource[:value]
     }
   end
 
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing cluster property')
-    cmd = [ command(:pcs), 'property', 'unset', "#{@property_hash[:name]}" ]
+    cmd = [command(:pcs), 'property', 'unset', (@property_hash[:name]).to_s]
+    # rubocop:disable Lint/UselessAssignment
     raw, status = run_pcs_command(cmd)
+    # rubocop:enable Lint/UselessAssignment
     @property_hash.clear
   end
 
@@ -76,12 +79,16 @@ Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacem
   # the updates that need to be made.  The temporary file is then used
   # as stdin for the pcs command.
   def flush
+    # rubocop:disable Style/GuardClause
     unless @property_hash.empty?
+      # rubocop:enable Style/GuardClause
       # clear this on properties, in case it's set from a previous
       # run of a different corosync type
       ENV['CIB_shadow'] = nil
-      cmd = [ command(:pcs), 'property', 'set', "#{@property_hash[:name]}=#{@property_hash[:value]}" ]
-      raw, status = Puppet::Provider::Pacemaker::run_pcs_command(cmd)
+      cmd = [command(:pcs), 'property', 'set', "#{@property_hash[:name]}=#{@property_hash[:value]}"]
+      # rubocop:disable Lint/UselessAssignment
+      raw, status = Puppet::Provider::Pacemaker.run_pcs_command(cmd)
+      # rubocop:enable Lint/UselessAssignment
     end
   end
 end
