@@ -387,10 +387,13 @@ class corosync(
 
   case $::osfamily {
     'Debian': {
-      exec { 'enable corosync':
-        command => 'sed -i s/START=no/START=yes/ /etc/default/corosync',
-        path    => [ '/bin', '/usr/bin' ],
-        unless  => 'grep START=yes /etc/default/corosync',
+      augeas { 'enable corosync':
+        lens    => 'Shellvars.lns',
+        incl    => '/etc/default/corosync',
+        context => '/files/etc/default/corosync',
+        changes => [
+          'set START "yes"',
+        ],
         require => Package['corosync'],
         before  => Service['corosync'],
       }
