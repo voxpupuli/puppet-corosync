@@ -198,9 +198,18 @@ cs_property { 'stonith-enabled' :
 ```
 
 Change quorum policy
-```
+```puppet
 cs_property { 'no-quorum-policy' :
   value   => 'ignore',
+}
+```
+
+You can use the replace parameter to create but not update some values:
+
+```puppet
+cs_property { 'maintenance-mode':
+  value   => 'true',
+  replace => false,
 }
 ```
 

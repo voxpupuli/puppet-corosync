@@ -21,17 +21,20 @@ Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacem
     raw, status = run_pcs_command(cmd)
     doc = REXML::Document.new(raw)
 
-    doc.root.elements['configuration/crm_config/cluster_property_set'].each_element do |e|
-      items = e.attributes
-      property = { :name => items['name'], :value => items['value'] }
+    cluster_property_set = doc.root.elements['configuration/crm_config/cluster_property_set']
+    if not cluster_property_set.nil?
+      cluster_property_set.each_element do |e|
+        items = e.attributes
+        property = { :name => items['name'], :value => items['value'] }
 
-      property_instance = {
-        :name       => property[:name],
-        :ensure     => :present,
-        :value      => property[:value],
-        :provider   => self.name
-      }
-      instances << new(property_instance)
+        property_instance = {
+          :name       => property[:name],
+          :ensure     => :present,
+          :value      => property[:value],
+          :provider   => self.name
+        }
+        instances << new(property_instance)
+      end
     end
     instances
   end

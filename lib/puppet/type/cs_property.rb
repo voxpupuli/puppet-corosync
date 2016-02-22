@@ -1,3 +1,5 @@
+require 'puppet/parameter/boolean'
+
 Puppet::Type.newtype(:cs_property) do
   @doc = "Type for manipulating corosync/pacemaker configuration properties.
     Besides the configuration file that is managed by the module the contains
@@ -25,10 +27,24 @@ Puppet::Type.newtype(:cs_property) do
     isnamevar
   end
 
+  newparam(:replace, :boolean => true, :parent => Puppet::Parameter::Boolean) do
+    desc "Whether to replace a property that already exists on the cluster
+      whose value doesn't match what the `value` attribute specifies.  Setting
+      this to false allows cs_property resources to initialize properties without
+      overwriting future changes. Defaults to `true`."
+    defaultto :true
+  end
+
   newproperty(:value) do
     desc "Value of the property.  It is expected that this will be a single
       value but we aren't validating string vs. integer vs. boolean because
       cluster properties can range the gambit."
+
+      def insync?(is)
+        return true if ! @resource.replace?
+
+        super
+      end
   end
 
   autorequire(:service) do
