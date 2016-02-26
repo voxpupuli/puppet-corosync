@@ -154,6 +154,28 @@ cs_colocation { 'vip_with_service':
 }
 ```
 
+*pcs only* Advanced colocations are also possible with colocation sets by using
+arrays instead of strings in the primitives array. Additionally, a hash can be
+added to the inner array with the specific options for that resource set.
+
+```puppet
+cs_colocation { 'mysql_and_ptheartbeat':
+  primitives => [
+    ['mysql', {'role' => 'master'}],
+    [ 'ptheartbeat' ],
+  ],
+}
+```
+
+```puppet
+cs_colocation { 'mysql_apache_munin_and_ptheartbeat':
+  primitives => [
+    ['mysql', 'apache', {'role' => 'master'}],
+    [ 'munin', 'ptheartbeat' ],
+  ],
+}
+```
+
 Configuring migration or state order
 ------------------------------------
 
