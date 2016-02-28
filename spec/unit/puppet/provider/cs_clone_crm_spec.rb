@@ -7,7 +7,6 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
 
   context 'when getting instances' do
     let :instances do
-
       test_cib = <<-EOS
         <cib>
         <configuration>
@@ -26,13 +25,15 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
 
       described_class.expects(:block_until_ready).returns(nil)
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-        Puppet::Util::SUIDManager.expects(:run_and_capture).with(['crm', 'configure', 'show', 'xml']).at_least_once.returns([test_cib, 0])
+        Puppet::Util::SUIDManager.expects(:run_and_capture).with(%w(crm configure show xml)).at_least_once.returns([test_cib, 0])
       else
-        Puppet::Util::Execution.expects(:execute).with(['crm', 'configure', 'show', 'xml']).at_least_once.returns(
+        Puppet::Util::Execution.expects(:execute).with(%w(crm configure show xml)).at_least_once.returns(
           Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
         )
       end
+      # rubocop:disable Lint/UselessAssignment
       instances = described_class.instances
+      # rubocop:enable Lint/UselessAssignment
     end
 
     it 'should have an instance for each <clone>' do
@@ -49,7 +50,7 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
       end
 
       it "is named by the <primitive>'s id attribute" do
-        expect(instance.name).to eq("p_keystone-clone")
+        expect(instance.name).to eq('p_keystone-clone')
       end
     end
   end
@@ -57,7 +58,7 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
   context 'when flushing' do
     def expect_update(pattern)
       instance.expects(:crm).with { |*args|
-        if args.slice(0..2) == ['configure', 'load', 'update']
+        if args.slice(0..2) == %w(configure load update)
           expect(File.read(args[3])).to match(pattern)
           true
         else
@@ -81,8 +82,8 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
     end
 
     it 'creates clone' do
-        expect_update(/clone p_keystone-clone p_keystone/)
-        instance.flush
+      expect_update(/clone p_keystone-clone p_keystone/)
+      instance.flush
     end
 
     it 'sets max clones' do
@@ -96,7 +97,7 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
       expect_update(/clone-node-max=3/)
       instance.flush
     end
-    
+
     it 'sets notify_clones' do
       instance.notify_clones = :true
       expect_update(/notify=true/)
@@ -121,5 +122,4 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
       instance.flush
     end
   end
-
 end

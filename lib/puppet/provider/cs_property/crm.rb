@@ -11,17 +11,20 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Crmsh
   commands :cibadmin      => 'cibadmin'
 
   def self.instances
-
     block_until_ready
 
     instances = []
 
-    cmd = [ command(:crm), 'configure', 'show', 'xml' ]
+    cmd = [command(:crm), 'configure', 'show', 'xml']
     if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
+      # rubocop:disable Lint/UselessAssignment
       raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+      # rubocop:enable Lint/UselessAssignment
     else
+      # rubocop:disable Lint/UselessAssignment
       raw = Puppet::Util::Execution.execute(cmd)
       status = raw.exitstatus
+      # rubocop:enable Lint/UselessAssignment
     end
     doc = REXML::Document.new(raw)
 
@@ -33,7 +36,7 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Crmsh
         :name       => property[:name],
         :ensure     => :present,
         :value      => property[:value],
-        :provider   => self.name
+        :provider   => name
       }
       instances << new(property_instance)
     end
@@ -46,7 +49,7 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Crmsh
     @property_hash = {
       :name   => @resource[:name],
       :ensure => :present,
-      :value  => @resource[:value],
+      :value  => @resource[:value]
     }
   end
 
@@ -77,7 +80,9 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Crmsh
   # as stdin for the crm command.
   def flush
     self.class.block_until_ready
+    # rubocop:disable Style/GuardClause
     unless @property_hash.empty?
+      # rubocop:enable Style/GuardClause
       # clear this on properties, in case it's set from a previous
       # run of a different corosync type
       ENV['CIB_shadow'] = nil

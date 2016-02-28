@@ -15,7 +15,7 @@ Puppet::Type.newtype(:cs_clone) do
   end
 
   newproperty(:primitive) do
-    desc "The corosync resource primitive to be cloned.  "
+    desc 'The corosync resource primitive to be cloned.  '
   end
 
   newproperty(:clone_max) do
@@ -43,7 +43,7 @@ Puppet::Type.newtype(:cs_clone) do
   end
 
   newproperty(:ordered) do
-    desc "Should the copies be started in series (instead of in parallel). Allowed values: true, false"
+    desc 'Should the copies be started in series (instead of in parallel). Allowed values: true, false'
 
     newvalues(:true, :false)
   end
@@ -68,12 +68,10 @@ Puppet::Type.newtype(:cs_clone) do
   end
 
   autorequire(:cs_shadow) do
-    [ @parameters[:cib] ]
+    [@parameters[:cib]]
   end
 
   autorequire(:service) do
-    [ 'corosync' ]
+    ['corosync']
   end
-
 end
-

@@ -60,8 +60,4 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   describe service('pacemaker') do
     it { is_expected.to be_running }
   end
-
 end
-
-
-

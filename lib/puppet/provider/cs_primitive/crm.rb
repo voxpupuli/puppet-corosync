@@ -20,7 +20,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
 
     hash = {}
     e.each_element do |i|
-      hash[(i.attributes['name'])] = i.attributes['value']
+      hash[i.attributes['name']] = i.attributes['value']
     end
 
     hash
@@ -35,7 +35,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
       :provided_by      => e.attributes['provider'],
       :name             => e.attributes['id'].to_sym,
       :ensure           => :present,
-      :provider         => self.name,
+      :provider         => name,
       :parameters       => nvpairs_to_hash(e.elements['instance_attributes']),
       :operations       => {},
       :utilization      => nvpairs_to_hash(e.elements['utilization']),
@@ -44,16 +44,16 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
       :promotable       => :false
     }
 
-    if ! e.elements['operations'].nil?
+    unless e.elements['operations'].nil?
       e.elements['operations'].each_element do |o|
-        valids = o.attributes.reject do |k,v| k == 'id' end
+        valids = o.attributes.reject do |k, _v| k == 'id' end
         currentop = {}
-        valids.each do |k,v|
+        valids.each do |k, v|
           currentop[k] = v if k != 'name'
         end
-        if ! o.elements['instance_attributes'].nil?
+        unless o.elements['instance_attributes'].nil?
           o.elements['instance_attributes'].each_element do |i|
-            currentop[(i.attributes['name'])] = i.attributes['value']
+            currentop[i.attributes['name']] = i.attributes['value']
           end
         end
         if hash[:operations][valids['name']].instance_of?(Hash)
@@ -70,9 +70,9 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
     end
     if e.parent.name == 'master'
       hash[:promotable] = :true
-      if ! e.parent.elements['meta_attributes'].nil?
+      unless e.parent.elements['meta_attributes'].nil?
         e.parent.elements['meta_attributes'].each_element do |m|
-          hash[:ms_metadata][(m.attributes['name'])] = m.attributes['value']
+          hash[:ms_metadata][m.attributes['name']] = m.attributes['value']
         end
       end
     end
@@ -81,17 +81,20 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
   end
 
   def self.instances
-
     block_until_ready
 
     instances = []
 
-    cmd = [ command(:crm), 'configure', 'show', 'xml' ]
+    cmd = [command(:crm), 'configure', 'show', 'xml']
     if Puppet::PUPPETVERSION.to_f < 3.4
+      # rubocop:disable Lint/UselessAssignment
       raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+      # rubocop:enable Lint/UselessAssignment
     else
+      # rubocop:disable Lint/UselessAssignment
       raw = Puppet::Util::Execution.execute(cmd)
       status = raw.exitstatus
+      # rubocop:enable Lint/UselessAssignment
     end
     doc = REXML::Document.new(raw)
 
@@ -112,12 +115,12 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
       :primitive_type  => @resource[:primitive_type],
       :promotable      => @resource[:promotable]
     }
-    @property_hash[:parameters] = @resource[:parameters] if ! @resource[:parameters].nil?
-    @property_hash[:operations] = @resource[:operations] if ! @resource[:operations].nil?
-    @property_hash[:utilization] = @resource[:utilization] if ! @resource[:utilization].nil?
-    @property_hash[:metadata] = @resource[:metadata] if ! @resource[:metadata].nil?
-    @property_hash[:ms_metadata] = @resource[:ms_metadata] if ! @resource[:ms_metadata].nil?
-    @property_hash[:cib] = @resource[:cib] if ! @resource[:cib].nil?
+    @property_hash[:parameters] = @resource[:parameters] unless @resource[:parameters].nil?
+    @property_hash[:operations] = @resource[:operations] unless @resource[:operations].nil?
+    @property_hash[:utilization] = @resource[:utilization] unless @resource[:utilization].nil?
+    @property_hash[:metadata] = @resource[:metadata] unless @resource[:metadata].nil?
+    @property_hash[:ms_metadata] = @resource[:ms_metadata] unless @resource[:ms_metadata].nil?
+    @property_hash[:cib] = @resource[:cib] unless @resource[:cib].nil?
   end
 
   # Unlike create we actually immediately delete the item.  Corosync forces us
@@ -204,7 +207,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
         @property_hash[:operations].each do |o|
           [o[1]].flatten.each do |o2|
             operations << "op #{o[0]} "
-            o2.each_pair do |k,v|
+            o2.each_pair do |k, v|
               operations << "#{k}=#{v} "
             end
           end
@@ -212,23 +215,23 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
       end
       unless @property_hash[:parameters].empty?
         parameters = 'params '
-        @property_hash[:parameters].each_pair do |k,v|
+        @property_hash[:parameters].each_pair do |k, v|
           parameters << "'#{k}=#{v}' "
         end
       end
       unless @property_hash[:utilization].empty?
         utilization = 'utilization '
-        @property_hash[:utilization].each_pair do |k,v|
+        @property_hash[:utilization].each_pair do |k, v|
           utilization << "#{k}=#{v} "
         end
       end
       unless @property_hash[:metadata].empty?
         metadatas = 'meta '
-        @property_hash[:metadata].each_pair do |k,v|
+        @property_hash[:metadata].each_pair do |k, v|
           metadatas << "#{k}=#{v} "
         end
       end
-      updated = "primitive "
+      updated = 'primitive '
       updated << "#{@property_hash[:name]} #{@property_hash[:primitive_class]}:"
       updated << "#{@property_hash[:provided_by]}:" if @property_hash[:provided_by]
       updated << "#{@property_hash[:primitive_type]} "
@@ -241,7 +244,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
         updated << "ms ms_#{@property_hash[:name]} #{@property_hash[:name]} "
         unless @property_hash[:ms_metadata].empty?
           updated << 'meta '
-          @property_hash[:ms_metadata].each_pair do |k,v|
+          @property_hash[:ms_metadata].each_pair do |k, v|
             updated << "#{k}=#{v} "
           end
         end

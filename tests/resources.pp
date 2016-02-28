@@ -21,8 +21,8 @@ cs_primitive { 'bar':
   primitive_type  => 'Dummy',
   operations      => {
     'monitor'  => {
-      'interval' => '20'
-    }
+      'interval' => '20',
+    },
   },
 } ->
 cs_primitive { 'blort':
@@ -33,12 +33,12 @@ cs_primitive { 'blort':
   promotable      => true,
   operations      => {
     'monitor' => {
-      'interval' => '20'
+      'interval' => '20',
     },
     'start'   => {
       'interval' => '0',
-      'timeout'  => '20'
-    }
+      'timeout'  => '20',
+    },
   },
 } ->
 cs_primitive { 'foo':

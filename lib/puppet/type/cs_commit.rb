@@ -1,15 +1,15 @@
 Puppet::Type.newtype(:cs_commit) do
-  @doc = "This type is an implementation detail. DO NOT use it directly"
+  @doc = 'This type is an implementation detail. DO NOT use it directly'
   newproperty(:cib) do
     def sync
-      provider.sync(self.should)
+      provider.sync(should)
     end
 
     def retrieve
       :absent
     end
 
-    def insync?(is)
+    def insync?(_is)
       false
     end
 
@@ -21,11 +21,11 @@ Puppet::Type.newtype(:cs_commit) do
   end
 
   autorequire(:cs_shadow) do
-    [ @parameters[:cib].should ]
+    [@parameters[:cib].should]
   end
 
   autorequire(:service) do
-    [ 'corosync' ]
+    ['corosync']
   end
 
   autorequire(:cs_primitive) do
@@ -50,8 +50,9 @@ Puppet::Type.newtype(:cs_commit) do
 
   def resources_with_cib(cib)
     autos = []
-
-    catalog.resources.find_all { |r| r.is_a?(Puppet::Type.type(cib)) and param = r.parameter(:cib) and param.value == @parameters[:cib].should }.each do |r|
+    # rubocop:disable Lint/UselessAssignment
+    catalog.resources.find_all { |r| r.is_a?(Puppet::Type.type(cib)) && param = r.parameter(:cib) && param.value == @parameters[:cib].should }.each do |r|
+      # rubocop:enable Lint/UselessAssignment
       autos << r
     end
 

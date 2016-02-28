@@ -7,7 +7,6 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
 
   context 'when getting instances' do
     let :instances do
-
       test_cib = <<-EOS
         <cib>
         <configuration>
@@ -26,13 +25,15 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
 
       described_class.expects(:block_until_ready).returns(nil)
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-        Puppet::Util::SUIDManager.expects(:run_and_capture).with(['pcs', 'cluster', 'cib']).at_least_once.returns([test_cib, 0])
+        Puppet::Util::SUIDManager.expects(:run_and_capture).with(%w(pcs cluster cib)).at_least_once.returns([test_cib, 0])
       else
-        Puppet::Util::Execution.expects(:execute).with(['pcs', 'cluster', 'cib'], {:failonfail => true}).at_least_once.returns(
+        Puppet::Util::Execution.expects(:execute).with(%w(pcs cluster cib), :failonfail => true).at_least_once.returns(
           Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
         )
       end
+      # rubocop:disable Lint/UselessAssignment
       instances = described_class.instances
+      # rubocop:enable Lint/UselessAssignment
     end
 
     it 'should have an instance for each <clone>' do
@@ -49,7 +50,7 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
       end
 
       it "is named by the <primitive>'s id attribute" do
-        expect(instance.name).to eq("p_keystone-clone")
+        expect(instance.name).to eq('p_keystone-clone')
       end
     end
   end
@@ -58,13 +59,13 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
     def expect_update(pattern)
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with { |*args|
-          cmdline=args[0].join(" ")
+          cmdline = args[0].join(' ')
           expect(cmdline).to match(pattern)
           true
         }.at_least_once.returns(['', 0])
       else
-        Puppet::Util::Execution.expects(:execute).with{ |*args|
-          cmdline=args[0].join(" ")
+        Puppet::Util::Execution.expects(:execute).with { |*args|
+          cmdline = args[0].join(' ')
           expect(cmdline).to match(pattern)
           true
         }.at_least_once.returns(
@@ -88,8 +89,8 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
     end
 
     it 'creates clone' do
-        expect_update(/pcs resource clone p_keystone/)
-        instance.flush
+      expect_update(/pcs resource clone p_keystone/)
+      instance.flush
     end
 
     it 'sets max clones' do
@@ -103,7 +104,7 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
       expect_update(/clone-node-max=3/)
       instance.flush
     end
-    
+
     it 'sets notify_clones' do
       instance.notify_clones = :true
       expect_update(/notify=true/)
@@ -128,5 +129,4 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
       instance.flush
     end
   end
-
 end

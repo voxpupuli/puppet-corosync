@@ -7,7 +7,6 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
 
   context 'when getting instances' do
     let :instances do
-
       test_cib = <<-EOS
         <configuration>
           <resources>
@@ -40,13 +39,15 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
 
       described_class.expects(:block_until_ready).returns(nil)
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-        Puppet::Util::SUIDManager.expects(:run_and_capture).with(['crm', 'configure', 'show', 'xml']).at_least_once.returns([test_cib, 0])
+        Puppet::Util::SUIDManager.expects(:run_and_capture).with(%w(crm configure show xml)).at_least_once.returns([test_cib, 0])
       else
-        Puppet::Util::Execution.expects(:execute).with(['crm', 'configure', 'show', 'xml']).at_least_once.returns(
+        Puppet::Util::Execution.expects(:execute).with(%w(crm configure show xml)).at_least_once.returns(
           Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
         )
       end
+      # rubocop:disable Lint/UselessAssignment
       instances = described_class.instances
+      # rubocop:enable Lint/UselessAssignment
     end
 
     it 'should have an instance for each <primitive>' do
@@ -68,55 +69,47 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
 
       it "has an primitive_class parameter corresponding to the <primitive>'s class attribute" do
         pending 'knowing the proper way to assert this'
-        expect(instance.primitive_class).to eq("ocf")
+        expect(instance.primitive_class).to eq('ocf')
       end
 
       it "has an primitive_type parameter corresponding to the <primitive>'s type attribute" do
         pending 'knowing the proper way to assert this'
-        expect(instance.primitive_type).to eq("Xen")
+        expect(instance.primitive_type).to eq('Xen')
       end
 
       it "has an provided_by parameter corresponding to the <primitive>'s provider attribute" do
         pending 'knowing the proper way to assert this'
-        expect(instance.provided_by).to eq("heartbeat")
+        expect(instance.provided_by).to eq('heartbeat')
       end
 
       it 'has a parameters property corresponding to <instance_attributes>' do
-        expect(instance.parameters).to eq({
-          "xmfile" => "/etc/xen/example_vm.cfg",
-          "name" => "example_vm_name",
-        })
+        expect(instance.parameters).to eq('xmfile' => '/etc/xen/example_vm.cfg',
+                                          'name' => 'example_vm_name')
       end
 
       it 'has an operations property corresponding to <operations>' do
-        expect(instance.operations).to eq({
-          "monitor" => [
-            {"interval" => "15", "timeout" => "10", "on-fail" => "standby", "OCF_CHECK_LEVEL" => "10"},
-            {"interval" => "5", "timeout" => "10", "on-fail" => "standby", "role" => "Master"}
-          ],
-          "start" => {"interval" => "0", "timeout" => "60"},
-          "stop" => {"interval" => "0", "timeout" => "40"},
-        })
+        expect(instance.operations).to eq('monitor' => [
+                                            { 'interval' => '15', 'timeout' => '10', 'on-fail' => 'standby', 'OCF_CHECK_LEVEL' => '10' },
+                                            { 'interval' => '5', 'timeout' => '10', 'on-fail' => 'standby', 'role' => 'Master' }
+                                          ],
+                                          'start' => { 'interval' => '0', 'timeout' => '60' },
+                                          'stop' => { 'interval' => '0', 'timeout' => '40' })
       end
 
       it 'has a utilization property corresponding to <utilization>' do
-        expect(instance.utilization).to eq({
-          "ram" => "256",
-        })
+        expect(instance.utilization).to eq('ram' => '256')
       end
 
       it 'has a metadata property corresponding to <meta_attributes>' do
-        expect(instance.metadata).to eq({
-          "target-role" => "Started",
-          "priority" => "7",
-        })
+        expect(instance.metadata).to eq('target-role' => 'Started',
+                                        'priority' => '7')
       end
 
       it 'has an ms_metadata property' do
         expect(instance).to respond_to(:ms_metadata)
       end
 
-      it "has a promotable property that is :false" do
+      it 'has a promotable property that is :false' do
         expect(instance.promotable).to eq(:false)
       end
     end
@@ -140,7 +133,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
 
     def expect_update(pattern)
       instance.expects(:crm).with { |*args|
-        if args.slice(0..2) == ['configure', 'load', 'update']
+        if args.slice(0..2) == %w(configure load update)
           expect(File.read(args[3])).to match(pattern)
           true
         else
@@ -155,25 +148,25 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
     end
 
     it 'sets operations' do
-      instance.operations = {'monitor' => {'interval' => '10s'}}
+      instance.operations = { 'monitor' => { 'interval' => '10s' } }
       expect_update(/op monitor interval=10s/)
       instance.flush
     end
 
     it 'sets utilization' do
-      instance.utilization = {'waffles' => '5'}
+      instance.utilization = { 'waffles' => '5' }
       expect_update(/utilization waffles=5/)
       instance.flush
     end
 
     it 'sets parameters' do
-      instance.parameters = {'fluffyness' => '12'}
+      instance.parameters = { 'fluffyness' => '12' }
       expect_update(/params 'fluffyness=12'/)
       instance.flush
     end
 
     it 'sets metadata' do
-      instance.metadata = {'target-role' => 'Started'}
+      instance.metadata = { 'target-role' => 'Started' }
       expect_update(/meta target-role=Started/)
       instance.flush
     end

@@ -69,7 +69,7 @@ Puppet::Type.newtype(:cs_order) do
   end
 
   autorequire(:cs_shadow) do
-    [ @parameters[:cib] ]
+    [@parameters[:cib]]
   end
   newproperty(:symmetrical) do
     desc "Boolean specifying if the resources should stop in reverse order.
@@ -90,10 +90,10 @@ Puppet::Type.newtype(:cs_order) do
   end
 
   autorequire(:service) do
-    [ 'corosync' ]
+    ['corosync']
   end
 
-  valid_resource_types.each{ |possible_resource_type|
+  valid_resource_types.each { |possible_resource_type|
     # We're generating autorequire blocks for all possible cs_ types because
     # accessing the @parameters[:resources_type].value doesn't seem possible
     # when the type is declared. Feel free to improve this.
@@ -111,9 +111,7 @@ Puppet::Type.newtype(:cs_order) do
 
   def unmunge_cs_resourcename(name)
     name = name.split(':')[0]
-    if name.start_with? 'ms_'
-      name = name[3..-1]
-    end
+    name = name[3..-1] if name.start_with? 'ms_'
 
     name
   end

@@ -8,28 +8,30 @@ Puppet::Type.type(:cs_group).provide(:crm, :parent => Puppet::Provider::Crmsh) d
   commands :crm => '/usr/sbin/crm'
 
   def self.instances
-
     block_until_ready
 
     instances = []
 
-    cmd = [ command(:crm), 'configure', 'show', 'xml' ]
+    cmd = [command(:crm), 'configure', 'show', 'xml']
     if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
+      # rubocop:disable Lint/UselessAssignment
       raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+      # rubocop:enable Lint/UselessAssignment
     else
       raw = Puppet::Util::Execution.execute(cmd)
+      # rubocop:disable Lint/UselessAssignment
       status = raw.exitstatus
+      # rubocop:enable Lint/UselessAssignment
     end
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//group') do |e|
-
       items = e.attributes
       group = { :name => items['id'].to_sym }
 
       primitives = []
 
-      if ! e.elements['primitive'].nil?
+      unless e.elements['primitive'].nil?
         e.each_element do |p|
           primitives << p.attributes['id']
         end
@@ -39,7 +41,7 @@ Puppet::Type.type(:cs_group).provide(:crm, :parent => Puppet::Provider::Crmsh) d
         :name       => group[:name],
         :ensure     => :present,
         :primitives => primitives,
-        :provider   => self.name
+        :provider   => name
       }
       instances << new(group_instance)
     end
@@ -54,7 +56,7 @@ Puppet::Type.type(:cs_group).provide(:crm, :parent => Puppet::Provider::Crmsh) d
       :ensure     => :present,
       :primitives => @resource[:primitives]
     }
-    @property_hash[:cib] = @resource[:cib] if ! @resource[:cib].nil?
+    @property_hash[:cib] = @resource[:cib] unless @resource[:cib].nil?
   end
 
   # Unlike create we actually immediately delete the item but first, like primitives,

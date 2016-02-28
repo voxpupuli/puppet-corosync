@@ -15,11 +15,11 @@ Puppet::Type.newtype(:cs_location) do
   end
 
   newproperty(:primitive) do
-    desc "The corosync resource primitive to have a location applied.  "
+    desc 'The corosync resource primitive to have a location applied.  '
   end
 
   newproperty(:node_name) do
-    desc "The corosync node_name where the resource should be located.  "
+    desc 'The corosync node_name where the resource should be located.  '
   end
 
   newparam(:cib) do
@@ -44,11 +44,10 @@ Puppet::Type.newtype(:cs_location) do
   end
 
   autorequire(:cs_shadow) do
-    [ @parameters[:cib] ]
+    [@parameters[:cib]]
   end
 
   autorequire(:service) do
-    [ 'corosync' ]
+    ['corosync']
   end
-
 end

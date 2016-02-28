@@ -7,7 +7,6 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
 
   context 'when getting instances' do
     let :instances do
-
       test_cib = <<-EOS
         <configuration>
           <resources>
@@ -34,20 +33,20 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
 
       described_class.expects(:block_until_ready).returns(nil)
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-        Puppet::Util::SUIDManager.expects(:run_and_capture).with(['pcs', 'cluster', 'cib']).at_least_once.returns([test_cib, 0])
+        Puppet::Util::SUIDManager.expects(:run_and_capture).with(%w(pcs cluster cib)).at_least_once.returns([test_cib, 0])
       else
-        Puppet::Util::Execution.expects(:execute).with(['pcs', 'cluster', 'cib'], {:failonfail => true}).at_least_once.returns(
+        Puppet::Util::Execution.expects(:execute).with(%w(pcs cluster cib), :failonfail => true).at_least_once.returns(
           Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
         )
       end
+      # rubocop:disable Lint/UselessAssignment
       instances = described_class.instances
+      # rubocop:enable Lint/UselessAssignment
     end
-
 
     it 'should have an instance for each <primitive>' do
       expect(instances.count).to eq(1)
     end
-
 
     describe 'each instance' do
       let :instance do
@@ -63,46 +62,36 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
       end
 
       it 'has a parameters property corresponding to <instance_attributes>' do
-        expect(instance.parameters).to eq({
-          "xmfile" => "/etc/xen/example_vm.cfg",
-          "name" => "example_vm_name",
-        })
+        expect(instance.parameters).to eq('xmfile' => '/etc/xen/example_vm.cfg',
+                                          'name' => 'example_vm_name')
       end
 
       it 'has an operations property corresponding to <operations>' do
-        expect(instance.operations).to eq({
-          "start" => {"interval" => "0", "timeout" => "60"},
-          "stop" => {"interval" => "0", "timeout" => "40"},
-        })
+        expect(instance.operations).to eq('start' => { 'interval' => '0', 'timeout' => '60' },
+                                          'stop' => { 'interval' => '0', 'timeout' => '40' })
       end
 
       it 'has a utilization property corresponding to <utilization>' do
-        expect(instance.utilization).to eq({
-          "ram" => "256",
-        })
+        expect(instance.utilization).to eq('ram' => '256')
       end
 
       it 'has a metadata property corresponding to <meta_attributes>' do
-        expect(instance.metadata).to eq({
-          "target-role" => "Started",
-          "priority" => "7",
-        })
+        expect(instance.metadata).to eq('target-role' => 'Started',
+                                        'priority' => '7')
       end
 
       it 'has an ms_metadata property' do
         expect(instance).to respond_to(:ms_metadata)
       end
 
-      it "has a promotable property that is :false" do
+      it 'has a promotable property that is :false' do
         expect(instance.promotable).to eq(:false)
       end
     end
   end
 
   context 'when flushing' do
-
     let :instances do
-
       test_cib = <<-EOS
         <configuration>
           <resources>
@@ -121,25 +110,27 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
 
       described_class.expects(:block_until_ready).returns(nil)
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-        Puppet::Util::SUIDManager.expects(:run_and_capture).with(['pcs', 'cluster', 'cib']).at_least_once.returns([test_cib, 0])
+        Puppet::Util::SUIDManager.expects(:run_and_capture).with(%w(pcs cluster cib)).at_least_once.returns([test_cib, 0])
       else
-        Puppet::Util::Execution.expects(:execute).with(['pcs', 'cluster', 'cib'], {:failonfail => true}).at_least_once.returns(
+        Puppet::Util::Execution.expects(:execute).with(%w(pcs cluster cib), :failonfail => true).at_least_once.returns(
           Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
         )
       end
+      # rubocop:disable Lint/UselessAssignment
       instances = described_class.instances
+      # rubocop:enable Lint/UselessAssignment
     end
 
     def expect_update(pattern)
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with { |*args|
-          cmdline=args[0].join(" ")
+          cmdline = args[0].join(' ')
           expect(cmdline).to match(pattern)
           true
         }.at_least_once.returns(['', 0])
       else
-        Puppet::Util::Execution.expects(:execute).with{ |*args|
-          cmdline=args[0].join(" ")
+        Puppet::Util::Execution.expects(:execute).with { |*args|
+          cmdline = args[0].join(' ')
           expect(cmdline).to match(pattern)
           true
         }.at_least_once.returns(
@@ -178,25 +169,25 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
     end
 
     it 'sets operations' do
-      instance.operations = {'monitor' => {'interval' => '10s'}}
+      instance.operations = { 'monitor' => { 'interval' => '10s' } }
       expect_update(/op monitor interval=10s/)
       instance.flush
     end
 
     it 'sets utilization' do
-      instance.utilization = {'waffles' => '5'}
+      instance.utilization = { 'waffles' => '5' }
       expect_update(/(pcs resource op remove|utilization waffles=5)/)
       instance.flush
     end
 
     it 'sets parameters' do
-      instance.parameters = {'fluffyness' => '12'}
+      instance.parameters = { 'fluffyness' => '12' }
       expect_update(/(pcs resource op remove|fluffyness=12)/)
       instance.flush
     end
 
     it 'sets metadata' do
-      instance.metadata = {'target-role' => 'Started'}
+      instance.metadata = { 'target-role' => 'Started' }
       expect_update(/(pcs resource op remove|meta target-role=Started)/)
       instance.flush
     end
@@ -223,6 +214,5 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
       expect_update(/resource (create|delete|op remove) example_vip/)
       vip_instance.flush
     end
-
   end
 end

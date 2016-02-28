@@ -7,7 +7,6 @@ describe Puppet::Type.type(:cs_property).provider(:crm) do
 
   context 'when getting instances' do
     let :instances do
-
       test_cib = <<-EOS
         <cib>
           <configuration>
@@ -26,13 +25,15 @@ describe Puppet::Type.type(:cs_property).provider(:crm) do
 
       described_class.expects(:block_until_ready).returns(nil)
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-        Puppet::Util::SUIDManager.expects(:run_and_capture).with(['crm', 'configure', 'show', 'xml']).at_least_once.returns([test_cib, 0])
+        Puppet::Util::SUIDManager.expects(:run_and_capture).with(%w(crm configure show xml)).at_least_once.returns([test_cib, 0])
       else
-        Puppet::Util::Execution.expects(:execute).with(['crm', 'configure', 'show', 'xml']).at_least_once.returns(
+        Puppet::Util::Execution.expects(:execute).with(%w(crm configure show xml)).at_least_once.returns(
           Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
         )
       end
+      # rubocop:disable Lint/UselessAssignment
       instances = described_class.instances
+      # rubocop:enable Lint/UselessAssignment
     end
 
     it 'should have an instance for each <nvpair> in <cluster_property_set>' do
@@ -49,11 +50,11 @@ describe Puppet::Type.type(:cs_property).provider(:crm) do
       end
 
       it "is named by the <nvpair>'s name attribute" do
-        expect(instance.name).to eq("apples")
+        expect(instance.name).to eq('apples')
       end
 
       it "has a value corresponding to the <nvpair>'s value attribute" do
-        expect(instance.value).to eq("red")
+        expect(instance.value).to eq('red')
       end
     end
   end

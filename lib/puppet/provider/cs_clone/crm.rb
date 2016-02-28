@@ -16,24 +16,27 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Crmsh) d
 
     hash = {}
     e.each_element do |i|
-      hash[(i.attributes['name'])] = i.attributes['value'].strip
+      hash[i.attributes['name']] = i.attributes['value'].strip
     end
 
     hash
   end
 
   def self.instances
-
     block_until_ready
 
     instances = []
 
-    cmd = [ command(:crm), 'configure', 'show', 'xml' ]
+    cmd = [command(:crm), 'configure', 'show', 'xml']
     if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
+      # rubocop:disable Lint/UselessAssignment
       raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+      # rubocop:enable Lint/UselessAssignment
     else
       raw = Puppet::Util::Execution.execute(cmd)
+      # rubocop:disable Lint/UselessAssignment
       status = raw.exitstatus
+      # rubocop:enable Lint/UselessAssignment
     end
     doc = REXML::Document.new(raw)
 
@@ -51,7 +54,7 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Crmsh) d
         :globally_unique => items['globally-unique'],
         :ordered         => items['ordered'],
         :interleave      => items['interleave'],
-        :existing_resource => :true,
+        :existing_resource => :true
       }
       instances << new(clone_instance)
     end
@@ -72,7 +75,7 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Crmsh) d
       :ordered         => @resource[:ordered],
       :interleave      => @resource[:interleave],
       :cib             => @resource[:cib],
-      :existing_resource => :false,
+      :existing_resource => :false
     }
   end
 
@@ -82,6 +85,7 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Crmsh) d
     crm('configure', 'delete', @resource[:name])
     @property_hash.clear
   end
+
   #
   # Getter that obtains the our service that should have been populated by
   # prefetch or instances (depends on if your using puppet resource or not).
@@ -154,45 +158,38 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Crmsh) d
   def flush
     unless @property_hash.empty?
       if @property_hash[:existing_resource] == :false
-        debug ('Creating clone resource')
-        updated = "clone "
+        debug 'Creating clone resource'
+        updated = 'clone '
         updated << "#{@property_hash[:name]} "
         updated << "#{@property_hash[:primitive]} "
-        meta = ""
+        meta = ''
         meta << "clone-max=#{@property_hash[:clone_max]} " if @property_hash[:clone_max]
         meta << "clone-node-max=#{@property_hash[:clone_node_max]} " if @property_hash[:clone_node_max]
         meta << "notify=#{@property_hash[:notify_clones]} " if @property_hash[:notify_clones]
         meta << "globally-unique=#{@property_hash[:globally_unique]} " if @property_hash[:globally_unique]
         meta << "ordered=#{@property_hash[:ordered]} " if @property_hash[:ordered]
         meta << "interleave=#{@property_hash[:interleave]}" if @property_hash[:interleave]
-        updated << "meta " << meta if not meta.empty?
-        Tempfile.open('puppet_crm_update') do |tmpfile|
-          tmpfile.write(updated)
-          tmpfile.flush
-          ENV["CIB_shadow"] = @resource[:cib]
-          crm('configure', 'load', 'update', tmpfile.path.to_s)
-        end
+        updated << 'meta ' << meta unless meta.empty?
       else
-        debug ('Updating clone resource')
-        updated = "resource meta "
+        debug 'Updating clone resource'
+        updated = 'resource meta '
         updated << "#{@property_hash[:name]} "
-        meta = "set "
+        meta = 'set '
         meta << "clone-max=#{@property_hash[:clone_max]} " if @property_hash[:clone_max]
         meta << "clone-node-max=#{@property_hash[:clone_node_max]} " if @property_hash[:clone_node_max]
         meta << "notify=#{@property_hash[:notify_clones]} " if @property_hash[:notify_clones]
         meta << "globally-unique=#{@property_hash[:globally_unique]} " if @property_hash[:globally_unique]
         meta << "ordered=#{@property_hash[:ordered]} " if @property_hash[:ordered]
         meta << "interleave=#{@property_hash[:interleave]}" if @property_hash[:interleave]
-        updated << meta if not meta.empty?
-        debug("Loading update: #{updated}")
-        Tempfile.open('puppet_crm_update') do |tmpfile|
-          tmpfile.write(updated)
-          tmpfile.flush
-          ENV["CIB_shadow"] = @resource[:cib]
-          crm('configure', 'load', 'update', tmpfile.path.to_s)
-        end
+        updated << meta unless meta.empty?
+        debug "Loading update: #{updated}"
+      end
+      Tempfile.open('puppet_crm_update') do |tmpfile|
+        tmpfile.write(updated)
+        tmpfile.flush
+        ENV['CIB_shadow'] = @resource[:cib]
+        crm('configure', 'load', 'update', tmpfile.path.to_s)
       end
     end
   end
 end
-

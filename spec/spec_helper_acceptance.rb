@@ -8,7 +8,7 @@
 require 'beaker-rspec'
 require 'beaker/puppet_install_helper'
 
-UNSUPPORTED_PLATFORMS = []
+UNSUPPORTED_PLATFORMS = [].freeze
 
 run_puppet_install_helper
 
@@ -23,30 +23,36 @@ RSpec.configure do |c|
   c.before :suite do
     if ENV['FUTURE_PARSER'] == 'yes'
       default[:default_apply_opts] ||= {}
-      default[:default_apply_opts].merge!({:parser => 'future'})
+      default[:default_apply_opts][:parser] = 'future'
     end
 
     copy_root_module_to(default, :source => proj_root, :module_name => 'corosync')
     hosts.each do |host|
-      on host, puppet('module','install','puppetlabs-stdlib'), { :acceptable_exit_codes => [0,1] }
+      on host, puppet('module', 'install', 'puppetlabs-stdlib'), :acceptable_exit_codes => [0, 1]
     end
   end
 end
 
+# rubocop:disable Style/PredicateName
 def is_future_parser_enabled?
+  # rubocop:disable Style/GuardClause
   if default[:type] == 'aio'
+    # rubocop:enable Style/GuardClause
     return true
   elsif default[:default_apply_opts]
     return default[:default_apply_opts][:parser] == 'future'
   end
-  return false
+  false
 end
+# rubocop:enable Style/PredicateName
 
+# rubocop:disable Style/AccessorMethodName
 def get_puppet_version
   (on default, puppet('--version')).output.chomp
 end
+# rubocop:enable Style/AccessorMethodName
 
-RSpec.shared_context "with faked facts" do
+RSpec.shared_context 'with faked facts' do
   let(:facts_d) do
     puppet_version = get_puppet_version
     if fact('osfamily') =~ /windows/i
@@ -55,7 +61,7 @@ RSpec.shared_context "with faked facts" do
       else
         'C:/ProgramData/PuppetLabs/facter/facts.d'
       end
-    elsif Puppet::Util::Package.versioncmp(puppet_version, '4.0.0') < 0 and fact('is_pe', '--puppet') == "true"
+    elsif Puppet::Util::Package.versioncmp(puppet_version, '4.0.0') < 0 && fact('is_pe', '--puppet') == 'true'
       '/etc/puppetlabs/facter/facts.d'
     else
       '/etc/facter/facts.d'
@@ -63,14 +69,12 @@ RSpec.shared_context "with faked facts" do
   end
 
   before :each do
-    #No need to create on windows, PE creates by default
-    if fact('osfamily') !~ /windows/i
-      shell("mkdir -p '#{facts_d}'")
-    end
+    # No need to create on windows, PE creates by default
+    shell("mkdir -p '#{facts_d}'") if fact('osfamily') !~ /windows/i
   end
 
   after :each do
-    shell("rm -f '#{facts_d}/fqdn.txt'", :acceptable_exit_codes => [0,1])
+    shell("rm -f '#{facts_d}/fqdn.txt'", :acceptable_exit_codes => [0, 1])
   end
 
   def fake_fact(name, value)

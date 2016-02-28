@@ -12,17 +12,20 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Crmsh
   commands :crm => 'crm'
 
   def self.instances
-
     block_until_ready
 
     instances = []
 
-    cmd = [ command(:crm), 'configure', 'show', 'xml' ]
+    cmd = [command(:crm), 'configure', 'show', 'xml']
     if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-       raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+      # rubocop:disable Lint/UselessAssignment
+      raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
+      # rubocop:enable Lint/UselessAssignment
     else
-       raw = Puppet::Util::Execution.execute(cmd)
-       status = raw.exitstatus
+      # rubocop:disable Lint/UselessAssignment
+      raw = Puppet::Util::Execution.execute(cmd)
+      status = raw.exitstatus
+      # rubocop:enable Lint/UselessAssignment
     end
     doc = REXML::Document.new(raw)
 
@@ -35,7 +38,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Crmsh
         :primitive  => items['rsc'],
         :node_name  => items['node'],
         :score      => items['score'],
-        :provider   => self.name
+        :provider   => name
       }
       instances << new(location_instance)
     end
@@ -51,7 +54,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Crmsh
       :primitive  => @resource[:primitive],
       :node_name  => @resource[:node_name],
       :score      => @resource[:score],
-      :cib        => @resource[:cib],
+      :cib        => @resource[:cib]
     }
   end
 
@@ -61,6 +64,7 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Crmsh
     crm('configure', 'delete', @resource[:name])
     @property_hash.clear
   end
+
   #
   # Getter that obtains the our service that should have been populated by
   # prefetch or instances (depends on if your using puppet resource or not).
@@ -102,13 +106,13 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Crmsh
   # as stdin for the crm command.
   def flush
     unless @property_hash.empty?
-      updated = "location "
+      updated = 'location '
       updated << "#{@property_hash[:name]} #{@property_hash[:primitive]} #{@property_hash[:score]}: #{@property_hash[:node_name]}"
       debug("Loading update: #{updated}")
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        ENV["CIB_shadow"] = @resource[:cib]
+        ENV['CIB_shadow'] = @resource[:cib]
         crm('configure', 'load', 'update', tmpfile.path.to_s)
       end
     end

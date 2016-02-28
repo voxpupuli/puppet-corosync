@@ -7,7 +7,7 @@ describe Puppet::Provider::Crmsh do
   end
 
   it 'declares a crm_attribute command' do
-    expect{
+    expect {
       described_class.command :crm_attribute
     }.not_to raise_error
   end
@@ -23,7 +23,7 @@ describe Puppet::Provider::Crmsh do
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version']).returns(['', 1])
       else
-        Puppet::Util::Execution.expects(:execute).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version'],{:combine => true, :failonfail => false}).returns(
+        Puppet::Util::Execution.expects(:execute).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version'], :combine => true, :failonfail => false).returns(
           Puppet::Util::Execution::ProcessOutput.new('', 1)
         )
       end
@@ -35,7 +35,7 @@ describe Puppet::Provider::Crmsh do
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version']).returns(['', 0])
       else
-        Puppet::Util::Execution.expects(:execute).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version'],{:combine => true, :failonfail => false}).returns(
+        Puppet::Util::Execution.expects(:execute).with(['crm_attribute', '--type', 'crm_config', '--query', '--name', 'dc-version'], :combine => true, :failonfail => false).returns(
           Puppet::Util::Execution::ProcessOutput.new('', 0)
         )
       end
