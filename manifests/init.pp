@@ -101,7 +101,9 @@
 #
 # [*set_votequorum*]
 #   Set to true if corosync_votequorum should be used as quorum provider.
-#   Defaults to false.
+#   Defaults to true on RedHat based operating systems.
+#   Defaults to true on Ubuntu version 14.04 or greater.
+#   Defaults to false on all other operating systems.
 #
 # [*quorum_members*]
 #   Array of quorum member hostname. This is required if set_votequorum
