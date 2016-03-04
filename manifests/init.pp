@@ -225,7 +225,7 @@ class corosync(
   validate_re($authkey_source, '^(file|string)$')
   validate_bool($force_online)
   validate_bool($check_standby)
-  validate_bool($to_logile)
+  validate_bool($to_logfile)
   validate_bool($debug)
 
   if $unicast_addresses == 'UNSET' {
