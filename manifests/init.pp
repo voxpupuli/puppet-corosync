@@ -52,6 +52,10 @@
 #   True/false parameter specifying whether puppet should return an error log
 #   message if a node is in standby. Useful for monitoring node state.
 #
+# [*to_logfile*]
+#   True/false parameter specifying whether Corosync should produce debug
+#   output in 'logfile'.
+#
 # [*debug*]
 #   True/false parameter specifying whether Corosync should produce debug
 #   output in its logs.
@@ -134,6 +138,7 @@ class corosync(
   $unicast_addresses                   = $::corosync::params::unicast_addresses,
   $force_online                        = $::corosync::params::force_online,
   $check_standby                       = $::corosync::params::check_standby,
+  $to_logfile                          = $::corosync::params::to_logfile,
   $debug                               = $::corosync::params::debug,
   $rrp_mode                            = $::corosync::params::rrp_mode,
   $ttl                                 = $::corosync::params::ttl,
@@ -220,6 +225,7 @@ class corosync(
   validate_re($authkey_source, '^(file|string)$')
   validate_bool($force_online)
   validate_bool($check_standby)
+  validate_bool($to_logile)
   validate_bool($debug)
 
   if $unicast_addresses == 'UNSET' {
@@ -293,6 +299,7 @@ class corosync(
   # Template uses:
   # - $unicast_addresses
   # - $multicast_address
+  # - $to_logfile
   # - $debug
   # - $bind_address
   # - $port
