@@ -9,19 +9,6 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Crmsh) d
   commands :crm => 'crm'
   commands :crm_attribute => 'crm_attribute'
 
-  # given an XML element containing some <nvpair>s, return a hash. Return an
-  # empty hash if `e` is nil.
-  def self.nvpairs_to_hash(e)
-    return {} if e.nil?
-
-    hash = {}
-    e.each_element do |i|
-      hash[i.attributes['name']] = i.attributes['value'].strip
-    end
-
-    hash
-  end
-
   def self.instances
     block_until_ready
 
