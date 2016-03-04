@@ -44,8 +44,9 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
       :promotable       => :false
     }
 
-    unless e.elements['operations'].nil?
-      e.elements['operations'].each_element do |o|
+    operations = e.elements['operations']
+    unless operations.nil?
+      operations.each_element do |o|
         valids = o.attributes.reject do |k, _v| k == 'id' end
         currentop = {}
         valids.each do |k, v|
