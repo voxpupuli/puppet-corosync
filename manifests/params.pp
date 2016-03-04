@@ -10,6 +10,7 @@ class corosync::params {
   $force_online                        = false
   $check_standby                       = false
   $debug                               = false
+  $to_logfile                          = false
   $rrp_mode                            = 'none'
   $ttl                                 = false
   $token                               = 3000

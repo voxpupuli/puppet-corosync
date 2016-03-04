@@ -33,7 +33,8 @@ totem {
 logging {
   fileline:        off
   to_stderr:       yes
-  to_logfile:      no
+  to_logfile:      <%= scope.lookupvar('to_logfile') ? 'on' : 'off' %>
+  logfile:         /var/log/corosync.log
   to_syslog:       yes
   syslog_facility: daemon
   debug:           <%= scope.lookupvar('debug') ? 'on' : 'off' %>
