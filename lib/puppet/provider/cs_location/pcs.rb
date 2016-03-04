@@ -22,18 +22,21 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
     # rubocop:enable Lint/UselessAssignment
     doc = REXML::Document.new(raw)
 
-    doc.root.elements['configuration'].elements['constraints'].each_element('rsc_location') do |e|
-      items = e.attributes
+    constraints = doc.root.elements['configuration'].elements['constraints']
+    unless constraints.nil?
+      constraints.each_element('rsc_location') do |e|
+        items = e.attributes
 
-      location_instance = {
-        :name       => items['id'],
-        :ensure     => :present,
-        :primitive  => items['rsc'],
-        :node_name  => items['node'],
-        :score      => items['score'],
-        :provider   => name
-      }
-      instances << new(location_instance)
+        location_instance = {
+          :name       => items['id'],
+          :ensure     => :present,
+          :primitive  => items['rsc'],
+          :node_name  => items['node'],
+          :score      => items['score'],
+          :provider   => name
+        }
+        instances << new(location_instance)
+      end
     end
     instances
   end

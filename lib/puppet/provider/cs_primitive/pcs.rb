@@ -49,8 +49,9 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
       :existing_operations      => {}
     }
 
-    unless e.elements['operations'].nil?
-      e.elements['operations'].each_element do |o|
+    operations = e.elements['operations']
+    unless operations.nil?
+      operations.each_element do |o|
         valids = o.attributes.reject do |k, _v| k == 'id' end
         if !valids['role'].nil?
           name = valids['name']
