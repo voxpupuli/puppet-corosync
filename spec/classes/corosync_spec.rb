@@ -192,6 +192,30 @@ describe 'corosync' do
         :ipaddress      => '127.0.0.1' }
     end
 
-    it_configures 'corosync'
+    context 'major version is 6' do
+      before do
+        facts.merge!(:operatingsystemrelease => '6.12')
+      end
+
+      it_configures 'corosync'
+
+      it 'does not manage the pacemaker service' do
+        should_not contain_service('pacemaker')
+      end
+    end
+
+    context 'major version is 7' do
+      before do
+        facts.merge!(:operatingsystemrelease => '7.3')
+      end
+
+      it_configures 'corosync'
+
+      it 'does manage the pacemaker service' do
+        should contain_service('pacemaker').with(
+          :ensure => 'running'
+        )
+      end
+    end
   end
 end
