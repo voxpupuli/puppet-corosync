@@ -69,7 +69,8 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
           colocation_instance = {
             :name       => items['id'],
             :ensure     => :present,
-            :primitives => [rsc, with_rsc],
+            # Put primitives in chronological order, first 'with-rsc', then 'rsc'.
+            :primitives => [with_rsc, rsc],
             :score      => items['score'],
             :provider   => name,
             :new        => false
@@ -167,8 +168,9 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
         cmd << "id=#{@property_hash[:name]}"
         cmd << "score=#{@property_hash[:score]}"
       else
+        with_rsc = first_item
+        rsc = @property_hash[:primitives].shift
         cmd << 'add'
-        rsc = first_item
         if rsc.include? ':'
           items = rsc.split(':')
           # rubocop:disable Metrics/BlockNesting
@@ -182,9 +184,8 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
           cmd << rsc
         end
         cmd << 'with'
-        rsc = @property_hash[:primitives].shift
-        if rsc.include? ':'
-          items = rsc.split(':')
+        if with_rsc.include? ':'
+          items = with_rsc.split(':')
           if items[1] == 'Master'
             cmd << 'master'
           elsif items[1] == 'Slave'
@@ -192,7 +193,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
           end
           cmd << items[0]
         else
-          cmd << rsc
+          cmd << with_rsc
         end
         cmd << @property_hash[:score]
         cmd << "id=#{@property_hash[:name]}"

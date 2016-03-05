@@ -100,13 +100,9 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'should create the colocation' do
-    command = if fact('osfamily') == 'RedHat'
-                'pcs cluster cib'
-              else
-                'crm configure show'
-              end
-    shell("#{command} | grep vip_with_service") do |r|
-      expect(r.stdout).to match(/colocation.*nginx_service.*nginx_vip/)
+    shell('cibadmin --query | grep vip_with_service') do |r|
+      expect(r.stdout).to match(/colocation.*\swith-rsc="nginx_vip"/)
+      expect(r.stdout).to match(/colocation.*\srsc="nginx_service"/)
     end
   end
 end
