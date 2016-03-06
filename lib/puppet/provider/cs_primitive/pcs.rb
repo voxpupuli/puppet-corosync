@@ -12,6 +12,8 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
 
   commands :pcs => 'pcs'
 
+  mk_resource_methods
+
   defaultfor :operatingsystem => [:fedora, :centos, :redhat]
   # given an XML element containing some <nvpair>s, return a hash. Return an
   # empty hash if `e` is nil.
@@ -45,7 +47,10 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
       :existing_resource        => :true,
       :existing_primitive_class => e.attributes['class'],
       :existing_primitive_type  => e.attributes['type'],
+      :existing_promotable      => :false,
       :existing_provided_by     => e.attributes['provider'],
+      :existing_metadata        => nvpairs_to_hash(e.elements['meta_attributes']),
+      :existing_ms_metadata     => {},
       :existing_operations      => {}
     }
 
@@ -69,10 +74,12 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
     end
     if e.parent.name == 'master'
       hash[:promotable] = :true
+      hash[:existing_promotable] = :true
       unless e.parent.elements['meta_attributes'].nil?
         e.parent.elements['meta_attributes'].each_element do |m|
           hash[:ms_metadata][m.attributes['name']] = m.attributes['value']
         end
+        hash[:existing_ms_metadata] = hash[:ms_metadata].dup
       end
     end
 
@@ -86,7 +93,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
 
     cmd = [command(:pcs), 'cluster', 'cib']
     # rubocop:disable Lint/UselessAssignment
-    raw, status = run_pcs_command(cmd)
+    raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
     # rubocop:enable Lint/UselessAssignment
     doc = REXML::Document.new(raw)
 
@@ -115,88 +122,14 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
     @property_hash[:utilization] = @resource[:utilization] unless @resource[:utilization].nil?
     @property_hash[:metadata] = @resource[:metadata] unless @resource[:metadata].nil?
     @property_hash[:ms_metadata] = @resource[:ms_metadata] unless @resource[:ms_metadata].nil?
-    @property_hash[:cib] = @resource[:cib] unless @resource[:cib].nil?
+    @property_hash[:existing_metadata] = {}
   end
 
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing primitive')
-    Puppet::Provider::Pacemaker.run_pcs_command([command(:pcs), 'resource', 'delete', @property_hash[:name]])
+    Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', @resource[:name]], @resource[:cib])
     @property_hash.clear
-  end
-
-  # Getters that obtains the parameters and operations defined in our primitive
-  # that have been populated by prefetch or instances (depends on if your using
-  # puppet resource or not).
-  def parameters
-    @property_hash[:parameters]
-  end
-
-  def primitive_class
-    @property_hash[:primitive_class]
-  end
-
-  def provided_by
-    @property_hash[:provided_by]
-  end
-
-  def primitive_type
-    @property_hash[:primitive_type]
-  end
-
-  def operations
-    @property_hash[:operations]
-  end
-
-  def utilization
-    @property_hash[:utilization]
-  end
-
-  def metadata
-    @property_hash[:metadata]
-  end
-
-  def ms_metadata
-    @property_hash[:ms_metadata]
-  end
-
-  def promotable
-    @property_hash[:promotable]
-  end
-
-  # Our setters for parameters and operations.  Setters are used when the
-  # resource already exists so we just update the current value in the
-  # property_hash and doing this marks it to be flushed.
-  def parameters=(should)
-    @property_hash[:parameters] = should
-  end
-
-  def primitive_class=(should)
-    @property_hash[:primitive_class] = should
-  end
-
-  def provided_by=(should)
-    @property_hash[:provided_by] = should
-  end
-
-  def primitive_type=(should)
-    @property_hash[:primitive_type] = should
-  end
-
-  def operations=(should)
-    @property_hash[:operations] = should
-  end
-
-  def utilization=(should)
-    @property_hash[:utilization] = should
-  end
-
-  def metadata=(should)
-    @property_hash[:metadata] = should
-  end
-
-  def ms_metadata=(should)
-    @property_hash[:ms_metadata] = should
   end
 
   def promotable=(should)
@@ -215,6 +148,8 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
   # params.
   def flush
     unless @property_hash.empty?
+      # Required for tests
+      @resource = {} if @resource.nil?
       # The ressource_type variable is used to check if one of the class,
       # provider or type has changed
       ressource_type = "#{@property_hash[:primitive_class]}:"
@@ -257,6 +192,11 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
         @property_hash[:metadata].each_pair do |k, v|
           metadatas << "#{k}=#{v}"
         end
+        unless @property_hash[:existing_metadata].empty?
+          @property_hash[:existing_metadata].keys.reject { |key| @property_hash[:metadata].key?(key) }.each do |k|
+            metadatas << "#{k}="
+          end
+        end
       end
 
       # We destroy the ressource if it's type, class or provider has changed
@@ -266,22 +206,25 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
         existing_ressource_type << (@property_hash[:existing_primitive_type]).to_s
         if existing_ressource_type != ressource_type
           debug('Removing primitive')
-          Puppet::Provider::Pacemaker.run_pcs_command([command(:pcs), 'resource', 'delete', @property_hash[:name]])
+          Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'unclone', (@property_hash[:name]).to_s], @resource[:cib], false)
+          Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', (@property_hash[:name]).to_s], @resource[:cib])
           force_reinstall = :true
         end
       end
 
-      ENV['CIB_shadow'] = @property_hash[:cib]
-
       if @property_hash[:existing_resource] == :false || force_reinstall == :true
-        cmd = [command(:pcs), 'resource', 'create', (@property_hash[:name]).to_s]
+        cmd = if Facter.value(:osfamily) == 'RedHat' && Facter.value(:operatingsystemmajrelease).to_s == '7'
+                [command(:pcs), 'resource', 'create', '--force', '--no-default-ops', (@property_hash[:name]).to_s]
+              else
+                cmd = [command(:pcs), 'resource', 'create', '--force', (@property_hash[:name]).to_s]
+              end
         cmd << ressource_type
         cmd += parameters unless parameters.nil?
         cmd += operations unless operations.nil?
         cmd += utilization unless utilization.nil?
         cmd += metadatas unless metadatas.nil?
         # rubocop:disable Lint/UselessAssignment
-        raw, status = Puppet::Provider::Pacemaker.run_pcs_command(cmd)
+        raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
         # rubocop:enable Lint/UselessAssignment
         # if we are using a master/slave resource, prepend ms_ before its name
         # and declare it as a master/slave resource
@@ -296,25 +239,25 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
             end
           end
           # rubocop:disable Lint/UselessAssignment
-          raw, status = Puppet::Provider::Pacemaker.run_pcs_command(cmd)
+          raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
           # rubocop:enable Lint/UselessAssignment
         end
         # try to remove the default monitor operation
         if @property_hash[:operations]['monitor'].nil?
           cmd = [command(:pcs), 'resource', 'op', 'remove', (@property_hash[:name]).to_s, 'monitor', 'interval=60s']
-          Puppet::Provider::Pacemaker.run_pcs_command(cmd, false)
+          Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib], false)
         end
       else
-        # if there is no operations defined, we ensure that they are not present
-        if @property_hash[:operations].empty? && ! @property_hash[:existing_operations].empty?
-          @property_hash[:existing_operations].each do |o|
-            cmd = [command(:pcs), 'resource', 'op', 'remove', (@property_hash[:name]).to_s]
-            cmd << (o[0]).to_s
-            o[1].each_pair do |k, v|
-              cmd << "#{k}=#{v}"
-            end
-            Puppet::Provider::Pacemaker.run_pcs_command(cmd)
+        if @property_hash[:promotable] == :false && @property_hash[:existing_promotable] == :true
+          Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', "ms_#{@property_hash[:name]}"], @resource[:cib])
+        end
+        @property_hash[:existing_operations].reject { |op, params| @property_hash[:operations].key?(op) && @property_hash[:operations][op] == params }.each do |o|
+          cmd = [command(:pcs), 'resource', 'op', 'remove', (@property_hash[:name]).to_s]
+          cmd << (o[0]).to_s
+          o[1].each_pair do |k, v|
+            cmd << "#{k}=#{v}"
           end
+          Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
         end
         cmd = [command(:pcs), 'resource', 'update', (@property_hash[:name]).to_s]
         cmd += parameters unless parameters.nil?
@@ -322,7 +265,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
         cmd += utilization unless utilization.nil?
         cmd += metadatas unless metadatas.nil?
         # rubocop:disable Lint/UselessAssignment
-        raw, status = Puppet::Provider::Pacemaker.run_pcs_command(cmd)
+        raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
         # rubocop:enable Lint/UselessAssignment
         if @property_hash[:promotable] == :true
           cmd = [command(:pcs), 'resource', 'update', "ms_#{@property_hash[:name]}", (@property_hash[:name]).to_s]
@@ -333,9 +276,12 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
             @property_hash[:ms_metadata].each_pair do |k, v|
               cmd << "#{k}=#{v}"
             end
+            @property_hash[:existing_ms_metadata].keys.reject { |key| @property_hash[:ms_metadata].key?(key) }.each do |k|
+              cmd << "#{k}="
+            end
           end
           # rubocop:disable Lint/UselessAssignment
-          raw, status = Puppet::Provider::Pacemaker.run_pcs_command(cmd)
+          raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
           # rubocop:enable Lint/UselessAssignment
         end
       end

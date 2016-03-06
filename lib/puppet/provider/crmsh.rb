@@ -1,4 +1,6 @@
-class Puppet::Provider::Crmsh < Puppet::Provider
+require Pathname.new(__FILE__).dirname.expand_path + 'cib_helper'
+
+class Puppet::Provider::Crmsh < Puppet::Provider::CibHelper
   # Yep, that's right we are parsing XML...FUN! (It really wasn't that bad)
   require 'rexml/document'
 

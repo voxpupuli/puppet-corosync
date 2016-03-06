@@ -27,6 +27,17 @@ Puppet::Type.newtype(:cs_property) do
     isnamevar
   end
 
+  newparam(:cib) do
+    desc "Corosync applies its configuration immediately. Using a CIB allows
+      you to group multiple primitives and relationships to be applied at
+      once. This can be necessary to insert complex configurations into
+      Corosync correctly.
+
+      This paramater sets the CIB this parameter should be created in. A
+      cs_shadow resource with a title of the same name as this value should
+      also be added to your manifest."
+  end
+
   newparam(:replace, :boolean => true, :parent => Puppet::Parameter::Boolean) do
     desc "Whether to replace a property that already exists on the cluster
       whose value doesn't match what the `value` attribute specifies.  Setting

@@ -18,7 +18,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
 
     cmd = [command(:pcs), 'cluster', 'cib']
     # rubocop:disable Lint/UselessAssignment
-    raw, status = run_pcs_command(cmd)
+    raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
     # rubocop:enable Lint/UselessAssignment
     doc = REXML::Document.new(raw)
     resource_set_options = ['sequential', 'require-all', 'action', 'role']
@@ -101,7 +101,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
   def destroy
     debug('Removing colocation')
     cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
-    Puppet::Provider::Pacemaker.run_pcs_command(cmd)
+    Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
   end
 
@@ -154,7 +154,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
       if @property_hash[:new] == false
         debug('Removing colocation')
         cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
-        Puppet::Provider::Pacemaker.run_pcs_command(cmd, @resource[:cib])
+        Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
       end
       first_item = @property_hash[:primitives].shift
       cmd = [command(:pcs), 'constraint', 'colocation']
@@ -199,7 +199,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
         cmd << "id=#{@property_hash[:name]}"
       end
       # rubocop:disable Lint/UselessAssignment
-      raw, status = Puppet::Provider::Pacemaker.run_pcs_command(cmd, @resource[:cib])
+      raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
       # rubocop:enable Lint/UselessAssignment
     end
   end

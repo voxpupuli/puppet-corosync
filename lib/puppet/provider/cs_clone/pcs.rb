@@ -28,7 +28,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemake
 
     cmd = [command(:pcs), 'cluster', 'cib']
     # rubocop:disable Lint/UselessAssignment
-    raw, status = run_pcs_command(cmd)
+    raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
     # rubocop:enable Lint/UselessAssignment
     doc = REXML::Document.new(raw)
 
@@ -66,7 +66,6 @@ Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemake
       :globally_unique   => @resource[:globally_unique],
       :ordered           => @resource[:ordered],
       :interleave        => @resource[:interleave],
-      :cib               => @resource[:cib],
       :existing_resource => :false
     }
   end
@@ -74,7 +73,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemake
   # Unlike create we actually immediately delete the item.
   def destroy
     debug 'Removing clone'
-    Puppet::Provider::Pacemaker.run_pcs_command([command(:pcs), 'resource', 'unclone', @resource[:name]])
+    Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'unclone', @resource[:name]], @resource[:cib])
     @property_hash.clear
   end
 
@@ -160,7 +159,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemake
         # pcs versions earlier than 0.9.116 do not allow updating a cloned
         # resource. Being conservative, we will unclone then create a new clone
         # with the new parameters.
-        Puppet::Provider::Pacemaker.run_pcs_command([command(:pcs), 'resource', 'unclone', @resource[:primitive]])
+        Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'unclone', @resource[:primitive]], @resource[:cib])
       end
       cmd = [command(:pcs), 'resource', 'clone', (@property_hash[:primitive]).to_s]
       cmd << "clone-max=#{@property_hash[:clone_max]}" if @property_hash[:clone_max]
@@ -170,7 +169,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemake
       cmd << "ordered=#{@property_hash[:ordered]}" if @property_hash[:ordered]
       cmd << "interleave=#{@property_hash[:interleave]}" if @property_hash[:interleave]
       # rubocop:disable Lint/UselessAssignment
-      raw, status = Puppet::Provider::Pacemaker.run_pcs_command(cmd)
+      raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
       # rubocop:enable Lint/UselessAssignment
     end
   end

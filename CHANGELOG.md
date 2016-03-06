@@ -1,9 +1,12 @@
 ##Next
 ###Summary
+- support for cs\_shadow, cs\_commit in the pcs provider
+
 
 ###Backward incompatible changes
 - pcs provider: cs_location: the order of the primitive is now the chronological
   order: ['with-rsc', 'rsc']. This aligns pcs with the crmsh provider.
+- cs_commit resources now only commit when refreshed (see README)
 
 ##2015-10-14 - Release 0.8.0
 ###Summary

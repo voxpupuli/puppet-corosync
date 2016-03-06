@@ -4,28 +4,38 @@ Puppet::Type.newtype(:cs_shadow) do
     will not become active until all other resources with the same cib
     value have also been applied."
 
-  newproperty(:cib) do
-    def sync
-      provider.sync(should)
-    end
-
-    def retrieve
-      :absent
-    end
-
-    def insync?(_is)
-      false
-    end
-
-    defaultto { @resource[:name] }
-  end
-
-  newparam(:name) do
-    desc 'Name of the shadow CIB to create and manage'
+  newparam(:cib) do
     isnamevar
   end
 
+  newparam(:autocommit, :boolean => true, :parent => Puppet::Parameter::Boolean) do
+    desc "Whether to generate a cs_commit or not. Can be used to create shadow
+      CIB without committing them."
+    defaultto :true
+  end
+
+  newproperty(:epoch) do
+    def sync
+      provider.sync(@resource[:cib])
+    end
+
+    def retrieve
+      provider.get_epoch(@resource[:cib])
+    end
+
+    def insync?(_is)
+      provider.insync?(@resource[:cib])
+    end
+
+    def change_to_s(currentvalue, _newvalue)
+      super(currentvalue, provider.get_epoch(@resource[:cib]))
+    end
+
+    defaultto :latest
+  end
+
   def generate
+    return [] if self[:autocommit] != true
     options = { :name => @title }
     [Puppet::Type.type(:cs_commit).new(options)]
   end
