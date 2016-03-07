@@ -109,6 +109,7 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing colocation')
+    ENV['CIB_shadow'] = @resource[:cib]
     crm('configure', 'delete', @resource[:name])
     @property_hash.clear
   end
@@ -157,8 +158,7 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        ENV['CIB_shadow'] = @resource[:cib]
-        crm('configure', 'load', 'update', tmpfile.path.to_s)
+        Puppet::Provider::Crmsh.run_command_in_cib(['crm', 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
       end
     end
   end

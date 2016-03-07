@@ -1,25 +1,11 @@
-class Puppet::Provider::Pacemaker < Puppet::Provider
+require Pathname.new(__FILE__).dirname.expand_path + 'cib_helper'
+
+class Puppet::Provider::Pacemaker < Puppet::Provider::CibHelper
   # Yep, that's right we are parsing XML...FUN! (It really wasn't that bad)
   require 'rexml/document'
 
   initvars
   commands :pcs => 'pcs'
-
-  def self.run_pcs_command(pcs_cmd, failonfail = true)
-    if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-      raw, status = Puppet::Util::SUIDManager.run_and_capture(pcs_cmd)
-    else
-      raw = Puppet::Util::Execution.execute(pcs_cmd, :failonfail => failonfail)
-      status = raw.exitstatus
-    end
-    # rubocop:disable Style/GuardClause
-    if status == 0 || failonfail == false
-      # rubocop:enable Style/GuardClause
-      return raw, status
-    else
-      raise("command #{pcs_cmd.join(' ')} failed")
-    end
-  end
 
   # Corosync takes a while to build the initial CIB configuration once the
   # service is started for the first time.  This provides us a way to wait
@@ -31,7 +17,7 @@ class Puppet::Provider::Pacemaker < Puppet::Provider
   def self.ready?
     return true if @@pcsready
     cmd = [command(:pcs), 'property', 'show', 'dc-version']
-    raw, status = run_pcs_command(cmd, false)
+    raw, status = run_command_in_cib(cmd, nil, false)
     if status == 0
       # rubocop:disable Style/ClassVars
       @@pcsready = true

@@ -246,6 +246,39 @@ cs_rsc_defaults { 'resource-stickiness' :
 }
 ```
 
+Shadow CIB
+----------
+
+Shadow CIB allows you to apply all the changes at the same time. For that, you
+need to use the `cib` parameter and the `cs_commit` and `cs_shadow` types.
+
+Shadow CIB is *the* recommended way to manage large CIB with puppet, as it will
+apply all your changes at once, starting the cluster when everything is in
+place: primitives, constraints, properties.
+
+If you set the `cib` parameter to one `cs_*` resource we recommend you to set
+that `cib` parameter to all the `cs_*` resources.
+
+
+```puppet
+cs_shadow {
+    'puppet':
+}
+cs_primitive { 'pgsql_service':
+  primitive_class => 'ocf',
+  primitive_type  => 'pgsql',
+  provided_by     => 'heartbeat',
+  cib             => 'puppet'
+}
+cs_commit {
+    'puppet':
+}
+```
+In Puppet < 4.0, you also need the resources to notify their `cs_commit`:
+```puppet
+Cs_primitive['pgsql_service'] ~> Cs_commit['puppet']
+```
+
 Dependencies
 ------------
 

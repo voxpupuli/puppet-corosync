@@ -16,7 +16,7 @@ Puppet::Type.type(:cs_group).provide(:pcs, :parent => Puppet::Provider::Pacemake
 
     cmd = [command(:pcs), 'cluster', 'cib']
     # rubocop:disable Lint/UselessAssignment
-    raw, status = run_pcs_command(cmd)
+    raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
     # rubocop:enable Lint/UselessAssignment
     doc = REXML::Document.new(raw)
 
@@ -60,7 +60,7 @@ Puppet::Type.type(:cs_group).provide(:pcs, :parent => Puppet::Provider::Pacemake
   # we need to stop the group.
   def destroy
     debug('Removing group')
-    Puppet::Provider::Pacemaker.run_pcs_command([command(:pcs), 'resource', 'ungroup', @property_hash[:name]])
+    Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'ungroup', @property_hash[:name]], @resource[:cib])
     @property_hash.clear
   end
 
@@ -89,13 +89,13 @@ Puppet::Type.type(:cs_group).provide(:pcs, :parent => Puppet::Provider::Pacemake
 
       if @property_hash[:new] == false
         debug('Removing group')
-        Puppet::Provider::Pacemaker.run_pcs_command([command(:pcs), 'resource', 'ungroup', @property_hash[:name]])
+        Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'ungroup', @property_hash[:name]], @resource[:cib])
       end
 
       cmd = [command(:pcs), 'resource', 'group', 'add', (@property_hash[:name]).to_s]
       cmd += @property_hash[:primitives]
       # rubocop:disable Lint/UselessAssignment
-      raw, status = Puppet::Provider::Pacemaker.run_pcs_command(cmd)
+      raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
       # rubocop:enable Lint/UselessAssignment
     end
   end

@@ -19,7 +19,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
 
     cmd = [command(:pcs), 'cluster', 'cib']
     # rubocop:disable Lint/UselessAssignment
-    raw, status = run_pcs_command(cmd)
+    raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
     # rubocop:enable Lint/UselessAssignment
     doc = REXML::Document.new(raw)
 
@@ -82,7 +82,6 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
       :score       => @resource[:score],
       :kind        => @resource[:kind],
       :symmetrical => @resource[:symmetrical],
-      :cib         => @resource[:cib],
       :new         => true
     }
   end
@@ -91,54 +90,8 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
   def destroy
     debug('Removing order directive')
     cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
-    Puppet::Provider::Pacemaker.run_pcs_command(cmd)
+    Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
-  end
-
-  # Getters that obtains the first and second primitives and score in our
-  # ordering definintion that have been populated by prefetch or instances
-  # (depends on if your using puppet resource or not).
-  def first
-    @property_hash[:first]
-  end
-
-  def second
-    @property_hash[:second]
-  end
-
-  def score
-    @property_hash[:score]
-  end
-
-  def kind
-    @property_hash[:kind]
-  end
-
-  def symmetrical
-    @property_hash[:symmetrical]
-  end
-
-  # Our setters for the first and second primitives and score.  Setters are
-  # used when the resource already exists so we just update the current value
-  # in the property hash and doing this marks it to be flushed.
-  def first=(should)
-    @property_hash[:first] = should
-  end
-
-  def second=(should)
-    @property_hash[:second] = should
-  end
-
-  def score=(should)
-    @property_hash[:score] = should
-  end
-
-  def kind=(should)
-    @property_hash[:kind] = should
-  end
-
-  def symmetrical=(should)
-    @property_hash[:symmetrical] = should
   end
 
   # Flush is triggered on anything that has been detected as being
@@ -147,13 +100,10 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
   # as stdin for the pcs command.
   def flush
     unless @property_hash.empty?
-
-      ENV['CIB_shadow'] = @property_hash[:cib]
-
       if @property_hash[:new] == false
         debug('Removing order directive')
         cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
-        Puppet::Provider::Pacemaker.run_pcs_command(cmd)
+        Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
       end
 
       cmd = [command(:pcs), 'constraint', 'order']
@@ -179,7 +129,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
       cmd << "id=#{@property_hash[:name]}"
       cmd << "symmetrical=#{@property_hash[:symmetrical]}"
       # rubocop:disable Lint/UselessAssignment
-      raw, status = Puppet::Provider::Pacemaker.run_pcs_command(cmd)
+      raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
       # rubocop:enable Lint/UselessAssignment
     end
   end

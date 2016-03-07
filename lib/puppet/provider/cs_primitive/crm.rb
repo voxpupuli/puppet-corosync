@@ -129,7 +129,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
   def destroy
     debug('Stopping primitive before removing it')
     crm('resource', 'stop', @resource[:name])
-    debug('Revmoving primitive')
+    debug('Removing primitive')
     crm('configure', 'delete', @resource[:name])
     @property_hash.clear
   end
@@ -254,8 +254,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        ENV['CIB_shadow'] = @resource[:cib]
-        crm('configure', 'load', 'update', tmpfile.path.to_s)
+        Puppet::Provider::Crmsh.run_command_in_cib(['crm', '-F', 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
       end
     end
   end

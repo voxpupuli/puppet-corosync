@@ -11,6 +11,8 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
 
   commands :pcs => 'pcs'
 
+  mk_resource_methods
+
   def self.instances
     block_until_ready
 
@@ -18,7 +20,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
 
     cmd = [command(:pcs), 'cluster', 'cib']
     # rubocop:disable Lint/UselessAssignment
-    raw, status = run_pcs_command(cmd)
+    raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
     # rubocop:enable Lint/UselessAssignment
     doc = REXML::Document.new(raw)
 
@@ -49,8 +51,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
       :ensure     => :present,
       :primitive  => @resource[:primitive],
       :node_name  => @resource[:node_name],
-      :score      => @resource[:score],
-      :cib        => @resource[:cib]
+      :score      => @resource[:score]
     }
   end
 
@@ -58,38 +59,8 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
   def destroy
     debug('Removing location')
     cmd = [command(:pcs), 'constraint', 'resource', 'remove', @resource[:name]]
-    Puppet::Provider::Pacemaker.run_pcs_command(cmd)
+    Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
-  end
-
-  # Getters that obtains the parameters defined in our location that have been
-  # populated by prefetch or instances (depends on if your using puppet resource
-  # or not).
-  def primitive
-    @property_hash[:primitive]
-  end
-
-  def node_name
-    @property_hash[:node_name]
-  end
-
-  def score
-    @property_hash[:score]
-  end
-
-  # Our setters for parameters.  Setters are used when the resource already
-  # exists so we just update the current value in the location_hash and doing
-  # this marks it to be flushed.
-  def primitive=(should)
-    @property_hash[:primitive] = should
-  end
-
-  def node_name=(should)
-    @property_hash[:node_name] = should
-  end
-
-  def score=(should)
-    @property_hash[:score] = should
   end
 
   # Flush is triggered on anything that has been detected as being
@@ -100,11 +71,8 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
     # rubocop:disable Style/GuardClause
     unless @property_hash.empty?
       # rubocop:enable Style/GuardClause
-
-      ENV['CIB_shadow'] = @property_hash[:cib]
-
       cmd = [command(:pcs), 'constraint', 'location', 'add', @property_hash[:name], @property_hash[:primitive], @property_hash[:node_name], @property_hash[:score]]
-      Puppet::Provider::Pacemaker.run_pcs_command(cmd)
+      Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
     end
   end
 end

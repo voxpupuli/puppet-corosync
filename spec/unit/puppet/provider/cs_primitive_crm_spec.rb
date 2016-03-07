@@ -132,14 +132,23 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
     end
 
     def expect_update(pattern)
-      instance.expects(:crm).with { |*args|
-        if args.slice(0..2) == %w(configure load update)
-          expect(File.read(args[3])).to match(pattern)
+      if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
+        Puppet::Util::SUIDManager.expects(:run_and_capture).with { |*args|
+          if args.slice(0..2) == %w(configure load update)
+            expect(File.read(args[3])).to match(pattern)
+          end
           true
-        else
-          false
-        end
-      }
+        }.at_least_once.returns(['', 0])
+      else
+        Puppet::Util::Execution.expects(:execute).with { |*args|
+          if args.slice(0..2) == %w(configure load update)
+            expect(File.read(args[3])).to match(pattern)
+          end
+          true
+        }.at_least_once.returns(
+          Puppet::Util::Execution::ProcessOutput.new('', 0)
+        )
+      end
     end
 
     it 'can flush without changes' do
