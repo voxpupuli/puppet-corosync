@@ -1,7 +1,7 @@
 require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'cib_helper'
+require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
 
-Puppet::Type.type(:cs_shadow).provide(:crm_shadow, :parent => Puppet::Provider::CibHelper) do
+Puppet::Type.type(:cs_shadow).provide(:pcs, :parent => Puppet::Provider::Pacemaker) do
   commands :crm_shadow => 'crm_shadow'
   commands :cibadmin => 'cibadmin'
   # Required for block_until_ready

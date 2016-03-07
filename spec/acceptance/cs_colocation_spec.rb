@@ -78,9 +78,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     EOS
 
     apply_manifest(pp, :catch_failures => true)
-    unless fact('osfamily') == 'RedHat' # Something's wrong with the pcs provider
-      apply_manifest(pp, :catch_changes => true)
-    end
+    apply_manifest(pp, :catch_changes => true)
   end
 
   describe service('corosync') do
