@@ -15,18 +15,6 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
   mk_resource_methods
 
   defaultfor :operatingsystem => [:fedora, :centos, :redhat]
-  # given an XML element containing some <nvpair>s, return a hash. Return an
-  # empty hash if `e` is nil.
-  def self.nvpairs_to_hash(e)
-    return {} if e.nil?
-
-    hash = {}
-    e.each_element do |i|
-      hash[i.attributes['name']] = i.attributes['value']
-    end
-
-    hash
-  end
 
   # given an XML element (a <primitive> from cibadmin), produce a hash suitible
   # for creating a new provider instance.
