@@ -92,12 +92,10 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     EOS
 
     apply_manifest(pp, :debug => true, :trace => true, :catch_failures => true)
-    unless fact('osfamily') == 'RedHat' # Something's wrong with the pcs provider
-      # A second run will re-sync the puppet CIB (by design)
-      apply_manifest(pp, :catch_changes => false)
-      # The third shoud be without changes
-      apply_manifest(pp, :catch_changes => true)
-    end
+    # Another run is needed to update the Puppet shadow CIB
+    apply_manifest(pp, :expect_changes => true)
+    # But the last one should not change anything
+    apply_manifest(pp, :catch_changes => true)
   end
 
   describe service('corosync') do

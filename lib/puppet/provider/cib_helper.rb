@@ -1,19 +1,22 @@
 class Puppet::Provider::CibHelper < Puppet::Provider
   # Yep, that's right we are parsing XML...FUN! (It really wasn't that bad)
-  def self.run_command_in_cib(pcs_cmd, cib = nil, failonfail = true)
+  def self.run_command_in_cib(cmd, cib = nil, failonfail = true)
     custom_environment = if cib.nil?
                            {}
                          else
                            { :custom_environment => { 'CIB_shadow' => cib } }
                          end
+    debug("Executing #{cmd} in the CIB") if cib.nil?
+    debug("Executing #{cmd} in the shadow CIB \"#{cib}\"") unless cib.nil?
     if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-      raw, status = Puppet::Util::SUIDManager.run_and_capture(pcs_cmd, nil, nil, custom_environment)
+      raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd, nil, nil, custom_environment)
     else
-      raw = Puppet::Util::Execution.execute(pcs_cmd, { :failonfail => failonfail }.merge(custom_environment))
+      raw = Puppet::Util::Execution.execute(cmd, { :failonfail => failonfail }.merge(custom_environment))
       status = raw.exitstatus
     end
     return raw, status if status == 0 || failonfail == false
-    raise Puppet::Error, "command #{pcs_cmd.join(' ')} failed"
+    raise Puppet::Error, "Command #{cmd.join(' ')} failed" if cib.nil?
+    raise Puppet::Error, "Command #{cmd.join(' ')} failed in the shadow CIB \"#{cib}\"" unless cib.nil?
   end
 
   # given an XML element containing some <nvpair>s, return a hash. Return an
