@@ -1,17 +1,35 @@
 ##Next
-###Summary
-- support for cs\_shadow, cs\_commit in the pcs provider
+###
+- Ubuntu 14.04 support (#178)
+- pcs provider: improved support for cs\_shadow, cs\_commit(#197 #196 #209)
 - cs\_property now takes an optional `replace` parameter that do not update
   previously created parameters. Useful to let users change the settings at
-  runtime without stopping puppet (e.g for maintenance mode).
-- cs\_location now supports a resource_discovery parameter that matches
+  runtime without stopping puppet (e.g for maintenance mode) (#203)
+- cs\_location now supports a resource\_discovery parameter that matches
   pacemaker resource-discovery location property
+- cs\_property will now wait for the cluster to be ready (#170)
+- Log the crm and pcs commands output (crmsh: #177, pcs: #219)
+- crm provider: cs\_property will only take care of cib-bootstrap-options
+  resource sets (#174)
+- crm provider: Fix cs\_colocation for resources with a role (#175)
+- cs\_commit now autorequires cs\_groups (#183)
+- support for more corosync configuration parameters (#184 #192 #194)
+- pcs provider: speed enhancements (#187)
+- pcs provider: cs_order: implement the kind and symmetrical parameters (#188
+  and #131
+- pcs provider: cs_colocation: Add support for colocation sets (#190)
+- add support for the pcsd service (#130)
+- crm provider: Preserve resource order in cs_group (#133)
+- Bugfixes, improved tests, improved documentation
+
 
 
 ###Backward incompatible changes
-- pcs provider: cs_location: the order of the primitive is now the chronological
-  order: ['with-rsc', 'rsc']. This aligns pcs with the crmsh provider.
-- cs_commit resources now only commit when refreshed (see README)
+- cs\_commit resources now only commit when refreshed (see README) (#209)
+- pcs provider: cs\_location: the order of the primitives is now the chronological
+  order: ['with-rsc', 'rsc']. This aligns pcs with the crmsh provider (#212)
+- pcs_provider: cs\_colocation: the order of the primitives is now respected.
+  Previously they were sorted by chronological order (#153).
 
 ##2015-10-14 - Release 0.8.0
 ###Summary
