@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'spec_helper_corosync'
 
 describe Puppet::Type.type(:cs_clone).provider(:pcs) do
   before do
@@ -56,24 +57,6 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
   end
 
   context 'when flushing' do
-    def expect_update(pattern)
-      if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-        Puppet::Util::SUIDManager.expects(:run_and_capture).with { |*args|
-          cmdline = args[0].join(' ')
-          expect(cmdline).to match(pattern)
-          true
-        }.at_least_once.returns(['', 0])
-      else
-        Puppet::Util::Execution.expects(:execute).with { |*args|
-          cmdline = args[0].join(' ')
-          expect(cmdline).to match(pattern)
-          true
-        }.at_least_once.returns(
-          Puppet::Util::Execution::ProcessOutput.new('', 0)
-        )
-      end
-    end
-
     let :resource do
       Puppet::Type.type(:cs_clone).new(
         :name      => 'p_keystone',
@@ -89,43 +72,43 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
     end
 
     it 'creates clone' do
-      expect_update(/pcs resource clone p_keystone/)
+      expect_commands(/pcs resource clone p_keystone/)
       instance.flush
     end
 
     it 'sets max clones' do
       instance.clone_max = 3
-      expect_update(/clone-max=3/)
+      expect_commands(/clone-max=3/)
       instance.flush
     end
 
     it 'sets max node clones' do
       instance.clone_node_max = 3
-      expect_update(/clone-node-max=3/)
+      expect_commands(/clone-node-max=3/)
       instance.flush
     end
 
     it 'sets notify_clones' do
       instance.notify_clones = :true
-      expect_update(/notify=true/)
+      expect_commands(/notify=true/)
       instance.flush
     end
 
     it 'sets globally unique' do
       instance.globally_unique = :true
-      expect_update(/globally-unique=true/)
+      expect_commands(/globally-unique=true/)
       instance.flush
     end
 
     it 'sets ordered' do
       instance.ordered = :true
-      expect_update(/ordered=true/)
+      expect_commands(/ordered=true/)
       instance.flush
     end
 
     it 'sets interleave' do
       instance.interleave = :true
-      expect_update(/interleave=true/)
+      expect_commands(/interleave=true/)
       instance.flush
     end
   end
