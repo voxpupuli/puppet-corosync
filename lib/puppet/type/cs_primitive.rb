@@ -76,9 +76,7 @@ Puppet::Type.newtype(:cs_primitive) do
       raise Puppet::Error, 'Puppet::Type::Cs_Primitive: parameters property must be a hash.' unless value.is_a? Hash
     end
 
-    # rubocop:disable Style/EmptyLiteral
-    defaultto Hash.new
-    # rubocop:enable Style/EmptyLiteral
+    defaultto {}
   end
 
   newproperty(:operations) do
@@ -93,9 +91,7 @@ Puppet::Type.newtype(:cs_primitive) do
     validate do |value|
       raise Puppet::Error, 'Puppet::Type::Cs_Primitive: operations property must be a hash.' unless value.is_a? Hash
     end
-    # rubocop:disable Style/EmptyLiteral
-    defaultto Hash.new
-    # rubocop:enable Style/EmptyLiteral
+    defaultto {}
   end
 
   newproperty(:utilization) do
@@ -111,9 +107,7 @@ Puppet::Type.newtype(:cs_primitive) do
     validate do |value|
       raise Puppet::Error, 'Puppet::Type::Cs_Primitive: utilization property must be a hash.' unless value.is_a? Hash
     end
-    # rubocop:disable Style/EmptyLiteral
-    defaultto Hash.new
-    # rubocop:enable Style/EmptyLiteral
+    defaultto {}
   end
 
   newproperty(:metadata) do
@@ -126,9 +120,7 @@ Puppet::Type.newtype(:cs_primitive) do
     validate do |value|
       raise Puppet::Error, 'Puppet::Type::Cs_Primitive: metadata property must be a hash.' unless value.is_a? Hash
     end
-    # rubocop:disable Style/EmptyLiteral
-    defaultto Hash.new
-    # rubocop:enable Style/EmptyLiteral
+    defaultto {}
   end
 
   newproperty(:ms_metadata) do
@@ -147,9 +139,7 @@ Puppet::Type.newtype(:cs_primitive) do
     validate do |value|
       raise Puppet::Error, 'Puppet::Type::Cs_Primitive: ms_metadata property must be a hash' unless value.is_a? Hash
     end
-    # rubocop:disable Style/EmptyLiteral
-    defaultto Hash.new
-    # rubocop:enable Style/EmptyLiteral
+    defaultto {}
   end
 
   newproperty(:promotable) do
