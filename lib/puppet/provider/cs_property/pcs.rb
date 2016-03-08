@@ -22,7 +22,7 @@ Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacem
     # rubocop:enable Lint/UselessAssignment
     doc = REXML::Document.new(raw)
 
-    cluster_property_set = doc.root.elements['configuration/crm_config/cluster_property_set']
+    cluster_property_set = doc.root.elements["configuration/crm_config/cluster_property_set[@id='cib-bootstrap-options']"]
     unless cluster_property_set.nil?
       cluster_property_set.each_element do |e|
         items = e.attributes
