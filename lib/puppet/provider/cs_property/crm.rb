@@ -28,17 +28,20 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Crmsh
     end
     doc = REXML::Document.new(raw)
 
-    doc.root.elements["configuration/crm_config/cluster_property_set[@id='cib-bootstrap-options']"].each_element do |e|
-      items = e.attributes
-      property = { :name => items['name'], :value => items['value'] }
+    cluster_property_set = doc.root.elements["configuration/crm_config/cluster_property_set[@id='cib-bootstrap-options']"]
+    unless cluster_property_set.nil?
+      cluster_property_set.each_element do |e|
+        items = e.attributes
+        property = { :name => items['name'], :value => items['value'] }
 
-      property_instance = {
-        :name       => property[:name],
-        :ensure     => :present,
-        :value      => property[:value],
-        :provider   => name
-      }
-      instances << new(property_instance)
+        property_instance = {
+          :name       => property[:name],
+          :ensure     => :present,
+          :value      => property[:value],
+          :provider   => name
+        }
+        instances << new(property_instance)
+      end
     end
     instances
   end

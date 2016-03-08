@@ -9,8 +9,8 @@
   pacemaker resource-discovery location property
 - cs\_property will now wait for the cluster to be ready (#170)
 - Log the crm and pcs commands output (crmsh: #177, pcs: #219)
-- crm provider: cs\_property will only take care of cib-bootstrap-options
-  resource sets (#174)
+- cs\_property will only take care of cib-bootstrap-options cluster property set
+  (crm: #174 pcs: #224)
 - crm provider: Fix cs\_colocation for resources with a role (#175)
 - cs\_commit now autorequires cs\_groups (#183)
 - support for more corosync configuration parameters (#184 #192 #194)
