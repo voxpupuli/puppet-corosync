@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'spec_helper_corosync'
 
 describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
   before do
@@ -95,9 +96,21 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
       test_cib = <<-EOS
         <configuration>
           <resources>
+            <primitive class="ocf" id="simple" provider="heartbeat" type="IPaddr2" />
             <primitive class="ocf" id="example_vip" provider="heartbeat" type="IPaddr2">
               <operations>
                 <op id="example_vip-monitor-10s" interval="10s" name="monitor"/>
+              </operations>
+              <instance_attributes id="example_vip-instance_attributes">
+                <nvpair id="example_vip-instance_attributes-cidr_netmask" name="cidr_netmask" value="24"/>
+                <nvpair id="example_vip-instance_attributes-ip" name="ip" value="172.31.110.68"/>
+              </instance_attributes>
+            </primitive>
+h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat" type="IPaddr2">
+              <operations>
+                <op id="example_vip-monitor-10s" interval="10s" name="monitor"/>
+                <op id="example_vip-monitor-10s" interval="20s" name="monitor2"/>
+                <op id="example_vip-monitor-10s" interval="30s" name="monitor3"/>
               </operations>
               <instance_attributes id="example_vip-instance_attributes">
                 <nvpair id="example_vip-instance_attributes-cidr_netmask" name="cidr_netmask" value="24"/>
@@ -121,24 +134,6 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
       # rubocop:enable Lint/UselessAssignment
     end
 
-    def expect_update(pattern)
-      if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-        Puppet::Util::SUIDManager.expects(:run_and_capture).with { |*args|
-          cmdline = args[0].join(' ')
-          expect(cmdline).to match(pattern)
-          true
-        }.at_least_once.returns(['', 0])
-      else
-        Puppet::Util::Execution.expects(:execute).with { |*args|
-          cmdline = args[0].join(' ')
-          expect(cmdline).to match(pattern)
-          true
-        }.at_least_once.returns(
-          Puppet::Util::Execution::ProcessOutput.new('', 0)
-        )
-      end
-    end
-
     let :prefetch do
       described_class.prefetch
     end
@@ -146,9 +141,10 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
     let :resource do
       Puppet::Type.type(:cs_primitive).new(
         :name => 'testResource',
-        :provider => :crm,
+        :provider => :pcs,
         :primitive_class => 'ocf',
         :provided_by => 'heartbeat',
+        :operations => { 'monitor' => { 'interval' => '10s' } },
         :primitive_type => 'IPaddr2')
     end
 
@@ -158,60 +154,114 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
       instance
     end
 
+    let :simple_instance do
+      instances.first
+    end
+
     let :vip_instance do
-      vip_instance = instances.first
-      vip_instance
+      instances[1]
+    end
+
+    let :vip_op_instance do
+      instances[2]
     end
 
     it 'can flush without changes' do
-      expect_update(//)
-      instance.flush
+      expect_commands(/pcs/)
+      simple_instance.flush
     end
 
     it 'sets operations' do
-      instance.operations = { 'monitor' => { 'interval' => '10s' } }
-      expect_update(/op monitor interval=10s/)
+      instance.operations = { 'monitor' => { 'interval' => '20s' } }
+      expect_commands(/^pcs resource create --force testResource ocf:heartbeat:IPaddr2 op monitor interval=20s$/)
       instance.flush
     end
 
     it 'sets utilization' do
       instance.utilization = { 'waffles' => '5' }
-      expect_update(/(pcs resource op remove|utilization waffles=5)/)
+      expect_commands(/^pcs resource create --force testResource ocf:heartbeat:IPaddr2 op .* utilization waffles=5$/)
       instance.flush
     end
 
     it 'sets parameters' do
       instance.parameters = { 'fluffyness' => '12' }
-      expect_update(/(pcs resource op remove|fluffyness=12)/)
+      expect_commands(/^pcs resource create --force testResource ocf:heartbeat:IPaddr2 fluffyness=12 op.*/)
       instance.flush
     end
 
     it 'sets metadata' do
       instance.metadata = { 'target-role' => 'Started' }
-      expect_update(/(pcs resource op remove|meta target-role=Started)/)
+      expect_commands(/^pcs resource create --force testResource ocf:heartbeat:IPaddr2 op .* meta target-role=Started$/)
       instance.flush
     end
 
     it 'sets the primitive name and type' do
-      expect_update(/^pcs resource (create --force testResource ocf:heartbeat:IPaddr2|op remove testResource monitor interval=60s)/)
+      expect_commands(/^pcs resource create --force testResource ocf:heartbeat:IPaddr2/)
       instance.flush
     end
 
+    it 'update operations without changing operations that are already there' do
+      vip_op_instance.operations = {
+        'monitor' => { 'interval' => '20s' },
+        'monitor2' => { 'interval' => '20s' }
+      }
+      expect_commands([
+                        /^pcs resource op remove example_vip_with_op monitor interval=10s$/,
+                        /^pcs resource op remove example_vip_with_op monitor3 interval=30s$/,
+                        /^pcs resource update example_vip_with_op cidr_netmask=24 ip=172.31.110.68 op monitor interval=20s op monitor2 interval=20s/
+                      ])
+      vip_op_instance.flush
+    end
+
     it "sets a primitive_class parameter corresponding to the <primitive>'s class attribute" do
-      vip_instance.primitive_class = 'IPaddr3'
-      expect_update(/resource (create --force|unclone|delete --force|op remove) example_vip/)
+      vip_instance.primitive_class = 'stonith'
+      expect_commands([
+                        /^pcs resource unclone example_vip$/,
+                        /^pcs resource delete --force example_vip$/,
+                        /^pcs resource create --force example_vip stonith:heartbeat:IPaddr2/
+                      ])
+      vip_instance.flush
+    end
+
+    it "sets a provided_by parameter corresponding to the <primitive>'s class attribute" do
+      vip_instance.provided_by = 'voxpupuli'
+      expect_commands([
+                        /^pcs resource unclone example_vip$/,
+                        /^pcs resource delete --force example_vip$/,
+                        /^pcs resource create --force example_vip ocf:voxpupuli:IPaddr2/
+                      ])
       vip_instance.flush
     end
 
     it "sets an primitive_type parameter corresponding to the <primitive>'s type attribute" do
-      vip_instance.primitive_type = 'stonith'
-      expect_update(/resource (create --force|unclone|delete --force|op remove) example_vip/)
+      vip_instance.primitive_type = 'IPaddr3'
+      expect_commands([
+                        /^pcs resource unclone example_vip$/,
+                        /^pcs resource delete --force example_vip$/,
+                        /^pcs resource create --force example_vip ocf:heartbeat:IPaddr3/
+                      ])
+      vip_instance.flush
+    end
+
+    it 'creates a primitive without provided_by parameter' do
+      vip_instance.primitive_class = 'systemd'
+      vip_instance.provided_by = nil
+      vip_instance.primitive_type = 'httpd'
+      expect_commands([
+                        /^pcs resource unclone example_vip$/,
+                        /^pcs resource delete --force example_vip$/,
+                        /^pcs resource create --force example_vip systemd:httpd/
+                      ])
       vip_instance.flush
     end
 
     it "sets an provided_by parameter corresponding to the <primitive>'s provider attribute" do
       vip_instance.provided_by = 'inuits'
-      expect_update(/resource (create --force|unclone|delete --force|op remove) example_vip/)
+      expect_commands([
+                        /^pcs resource unclone example_vip$/,
+                        /^pcs resource delete --force example_vip$/,
+                        /^pcs resource create --force example_vip/
+                      ])
       vip_instance.flush
     end
   end
