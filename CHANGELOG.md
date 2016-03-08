@@ -4,6 +4,9 @@
 - cs\_property now takes an optional `replace` parameter that do not update
   previously created parameters. Useful to let users change the settings at
   runtime without stopping puppet (e.g for maintenance mode).
+- cs\_location now supports a resource_discovery parameter that matches
+  pacemaker resource-discovery location property
+
 
 ###Backward incompatible changes
 - pcs provider: cs_location: the order of the primitive is now the chronological

@@ -33,6 +33,12 @@ Puppet::Type.newtype(:cs_location) do
       also be added to your manifest."
   end
 
+  newproperty(:resource_discovery) do
+    desc 'Whether Pacemaker should perform resource discovery on this
+    node for the specified resource. It matches the resource-discovery
+    location property in pacemaker'
+  end
+
   newproperty(:score) do
     desc "The priority of this location.  Primitives can be a part of
       multiple location groups and so there is a way to control which

@@ -6,6 +6,7 @@ class Puppet::Provider::Crmsh < Puppet::Provider::CibHelper
 
   initvars
   commands :crm_attribute => 'crm_attribute'
+  commands :crm => 'crm'
 
   # Corosync takes a while to build the initial CIB configuration once the
   # service is started for the first time.  This provides us a way to wait
@@ -17,12 +18,7 @@ class Puppet::Provider::Crmsh < Puppet::Provider::CibHelper
   def self.ready?
     return true if @@crmready
     cmd =  [command(:crm_attribute), '--type', 'crm_config', '--query', '--name', 'dc-version']
-    if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-      raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
-    else
-      raw = Puppet::Util::Execution.execute(cmd, :failonfail => false, :combine => true)
-      status = raw.exitstatus
-    end
+    raw, status = run_command_in_cib(cmd, nil, false)
     if status == 0
       # rubocop:disable Style/ClassVars
       @@crmready = true
@@ -51,6 +47,16 @@ class Puppet::Provider::Crmsh < Puppet::Provider::CibHelper
         # rubocop:enable Lint/AssignmentInCondition
         res.provider = prov
       end
+    end
+  end
+
+  # Check that the version of crmsh is high enough to support a feature
+  def self.min_crm_version(min_version, feature)
+    cmd = [command(:crm), '--version']
+    raw, _status = run_command_in_cib(cmd)
+    crm_version = raw.split.first
+    unless Puppet::Util::Package.versioncmp(min_version, crm_version) == -1
+      raise Puppet::Error, "Feature #{feature} in only supported since crmsh #{min_version} (installed version: #{crm_version})"
     end
   end
 
