@@ -76,19 +76,7 @@ Puppet::Type.newtype(:cs_colocation) do
   end
 
   autorequire(:cs_shadow) do
-    autos = []
-    autos << @parameters[:cib].value if @parameters[:cib]
-
-    autos
-  end
-
-  if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '4.0') >= 0
-    autonotify(:cs_commit) do
-      autos = []
-      autos << @parameters[:cib].value if @parameters[:cib]
-
-      autos
-    end
+    [@parameters[:cib]]
   end
 
   autorequire(:service) do
