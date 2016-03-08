@@ -84,9 +84,6 @@ Puppet::Type.type(:cs_group).provide(:pcs, :parent => Puppet::Provider::Pacemake
   # as stdin for the pcs command.
   def flush
     unless @property_hash.empty?
-
-      ENV['CIB_shadow'] = @resource[:cib]
-
       if @property_hash[:new] == false
         debug('Removing group')
         Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'ungroup', @property_hash[:name]], @resource[:cib])
