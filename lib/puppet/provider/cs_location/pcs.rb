@@ -30,12 +30,13 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
         items = e.attributes
 
         location_instance = {
-          :name       => items['id'],
-          :ensure     => :present,
-          :primitive  => items['rsc'],
-          :node_name  => items['node'],
-          :score      => items['score'],
-          :provider   => name
+          :name               => items['id'],
+          :ensure             => :present,
+          :primitive          => items['rsc'],
+          :node_name          => items['node'],
+          :score              => items['score'],
+          :resource_discovery => items['resource-discovery'],
+          :provider           => name
         }
         instances << new(location_instance)
       end
@@ -47,18 +48,19 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
   # of actually doing the work.
   def create
     @property_hash = {
-      :name       => @resource[:name],
-      :ensure     => :present,
-      :primitive  => @resource[:primitive],
-      :node_name  => @resource[:node_name],
-      :score      => @resource[:score]
+      :name               => @resource[:name],
+      :ensure             => :present,
+      :primitive          => @resource[:primitive],
+      :node_name          => @resource[:node_name],
+      :score              => @resource[:score],
+      :resource_discovery => @resource[:resource_discovery]
     }
   end
 
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing location')
-    cmd = [command(:pcs), 'constraint', 'resource', 'remove', @resource[:name]]
+    cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
     Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
   end
@@ -68,10 +70,12 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
   # It calls several pcs commands to make the resource look like the
   # params.
   def flush
-    # rubocop:disable Style/GuardClause
     unless @property_hash.empty?
-      # rubocop:enable Style/GuardClause
-      cmd = [command(:pcs), 'constraint', 'location', 'add', @property_hash[:name], @property_hash[:primitive], @property_hash[:node_name], @property_hash[:score]]
+      # Remove existing location
+      cmd = ['pcs', 'constraint', 'resource', 'remove', @resource[:name]]
+      Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib], false)
+      cmd = ['pcs', 'constraint', 'location', 'add', @property_hash[:name], @property_hash[:primitive], @property_hash[:node_name], @property_hash[:score]]
+      cmd << "resource-discovery=#{@property_hash[:resource_discovery]}" unless @property_hash[:resource_discovery].nil?
       Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
     end
   end

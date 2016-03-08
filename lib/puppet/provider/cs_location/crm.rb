@@ -33,12 +33,13 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Crmsh
       items = e.attributes
 
       location_instance = {
-        :name       => items['id'],
-        :ensure     => :present,
-        :primitive  => items['rsc'],
-        :node_name  => items['node'],
-        :score      => items['score'],
-        :provider   => name
+        :name               => items['id'],
+        :ensure             => :present,
+        :primitive          => items['rsc'],
+        :node_name          => items['node'],
+        :score              => items['score'],
+        :resource_discovery => items['resource-discovery'],
+        :provider           => name
       }
       instances << new(location_instance)
     end
@@ -49,19 +50,19 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Crmsh
   # of actually doing the work.
   def create
     @property_hash = {
-      :name       => @resource[:name],
-      :ensure     => :present,
-      :primitive  => @resource[:primitive],
-      :node_name  => @resource[:node_name],
-      :score      => @resource[:score],
-      :cib        => @resource[:cib]
+      :name               => @resource[:name],
+      :ensure             => :present,
+      :primitive          => @resource[:primitive],
+      :node_name          => @resource[:node_name],
+      :score              => @resource[:score],
+      :resource_discovery => @resource[:resource_discovery]
     }
   end
 
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Revmoving location')
-    crm('configure', 'delete', @resource[:name])
+    Puppet::Provider::Crmsh.run_command_in_cib(['crm', 'configure', 'delete', @resource[:name]], @resource[:cib])
     @property_hash.clear
   end
 
@@ -106,14 +107,15 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Crmsh
   # as stdin for the crm command.
   def flush
     unless @property_hash.empty?
-      updated = 'location '
-      updated << "#{@property_hash[:name]} #{@property_hash[:primitive]} #{@property_hash[:score]}: #{@property_hash[:node_name]}"
+      Puppet::Provider::Crmsh.min_crm_version('2.1.2', 'resource-discovery in location constraints') unless @property_hash[:resource_discovery].nil?
+      updated = "location #{@property_hash[:name]} #{@property_hash[:primitive]}"
+      updated << " resource-discovery=#{@property_hash[:resource_discovery]}" unless @property_hash[:resource_discovery].nil?
+      updated << " #{@property_hash[:score]}: #{@property_hash[:node_name]}"
       debug("Loading update: #{updated}")
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        ENV['CIB_shadow'] = @resource[:cib]
-        crm('configure', 'load', 'update', tmpfile.path.to_s)
+        Puppet::Provider::Crmsh.run_command_in_cib(['crm', 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
       end
     end
   end
