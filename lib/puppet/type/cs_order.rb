@@ -68,16 +68,13 @@ Puppet::Type.newtype(:cs_order) do
     defaultto 'Mandatory'
   end
 
-  autorequire(:cs_shadow) do
-    [@parameters[:cib]]
-  end
   newproperty(:symmetrical) do
     desc "Boolean specifying if the resources should stop in reverse order.
         Default value: true."
     defaultto true
   end
 
-  valid_resource_types = [:cs_primitive, :cs_group]
+  valid_resource_types = [:cs_primitive, :cs_group, :cs_clone]
   newparam(:resources_type) do
     desc "String to specify which HA resource type is used for this order,
       e.g. when you want to order groups (cs_group) instead of primitives.
@@ -108,6 +105,10 @@ Puppet::Type.newtype(:cs_order) do
       autos
     end
   }
+
+  autorequire(:cs_shadow) do
+    [@parameters[:cib]]
+  end
 
   def unmunge_cs_resourcename(name)
     name = name.split(':')[0]
