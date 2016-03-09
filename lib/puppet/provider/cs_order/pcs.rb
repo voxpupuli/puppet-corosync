@@ -12,6 +12,8 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
   # Path to the pcs binary for interacting with the cluster configuration.
   commands :pcs => 'pcs'
 
+  mk_resource_methods
+
   def self.instances
     block_until_ready
 
@@ -23,50 +25,53 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
     # rubocop:enable Lint/UselessAssignment
     doc = REXML::Document.new(raw)
 
-    doc.root.elements['configuration'].elements['constraints'].each_element('rsc_order') do |e|
-      items = e.attributes
+    constraints = doc.root.elements['configuration'].elements['constraints']
+    unless constraints.nil?
+      constraints.each_element('rsc_order') do |e|
+        items = e.attributes
 
-      first = if items['first-action']
-                "#{items['first']}:#{items['first-action']}"
-              else
-                items['first']
-              end
+        first = if items['first-action']
+                  "#{items['first']}:#{items['first-action']}"
+                else
+                  items['first']
+                end
 
-      second = if items['then-action']
-                 "#{items['then']}:#{items['then-action']}"
+        second = if items['then-action']
+                   "#{items['then']}:#{items['then-action']}"
+                 else
+                   items['then']
+                 end
+        score = if items['score']
+                  items['score']
+                else
+                  'INFINITY'
+                end
+        kind = if items['kind']
+                 items['kind']
                else
-                 items['then']
+                 'Mandatory'
                end
-      score = if items['score']
-                items['score']
-              else
-                'INFINITY'
-              end
-      kind = if items['kind']
-               items['kind']
-             else
-               'Mandatory'
-             end
 
-      symmetrical = if items['symmetrical']
-                      (items['symmetrical'] == 'true')
-                    else
-                      # Default: symmetrical is true unless explicitly defined.
-                      true
-                    end
+        symmetrical = if items['symmetrical']
+                        (items['symmetrical'] == 'true')
+                      else
+                        # Default: symmetrical is true unless explicitly defined.
+                        true
+                      end
 
-      order_instance = {
-        :name        => items['id'],
-        :ensure      => :present,
-        :first       => first,
-        :second      => second,
-        :score       => score,
-        :kind        => kind,
-        :symmetrical => symmetrical,
-        :provider    => name,
-        :new         => false
-      }
-      instances << new(order_instance)
+        order_instance = {
+          :name        => items['id'],
+          :ensure      => :present,
+          :first       => first,
+          :second      => second,
+          :score       => score,
+          :kind        => kind,
+          :symmetrical => symmetrical,
+          :provider    => name,
+          :new         => false
+        }
+        instances << new(order_instance)
+      end
     end
     instances
   end
