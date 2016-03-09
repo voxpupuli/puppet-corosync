@@ -115,17 +115,18 @@ cs_primitive { 'apache_service':
 }
 ```
 
-Note: Operations with the same names have to be distinguished by role defined behind the colon. Example:
+Note: If you have multiple operations with the same names, you have to use an array.
+Example:
 ```puppet
 cs_primitive { 'pgsql_service':
   primitive_class => 'ocf',
   primitive_type  => 'pgsql',
   provided_by     => 'heartbeat',
-  operations      => {
-    'monitor'        => { 'interval' => '10s', 'timeout' => '30s' },
-    'monitor:Master' => { 'interval' => '5s', 'timeout' => '30s' },
-    'start'          => { 'interval' => '0', 'timeout' => '30s', 'on-fail' => 'restart' }
-  },
+  operations      => [
+    { 'monitor'   => { 'interval' => '10s', 'timeout' => '30s' } },
+    { 'monitor'   => { 'interval' => '5s', 'timeout' => '30s' 'role' => 'Master', } },
+    { 'start'     => { 'interval' => '0', 'timeout' => '30s', 'on-fail' => 'restart' } }
+  ],
 }
 ```
 
