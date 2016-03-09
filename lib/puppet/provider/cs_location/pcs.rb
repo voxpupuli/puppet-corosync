@@ -19,9 +19,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    # rubocop:disable Lint/UselessAssignment
-    raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
-    # rubocop:enable Lint/UselessAssignment
+    raw, = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     constraints = doc.root.elements['configuration'].elements['constraints']

@@ -14,9 +14,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemake
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    # rubocop:disable Lint/UselessAssignment
-    raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
-    # rubocop:enable Lint/UselessAssignment
+    raw, = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     doc.root.elements['configuration'].elements['resources'].each_element('clone') do |e|
@@ -155,9 +153,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemake
       cmd << "globally-unique=#{@property_hash[:globally_unique]}" if @property_hash[:globally_unique]
       cmd << "ordered=#{@property_hash[:ordered]}" if @property_hash[:ordered]
       cmd << "interleave=#{@property_hash[:interleave]}" if @property_hash[:interleave]
-      # rubocop:disable Lint/UselessAssignment
-      raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
-      # rubocop:enable Lint/UselessAssignment
+      Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
     end
   end
 end

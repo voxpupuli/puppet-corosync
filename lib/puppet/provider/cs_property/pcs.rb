@@ -17,9 +17,7 @@ Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacem
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    # rubocop:disable Lint/UselessAssignment
-    raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
-    # rubocop:enable Lint/UselessAssignment
+    raw, = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     cluster_property_set = doc.root.elements["configuration/crm_config/cluster_property_set[@id='cib-bootstrap-options']"]
@@ -54,9 +52,7 @@ Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacem
   def destroy
     debug('Removing cluster property')
     cmd = [command(:pcs), 'property', 'unset', (@property_hash[:name]).to_s]
-    # rubocop:disable Lint/UselessAssignment
-    raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
-    # rubocop:enable Lint/UselessAssignment
+    Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
   end
 
@@ -85,9 +81,7 @@ Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacem
       # clear this on properties, in case it's set from a previous
       # run of a different corosync type
       cmd = [command(:pcs), 'property', 'set', "#{@property_hash[:name]}=#{@property_hash[:value]}"]
-      # rubocop:disable Lint/UselessAssignment
-      raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
-      # rubocop:enable Lint/UselessAssignment
+      Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
     end
   end
 end

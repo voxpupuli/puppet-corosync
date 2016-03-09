@@ -80,9 +80,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    # rubocop:disable Lint/UselessAssignment
-    raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
-    # rubocop:enable Lint/UselessAssignment
+    raw, = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//primitive') do |e|
@@ -211,9 +209,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
         cmd += operations unless operations.nil?
         cmd += utilization unless utilization.nil?
         cmd += metadatas unless metadatas.nil?
-        # rubocop:disable Lint/UselessAssignment
-        raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
-        # rubocop:enable Lint/UselessAssignment
+        Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
         # if we are using a master/slave resource, prepend ms_ before its name
         # and declare it as a master/slave resource
         if @property_hash[:promotable] == :true
@@ -226,9 +222,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
               cmd << "#{k}=#{v}"
             end
           end
-          # rubocop:disable Lint/UselessAssignment
-          raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
-          # rubocop:enable Lint/UselessAssignment
+          Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
         end
         # try to remove the default monitor operation
         if @property_hash[:operations]['monitor'].nil?
@@ -252,9 +246,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
         cmd += operations unless operations.nil?
         cmd += utilization unless utilization.nil?
         cmd += metadatas unless metadatas.nil?
-        # rubocop:disable Lint/UselessAssignment
-        raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
-        # rubocop:enable Lint/UselessAssignment
+        Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
         if @property_hash[:promotable] == :true
           cmd = [command(:pcs), 'resource', 'update', "ms_#{@property_hash[:name]}", (@property_hash[:name]).to_s]
           # rubocop:disable Metrics/BlockNesting
@@ -268,9 +260,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
               cmd << "#{k}="
             end
           end
-          # rubocop:disable Lint/UselessAssignment
-          raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
-          # rubocop:enable Lint/UselessAssignment
+          Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
         end
       end
     end
