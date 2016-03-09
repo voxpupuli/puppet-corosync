@@ -15,9 +15,7 @@ Puppet::Type.type(:cs_group).provide(:pcs, :parent => Puppet::Provider::Pacemake
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    # rubocop:disable Lint/UselessAssignment
-    raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
-    # rubocop:enable Lint/UselessAssignment
+    raw, = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//group') do |e|
@@ -91,9 +89,7 @@ Puppet::Type.type(:cs_group).provide(:pcs, :parent => Puppet::Provider::Pacemake
 
       cmd = [command(:pcs), 'resource', 'group', 'add', (@property_hash[:name]).to_s]
       cmd += @property_hash[:primitives]
-      # rubocop:disable Lint/UselessAssignment
-      raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
-      # rubocop:enable Lint/UselessAssignment
+      Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
     end
   end
 end

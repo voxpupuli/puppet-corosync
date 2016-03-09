@@ -17,9 +17,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    # rubocop:disable Lint/UselessAssignment
-    raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
-    # rubocop:enable Lint/UselessAssignment
+    raw, = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
     resource_set_options = ['sequential', 'require-all', 'action', 'role']
 
@@ -85,9 +83,6 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
   # Create just adds our resource to the property_hash and flush will take care
   # of actually doing the work.
   def create
-    # rubocop:disable Lint/UselessAssignment
-    primitives = []
-    # rubocop:enable Lint/UselessAssignment
     @property_hash = {
       :name       => @resource[:name],
       :ensure     => :present,
@@ -195,9 +190,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
         cmd << @property_hash[:score]
         cmd << "id=#{@property_hash[:name]}"
       end
-      # rubocop:disable Lint/UselessAssignment
-      raw, status = Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
-      # rubocop:enable Lint/UselessAssignment
+      Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
     end
   end
 end
