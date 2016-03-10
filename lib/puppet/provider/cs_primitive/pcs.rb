@@ -125,7 +125,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
       @property_hash[:promotable] = should
     when :false
       @property_hash[:promotable] = should
-      pcs('resource', 'delete', "ms_#{@resource[:name]}")
+      Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'delete', "ms_#{@resource[:name]}"], @resource[:cib])
     end
   end
 
