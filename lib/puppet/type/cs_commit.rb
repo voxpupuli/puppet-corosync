@@ -77,11 +77,9 @@ Puppet::Type.newtype(:cs_commit) do
     end
   end
 
-  def resources_with_cib(cib)
+  def resources_with_cib(resource_type)
     autos = []
-    # rubocop:disable Lint/UselessAssignment
-    catalog.resources.find_all { |r| r.is_a?(Puppet::Type.type(cib)) && param = r.parameter(:cib) && !param.nil? && param.value == @parameters[:cib] }.each do |r|
-      # rubocop:enable Lint/UselessAssignment
+    catalog.resources.find_all { |r| r.is_a?(Puppet::Type.type(resource_type)) && r.should(:cib) == should(:cib) }.each do |r|
       autos << r
     end
 
