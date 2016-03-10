@@ -81,7 +81,7 @@ Puppet::Type.newtype(:cs_primitive) do
     # rubocop:enable Style/EmptyLiteral
   end
 
-  newproperty(:operations) do
+  newproperty(:operations, :array_matching => :all) do
     desc "A hash of operations for the primitive.  Operations defined in a
       primitive are little more predictable as they are commonly things like
       monitor or start and their values are in seconds.  Since each resource
@@ -97,13 +97,69 @@ Puppet::Type.newtype(:cs_primitive) do
     munge do |value|
       if value.is_a? Hash
         operations = []
+        # Backwards compatibility
         value.each do |k, v|
-          operations << { k => v }
+          if k.include? ':'
+            Puppet.deprecation_warning 'cs_primitive.rb[operations]: Role in the operations name is now deprecated. Please use an array of hashes and put the role in the values.'
+            items = k.split(':')
+            k = items[0]
+            v['role'] = items[1] if v.is_a?(Hash)
+            if v.is_a?(Array)
+              v.each do |p|
+                p['role'] = items[1]
+              end
+            end
+          end
+          if v.is_a? Array
+            Puppet.deprecation_warning 'cs_primitive.rb[operations]: Multiple operations with the same name now have to be declared as an array of hashe, not as a hash with arrays.'
+            v.each do |p|
+              operations << { k => p }
+            end
+          else
+            operations << { k => v }
+          end
         end
         operations
       else
         value
       end
+    end
+
+    def insync?(is)
+      ((should - is) + (is - should)).empty?
+    end
+
+    def should
+      super.flatten
+    end
+
+    def op_to_s(op)
+      s = op.keys.first.to_s.dup
+      p = []
+      op.values.first.each_pair do |k, v|
+        p << "#{k}=#{v}"
+      end
+      s << ' (' << p.join(' ') << ')' unless p.empty?
+      s
+    end
+
+    def change_to_s(currentvalue, newvalue)
+      new_ops = (newvalue - currentvalue)
+      deleted_ops = (currentvalue - newvalue)
+      same_ops = (currentvalue + newvalue).uniq - new_ops - deleted_ops
+      message = []
+      unless new_ops.empty?
+        m = "#{new_ops.size} added:"
+        new_ops.each do |n| m << ' ' << op_to_s(n) end
+        message << m
+      end
+      unless deleted_ops.empty?
+        m = "#{deleted_ops.size} removed:"
+        deleted_ops.each do |n| m << ' ' << op_to_s(n) end
+        message << m
+      end
+      message << "#{same_ops.size} kept" unless same_ops.empty?
+      message.join ' / '
     end
 
     # rubocop:disable Style/EmptyLiteral
