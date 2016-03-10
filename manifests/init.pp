@@ -110,7 +110,8 @@
 #   is set to true.
 #   Defaults to ['localhost']
 #
-# [*quorum_members_ids*]                                                                                                                                                                  #   Array of quorum member IDs. Persistent IDs are required for the dynamic
+# [*quorum_members_ids*]
+#   Array of quorum member IDs. Persistent IDs are required for the dynamic
 #   config of a corosync cluster and when_set_votequorum is set to true.
 #   Should be used only with the quorum_members parameter.
 #   Defaults to undef
