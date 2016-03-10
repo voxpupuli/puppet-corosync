@@ -87,6 +87,28 @@ describe 'corosync' do
       end
     end
 
+    context 'when log_file is set' do
+      before :each do
+        params.merge!(
+          :log_file => true
+        )
+      end
+
+      it 'does set to_logfile' do
+        should contain_file('/etc/corosync/corosync.conf').with_content(
+          /to_logfile.*yes/
+        )
+      end
+    end
+
+    context 'when log_file is not set' do
+      it 'does not set to_logfile' do
+        should contain_file('/etc/corosync/corosync.conf').with_content(
+          /to_logfile.*no/
+        )
+      end
+    end
+
     [:package_corosync, :package_pacemaker, :version_corosync, :version_pacemaker].each { |package_param|
       context "new-style package parameter $#{package_param} mixed with deprecated $packages parameter" do
         before :each do

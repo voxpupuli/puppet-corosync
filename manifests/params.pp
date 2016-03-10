@@ -9,6 +9,7 @@ class corosync::params {
   $unicast_addresses                   = 'UNSET'
   $force_online                        = false
   $check_standby                       = false
+  $log_file                            = false
   $debug                               = false
   $log_stderr                          = true
   $syslog_priority                     = 'info'

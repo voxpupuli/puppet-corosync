@@ -52,6 +52,10 @@
 #   True/false parameter specifying whether puppet should return an error log
 #   message if a node is in standby. Useful for monitoring node state.
 #
+# [*log_file*]
+#   Boolean parameter specifying whether Corosync should produce debug
+#   output in a logfile. Default: false.
+#
 # [*debug*]
 #   True/false parameter specifying whether Corosync should produce debug
 #   output in its logs.
@@ -189,6 +193,7 @@ class corosync(
   $unicast_addresses                   = $::corosync::params::unicast_addresses,
   $force_online                        = $::corosync::params::force_online,
   $check_standby                       = $::corosync::params::check_standby,
+  $log_file                            = $::corosync::params::log_file,
   $debug                               = $::corosync::params::debug,
   $log_stderr                          = $::corosync::params::log_stderr,
   $syslog_priority                     = $::corosync::params::syslog_priority,
@@ -291,6 +296,7 @@ class corosync(
   validate_re($authkey_source, '^(file|string)$')
   validate_bool($force_online)
   validate_bool($check_standby)
+  validate_bool($log_file)
   validate_bool($debug)
   validate_bool($log_stderr)
   validate_re($syslog_priority, '^(debug|info|notice|warning|err|emerg)$')
@@ -374,6 +380,7 @@ class corosync(
   # Template uses:
   # - $unicast_addresses
   # - $multicast_address
+  # - $log_file
   # - $debug
   # - $bind_address
   # - $port
