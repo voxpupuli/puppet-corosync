@@ -91,8 +91,21 @@ Puppet::Type.newtype(:cs_primitive) do
       is valid."
 
     validate do |value|
-      raise Puppet::Error, 'Puppet::Type::Cs_Primitive: operations property must be a hash.' unless value.is_a? Hash
+      raise Puppet::Error, 'Puppet::Type::Cs_Primitive: operations property must be a hash or an array.' unless value.is_a?(Hash) || value.is_a?(Array)
     end
+
+    munge do |value|
+      if value.is_a? Hash
+        operations = []
+        value.each do |k, v|
+          operations << { k => v }
+        end
+        operations
+      else
+        value
+      end
+    end
+
     # rubocop:disable Style/EmptyLiteral
     defaultto Hash.new
     # rubocop:enable Style/EmptyLiteral

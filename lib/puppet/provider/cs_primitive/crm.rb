@@ -24,7 +24,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
       :ensure           => :present,
       :provider         => name,
       :parameters       => nvpairs_to_hash(e.elements['instance_attributes']),
-      :operations       => {},
+      :operations       => [],
       :utilization      => nvpairs_to_hash(e.elements['utilization']),
       :metadata         => nvpairs_to_hash(e.elements['meta_attributes']),
       :ms_metadata      => {},
@@ -35,25 +35,18 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
     unless operations.nil?
       operations.each_element do |o|
         valids = o.attributes.reject do |k, _v| k == 'id' end
-        currentop = {}
+        name = valids['name']
+        operation = {}
+        operation[name] = {}
         valids.each do |k, v|
-          currentop[k] = v if k != 'name'
+          operation[name][k] = v if k != 'name'
         end
         unless o.elements['instance_attributes'].nil?
           o.elements['instance_attributes'].each_element do |i|
-            currentop[i.attributes['name']] = i.attributes['value']
+            operation[name][i.attributes['name']] = i.attributes['value']
           end
         end
-        if hash[:operations][valids['name']].instance_of?(Hash)
-          # There is already an operation with the same name, change to Array
-          hash[:operations][valids['name']] = [hash[:operations][valids['name']]]
-        end
-        if hash[:operations][valids['name']].instance_of?(Array)
-          # Append to an existing list
-          hash[:operations][valids['name']] += [currentop]
-        else
-          hash[:operations][valids['name']] = currentop
-        end
+        hash[:operations] << operation
       end
     end
     if e.parent.name == 'master'
@@ -193,11 +186,10 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
       unless @property_hash[:operations].empty?
         operations = ''
         @property_hash[:operations].each do |o|
-          [o[1]].flatten.each do |o2|
-            operations << "op #{o[0]} "
-            o2.each_pair do |k, v|
-              operations << "#{k}=#{v} "
-            end
+          op_name = o.keys.first
+          operations << "op #{op_name}"
+          o.values.first.each_pair do |k, v|
+            operations << "#{k}=#{v} "
           end
         end
       end

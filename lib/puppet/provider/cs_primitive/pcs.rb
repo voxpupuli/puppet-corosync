@@ -27,7 +27,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
       :ensure                   => :present,
       :provider                 => name,
       :parameters               => nvpairs_to_hash(e.elements['instance_attributes']),
-      :operations               => {},
+      :operations               => [],
       :utilization              => nvpairs_to_hash(e.elements['utilization']),
       :metadata                 => nvpairs_to_hash(e.elements['meta_attributes']),
       :ms_metadata              => {},
@@ -39,25 +39,26 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
       :existing_provided_by     => e.attributes['provider'],
       :existing_metadata        => nvpairs_to_hash(e.elements['meta_attributes']),
       :existing_ms_metadata     => {},
-      :existing_operations      => {}
+      :existing_operations      => []
     }
 
     operations = e.elements['operations']
     unless operations.nil?
       operations.each_element do |o|
         valids = o.attributes.reject do |k, _v| k == 'id' end
-        if !valids['role'].nil?
-          name = valids['name']
-          name << ':'
-          name << valids['role']
-        else
-          name = valids['name']
-        end
-        hash[:operations][name] = {}
+        name = valids['name']
+        operation = {}
+        operation[name] = {}
         valids.each do |k, v|
-          hash[:operations][name][k] = v if k != 'name' && k != 'role'
+          operation[name][k] = v if k != 'name'
         end
-        hash[:existing_operations] = hash[:operations].dup
+        unless o.elements['instance_attributes'].nil?
+          o.elements['instance_attributes'].each_element do |i|
+            operation[name][i.attributes['name']] = i.attributes['value']
+          end
+        end
+        hash[:operations] << operation
+        hash[:existing_operations] << operation
       end
     end
     if e.parent.name == 'master'
@@ -147,16 +148,11 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
       unless @property_hash[:operations].empty?
         operations = []
         @property_hash[:operations].each do |o|
-          op_name = o[0]
+          # o is {k => v}
+          op_name = o.keys.first.to_s
           operations << 'op'
-          if op_name.include? ':'
-            items = op_name.split(':')
-            operations << items[0]
-            operations << "role=#{items[1]}"
-          else
-            operations << op_name
-          end
-          o[1].each_pair do |k, v|
+          operations << op_name
+          o.values.first.each_pair do |k, v|
             operations << "#{k}=#{v}"
           end
         end
@@ -225,7 +221,8 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
           Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
         end
         # try to remove the default monitor operation
-        if @property_hash[:operations]['monitor'].nil?
+        default_op = { 'monitor' => { 'interval' => '60s' } }
+        unless @property_hash[:operations].include?(default_op)
           cmd = [command(:pcs), 'resource', 'op', 'remove', (@property_hash[:name]).to_s, 'monitor', 'interval=60s']
           Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib], false)
         end
@@ -233,10 +230,10 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
         if @property_hash[:promotable] == :false && @property_hash[:existing_promotable] == :true
           Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', "ms_#{@property_hash[:name]}"], @resource[:cib])
         end
-        @property_hash[:existing_operations].reject { |op, params| @property_hash[:operations].key?(op) && @property_hash[:operations][op] == params }.each do |o|
+        @property_hash[:existing_operations].reject { |op| @property_hash[:operations].include?(op) }.each do |o|
           cmd = [command(:pcs), 'resource', 'op', 'remove', (@property_hash[:name]).to_s]
-          cmd << (o[0]).to_s
-          o[1].each_pair do |k, v|
+          cmd << o.keys.first.to_s
+          o.values.first.each_pair do |k, v|
             cmd << "#{k}=#{v}"
           end
           Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])

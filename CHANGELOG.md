@@ -30,6 +30,9 @@
   order: ['with-rsc', 'rsc']. This aligns pcs with the crmsh provider (#212)
 - pcs_provider: cs\_colocation: the order of the primitives is now respected.
   Previously they were sorted by chronological order (#153).
+- cs_primitive operations parameter with a role now need to define the role as
+  a property, and if multiple operations have the same role you have to use an
+  array (#236)
 
 ##2015-10-14 - Release 0.8.0
 ###Summary
