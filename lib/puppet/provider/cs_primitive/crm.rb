@@ -187,7 +187,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
         operations = ''
         @property_hash[:operations].each do |o|
           op_name = o.keys.first
-          operations << "op #{op_name}"
+          operations << "op #{op_name} "
           o.values.first.each_pair do |k, v|
             operations << "#{k}=#{v} "
           end

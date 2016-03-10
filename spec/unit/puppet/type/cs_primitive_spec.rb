@@ -72,4 +72,108 @@ describe Puppet::Type.type(:cs_primitive) do
       end
     end
   end
+
+  describe 'when munging the operations attributes' do
+    it 'should not change arrays' do
+      Puppet.expects(:deprecation_warning).never
+      expect(subject.new(
+        :name => 'mock_primitive',
+        :operations => [{ 'start' => { 'interval' => '10' } }, { 'stop' => { 'interval' => '10' } }]
+      ).should(:operations)).to eq([
+                                     { 'start' => { 'interval' => '10' } },
+                                     { 'stop' => { 'interval' => '10' } }
+                                   ])
+    end
+    it 'should convert hashes into array' do
+      Puppet.expects(:deprecation_warning).never
+      expect(subject.new(
+        :name => 'mock_primitive',
+        :operations => { 'start' => { 'interval' => '10' }, 'stop' => { 'interval' => '10' } }
+      ).should(:operations)).to eq([
+                                     { 'start' => { 'interval' => '10' } },
+                                     { 'stop' => { 'interval' => '10' } }
+                                   ])
+    end
+    it 'should convert hashes into array with correct roles' do
+      Puppet.expects(:deprecation_warning).once
+      expect(subject.new(
+        :name => 'mock_primitive',
+        :operations => { 'start' => { 'interval' => '10' }, 'stop:Master' => { 'interval' => '10' } }
+      ).should(:operations)).to eq([
+                                     { 'start' => { 'interval' => '10' } },
+                                     { 'stop' => { 'interval' => '10', 'role' => 'Master' } }
+                                   ])
+    end
+    it 'should convert sub-arrays into array' do
+      Puppet.expects(:deprecation_warning).once
+      expect(subject.new(
+        :name => 'mock_primitive',
+        :operations => { 'start' => [{ 'interval' => '10' }, { 'interval' => '10', 'role' => 'foo' }], 'stop' => { 'interval' => '10' } }
+      ).should(:operations)).to eq([
+                                     { 'start' => { 'interval' => '10' } },
+                                     { 'start' => { 'interval' => '10', 'role' => 'foo' } },
+                                     { 'stop' => { 'interval' => '10' } }
+                                   ])
+    end
+    it 'should convert sub-arrays into array with correct roles' do # That case probably never happens in practice
+      Puppet.expects(:deprecation_warning).twice
+      expect(subject.new(
+        :name => 'mock_primitive',
+        :operations => { 'start' => { 'interval' => '10' }, 'stop:Master' => [{ 'interval' => '10' }, { 'interval' => '20' }] }
+      ).should(:operations)).to eq([
+                                     { 'start' => { 'interval' => '10' } },
+                                     { 'stop' => { 'interval' => '10', 'role' => 'Master' } },
+                                     { 'stop' => { 'interval' => '20', 'role' => 'Master' } }
+                                   ])
+    end
+  end
+
+  describe 'when diffing the operations attributes' do
+    def ops
+      subject.new(:name => 'mock_primitive').parameter(:operations)
+    end
+
+    it 'should show 1 new op with 1 parameter' do
+      expect(ops.change_to_s([], [{ 'start' => { 'interval' => '10' } }])).to eq(
+        '1 added: start (interval=10)'
+      )
+    end
+
+    it 'should show 1 new op with 1 parameter and 1 kept' do
+      common = [{ 'monitor' => { 'interval' => '10' } }]
+      expect(ops.change_to_s(common, common + [{ 'start' => { 'interval' => '10' } }])).to eq(
+        '1 added: start (interval=10) / 1 kept'
+      )
+    end
+
+    it 'should show 1 new op with 2 parameters' do
+      expect(ops.change_to_s([], [{ 'start' => { 'interval' => '10', 'foo' => 'bar' } }])).to eq(
+        '1 added: start (interval=10 foo=bar)'
+      )
+    end
+
+    it 'should show 2 new ops with 1 parameter' do
+      expect(ops.change_to_s([], [{ 'start' => { 'interval' => '10' } }, { 'stop' => { 'interval' => '10' } }])).to eq(
+        '2 added: start (interval=10) stop (interval=10)'
+      )
+    end
+
+    it 'should show 1 deleted op with 1 parameter' do
+      expect(ops.change_to_s([{ 'start' => { 'interval' => '10' } }], [])).to eq(
+        '1 removed: start (interval=10)'
+      )
+    end
+
+    it 'should show 1 removed op with 2 parameters' do
+      expect(ops.change_to_s([{ 'start' => { 'interval' => '10', 'foo' => 'bar' } }], [])).to eq(
+        '1 removed: start (interval=10 foo=bar)'
+      )
+    end
+
+    it 'should show 2 removed ops with 1 parameter' do
+      expect(ops.change_to_s([{ 'start' => { 'interval' => '10' } }, { 'stop' => { 'interval' => '10' } }], [])).to eq(
+        '2 removed: start (interval=10) stop (interval=10)'
+      )
+    end
+  end
 end

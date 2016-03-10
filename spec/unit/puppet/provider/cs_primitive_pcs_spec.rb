@@ -68,8 +68,10 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
       end
 
       it 'has an operations property corresponding to <operations>' do
-        expect(instance.operations).to match_array([{ 'start' => { 'interval' => '0', 'timeout' => '60' } },
-                                                    { 'stop'  => { 'interval' => '0', 'timeout' => '40' } }])
+        expect(instance.operations).to eq([
+                                            { 'start' => { 'interval' => '0', 'timeout' => '60' } },
+                                            { 'stop'  => { 'interval' => '0', 'timeout' => '40' } }
+                                          ])
       end
 
       it 'has a utilization property corresponding to <utilization>' do
