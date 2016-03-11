@@ -10,22 +10,15 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Crmsh) d
   # Path to the crm binary for interacting with the cluster configuration.
   commands :crm => 'crm'
 
+  mk_resource_methods
+
   def self.instances
     block_until_ready
 
     instances = []
 
     cmd = [command(:crm), 'configure', 'show', 'xml']
-    if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-      # rubocop:disable Lint/UselessAssignment
-      raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
-      # rubocop:enable Lint/UselessAssignment
-    else
-      raw = Puppet::Util::Execution.execute(cmd)
-      # rubocop:disable Lint/UselessAssignment
-      status = raw.exitstatus
-      # rubocop:enable Lint/UselessAssignment
-    end
+    raw, = Puppet::Provider::Crmsh.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     doc.root.elements['configuration'].elements['constraints'].each_element('rsc_order') do |e|
@@ -74,53 +67,16 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Crmsh) d
       :second       => @resource[:second],
       :score        => @resource[:score],
       :symmetrical  => @resource[:symmetrical],
+      :kind         => @resource[:kind],
       :cib          => @resource[:cib]
     }
   end
 
   # Unlike create we actually immediately delete the item.
   def destroy
-    debug('Revmoving order directive')
-    crm('configure', 'delete', @resource[:name])
+    debug('Removing order directive')
+    Puppet::Provider::Crmsh.run_command_in_cib([command(:crm), 'configure', 'delete', @resource[:name]], @resource[:cib])
     @property_hash.clear
-  end
-
-  # Getters that obtains the first and second primitives and score in our
-  # ordering definintion that have been populated by prefetch or instances
-  # (depends on if your using puppet resource or not).
-  def first
-    @property_hash[:first]
-  end
-
-  def second
-    @property_hash[:second]
-  end
-
-  def score
-    @property_hash[:score]
-  end
-
-  def symmetrical
-    @property_hash[:symmetrical]
-  end
-
-  # Our setters for the first and second primitives and score.  Setters are
-  # used when the resource already exists so we just update the current value
-  # in the property hash and doing this marks it to be flushed.
-  def first=(should)
-    @property_hash[:first] = should
-  end
-
-  def second=(should)
-    @property_hash[:second] = should
-  end
-
-  def score=(should)
-    @property_hash[:score] = should
-  end
-
-  def symmetrical=(should)
-    @property_hash[:symmetrical] = should
   end
 
   # Flush is triggered on anything that has been detected as being
@@ -132,12 +88,12 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Crmsh) d
       updated = 'order '
       updated << "#{@property_hash[:name]} #{@property_hash[:score]}: "
       updated << "#{@property_hash[:first]} #{@property_hash[:second]} symmetrical=#{@property_hash[:symmetrical]}"
+      updated << " kind=#{@property_hash[:kind]}" if feature? :kindness
       debug("Loading update: #{updated}")
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        ENV['CIB_shadow'] = @resource[:cib]
-        crm('configure', 'load', 'update', tmpfile.path.to_s)
+        Puppet::Provider::Crmsh.run_command_in_cib([command(:crm), 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
       end
     end
   end

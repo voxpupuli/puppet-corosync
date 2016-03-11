@@ -107,9 +107,8 @@ Puppet::Type.type(:cs_location).provide(:crm, :parent => Puppet::Provider::Crmsh
   # as stdin for the crm command.
   def flush
     unless @property_hash.empty?
-      Puppet::Provider::Crmsh.min_crm_version('2.1.2', 'resource-discovery in location constraints') unless @property_hash[:resource_discovery].nil?
       updated = "location #{@property_hash[:name]} #{@property_hash[:primitive]}"
-      updated << " resource-discovery=#{@property_hash[:resource_discovery]}" unless @property_hash[:resource_discovery].nil?
+      updated << " resource-discovery=#{@property_hash[:resource_discovery]}" if feature?(:discovery)
       updated << " #{@property_hash[:score]}: #{@property_hash[:node_name]}"
       debug("Loading update: #{updated}")
       Tempfile.open('puppet_crm_update') do |tmpfile|

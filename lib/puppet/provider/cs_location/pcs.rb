@@ -8,6 +8,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
         aspects.'
 
   defaultfor :operatingsystem => [:fedora, :centos, :redhat]
+  has_feature :discovery
 
   commands :pcs => 'pcs'
 
