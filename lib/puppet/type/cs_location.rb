@@ -6,6 +6,8 @@ Puppet::Type.newtype(:cs_location) do
 
   ensurable
 
+  feature :discovery, 'Support for the resource_discovery parameter'
+
   newparam(:name) do
     desc "Identifier of the location entry.  This value needs to be unique
       across the entire Corosync/Pacemaker configuration since it doesn't have
@@ -33,7 +35,7 @@ Puppet::Type.newtype(:cs_location) do
       also be added to your manifest."
   end
 
-  newproperty(:resource_discovery) do
+  newproperty(:resource_discovery, :required_features => :discovery) do
     desc 'Whether Pacemaker should perform resource discovery on this
     node for the specified resource. It matches the resource-discovery
     location property in pacemaker'

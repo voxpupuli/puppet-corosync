@@ -50,22 +50,6 @@ class Puppet::Provider::Crmsh < Puppet::Provider::CibHelper
     end
   end
 
-  # Check that the version of crmsh is high enough to support a feature
-  def self.crm_version_check(version, comparison = -1)
-    return false unless command(:crm)
-    cmd = [command(:crm), '--version']
-    raw, status = run_command_in_cib(cmd, :failonfail => false)
-    return false if status > 0
-    crm_version = raw.split.first
-    Puppet::Util::Package.versioncmp(version, crm_version) != comparison
-  end
-
-  # Check that the version of crmsh is high enough to support a feature
-  def self.min_crm_version(min_version, feature)
-    versioncheck = crm_version_check(min_version)
-    raise Puppet::Error, "Feature #{feature} in not supported by your crmsh (required version is #{min_version})" unless versioncheck
-  end
-
   def exists?
     self.class.block_until_ready
     debug(@property_hash.inspect)
