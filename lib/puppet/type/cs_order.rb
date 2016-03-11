@@ -22,11 +22,21 @@ Puppet::Type.newtype(:cs_order) do
     desc "First Corosync primitive.  Just like colocation, our primitives for
       ording come in pairs but this time order matters so we need to define
       which primitive starts the desired state change chain."
+
+    munge do |value|
+      value = "#{value}:start" unless value.include?(':')
+      value
+    end
   end
 
   newproperty(:second) do
     desc "Second Corosync primitive.  Our second primitive will move to the
       desired state after the first primitive."
+
+    munge do |value|
+      value = "#{value}:start" unless value.include?(':')
+      value
+    end
   end
 
   newparam(:cib) do
