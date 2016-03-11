@@ -9,6 +9,8 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
 
   defaultfor :operatingsystem => [:fedora, :centos, :redhat]
 
+  has_feature :kindness
+
   # Path to the pcs binary for interacting with the cluster configuration.
   commands :pcs => 'pcs'
 

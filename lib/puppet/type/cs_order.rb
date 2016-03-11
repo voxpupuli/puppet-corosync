@@ -1,3 +1,5 @@
+require 'puppet/property/boolean'
+
 Puppet::Type.newtype(:cs_order) do
   @doc = "Type for manipulating Corosync/Pacemkaer ordering entries.  Order
     entries are another type of constraint that can be put on sets of
@@ -10,6 +12,8 @@ Puppet::Type.newtype(:cs_order) do
     * http://www.clusterlabs.org/doc/en-US/Pacemaker/1.1/html/Clusters_from_Scratch/_controlling_resource_start_stop_ordering.html"
 
   ensurable
+
+  feature :kindness, 'Support for the kind parameter'
 
   newparam(:name) do
     desc "Name identifier of this ordering entry.  This value needs to be unique
@@ -60,7 +64,7 @@ Puppet::Type.newtype(:cs_order) do
     defaultto 'INFINITY'
   end
 
-  newproperty(:kind) do
+  newproperty(:kind, :required_features => :kindness) do
     desc "How to enforce the constraint.
 
     Allowed values:
@@ -78,7 +82,7 @@ Puppet::Type.newtype(:cs_order) do
     defaultto 'Mandatory'
   end
 
-  newproperty(:symmetrical) do
+  newproperty(:symmetrical, :boolean => true, :parent => Puppet::Property::Boolean) do
     desc "Boolean specifying if the resources should stop in reverse order.
         Default value: true."
     defaultto true
@@ -108,8 +112,8 @@ Puppet::Type.newtype(:cs_order) do
       autos = []
       resource_type = @parameters[:resources_type].value
       if resource_type.to_sym == possible_resource_type.to_sym
-        autos << unmunge_cs_resourcename(@parameters[:first].should)
-        autos << unmunge_cs_resourcename(@parameters[:second].should)
+        autos << unmunge_cs_resourcename(should(:first))
+        autos << unmunge_cs_resourcename(should(:second))
       end
 
       autos
@@ -121,6 +125,7 @@ Puppet::Type.newtype(:cs_order) do
   end
 
   def unmunge_cs_resourcename(name)
+    return if name.nil?
     name = name.split(':')[0]
     name = name[3..-1] if name.start_with? 'ms_'
 

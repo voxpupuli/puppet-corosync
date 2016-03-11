@@ -84,53 +84,53 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
 
   it 'should create a simple order constraint' do
     pp = <<-EOS
-      cs_order { '1_then_2':
+      cs_order { 'first_then_two':
         first  => 'first_vip',
-        first  => 'second_vip',
+        second  => 'second_vip',
       }
     EOS
     apply_manifest(pp, :debug => true, :catch_failures => true)
     apply_manifest(pp, :debug => true, :catch_changes => true)
-    shell('cibadmin --query | grep 1_then_2') do |r|
+    shell('cibadmin --query | grep first_then_two') do |r|
       expect(r.stdout).to match(/rsc_order/)
       expect(r.stdout).to match(/first="first_vip"/)
       expect(r.stdout).to match(/first-action="start"/)
-      expect(r.stdout).to match(/second="second_vip"/)
-      expect(r.stdout).to match(/second-action="start"/)
-      expect(r.stdout).to match(/kind="Mandatory"/)
+      expect(r.stdout).to match(/then="second_vip"/)
+      expect(r.stdout).to match(/then-action="start"/)
+      expect(r.stdout).to match(/kind="Mandatory"/) if fact('osfamily') == 'RedHat'
     end
   end
 
   it 'should delete an order constraint' do
     pp = <<-EOS
-      cs_order { '1_then_2':
+      cs_order { 'first_then_two':
         ensure => absent,
       }
     EOS
     apply_manifest(pp, :catch_failures => true)
     apply_manifest(pp, :catch_changes => true)
     assert_raises(Beaker::Host::CommandFailure) do
-      shell('cibadmin --query | grep 1_then_2')
+      shell('cibadmin --query | grep first_then_two')
     end
   end
 
   it 'should create a more complex order constraint' do
     pp = <<-EOS
-      cs_order { '1_then_2_complex':
+      cs_order { 'one_then_two_complex':
         first  => 'first_vip:stop',
-        first  => 'second_vip:promote',
+        second => 'second_vip:promote',
         kind   => 'Optional',
       }
     EOS
     apply_manifest(pp, :debug => true, :catch_failures => true)
     apply_manifest(pp, :debug => true, :catch_changes => true)
-    shell('cibadmin --query | grep 1_then_2') do |r|
+    shell('cibadmin --query | grep one_then_two_complex') do |r|
       expect(r.stdout).to match(/rsc_order/)
       expect(r.stdout).to match(/first="first_vip"/)
       expect(r.stdout).to match(/first-action="stop"/)
-      expect(r.stdout).to match(/second="second_vip"/)
-      expect(r.stdout).to match(/second-action="promote"/)
-      expect(r.stdout).to match(/kind="Optional"/)
+      expect(r.stdout).to match(/then="second_vip"/)
+      expect(r.stdout).to match(/then-action="promote"/)
+      expect(r.stdout).to match(/kind="Optional"/) if fact('osfamily') == 'RedHat'
     end
   end
 end
