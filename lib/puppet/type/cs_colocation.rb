@@ -100,12 +100,10 @@ Puppet::Type.newtype(:cs_colocation) do
     result.flatten
   end
 
-  autorequire(:cs_clone) do
-    extract_primitives
-  end
-
-  autorequire(:cs_primitive) do
-    extract_primitives
+  [:cs_clone, :cs_primitive].each do |resource_type|
+    autorequire(resource_type) do
+      extract_primitives
+    end
   end
 
   def unmunge_cs_primitive(name)

@@ -88,37 +88,18 @@ Puppet::Type.newtype(:cs_order) do
     defaultto true
   end
 
-  valid_resource_types = [:cs_primitive, :cs_group, :cs_clone]
-  newparam(:resources_type) do
-    desc "String to specify which HA resource type is used for this order,
-      e.g. when you want to order groups (cs_group) instead of primitives.
-      Defaults to cs_primitive."
-
-    defaultto :cs_primitive
-    validate do |value|
-      valid_resource_types.include? value
-    end
-  end
-
   autorequire(:service) do
     ['corosync']
   end
 
-  valid_resource_types.each { |possible_resource_type|
-    # We're generating autorequire blocks for all possible cs_ types because
-    # accessing the @parameters[:resources_type].value doesn't seem possible
-    # when the type is declared. Feel free to improve this.
-    autorequire(possible_resource_type) do
+  [:cs_clone, :cs_group, :cs_primitive].each do |resource_type|
+    autorequire(resource_type) do
       autos = []
-      resource_type = @parameters[:resources_type].value
-      if resource_type.to_sym == possible_resource_type.to_sym
-        autos << unmunge_cs_resourcename(should(:first))
-        autos << unmunge_cs_resourcename(should(:second))
-      end
-
+      autos << unmunge_cs_resourcename(should(:first))
+      autos << unmunge_cs_resourcename(should(:second))
       autos
     end
-  }
+  end
 
   autorequire(:cs_shadow) do
     [@parameters[:cib]]
