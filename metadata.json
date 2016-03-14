@@ -7,6 +7,14 @@
   "source": "https://github.com/voxpupuli/puppet-corosync",
   "project_page": "https://github.com/voxpupuli/puppet-corosync",
   "issues_url": "https://github.com/voxpupuli/puppet-corosync/issues",
+  "operatingsystem_support": [
+    { "operatingsystem":"RedHat",
+      "operatingsystemrelease":[ "7" ] },
+    { "operatingsystem":"CentOS",
+      "operatingsystemrelease":[ "7" ] },
+    { "operatingsystem": "Ubuntu",
+      "operatingsystemrelease": ["14.04"] }
+  ],
   "dependencies": [
     {"name":"puppetlabs/stdlib","version_requirement":"4.x"}
   ]
