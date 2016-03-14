@@ -101,7 +101,7 @@ Puppet::Type.newtype(:cs_order) do
   end
 
   autorequire(:service) do
-    ['corosync']
+    %w(corosync pacemaker)
   end
 
   valid_resource_types.each { |possible_resource_type|

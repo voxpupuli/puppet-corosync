@@ -37,16 +37,6 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         set_votequorum    => true,
         quorum_members    => ['127.0.0.1'],
       }
-      corosync::service { 'pacemaker':
-        version => '1',
-      }
-      unless $::corosync::params::manage_pacemaker_service {
-        service { 'pacemaker':
-          ensure    => running,
-          subscribe => Service['corosync'],
-          require   => Corosync::Service['pacemaker'],
-        }
-      }
     EOS
 
     apply_manifest(pp, :catch_failures => true)
