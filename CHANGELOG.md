@@ -33,6 +33,7 @@
 - cs_primitive operations parameter with a role now need to define the role as
   a property, and if multiple operations have the same role you have to use an
   array (#236)
+- cs\_order: the resources\_type parameter has been removed (#246)
 
 ##2015-10-14 - Release 0.8.0
 ###Summary
