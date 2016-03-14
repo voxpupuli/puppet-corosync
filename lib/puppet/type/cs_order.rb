@@ -89,7 +89,7 @@ Puppet::Type.newtype(:cs_order) do
   end
 
   autorequire(:service) do
-    ['corosync']
+    %w(corosync pacemaker)
   end
 
   [:cs_clone, :cs_group, :cs_primitive].each do |resource_type|

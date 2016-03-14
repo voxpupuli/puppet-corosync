@@ -35,26 +35,6 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         set_votequorum    => true,
         quorum_members    => ['127.0.0.1'],
       }
-      corosync::service { 'pacemaker':
-        version => '1',
-      }
-      if $::osfamily == 'RedHat' {
-        exec { 'stop_pacemaker':
-          command     => 'service pacemaker stop',
-          path        => ['/bin','/sbin','/usr/sbin/'],
-          refreshonly => true,
-          notify      => Service['corosync'],
-          subscribe   => File['/etc/corosync/corosync.conf'],
-        }
-      }
-      unless $::corosync::params::manage_pacemaker_service {
-        service { 'pacemaker':
-          ensure    => running,
-          subscribe => Service['corosync'],
-          require   => Corosync::Service['pacemaker'],
-          before    => Cs_property['stonith-enabled'],
-        }
-      }
       cs_primitive { 'pgsql':
         primitive_class => 'ocf',
         primitive_type => 'pgsql',

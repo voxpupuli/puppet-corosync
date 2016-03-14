@@ -47,7 +47,7 @@ Puppet::Type.newtype(:cs_group) do
   end
 
   autorequire(:service) do
-    ['corosync']
+    %w(corosync pacemaker)
   end
 
   autorequire(:cs_primitive) do

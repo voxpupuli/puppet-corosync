@@ -80,7 +80,7 @@ Puppet::Type.newtype(:cs_colocation) do
   end
 
   autorequire(:service) do
-    ['corosync']
+    %w(corosync pacemaker)
   end
 
   def extract_primitives

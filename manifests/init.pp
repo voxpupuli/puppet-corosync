@@ -129,7 +129,9 @@
 # [*manage_pacemaker_service*]
 #   Whether the module should try to manage the pacemaker service in
 #   addition to the corosync service.
-#   Defaults to false, except on Ubuntu 14.04+ where it defaults to true.
+#   Defaults to true on RedHat based operating systems version 7 or greater.
+#   Defaults to true on Ubuntu version 14.04 or greater.
+#   Defaults to false on all other operating systems.
 #
 # [*manage_pcsd_service*]
 #   Whether the module should try to manage the pcsd service in addition to the

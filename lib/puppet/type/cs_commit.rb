@@ -20,7 +20,7 @@ Puppet::Type.newtype(:cs_commit) do
   end
 
   autorequire(:service) do
-    ['corosync']
+    %w(corosync pacemaker)
   end
 
   autorequire(:cs_shadow) do
