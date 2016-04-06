@@ -309,7 +309,7 @@ class corosync(
 
       if $_package_corosync == true {
         package { 'corosync':
-          ensure => $_version_corosync,
+          ensure          => $_version_corosync,
           install_options => $_packageopts_corosync,
         }
       }
