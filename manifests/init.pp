@@ -87,6 +87,10 @@
 #   Define what version of corosync should be installed.
 #   Defaults to present
 #
+# [*packageopts_corosync*]
+#   Additional install-options for package-resource.
+#   Defaults to undef
+#
 # [*package_pacemaker*]
 #   Define if package pacemaker should be installed.
 #   Defaults to true
@@ -94,6 +98,10 @@
 # [*version_pacemaker*]
 #   Define what version of pacemaker should be installed.
 #   Defaults to present
+#
+# [*packageopts_pacemaker*]
+#   Additional install-options for package-resource.
+#   Defaults to undef
 #
 # [*package_pcs*]
 #   Define if package pcs should be installed.
@@ -205,8 +213,10 @@ class corosync(
   $packages                            = undef,
   $package_corosync                    = undef,
   $version_corosync                    = undef,
+  $packageopts_corosync                = undef,
   $package_pacemaker                   = undef,
   $version_pacemaker                   = undef,
+  $packageopts_pacemaker               = undef,
   $package_pcs                         = undef,
   $version_pcs                         = undef,
   $set_votequorum                      = $::corosync::params::set_votequorum,
@@ -244,6 +254,9 @@ class corosync(
     if $package_corosync {
       fail('$corosync::package_corosync and $corosync::packages must not be mixed!')
     }
+    if $packageopts_corosync {
+      fail('$corosync::packageopts_corosync and $corosync::packages must not be mixed!')
+    }
     if $package_pacemaker {
       fail('$corosync::package_pacemaker and $corosync::packages must not be mixed!')
     }
@@ -253,12 +266,21 @@ class corosync(
     if $version_pacemaker {
       fail('$corosync::version_pacemaker and $corosync::packages must not be mixed!')
     }
+    if $packageopts_pacemaker {
+      fail('$corosync::packageopts_pacemaker and $corosync::packages must not be mixed!')
+    }
   } else {
       # Handle defaults for new-style package parameters here to allow co-existence with $packages.
       if $package_corosync == undef {
         $_package_corosync = true
       } else {
         $_package_corosync = $package_corosync
+      }
+
+      if $packageopts_corosync == undef {
+        $_packageopts_corosync = undef
+      } else {
+        $_packageopts_corosync = $packageopts_corosync
       }
 
       if $package_pacemaker == undef {
@@ -279,15 +301,23 @@ class corosync(
         $_version_pacemaker = $version_pacemaker
       }
 
+      if $packageopts_pacemaker == undef {
+        $_packageopts_pacemaker = undef
+      } else {
+        $_packageopts_pacemaker = $packageopts_pacemaker
+      }
+
       if $_package_corosync == true {
         package { 'corosync':
-          ensure => $_version_corosync,
+          ensure          => $_version_corosync,
+          install_options => $_packageopts_corosync,
         }
       }
 
       if $_package_pacemaker == true {
         package { 'pacemaker':
-          ensure => $_version_pacemaker,
+          ensure          => $_version_pacemaker,
+          install_options => $_packageopts_pacemaker,
         }
       }
     }
