@@ -43,39 +43,84 @@ describe 'corosync' do
       end
     end
 
-    context 'when set_quorum is true and unicast is used' do
+    context 'when unicast is used' do
       before :each do
         params.merge!(
-          :set_votequorum => true,
-          :quorum_members => ['node1.test.org', 'node2.test.org'],
           :multicast_address => 'UNSET',
           :unicast_addresses => ['192.168.1.1', '192.168.1.2']
         )
       end
 
-      it 'configures votequorum' do
-        should contain_file('/etc/corosync/corosync.conf').with_content(
-          /nodelist/
-        )
-        should contain_file('/etc/corosync/corosync.conf').with_content(
-          /ring0_addr\: node1\.test\.org\n\s*nodeid: 1/
-        )
-        should contain_file('/etc/corosync/corosync.conf').with_content(
-          /ring0_addr\: node2\.test\.org\n\s*nodeid: 2/
-        )
+      context 'when set_quorum is true' do
+        before :each do
+          params.merge!(
+            :set_votequorum => true,
+            :quorum_members => ['node1.test.org', 'node2.test.org'],
+          )
+        end
+
+        it 'configures votequorum' do
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            /nodelist/
+          )
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            /ring0_addr\: node1\.test\.org\n\s*nodeid: 1/
+          )
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            /ring0_addr\: node2\.test\.org\n\s*nodeid: 2/
+          )
+        end
+
+        it 'supports persistent node IDs' do
+          params[:quorum_members_ids] = [3, 11]
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            /nodelist/
+          )
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            /ring0_addr\: node1\.test\.org\n\s*nodeid: 3/
+          )
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            /ring0_addr\: node2\.test\.org\n\s*nodeid: 11/
+          )
+        end
       end
 
-      it 'supports persistent node IDs' do
-        params[:quorum_members_ids] = [3, 11]
-        should contain_file('/etc/corosync/corosync.conf').with_content(
-          /nodelist/
-        )
-        should contain_file('/etc/corosync/corosync.conf').with_content(
-          /ring0_addr\: node1\.test\.org\n\s*nodeid: 3/
-        )
-        should contain_file('/etc/corosync/corosync.conf').with_content(
-          /ring0_addr\: node2\.test\.org\n\s*nodeid: 11/
-        )
+      context 'with one ring' do
+        before :each do
+          params.merge!(
+            :bind_address      => '10.0.0.1',
+            :unicast_addresses => ['10.0.0.1', '10.0.0.2'],
+          )
+        end
+
+        it 'configures the ring properly' do
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            /interface.*memberaddr: 10\.0\.0\.1.*memberaddr: 10\.0\.0\.2.*ringnumber:\s+0.*bindnetaddr: 10\.0\.0\.1/m
+          )
+        end
+      end
+
+      context 'with multiple rings ' do
+        before :each do
+          params.merge!(
+            :bind_address      => ['10.0.0.1', '10.0.1.1'],
+            :unicast_addresses => [
+              [
+                '10.0.0.1',
+                '10.0.1.1'
+              ], [
+                '10.0.0.2',
+                '10.0.1.2'
+              ],
+            ],
+          )
+        end
+
+        it 'configures the rings properly' do
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            /interface.*memberaddr: 10\.0\.0\.1.*memberaddr: 10\.0\.0\.2.*ringnumber:\s+0.*bindnetaddr: 10\.0\.0\.1.*interface.*memberaddr: 10\.0\.1\.1.*memberaddr: 10\.0\.1\.2.*ringnumber:\s+1.*bindnetaddr: 10\.0\.1\.1/m
+          )
+        end
       end
     end
 
