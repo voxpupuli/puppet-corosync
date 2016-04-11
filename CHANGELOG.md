@@ -20,6 +20,7 @@
 - pcs provider: cs_colocation: Add support for colocation sets (#190)
 - add support for the pcsd service (#130)
 - crm provider: Preserve resource order in cs_group (#133)
+- corosync: support for multiple rings in unicast mode (#251)
 - Bugfixes, improved tests, improved documentation
 
 

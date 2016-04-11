@@ -247,6 +247,31 @@ cs_rsc_defaults { 'resource-stickiness' :
 }
 ```
 
+Multiple rings
+--------------
+
+In unicast mode, you can have multiple rings by specifying unicast_address and
+bind_address as arrays:
+
+```puppet
+class { 'corosync':
+  enable_secauth    => true,
+  authkey           => '/var/lib/puppet/ssl/certs/ca.pem',
+  bind_address      => ['10.0.0.1', '10.0.1.1'],
+  unicast_addresses => [
+      [ '10.0.0.1',
+        '10.0.1.1'
+      ], [
+        '10.0.0.2',
+        '10.0.1.2'
+      ],
+  ],
+}
+```
+
+The unicast_addresses is an array of arrays. One sub array matches one host
+IP addresses. In this example host2 has IP addresses 10.0.0.2 and 10.0.1.2.
+
 Shadow CIB
 ----------
 

@@ -25,12 +25,12 @@
 #
 # [*bind_address*]
 #   The ip address we are going to bind the corosync daemon too.
-#   Can be specified as an array to have multiple rings (multicast only).
+#   Can be specified as an array to have multiple rings.
 #
 # [*port*]
 #   The udp port that corosync will use to do its multicast communication.  Be
 #   aware that corosync used this defined port plus minus one.
-#   Can be specified as an array to have multiple rings (multicast only).
+#   Can be specified as an array to have multiple rings.
 #
 # [*multicast_address*]
 #   An IP address that has been reserved for multicast traffic.  This is the
@@ -43,6 +43,8 @@
 #   use if you are able to use multicast on your network and instead opt for
 #   the udpu transport.  You need a relatively recent version of Corosync to
 #   make this possible.
+#   You can also have an array of arrays to have multiple rings. In that case,
+#   each subarray matches a host IP addresses.
 #
 # [*force_online*]
 #   True/false parameter specifying whether to force nodes that have been put
@@ -77,7 +79,7 @@
 #   Mode of redundant ring. May be none, active, or passive.
 #
 # [*ttl*]
-#   Time To Live (multicast only).
+#   Time To Live.
 #
 # [*package_corosync*]
 #   Define if package corosync should be installed.
