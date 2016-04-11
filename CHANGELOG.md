@@ -1,5 +1,5 @@
-##Next
-###
+##2016-04-11 - Release 1.0.0-beta
+###Summary
 - Ubuntu 14.04 support (#178)
 - pcs provider: improved support for cs\_shadow, cs\_commit(#197 #196 #209)
 - cs\_property now takes an optional `replace` parameter that do not update
