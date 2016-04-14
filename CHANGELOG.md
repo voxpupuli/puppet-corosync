@@ -1,4 +1,4 @@
-##2016-04-11 - Release 1.0.0-beta
+##2016-04-14 - Release 1.0.0-beta1
 ###Summary
 - Ubuntu 14.04 support (#178)
 - pcs provider: improved support for cs\_shadow, cs\_commit(#197 #196 #209)
