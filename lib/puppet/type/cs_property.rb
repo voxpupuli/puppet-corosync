@@ -38,7 +38,7 @@ Puppet::Type.newtype(:cs_property) do
       also be added to your manifest."
   end
 
-  newparam(:replace, :boolean => true, :parent => Puppet::Parameter::Boolean) do
+  newparam(:replace, boolean: true, parent: Puppet::Parameter::Boolean) do
     desc "Whether to replace a property that already exists on the cluster
       whose value doesn't match what the `value` attribute specifies.  Setting
       this to false allows cs_property resources to initialize properties without

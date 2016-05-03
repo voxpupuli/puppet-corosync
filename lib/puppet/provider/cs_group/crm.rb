@@ -1,11 +1,11 @@
 require 'pathname'
 require Pathname.new(__FILE__).dirname.dirname.expand_path + 'crmsh'
 
-Puppet::Type.type(:cs_group).provide(:crm, :parent => Puppet::Provider::Crmsh) do
+Puppet::Type.type(:cs_group).provide(:crm, parent: Puppet::Provider::Crmsh) do
   desc 'Provider to add, delete, manipulate primitive groups.'
 
   # Path to the crm binary for interacting with the cluster configuration.
-  commands :crm => '/usr/sbin/crm'
+  commands crm: '/usr/sbin/crm'
 
   def self.instances
     block_until_ready
@@ -27,7 +27,7 @@ Puppet::Type.type(:cs_group).provide(:crm, :parent => Puppet::Provider::Crmsh) d
 
     REXML::XPath.each(doc, '//group') do |e|
       items = e.attributes
-      group = { :name => items['id'].to_sym }
+      group = { name: items['id'].to_sym }
 
       primitives = []
 
@@ -38,10 +38,10 @@ Puppet::Type.type(:cs_group).provide(:crm, :parent => Puppet::Provider::Crmsh) d
       end
 
       group_instance = {
-        :name       => group[:name],
-        :ensure     => :present,
-        :primitives => primitives,
-        :provider   => name
+        name:       group[:name],
+        ensure:     :present,
+        primitives: primitives,
+        provider:   name
       }
       instances << new(group_instance)
     end
@@ -52,9 +52,9 @@ Puppet::Type.type(:cs_group).provide(:crm, :parent => Puppet::Provider::Crmsh) d
   # of actually doing the work.
   def create
     @property_hash = {
-      :name       => @resource[:name],
-      :ensure     => :present,
-      :primitives => @resource[:primitives]
+      name:       @resource[:name],
+      ensure:     :present,
+      primitives: @resource[:primitives]
     }
     @property_hash[:cib] = @resource[:cib] unless @resource[:cib].nil?
   end

@@ -2,8 +2,8 @@ require 'spec_helper'
 
 describe 'corosync' do
   let :params do
-    { :set_votequorum => false,
-      :multicast_address => '239.1.1.2' }
+    { set_votequorum: false,
+      multicast_address: '239.1.1.2' }
   end
 
   shared_examples_for 'corosync' do
@@ -12,8 +12,8 @@ describe 'corosync' do
     context 'when set_quorum is true and quorum_members are set' do
       before :each do
         params.merge!(
-          :set_votequorum => true,
-          :quorum_members => ['node1.test.org', 'node2.test.org']
+          set_votequorum: true,
+          quorum_members: ['node1.test.org', 'node2.test.org']
         )
       end
 
@@ -46,16 +46,16 @@ describe 'corosync' do
     context 'when unicast is used' do
       before :each do
         params.merge!(
-          :multicast_address => 'UNSET',
-          :unicast_addresses => ['192.168.1.1', '192.168.1.2']
+          multicast_address: 'UNSET',
+          unicast_addresses: ['192.168.1.1', '192.168.1.2']
         )
       end
 
       context 'when set_quorum is true' do
         before :each do
           params.merge!(
-            :set_votequorum => true,
-            :quorum_members => ['node1.test.org', 'node2.test.org'],
+            set_votequorum: true,
+            quorum_members: ['node1.test.org', 'node2.test.org'],
           )
         end
 
@@ -88,8 +88,8 @@ describe 'corosync' do
       context 'with one ring' do
         before :each do
           params.merge!(
-            :bind_address      => '10.0.0.1',
-            :unicast_addresses => ['10.0.0.1', '10.0.0.2'],
+            bind_address:      '10.0.0.1',
+            unicast_addresses: ['10.0.0.1', '10.0.0.2'],
           )
         end
 
@@ -103,8 +103,8 @@ describe 'corosync' do
       context 'with multiple rings ' do
         before :each do
           params.merge!(
-            :bind_address      => ['10.0.0.1', '10.0.1.1'],
-            :unicast_addresses => [
+            bind_address:      ['10.0.0.1', '10.0.1.1'],
+            unicast_addresses: [
               [
                 '10.0.0.1',
                 '10.0.1.1'
@@ -134,7 +134,7 @@ describe 'corosync' do
     context 'when cluster_name is set' do
       before :each do
         params.merge!(
-          :cluster_name => 'hacell'
+          cluster_name: 'hacell'
         )
       end
 
@@ -148,7 +148,7 @@ describe 'corosync' do
     context 'when log_file is set' do
       before :each do
         params.merge!(
-          :log_file => true
+          log_file: true
         )
       end
 
@@ -174,7 +174,7 @@ describe 'corosync' do
             package_param => true, # value does not really matter here: these
             # two params must not both be defined
             # at the same time.
-            :packages => %w(corosync pacemaker)
+            packages: %w(corosync pacemaker)
           )
         end
 
@@ -195,7 +195,7 @@ describe 'corosync' do
 
         it "does install #{package}" do
           should contain_package(package).with(
-            :ensure => 'present'
+            ensure: 'present'
           )
         end
       end
@@ -210,7 +210,7 @@ describe 'corosync' do
 
         it "does install #{package} with version 1.1.1" do
           should contain_package(package).with(
-            :ensure => '1.1.1'
+            ensure: '1.1.1'
           )
         end
       end
@@ -229,8 +229,8 @@ describe 'corosync' do
     context 'when set_quorum is true and quorum_members are not set' do
       before :each do
         params.merge!(
-          :set_votequorum => true,
-          :quorum_members => false
+          set_votequorum: true,
+          quorum_members: false
         )
       end
 
@@ -256,10 +256,10 @@ describe 'corosync' do
 
   context 'on Debian platforms' do
     let :facts do
-      { :osfamily        => 'Debian',
-        :operatingsystem => 'Debian',
-        :processorcount  => '3',
-        :ipaddress       => '127.0.0.1' }
+      { osfamily:        'Debian',
+        operatingsystem: 'Debian',
+        processorcount:  '3',
+        ipaddress:       '127.0.0.1' }
     end
 
     it_configures 'corosync'
@@ -267,14 +267,14 @@ describe 'corosync' do
 
   context 'on RedHat platforms' do
     let :facts do
-      { :osfamily       => 'RedHat',
-        :processorcount => '3',
-        :ipaddress      => '127.0.0.1' }
+      { osfamily:       'RedHat',
+        processorcount: '3',
+        ipaddress:      '127.0.0.1' }
     end
 
     context 'major version is 6' do
       before do
-        facts.merge!(:operatingsystemrelease => '6.12')
+        facts.merge!(operatingsystemrelease: '6.12')
       end
 
       it_configures 'corosync'
@@ -286,14 +286,14 @@ describe 'corosync' do
 
     context 'major version is 7' do
       before do
-        facts.merge!(:operatingsystemrelease => '7.3')
+        facts.merge!(operatingsystemrelease: '7.3')
       end
 
       it_configures 'corosync'
 
       it 'does manage the pacemaker service' do
         should contain_service('pacemaker').with(
-          :ensure => 'running'
+          ensure: 'running'
         )
       end
     end

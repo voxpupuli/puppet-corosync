@@ -1,14 +1,14 @@
 require 'pathname' # JJM WORK_AROUND #14073
 require Pathname.new(__FILE__).dirname.dirname.expand_path + 'crmsh'
 
-Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Crmsh) do
+Puppet::Type.type(:cs_property).provide(:crm, parent: Puppet::Provider::Crmsh) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived. This provider will check the state
         of Corosync cluster configuration properties.'
 
   # Path to the crm binary for interacting with the cluster configuration.
-  commands :crm           => 'crm'
-  commands :cibadmin      => 'cibadmin'
+  commands crm:           'crm'
+  commands cibadmin:      'cibadmin'
 
   def self.instances
     block_until_ready
@@ -32,13 +32,13 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Crmsh
     unless cluster_property_set.nil?
       cluster_property_set.each_element do |e|
         items = e.attributes
-        property = { :name => items['name'], :value => items['value'] }
+        property = { name: items['name'], value: items['value'] }
 
         property_instance = {
-          :name       => property[:name],
-          :ensure     => :present,
-          :value      => property[:value],
-          :provider   => name
+          name:       property[:name],
+          ensure:     :present,
+          value:      property[:value],
+          provider:   name
         }
         instances << new(property_instance)
       end
@@ -50,9 +50,9 @@ Puppet::Type.type(:cs_property).provide(:crm, :parent => Puppet::Provider::Crmsh
   # of actually doing the work.
   def create
     @property_hash = {
-      :name   => @resource[:name],
-      :ensure => :present,
-      :value  => @resource[:value]
+      name:   @resource[:name],
+      ensure: :present,
+      value:  @resource[:value]
     }
   end
 

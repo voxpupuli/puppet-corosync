@@ -81,7 +81,7 @@ Puppet::Type.newtype(:cs_primitive) do
     # rubocop:enable Style/EmptyLiteral
   end
 
-  newproperty(:operations, :array_matching => :all) do
+  newproperty(:operations, array_matching: :all) do
     desc "A hash of operations for the primitive.  Operations defined in a
       primitive are little more predictable as they are commonly things like
       monitor or start and their values are in seconds.  Since each resource

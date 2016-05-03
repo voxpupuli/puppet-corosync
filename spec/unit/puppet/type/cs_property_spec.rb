@@ -9,7 +9,7 @@ describe Puppet::Type.type(:cs_property) do
     it 'should be able to create an instance' do
       #      Puppet::Type::Cs_clone.expects(:defaultprovider).returns(provider_class)
 
-      expect(subject.new(:name => 'maintenance', :value => 'false')).to_not be_nil
+      expect(subject.new(name: 'maintenance', value: 'false')).to_not be_nil
     end
 
     [:replace].each do |param|

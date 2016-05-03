@@ -1,15 +1,15 @@
 require 'pathname'
 require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
 
-Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pacemaker) do
+Puppet::Type.type(:cs_colocation).provide(:pcs, parent: Puppet::Provider::Pacemaker) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived.  This provider will check the state
         of current primitive colocations on the system; add, delete, or adjust various
         aspects.'
 
-  defaultfor :operatingsystem => [:fedora, :centos, :redhat]
+  defaultfor operatingsystem: [:fedora, :centos, :redhat]
 
-  commands :pcs => 'pcs'
+  commands pcs: 'pcs'
 
   def self.instances
     block_until_ready
@@ -44,12 +44,12 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
             resource_sets << resource_set
           end
           colocation_instance = {
-            :name       => items['id'],
-            :ensure     => :present,
-            :primitives => resource_sets,
-            :score      => items['score'],
-            :provider   => name,
-            :new        => false
+            name:       items['id'],
+            ensure:     :present,
+            primitives: resource_sets,
+            score:      items['score'],
+            provider:   name,
+            new:        false
           }
         else
           rsc = if items['rsc-role'] && items['rsc-role'] != 'Started'
@@ -65,13 +65,13 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
                      end
 
           colocation_instance = {
-            :name       => items['id'],
-            :ensure     => :present,
+            name:       items['id'],
+            ensure:     :present,
             # Put primitives in chronological order, first 'with-rsc', then 'rsc'.
-            :primitives => [with_rsc, rsc],
-            :score      => items['score'],
-            :provider   => name,
-            :new        => false
+            primitives: [with_rsc, rsc],
+            score:      items['score'],
+            provider:   name,
+            new:        false
           }
         end
         instances << new(colocation_instance)
@@ -84,11 +84,11 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, :parent => Puppet::Provider::Pac
   # of actually doing the work.
   def create
     @property_hash = {
-      :name       => @resource[:name],
-      :ensure     => :present,
-      :primitives => @resource[:primitives],
-      :score      => @resource[:score],
-      :new        => true
+      name:       @resource[:name],
+      ensure:     :present,
+      primitives: @resource[:primitives],
+      score:      @resource[:score],
+      new:        true
     }
   end
 

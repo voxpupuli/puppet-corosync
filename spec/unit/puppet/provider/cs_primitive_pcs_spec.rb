@@ -36,7 +36,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with(%w(pcs cluster cib)).at_least_once.returns([test_cib, 0])
       else
-        Puppet::Util::Execution.expects(:execute).with(%w(pcs cluster cib), :failonfail => true, :combine => true).at_least_once.returns(
+        Puppet::Util::Execution.expects(:execute).with(%w(pcs cluster cib), failonfail: true, combine: true).at_least_once.returns(
           Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
         )
       end
@@ -127,7 +127,7 @@ h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat"
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with(%w(pcs cluster cib)).at_least_once.returns([test_cib, 0])
       else
-        Puppet::Util::Execution.expects(:execute).with(%w(pcs cluster cib), :failonfail => true, :combine => true).at_least_once.returns(
+        Puppet::Util::Execution.expects(:execute).with(%w(pcs cluster cib), failonfail: true, combine: true).at_least_once.returns(
           Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
         )
       end
@@ -142,12 +142,12 @@ h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat"
 
     let :resource do
       Puppet::Type.type(:cs_primitive).new(
-        :name => 'testResource',
-        :provider => :pcs,
-        :primitive_class => 'ocf',
-        :provided_by => 'heartbeat',
-        :operations => { 'monitor' => { 'interval' => '60s' } },
-        :primitive_type => 'IPaddr2')
+        name: 'testResource',
+        provider: :pcs,
+        primitive_class: 'ocf',
+        provided_by: 'heartbeat',
+        operations: { 'monitor' => { 'interval' => '60s' } },
+        primitive_type: 'IPaddr2')
     end
 
     let :instance do

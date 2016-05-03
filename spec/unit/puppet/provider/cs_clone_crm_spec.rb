@@ -69,10 +69,10 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
 
     let :resource do
       Puppet::Type.type(:cs_clone).new(
-        :name      => 'p_keystone-clone',
-        :provider  => :crm,
-        :primitive => 'p_keystone',
-        :ensure    => :present)
+        name:      'p_keystone-clone',
+        provider:  :crm,
+        primitive: 'p_keystone',
+        ensure:    :present)
     end
 
     let :instance do

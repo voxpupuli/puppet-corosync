@@ -1,7 +1,7 @@
 require 'pathname'
 require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
 
-Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pacemaker) do
+Puppet::Type.type(:cs_primitive).provide(:pcs, parent: Puppet::Provider::Pacemaker) do
   desc 'Specific provider for a rather specific type since I currently have no
         plan to abstract corosync/pacemaker vs. keepalived.  Primitives in
         Corosync are the thing we desire to monitor; websites, ipaddresses,
@@ -10,36 +10,36 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
         operations and parameters.  A hash is used instead of constucting a
         better model since these values can be almost anything.'
 
-  commands :pcs => 'pcs'
+  commands pcs: 'pcs'
 
   mk_resource_methods
 
-  defaultfor :operatingsystem => [:fedora, :centos, :redhat]
+  defaultfor operatingsystem: [:fedora, :centos, :redhat]
 
   # given an XML element (a <primitive> from cibadmin), produce a hash suitible
   # for creating a new provider instance.
   def self.element_to_hash(e)
     hash = {
-      :primitive_class          => e.attributes['class'],
-      :primitive_type           => e.attributes['type'],
-      :provided_by              => e.attributes['provider'],
-      :name                     => e.attributes['id'].to_sym,
-      :ensure                   => :present,
-      :provider                 => name,
-      :parameters               => nvpairs_to_hash(e.elements['instance_attributes']),
-      :operations               => [],
-      :utilization              => nvpairs_to_hash(e.elements['utilization']),
-      :metadata                 => nvpairs_to_hash(e.elements['meta_attributes']),
-      :ms_metadata              => {},
-      :promotable               => :false,
-      :existing_resource        => :true,
-      :existing_primitive_class => e.attributes['class'],
-      :existing_primitive_type  => e.attributes['type'],
-      :existing_promotable      => :false,
-      :existing_provided_by     => e.attributes['provider'],
-      :existing_metadata        => nvpairs_to_hash(e.elements['meta_attributes']),
-      :existing_ms_metadata     => {},
-      :existing_operations      => []
+      primitive_class:          e.attributes['class'],
+      primitive_type:           e.attributes['type'],
+      provided_by:              e.attributes['provider'],
+      name:                     e.attributes['id'].to_sym,
+      ensure:                   :present,
+      provider:                 name,
+      parameters:               nvpairs_to_hash(e.elements['instance_attributes']),
+      operations:               [],
+      utilization:              nvpairs_to_hash(e.elements['utilization']),
+      metadata:                 nvpairs_to_hash(e.elements['meta_attributes']),
+      ms_metadata:              {},
+      promotable:               :false,
+      existing_resource:        :true,
+      existing_primitive_class: e.attributes['class'],
+      existing_primitive_type:  e.attributes['type'],
+      existing_promotable:      :false,
+      existing_provided_by:     e.attributes['provider'],
+      existing_metadata:        nvpairs_to_hash(e.elements['meta_attributes']),
+      existing_ms_metadata:     {},
+      existing_operations:      []
     }
 
     operations = e.elements['operations']
@@ -96,13 +96,13 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, :parent => Puppet::Provider::Pace
   # updates or create a resource, so we flag the resources with that parameter
   def create
     @property_hash = {
-      :name              => @resource[:name],
-      :ensure            => :present,
-      :primitive_class   => @resource[:primitive_class],
-      :provided_by       => @resource[:provided_by],
-      :primitive_type    => @resource[:primitive_type],
-      :promotable        => @resource[:promotable],
-      :existing_resource => :false
+      name:              @resource[:name],
+      ensure:            :present,
+      primitive_class:   @resource[:primitive_class],
+      provided_by:       @resource[:provided_by],
+      primitive_type:    @resource[:primitive_type],
+      promotable:        @resource[:promotable],
+      existing_resource: :false
     }
     @property_hash[:parameters] = @resource[:parameters] unless @resource[:parameters].nil?
     @property_hash[:operations] = @resource[:operations] unless @resource[:operations].nil?

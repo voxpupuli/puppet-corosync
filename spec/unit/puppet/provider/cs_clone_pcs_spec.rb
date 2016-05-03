@@ -28,7 +28,7 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with(%w(pcs cluster cib)).at_least_once.returns([test_cib, 0])
       else
-        Puppet::Util::Execution.expects(:execute).with(%w(pcs cluster cib), :failonfail => true, :combine => true).at_least_once.returns(
+        Puppet::Util::Execution.expects(:execute).with(%w(pcs cluster cib), failonfail: true, combine: true).at_least_once.returns(
           Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
         )
       end
@@ -59,10 +59,10 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
   context 'when flushing' do
     let :resource do
       Puppet::Type.type(:cs_clone).new(
-        :name      => 'p_keystone',
-        :provider  => :pcs,
-        :primitive => 'p_keystone',
-        :ensure    => :present)
+        name:      'p_keystone',
+        provider:  :pcs,
+        primitive: 'p_keystone',
+        ensure:    :present)
     end
 
     let :instance do

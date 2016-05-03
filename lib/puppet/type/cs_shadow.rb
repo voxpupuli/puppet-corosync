@@ -8,7 +8,7 @@ Puppet::Type.newtype(:cs_shadow) do
     isnamevar
   end
 
-  newparam(:autocommit, :boolean => true, :parent => Puppet::Parameter::Boolean) do
+  newparam(:autocommit, boolean: true, parent: Puppet::Parameter::Boolean) do
     desc "Whether to generate a cs_commit or not. Can be used to create shadow
       CIB without committing them."
     defaultto :true
@@ -36,7 +36,7 @@ Puppet::Type.newtype(:cs_shadow) do
 
   def generate
     return [] if self[:autocommit] != true
-    options = { :name => @title }
+    options = { name: @title }
     [Puppet::Type.type(:cs_commit).new(options)]
   end
 

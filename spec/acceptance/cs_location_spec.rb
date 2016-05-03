@@ -47,8 +47,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       }
     EOS
 
-    apply_manifest(pp, :catch_failures => true)
-    apply_manifest(pp, :catch_changes => true)
+    apply_manifest(pp, catch_failures: true)
+    apply_manifest(pp, catch_changes: true)
   end
 
   describe service('corosync') do
@@ -63,8 +63,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         score     => 'INFINITY',
       }
     EOS
-    apply_manifest(pp, :debug => true, :catch_failures => true)
-    apply_manifest(pp, :debug => true, :catch_changes => true)
+    apply_manifest(pp, debug: true, catch_failures: true)
+    apply_manifest(pp, debug: true, catch_changes: true)
     shell('cibadmin --query | grep duncan_vip_there') do |r|
       expect(r.stdout).to match(/rsc_location/)
     end
@@ -76,8 +76,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         ensure => absent,
       }
     EOS
-    apply_manifest(pp, :catch_failures => true)
-    apply_manifest(pp, :catch_changes => true)
+    apply_manifest(pp, catch_failures: true)
+    apply_manifest(pp, catch_changes: true)
     assert_raises(Beaker::Host::CommandFailure) do
       shell('cibadmin --query | grep duncan_vip_there')
     end
@@ -92,8 +92,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         score              => 'INFINITY',
       }
     EOS
-    apply_manifest(pp, :debug => true, :catch_failures => true)
-    apply_manifest(pp, :debug => true, :catch_changes => true)
+    apply_manifest(pp, debug: true, catch_failures: true)
+    apply_manifest(pp, debug: true, catch_changes: true)
     shell('cibadmin --query | grep duncan_vip_there') do |r|
       expect(r.stdout).to match(/rsc_location/)
       # Feature not supported in Ubuntu

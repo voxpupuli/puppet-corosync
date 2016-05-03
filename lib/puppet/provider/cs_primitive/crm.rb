@@ -1,7 +1,7 @@
 require 'pathname'
 require Pathname.new(__FILE__).dirname.dirname.expand_path + 'crmsh'
 
-Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crmsh) do
+Puppet::Type.type(:cs_primitive).provide(:crm, parent: Puppet::Provider::Crmsh) do
   desc 'Specific provider for a rather specific type since I currently have no
         plan to abstract corosync/pacemaker vs. keepalived.  Primitives in
         Corosync are the thing we desire to monitor; websites, ipaddresses,
@@ -11,24 +11,24 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
         better model since these values can be almost anything.'
 
   # Path to the crm binary for interacting with the cluster configuration.
-  commands :crm => 'crm'
+  commands crm: 'crm'
 
   # given an XML element (a <primitive> from cibadmin), produce a hash suitible
   # for creating a new provider instance.
   def self.element_to_hash(e)
     hash = {
-      :primitive_class  => e.attributes['class'],
-      :primitive_type   => e.attributes['type'],
-      :provided_by      => e.attributes['provider'],
-      :name             => e.attributes['id'].to_sym,
-      :ensure           => :present,
-      :provider         => name,
-      :parameters       => nvpairs_to_hash(e.elements['instance_attributes']),
-      :operations       => [],
-      :utilization      => nvpairs_to_hash(e.elements['utilization']),
-      :metadata         => nvpairs_to_hash(e.elements['meta_attributes']),
-      :ms_metadata      => {},
-      :promotable       => :false
+      primitive_class: e.attributes['class'],
+      primitive_type:  e.attributes['type'],
+      provided_by:     e.attributes['provider'],
+      name:            e.attributes['id'].to_sym,
+      ensure:          :present,
+      provider:        name,
+      parameters:      nvpairs_to_hash(e.elements['instance_attributes']),
+      operations:      [],
+      utilization:     nvpairs_to_hash(e.elements['utilization']),
+      metadata:        nvpairs_to_hash(e.elements['meta_attributes']),
+      ms_metadata:     {},
+      promotable:      :false
     }
 
     operations = e.elements['operations']
@@ -89,12 +89,12 @@ Puppet::Type.type(:cs_primitive).provide(:crm, :parent => Puppet::Provider::Crms
   # of actually doing the work.
   def create
     @property_hash = {
-      :name            => @resource[:name],
-      :ensure          => :present,
-      :primitive_class => @resource[:primitive_class],
-      :provided_by     => @resource[:provided_by],
-      :primitive_type  => @resource[:primitive_type],
-      :promotable      => @resource[:promotable]
+      name:            @resource[:name],
+      ensure:          :present,
+      primitive_class: @resource[:primitive_class],
+      provided_by:     @resource[:provided_by],
+      primitive_type:  @resource[:primitive_type],
+      promotable:      @resource[:promotable]
     }
     @property_hash[:parameters] = @resource[:parameters] unless @resource[:parameters].nil?
     @property_hash[:operations] = @resource[:operations] unless @resource[:operations].nil?

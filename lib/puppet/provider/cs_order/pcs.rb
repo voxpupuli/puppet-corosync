@@ -1,18 +1,18 @@
 require 'pathname'
 require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
 
-Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemaker) do
+Puppet::Type.type(:cs_order).provide(:pcs, parent: Puppet::Provider::Pacemaker) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived. This provider will check the state
         of current primitive start orders on the system; add, delete, or adjust various
         aspects.'
 
-  defaultfor :operatingsystem => [:fedora, :centos, :redhat]
+  defaultfor operatingsystem: [:fedora, :centos, :redhat]
 
   has_feature :kindness
 
   # Path to the pcs binary for interacting with the cluster configuration.
-  commands :pcs => 'pcs'
+  commands pcs: 'pcs'
 
   mk_resource_methods
 
@@ -60,15 +60,15 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
                       end
 
         order_instance = {
-          :name        => items['id'],
-          :ensure      => :present,
-          :first       => first,
-          :second      => second,
-          :score       => score,
-          :kind        => kind,
-          :symmetrical => symmetrical,
-          :provider    => name,
-          :new         => false
+          name:        items['id'],
+          ensure:      :present,
+          first:       first,
+          second:      second,
+          score:       score,
+          kind:        kind,
+          symmetrical: symmetrical,
+          provider:    name,
+          new:         false
         }
         instances << new(order_instance)
       end
@@ -80,14 +80,14 @@ Puppet::Type.type(:cs_order).provide(:pcs, :parent => Puppet::Provider::Pacemake
   # of actually doing the work.
   def create
     @property_hash = {
-      :name        => @resource[:name],
-      :ensure      => :present,
-      :first       => @resource[:first],
-      :second      => @resource[:second],
-      :score       => @resource[:score],
-      :kind        => @resource[:kind],
-      :symmetrical => @resource[:symmetrical],
-      :new         => true
+      name:        @resource[:name],
+      ensure:      :present,
+      first:       @resource[:first],
+      second:      @resource[:second],
+      score:       @resource[:score],
+      kind:        @resource[:kind],
+      symmetrical: @resource[:symmetrical],
+      new:         true
     }
   end
 
