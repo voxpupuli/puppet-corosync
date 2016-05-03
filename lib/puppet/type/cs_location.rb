@@ -35,7 +35,7 @@ Puppet::Type.newtype(:cs_location) do
       also be added to your manifest."
   end
 
-  newproperty(:resource_discovery, :required_features => :discovery) do
+  newproperty(:resource_discovery, required_features: :discovery) do
     desc 'Whether Pacemaker should perform resource discovery on this
     node for the specified resource. It matches the resource-discovery
     location property in pacemaker'

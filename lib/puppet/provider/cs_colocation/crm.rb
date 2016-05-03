@@ -1,7 +1,7 @@
 require 'pathname'
 require Pathname.new(__FILE__).dirname.dirname.expand_path + 'crmsh'
 
-Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crmsh) do
+Puppet::Type.type(:cs_colocation).provide(:crm, parent: Puppet::Provider::Crmsh) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived.  This provider will check the state
         of current primitive colocations on the system; add, delete, or adjust various
@@ -9,7 +9,7 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
 
   # Path to the crm binary for interacting with the cluster configuration.
   # Decided to just go with relative.
-  commands :crm => 'crm'
+  commands crm: 'crm'
 
   def self.instances
     block_until_ready
@@ -83,11 +83,11 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
       end
 
       colocation_instance = {
-        :name       => items['id'],
-        :ensure     => :present,
-        :primitives => primitives,
-        :score      => items['score'],
-        :provider   => name
+        name:       items['id'],
+        ensure:     :present,
+        primitives: primitives,
+        score:      items['score'],
+        provider:   name
       }
       instances << new(colocation_instance)
     end
@@ -98,11 +98,11 @@ Puppet::Type.type(:cs_colocation).provide(:crm, :parent => Puppet::Provider::Crm
   # of actually doing the work.
   def create
     @property_hash = {
-      :name       => @resource[:name],
-      :ensure     => :present,
-      :primitives => @resource[:primitives],
-      :score      => @resource[:score],
-      :cib        => @resource[:cib]
+      name:       @resource[:name],
+      ensure:     :present,
+      primitives: @resource[:primitives],
+      score:      @resource[:score],
+      cib:        @resource[:cib]
     }
   end
 

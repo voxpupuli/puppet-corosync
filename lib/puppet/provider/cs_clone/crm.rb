@@ -1,13 +1,13 @@
 require 'pathname'
 require Pathname.new(__FILE__).dirname.dirname.expand_path + 'crmsh'
 
-Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Crmsh) do
+Puppet::Type.type(:cs_clone).provide(:crm, parent: Puppet::Provider::Crmsh) do
   desc 'Provider to add, delete, manipulate primitive clones.'
 
   # Path to the crm binary for interacting with the cluster configuration.
   # Decided to just go with relative.
-  commands :crm => 'crm'
-  commands :crm_attribute => 'crm_attribute'
+  commands crm: 'crm'
+  commands crm_attribute: 'crm_attribute'
 
   def self.instances
     block_until_ready
@@ -32,16 +32,16 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Crmsh) d
       items = nvpairs_to_hash(e.elements['meta_attributes'])
 
       clone_instance = {
-        :name            => e.attributes['id'],
-        :ensure          => :present,
-        :primitive       => primitive_id,
-        :clone_max       => items['clone-max'],
-        :clone_node_max  => items['clone-node-max'],
-        :notify_clones   => items['notify'],
-        :globally_unique => items['globally-unique'],
-        :ordered         => items['ordered'],
-        :interleave      => items['interleave'],
-        :existing_resource => :true
+        name:              e.attributes['id'],
+        ensure:            :present,
+        primitive:         primitive_id,
+        clone_max:         items['clone-max'],
+        clone_node_max:    items['clone-node-max'],
+        notify_clones:     items['notify'],
+        globally_unique:   items['globally-unique'],
+        ordered:           items['ordered'],
+        interleave:        items['interleave'],
+        existing_resource: :true
       }
       instances << new(clone_instance)
     end
@@ -52,17 +52,17 @@ Puppet::Type.type(:cs_clone).provide(:crm, :parent => Puppet::Provider::Crmsh) d
   # of actually doing the work.
   def create
     @property_hash = {
-      :name       => @resource[:name],
-      :ensure     => :present,
-      :primitive       => @resource[:primitive],
-      :clone_max       => @resource[:clone_max],
-      :clone_node_max  => @resource[:clone_node_max],
-      :notify_clones   => @resource[:notify_clones],
-      :globally_unique => @resource[:globally_unique],
-      :ordered         => @resource[:ordered],
-      :interleave      => @resource[:interleave],
-      :cib             => @resource[:cib],
-      :existing_resource => :false
+      name:              @resource[:name],
+      ensure:            :present,
+      primitive:         @resource[:primitive],
+      clone_max:         @resource[:clone_max],
+      clone_node_max:    @resource[:clone_node_max],
+      notify_clones:     @resource[:notify_clones],
+      globally_unique:   @resource[:globally_unique],
+      ordered:           @resource[:ordered],
+      interleave:        @resource[:interleave],
+      cib:               @resource[:cib],
+      existing_resource: :false
     }
   end
 

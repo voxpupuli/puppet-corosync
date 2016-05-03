@@ -71,11 +71,11 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       }
     EOS
 
-    apply_manifest(pp, :debug => true, :trace => true, :catch_failures => true)
+    apply_manifest(pp, debug: true, trace: true, catch_failures: true)
     # Another run is needed to update the Puppet shadow CIB
-    apply_manifest(pp, :expect_changes => true)
+    apply_manifest(pp, expect_changes: true)
     # But the last one should not change anything
-    apply_manifest(pp, :catch_changes => true)
+    apply_manifest(pp, catch_changes: true)
   end
 
   describe service('corosync') do

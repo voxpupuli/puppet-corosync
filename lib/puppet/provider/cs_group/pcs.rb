@@ -1,13 +1,13 @@
 require 'pathname'
 require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
 
-Puppet::Type.type(:cs_group).provide(:pcs, :parent => Puppet::Provider::Pacemaker) do
+Puppet::Type.type(:cs_group).provide(:pcs, parent: Puppet::Provider::Pacemaker) do
   desc 'Provider to add, delete, manipulate primitive groups.'
 
-  defaultfor :operatingsystem => [:fedora, :centos, :redhat]
+  defaultfor operatingsystem: [:fedora, :centos, :redhat]
 
   # Path to the pcs binary for interacting with the cluster configuration.
-  commands :pcs => '/usr/sbin/pcs'
+  commands pcs: '/usr/sbin/pcs'
 
   def self.instances
     block_until_ready
@@ -20,7 +20,7 @@ Puppet::Type.type(:cs_group).provide(:pcs, :parent => Puppet::Provider::Pacemake
 
     REXML::XPath.each(doc, '//group') do |e|
       items = e.attributes
-      group = { :name => items['id'].to_sym }
+      group = { name: items['id'].to_sym }
 
       primitives = []
 
@@ -31,11 +31,11 @@ Puppet::Type.type(:cs_group).provide(:pcs, :parent => Puppet::Provider::Pacemake
       end
 
       group_instance = {
-        :name       => group[:name],
-        :ensure     => :present,
-        :primitives => primitives,
-        :provider   => name,
-        :new        => false
+        name:       group[:name],
+        ensure:     :present,
+        primitives: primitives,
+        provider:   name,
+        new:        false
       }
       instances << new(group_instance)
     end
@@ -46,10 +46,10 @@ Puppet::Type.type(:cs_group).provide(:pcs, :parent => Puppet::Provider::Pacemake
   # of actually doing the work.
   def create
     @property_hash = {
-      :name       => @resource[:name],
-      :ensure     => :present,
-      :primitives => @resource[:primitives],
-      :new        => true
+      name:       @resource[:name],
+      ensure:     :present,
+      primitives: @resource[:primitives],
+      new:        true
     }
     @property_hash[:cib] = @resource[:cib] unless @resource[:cib].nil?
   end

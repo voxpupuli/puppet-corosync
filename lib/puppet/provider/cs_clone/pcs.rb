@@ -1,12 +1,12 @@
 require 'pathname'
 require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
 
-Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemaker) do
+Puppet::Type.type(:cs_clone).provide(:pcs, parent: Puppet::Provider::Pacemaker) do
   desc 'Provider to add, delete, manipulate primitive clones.'
 
-  commands :pcs => 'pcs'
+  commands pcs: 'pcs'
 
-  defaultfor :operatingsystem => [:fedora, :centos, :redhat]
+  defaultfor operatingsystem: [:fedora, :centos, :redhat]
 
   def self.instances
     block_until_ready
@@ -22,16 +22,16 @@ Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemake
       items = nvpairs_to_hash(e.elements['meta_attributes'])
 
       clone_instance = {
-        :name              => e.attributes['id'],
-        :ensure            => :present,
-        :primitive         => primitive_id,
-        :clone_max         => items['clone-max'],
-        :clone_node_max    => items['clone-node-max'],
-        :notify_clones     => items['notify'],
-        :globally_unique   => items['globally-unique'],
-        :ordered           => items['ordered'],
-        :interleave        => items['interleave'],
-        :existing_resource => :true
+        name:              e.attributes['id'],
+        ensure:            :present,
+        primitive:         primitive_id,
+        clone_max:         items['clone-max'],
+        clone_node_max:    items['clone-node-max'],
+        notify_clones:     items['notify'],
+        globally_unique:   items['globally-unique'],
+        ordered:           items['ordered'],
+        interleave:        items['interleave'],
+        existing_resource: :true
       }
       instances << new(clone_instance)
     end
@@ -42,16 +42,16 @@ Puppet::Type.type(:cs_clone).provide(:pcs, :parent => Puppet::Provider::Pacemake
   # of actually doing the work.
   def create
     @property_hash = {
-      :name              => @resource[:primitive] + '-clone',
-      :ensure            => :present,
-      :primitive         => @resource[:primitive],
-      :clone_max         => @resource[:clone_max],
-      :clone_node_max    => @resource[:clone_node_max],
-      :notify_clones     => @resource[:notify_clones],
-      :globally_unique   => @resource[:globally_unique],
-      :ordered           => @resource[:ordered],
-      :interleave        => @resource[:interleave],
-      :existing_resource => :false
+      name:              @resource[:primitive] + '-clone',
+      ensure:            :present,
+      primitive:         @resource[:primitive],
+      clone_max:         @resource[:clone_max],
+      clone_node_max:    @resource[:clone_node_max],
+      notify_clones:     @resource[:notify_clones],
+      globally_unique:   @resource[:globally_unique],
+      ordered:           @resource[:ordered],
+      interleave:        @resource[:interleave],
+      existing_resource: :false
     }
   end
 

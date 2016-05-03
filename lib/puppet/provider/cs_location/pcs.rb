@@ -1,16 +1,16 @@
 require 'pathname'
 require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
 
-Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacemaker) do
+Puppet::Type.type(:cs_location).provide(:pcs, parent: Puppet::Provider::Pacemaker) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived.  This provider will check the state
         of current primitive locations on the system; add, delete, or adjust various
         aspects.'
 
-  defaultfor :operatingsystem => [:fedora, :centos, :redhat]
+  defaultfor operatingsystem: [:fedora, :centos, :redhat]
   has_feature :discovery
 
-  commands :pcs => 'pcs'
+  commands pcs: 'pcs'
 
   mk_resource_methods
 
@@ -29,13 +29,13 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
         items = e.attributes
 
         location_instance = {
-          :name               => items['id'],
-          :ensure             => :present,
-          :primitive          => items['rsc'],
-          :node_name          => items['node'],
-          :score              => items['score'],
-          :resource_discovery => items['resource-discovery'],
-          :provider           => name
+          name:               items['id'],
+          ensure:             :present,
+          primitive:          items['rsc'],
+          node_name:          items['node'],
+          score:              items['score'],
+          resource_discovery: items['resource-discovery'],
+          provider:           name
         }
         instances << new(location_instance)
       end
@@ -47,12 +47,12 @@ Puppet::Type.type(:cs_location).provide(:pcs, :parent => Puppet::Provider::Pacem
   # of actually doing the work.
   def create
     @property_hash = {
-      :name               => @resource[:name],
-      :ensure             => :present,
-      :primitive          => @resource[:primitive],
-      :node_name          => @resource[:node_name],
-      :score              => @resource[:score],
-      :resource_discovery => @resource[:resource_discovery]
+      name:               @resource[:name],
+      ensure:             :present,
+      primitive:          @resource[:primitive],
+      node_name:          @resource[:node_name],
+      score:              @resource[:score],
+      resource_discovery: @resource[:resource_discovery]
     }
   end
 

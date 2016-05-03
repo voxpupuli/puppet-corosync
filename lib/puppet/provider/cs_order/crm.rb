@@ -1,14 +1,14 @@
 require 'pathname'
 require Pathname.new(__FILE__).dirname.dirname.expand_path + 'crmsh'
 
-Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Crmsh) do
+Puppet::Type.type(:cs_order).provide(:crm, parent: Puppet::Provider::Crmsh) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived. This provider will check the state
         of current primitive start orders on the system; add, delete, or adjust various
         aspects.'
 
   # Path to the crm binary for interacting with the cluster configuration.
-  commands :crm => 'crm'
+  commands crm: 'crm'
 
   mk_resource_methods
 
@@ -44,13 +44,13 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Crmsh) d
                     end
 
       order_instance = {
-        :name           => items['id'],
-        :ensure         => :present,
-        :first          => first,
-        :second         => second,
-        :score          => items['score'],
-        :symmetrical    => symmetrical,
-        :provider       => name
+        name:        items['id'],
+        ensure:      :present,
+        first:       first,
+        second:      second,
+        score:       items['score'],
+        symmetrical: symmetrical,
+        provider:    name
       }
       instances << new(order_instance)
     end
@@ -61,14 +61,14 @@ Puppet::Type.type(:cs_order).provide(:crm, :parent => Puppet::Provider::Crmsh) d
   # of actually doing the work.
   def create
     @property_hash = {
-      :name         => @resource[:name],
-      :ensure       => :present,
-      :first        => @resource[:first],
-      :second       => @resource[:second],
-      :score        => @resource[:score],
-      :symmetrical  => @resource[:symmetrical],
-      :kind         => @resource[:kind],
-      :cib          => @resource[:cib]
+      name:        @resource[:name],
+      ensure:      :present,
+      first:       @resource[:first],
+      second:      @resource[:second],
+      score:       @resource[:score],
+      symmetrical: @resource[:symmetrical],
+      kind:        @resource[:kind],
+      cib:         @resource[:cib]
     }
   end
 

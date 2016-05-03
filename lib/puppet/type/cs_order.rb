@@ -64,7 +64,7 @@ Puppet::Type.newtype(:cs_order) do
     defaultto 'INFINITY'
   end
 
-  newproperty(:kind, :required_features => :kindness) do
+  newproperty(:kind, required_features: :kindness) do
     desc "How to enforce the constraint.
 
     Allowed values:
@@ -82,7 +82,7 @@ Puppet::Type.newtype(:cs_order) do
     defaultto 'Mandatory'
   end
 
-  newproperty(:symmetrical, :boolean => true, :parent => Puppet::Property::Boolean) do
+  newproperty(:symmetrical, boolean: true, parent: Puppet::Property::Boolean) do
     desc "Boolean specifying if the resources should stop in reverse order.
         Default value: true."
     defaultto true

@@ -5,7 +5,7 @@ class Puppet::Provider::Pacemaker < Puppet::Provider::CibHelper
   require 'rexml/document'
 
   initvars
-  commands :pcs => 'pcs'
+  commands pcs: 'pcs'
 
   # Corosync takes a while to build the initial CIB configuration once the
   # service is started for the first time.  This provides us a way to wait

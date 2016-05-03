@@ -5,8 +5,8 @@ class Puppet::Provider::Crmsh < Puppet::Provider::CibHelper
   require 'rexml/document'
 
   initvars
-  commands :crm_attribute => 'crm_attribute'
-  commands :crm => 'crm'
+  commands crm_attribute: 'crm_attribute'
+  commands crm: 'crm'
 
   # Corosync takes a while to build the initial CIB configuration once the
   # service is started for the first time.  This provides us a way to wait

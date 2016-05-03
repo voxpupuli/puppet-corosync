@@ -1,15 +1,15 @@
 require 'pathname' # JJM WORK_AROUND #14073
 require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
 
-Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacemaker) do
+Puppet::Type.type(:cs_property).provide(:pcs, parent: Puppet::Provider::Pacemaker) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived. This provider will check the state
         of Corosync cluster configuration properties.'
 
-  defaultfor :operatingsystem => [:fedora, :centos, :redhat]
+  defaultfor operatingsystem: [:fedora, :centos, :redhat]
 
   # Path to the pcs binary for interacting with the cluster configuration.
-  commands :pcs => 'pcs'
+  commands pcs: 'pcs'
 
   def self.instances
     block_until_ready
@@ -24,13 +24,13 @@ Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacem
     unless cluster_property_set.nil?
       cluster_property_set.each_element do |e|
         items = e.attributes
-        property = { :name => items['name'], :value => items['value'] }
+        property = { name: items['name'], value: items['value'] }
 
         property_instance = {
-          :name       => property[:name],
-          :ensure     => :present,
-          :value      => property[:value],
-          :provider   => name
+          name:       property[:name],
+          ensure:     :present,
+          value:      property[:value],
+          provider:   name
         }
         instances << new(property_instance)
       end
@@ -42,9 +42,9 @@ Puppet::Type.type(:cs_property).provide(:pcs, :parent => Puppet::Provider::Pacem
   # of actually doing the work.
   def create
     @property_hash = {
-      :name   => @resource[:name],
-      :ensure => :present,
-      :value  => @resource[:value]
+      name:   @resource[:name],
+      ensure: :present,
+      value:  @resource[:value]
     }
   end
 

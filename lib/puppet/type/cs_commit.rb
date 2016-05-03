@@ -1,7 +1,7 @@
 Puppet::Type.newtype(:cs_commit) do
   @doc = 'This type is an implementation detail. DO NOT use it directly'
 
-  feature :refreshable, 'The provider can execute the commit.', :methods => [:commit]
+  feature :refreshable, 'The provider can execute the commit.', methods: [:commit]
 
   newparam(:cib) do
     def insync?(_is)

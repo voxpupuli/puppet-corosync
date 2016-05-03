@@ -6,7 +6,7 @@ describe Puppet::Type.type(:cs_primitive) do
   end
 
   it "should have a 'name' parameter" do
-    expect(subject.new(:name => 'mock_primitive')[:name]).to eq('mock_primitive')
+    expect(subject.new(name: 'mock_primitive')[:name]).to eq('mock_primitive')
   end
 
   describe 'basic structure' do
@@ -14,7 +14,7 @@ describe Puppet::Type.type(:cs_primitive) do
       provider_class = Puppet::Type::Cs_primitive.provider(Puppet::Type::Cs_primitive.providers[0])
       Puppet::Type::Cs_primitive.expects(:defaultprovider).returns(provider_class)
 
-      expect(subject.new(:name => 'mock_primitive')).to_not be_nil
+      expect(subject.new(name: 'mock_primitive')).to_not be_nil
     end
 
     [:name, :primitive_class, :primitive_type, :provided_by, :cib].each do |param|
@@ -41,13 +41,13 @@ describe Puppet::Type.type(:cs_primitive) do
   describe 'when validating attributes' do
     [:parameters, :operations, :metadata, :ms_metadata].each do |attribute|
       it "should validate that the #{attribute} attribute defaults to a hash" do
-        expect(subject.new(:name => 'mock_primitive')[:parameters]).to eq({})
+        expect(subject.new(name: 'mock_primitive')[:parameters]).to eq({})
       end
 
       it "should validate that the #{attribute} attribute must be a hash" do
         expect { subject.new(
-          :name       => 'mock_primitive',
-          :parameters => 'fail'
+          name:       'mock_primitive',
+          parameters: 'fail'
         )
         }.to raise_error Puppet::Error, /hash/
       end
@@ -56,8 +56,8 @@ describe Puppet::Type.type(:cs_primitive) do
     it 'should validate that the promotable attribute can be true/false' do
       [true, false].each do |value|
         expect(subject.new(
-          :name       => 'mock_primitive',
-          :promotable => value
+          name:       'mock_primitive',
+          promotable: value
         )[:promotable]).to eq(value.to_s.to_sym)
       end
     end
@@ -65,8 +65,8 @@ describe Puppet::Type.type(:cs_primitive) do
     it 'should validate that the promotable attribute cannot be other values' do
       ['fail', 42].each do |value|
         expect { subject.new(
-          :name       => 'mock_primitive',
-          :promotable => value
+          name:       'mock_primitive',
+          promotable: value
         )
         }.to raise_error Puppet::Error, /(true|false)/
       end
@@ -77,8 +77,8 @@ describe Puppet::Type.type(:cs_primitive) do
     it 'should not change arrays' do
       Puppet.expects(:deprecation_warning).never
       expect(subject.new(
-        :name => 'mock_primitive',
-        :operations => [{ 'start' => { 'interval' => '10' } }, { 'stop' => { 'interval' => '10' } }]
+        name: 'mock_primitive',
+        operations: [{ 'start' => { 'interval' => '10' } }, { 'stop' => { 'interval' => '10' } }]
       ).should(:operations)).to eq([
                                      { 'start' => { 'interval' => '10' } },
                                      { 'stop' => { 'interval' => '10' } }
@@ -87,8 +87,8 @@ describe Puppet::Type.type(:cs_primitive) do
     it 'should convert hashes into array' do
       Puppet.expects(:deprecation_warning).never
       expect(subject.new(
-        :name => 'mock_primitive',
-        :operations => { 'start' => { 'interval' => '10' }, 'stop' => { 'interval' => '10' } }
+        name: 'mock_primitive',
+        operations: { 'start' => { 'interval' => '10' }, 'stop' => { 'interval' => '10' } }
       ).should(:operations)).to eq([
                                      { 'start' => { 'interval' => '10' } },
                                      { 'stop' => { 'interval' => '10' } }
@@ -97,8 +97,8 @@ describe Puppet::Type.type(:cs_primitive) do
     it 'should convert hashes into array with correct roles' do
       Puppet.expects(:deprecation_warning).once
       expect(subject.new(
-        :name => 'mock_primitive',
-        :operations => { 'start' => { 'interval' => '10' }, 'stop:Master' => { 'interval' => '10' } }
+        name: 'mock_primitive',
+        operations: { 'start' => { 'interval' => '10' }, 'stop:Master' => { 'interval' => '10' } }
       ).should(:operations)).to eq([
                                      { 'start' => { 'interval' => '10' } },
                                      { 'stop' => { 'interval' => '10', 'role' => 'Master' } }
@@ -107,8 +107,8 @@ describe Puppet::Type.type(:cs_primitive) do
     it 'should convert sub-arrays into array' do
       Puppet.expects(:deprecation_warning).once
       expect(subject.new(
-        :name => 'mock_primitive',
-        :operations => { 'start' => [{ 'interval' => '10' }, { 'interval' => '10', 'role' => 'foo' }], 'stop' => { 'interval' => '10' } }
+        name: 'mock_primitive',
+        operations: { 'start' => [{ 'interval' => '10' }, { 'interval' => '10', 'role' => 'foo' }], 'stop' => { 'interval' => '10' } }
       ).should(:operations)).to eq([
                                      { 'start' => { 'interval' => '10' } },
                                      { 'start' => { 'interval' => '10', 'role' => 'foo' } },
@@ -118,8 +118,8 @@ describe Puppet::Type.type(:cs_primitive) do
     it 'should convert sub-arrays into array with correct roles' do # That case probably never happens in practice
       Puppet.expects(:deprecation_warning).twice
       expect(subject.new(
-        :name => 'mock_primitive',
-        :operations => { 'start' => { 'interval' => '10' }, 'stop:Master' => [{ 'interval' => '10' }, { 'interval' => '20' }] }
+        name: 'mock_primitive',
+        operations: { 'start' => { 'interval' => '10' }, 'stop:Master' => [{ 'interval' => '10' }, { 'interval' => '20' }] }
       ).should(:operations)).to eq([
                                      { 'start' => { 'interval' => '10' } },
                                      { 'stop' => { 'interval' => '10', 'role' => 'Master' } },
@@ -130,7 +130,7 @@ describe Puppet::Type.type(:cs_primitive) do
 
   describe 'when diffing the operations attributes' do
     def ops
-      subject.new(:name => 'mock_primitive').parameter(:operations)
+      subject.new(name: 'mock_primitive').parameter(:operations)
     end
 
     it 'should show 1 new op with 1 parameter' do

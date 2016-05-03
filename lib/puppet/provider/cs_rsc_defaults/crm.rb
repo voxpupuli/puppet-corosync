@@ -1,14 +1,14 @@
 require 'pathname' # JJM WORK_AROUND #14073
 require Pathname.new(__FILE__).dirname.dirname.expand_path + 'crmsh'
 
-Puppet::Type.type(:cs_rsc_defaults).provide(:crm, :parent => Puppet::Provider::Crmsh) do
+Puppet::Type.type(:cs_rsc_defaults).provide(:crm, parent: Puppet::Provider::Crmsh) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived. This provider will check the state
         of Corosync global defaults for resource options.'
 
   # Path to the crm binary for interacting with the cluster configuration.
-  commands :crm           => 'crm'
-  commands :cibadmin      => 'cibadmin'
+  commands crm:           'crm'
+  commands cibadmin:      'cibadmin'
 
   def self.instances
     block_until_ready
@@ -30,13 +30,13 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:crm, :parent => Puppet::Provider::C
 
     REXML::XPath.each(doc, '//configuration/rsc_defaults/meta_attributes/nvpair') do |e|
       items = e.attributes
-      rsc_defaults = { :name => items['name'], :value => items['value'] }
+      rsc_defaults = { name: items['name'], value: items['value'] }
 
       rsc_defaults_instance = {
-        :name       => rsc_defaults[:name],
-        :ensure     => :present,
-        :value      => rsc_defaults[:value],
-        :provider   => name
+        name:     rsc_defaults[:name],
+        ensure:   :present,
+        value:    rsc_defaults[:value],
+        provider: name
       }
       instances << new(rsc_defaults_instance)
     end
@@ -47,9 +47,9 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:crm, :parent => Puppet::Provider::C
   # of actually doing the work.
   def create
     @property_hash = {
-      :name   => @resource[:name],
-      :ensure => :present,
-      :value  => @resource[:value]
+      name:   @resource[:name],
+      ensure: :present,
+      value:  @resource[:value]
     }
   end
 
