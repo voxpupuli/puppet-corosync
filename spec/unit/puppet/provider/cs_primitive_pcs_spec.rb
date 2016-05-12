@@ -147,7 +147,8 @@ h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat"
         primitive_class: 'ocf',
         provided_by: 'heartbeat',
         operations: { 'monitor' => { 'interval' => '60s' } },
-        primitive_type: 'IPaddr2')
+        primitive_type: 'IPaddr2'
+      )
     end
 
     let :instance do

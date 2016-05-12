@@ -35,11 +35,11 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: Puppet::Provider::Crmsh) 
     unless operations.nil?
       operations.each_element do |o|
         valids = o.attributes.reject do |k, _v| k == 'id' end
-        name = valids['name']
+        name = valids['name'].to_s
         operation = {}
         operation[name] = {}
         valids.each do |k, v|
-          operation[name][k] = v if k != 'name'
+          operation[name][k] = v.to_s if k != 'name'
         end
         unless o.elements['instance_attributes'].nil?
           o.elements['instance_attributes'].each_element do |i|

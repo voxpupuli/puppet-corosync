@@ -72,7 +72,8 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
         name:      'p_keystone-clone',
         provider:  :crm,
         primitive: 'p_keystone',
-        ensure:    :present)
+        ensure:    :present
+      )
     end
 
     let :instance do

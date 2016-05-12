@@ -33,7 +33,6 @@ RSpec.configure do |c|
   end
 end
 
-# rubocop:disable Style/PredicateName
 def is_future_parser_enabled?
   # rubocop:disable Style/GuardClause
   if default[:type] == 'aio'
@@ -44,7 +43,6 @@ def is_future_parser_enabled?
   end
   false
 end
-# rubocop:enable Style/PredicateName
 
 # rubocop:disable Style/AccessorMethodName
 def get_puppet_version

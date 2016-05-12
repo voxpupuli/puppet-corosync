@@ -90,7 +90,8 @@ describe Puppet::Type.type(:cs_colocation).provider(:crm) do
           name:       'first_with_second',
           provider:   :crm,
           primitives: %w(first second),
-          ensure:     :present)
+          ensure:     :present
+        )
       end
 
       let :instance do
@@ -135,7 +136,8 @@ describe Puppet::Type.type(:cs_colocation).provider(:crm) do
           name:       'first_with_second_with_third',
           provider:   :crm,
           primitives: %w(first second third),
-          ensure:     :present)
+          ensure:     :present
+        )
       end
 
       let :instance do
