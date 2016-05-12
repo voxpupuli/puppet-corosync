@@ -120,7 +120,8 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
         provider: :crm,
         primitive_class: 'ocf',
         provided_by: 'heartbeat',
-        primitive_type: 'IPaddr2')
+        primitive_type: 'IPaddr2'
+      )
     end
 
     let :instance do
