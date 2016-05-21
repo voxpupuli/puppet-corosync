@@ -5,16 +5,16 @@ describe Puppet::Type.type(:cs_primitive) do
     Puppet::Type.type(:cs_primitive)
   end
 
-  it "should have a 'name' parameter" do
+  it "has a 'name' parameter" do
     expect(subject.new(name: 'mock_primitive')[:name]).to eq('mock_primitive')
   end
 
   describe 'basic structure' do
-    it 'should be able to create an instance' do
+    it 'is able to create an instance' do
       provider_class = Puppet::Type::Cs_primitive.provider(Puppet::Type::Cs_primitive.providers[0])
       Puppet::Type::Cs_primitive.expects(:defaultprovider).returns(provider_class)
 
-      expect(subject.new(name: 'mock_primitive')).to_not be_nil
+      expect(subject.new(name: 'mock_primitive')).not_to be_nil
     end
 
     [:name, :primitive_class, :primitive_type, :provided_by, :cib].each do |param|
@@ -53,7 +53,7 @@ describe Puppet::Type.type(:cs_primitive) do
       end
     end
 
-    it 'should validate that the promotable attribute can be true/false' do
+    it 'validates that the promotable attribute can be true/false' do
       [true, false].each do |value|
         expect(subject.new(
           name:       'mock_primitive',
@@ -62,7 +62,7 @@ describe Puppet::Type.type(:cs_primitive) do
       end
     end
 
-    it 'should validate that the promotable attribute cannot be other values' do
+    it 'validates that the promotable attribute cannot be other values' do
       ['fail', 42].each do |value|
         expect { subject.new(
           name:       'mock_primitive',
@@ -74,7 +74,7 @@ describe Puppet::Type.type(:cs_primitive) do
   end
 
   describe 'when munging the operations attributes' do
-    it 'should not change arrays' do
+    it 'does not change arrays' do
       Puppet.expects(:deprecation_warning).never
       expect(subject.new(
         name: 'mock_primitive',
@@ -84,7 +84,7 @@ describe Puppet::Type.type(:cs_primitive) do
                                      { 'stop' => { 'interval' => '10' } }
                                    ])
     end
-    it 'should convert hashes into array' do
+    it 'converts hashes into array' do
       Puppet.expects(:deprecation_warning).never
       expect(subject.new(
         name: 'mock_primitive',
@@ -94,7 +94,7 @@ describe Puppet::Type.type(:cs_primitive) do
                                      { 'stop' => { 'interval' => '10' } }
                                    ])
     end
-    it 'should convert hashes into array with correct roles' do
+    it 'converts hashes into array with correct roles' do
       Puppet.expects(:deprecation_warning).once
       expect(subject.new(
         name: 'mock_primitive',
@@ -104,7 +104,7 @@ describe Puppet::Type.type(:cs_primitive) do
                                      { 'stop' => { 'interval' => '10', 'role' => 'Master' } }
                                    ])
     end
-    it 'should convert sub-arrays into array' do
+    it 'converts sub-arrays into array' do
       Puppet.expects(:deprecation_warning).once
       expect(subject.new(
         name: 'mock_primitive',
@@ -115,7 +115,7 @@ describe Puppet::Type.type(:cs_primitive) do
                                      { 'stop' => { 'interval' => '10' } }
                                    ])
     end
-    it 'should convert sub-arrays into array with correct roles' do # That case probably never happens in practice
+    it 'converts sub-arrays into array with correct roles' do # That case probably never happens in practice
       Puppet.expects(:deprecation_warning).twice
       expect(subject.new(
         name: 'mock_primitive',
@@ -133,44 +133,44 @@ describe Puppet::Type.type(:cs_primitive) do
       subject.new(name: 'mock_primitive').parameter(:operations)
     end
 
-    it 'should show 1 new op with 1 parameter' do
+    it 'shows 1 new op with 1 parameter' do
       expect(ops.change_to_s([], [{ 'start' => { 'interval' => '10' } }])).to eq(
         '1 added: start (interval=10)'
       )
     end
 
-    it 'should show 1 new op with 1 parameter and 1 kept' do
+    it 'shows 1 new op with 1 parameter and 1 kept' do
       common = [{ 'monitor' => { 'interval' => '10' } }]
       expect(ops.change_to_s(common, common + [{ 'start' => { 'interval' => '10' } }])).to eq(
         '1 added: start (interval=10) / 1 kept'
       )
     end
 
-    it 'should show 1 new op with 2 parameters' do
+    it 'shows 1 new op with 2 parameters' do
       expect(ops.change_to_s([], [{ 'start' => { 'interval' => '10', 'foo' => 'bar' } }])).to eq(
         '1 added: start (interval=10 foo=bar)'
       )
     end
 
-    it 'should show 2 new ops with 1 parameter' do
+    it 'shows 2 new ops with 1 parameter' do
       expect(ops.change_to_s([], [{ 'start' => { 'interval' => '10' } }, { 'stop' => { 'interval' => '10' } }])).to eq(
         '2 added: start (interval=10) stop (interval=10)'
       )
     end
 
-    it 'should show 1 deleted op with 1 parameter' do
+    it 'shows 1 deleted op with 1 parameter' do
       expect(ops.change_to_s([{ 'start' => { 'interval' => '10' } }], [])).to eq(
         '1 removed: start (interval=10)'
       )
     end
 
-    it 'should show 1 removed op with 2 parameters' do
+    it 'shows 1 removed op with 2 parameters' do
       expect(ops.change_to_s([{ 'start' => { 'interval' => '10', 'foo' => 'bar' } }], [])).to eq(
         '1 removed: start (interval=10 foo=bar)'
       )
     end
 
-    it 'should show 2 removed ops with 1 parameter' do
+    it 'shows 2 removed ops with 1 parameter' do
       expect(ops.change_to_s([{ 'start' => { 'interval' => '10' } }, { 'stop' => { 'interval' => '10' } }], [])).to eq(
         '2 removed: start (interval=10) stop (interval=10)'
       )

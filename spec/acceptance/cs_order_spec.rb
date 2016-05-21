@@ -62,7 +62,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     it { is_expected.to be_running }
   end
 
-  it 'should create a simple order constraint' do
+  it 'creates a simple order constraint' do
     pp = <<-EOS
       cs_order { 'first_then_two':
         first  => 'first_vip',
@@ -81,7 +81,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
   end
 
-  it 'should delete an order constraint' do
+  it 'deletes an order constraint' do
     pp = <<-EOS
       cs_order { 'first_then_two':
         ensure => absent,
@@ -94,7 +94,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
   end
 
-  it 'should create a more complex order constraint' do
+  it 'creates a more complex order constraint' do
     pp = <<-EOS
       cs_order { 'one_then_two_complex':
         first  => 'first_vip:stop',

@@ -5,16 +5,16 @@ describe Puppet::Type.type(:cs_clone) do
     Puppet::Type.type(:cs_clone)
   end
 
-  it "should have a 'name' parameter" do
+  it "has a 'name' parameter" do
     expect(subject.new(name: 'mock_clone')[:name]).to eq('mock_clone')
   end
 
   describe 'basic structure' do
-    it 'should be able to create an instance' do
+    it 'is able to create an instance' do
       provider_class = Puppet::Type::Cs_clone.provider(Puppet::Type::Cs_clone.providers[0])
       Puppet::Type::Cs_clone.expects(:defaultprovider).returns(provider_class)
 
-      expect(subject.new(name: 'mock_clone')).to_not be_nil
+      expect(subject.new(name: 'mock_clone')).not_to be_nil
     end
 
     [:name, :cib].each do |param|

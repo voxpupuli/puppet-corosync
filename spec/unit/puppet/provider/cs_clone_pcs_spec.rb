@@ -37,7 +37,7 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
       # rubocop:enable Lint/UselessAssignment
     end
 
-    it 'should have an instance for each <clone>' do
+    it 'has an instance for each <clone>' do
       expect(instances.count).to eq(1)
     end
 
