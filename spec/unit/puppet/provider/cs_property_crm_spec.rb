@@ -36,7 +36,7 @@ describe Puppet::Type.type(:cs_property).provider(:crm) do
       # rubocop:enable Lint/UselessAssignment
     end
 
-    it 'should have an instance for each <nvpair> in <cluster_property_set>' do
+    it 'has an instance for each <nvpair> in <cluster_property_set>' do
       expect(instances.count).to eq(2)
     end
 

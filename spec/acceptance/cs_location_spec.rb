@@ -55,7 +55,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     it { is_expected.to be_running }
   end
 
-  it 'should create a location' do
+  it 'creates a location' do
     pp = <<-EOS
       cs_location { 'duncan_vip_there':
         primitive => 'duncan_vip',
@@ -70,7 +70,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
   end
 
-  it 'should delete a location' do
+  it 'deletes a location' do
     pp = <<-EOS
       cs_location { 'duncan_vip_there':
         ensure => absent,
@@ -83,7 +83,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
   end
 
-  it 'should create a location with resource-discovery' do
+  it 'creates a location with resource-discovery' do
     pp = <<-EOS
       cs_location { 'duncan_vip_there':
         primitive          => 'duncan_vip',

@@ -65,7 +65,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     it { is_expected.to be_running }
   end
 
-  it 'should create the resources' do
+  it 'creates the resources' do
     command = if fact('osfamily') == 'RedHat'
                 'pcs resource show'
               else
@@ -77,7 +77,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
   end
 
-  it 'should create the colocation' do
+  it 'creates the colocation' do
     shell('cibadmin --query | grep vip_with_service') do |r|
       expect(r.stdout).to match(/colocation.*\swith-rsc="nginx_vip"/)
       expect(r.stdout).to match(/colocation.*\srsc="nginx_service"/)

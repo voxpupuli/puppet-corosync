@@ -50,7 +50,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
       # rubocop:enable Lint/UselessAssignment
     end
 
-    it 'should have an instance for each <primitive>' do
+    it 'has an instance for each <primitive>' do
       expect(instances.count).to eq(1)
     end
 

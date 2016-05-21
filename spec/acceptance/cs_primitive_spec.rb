@@ -62,7 +62,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     it { is_expected.to be_running }
   end
 
-  it 'should create the resources' do
+  it 'creates the resources' do
     command = if fact('osfamily') == 'RedHat'
                 'pcs resource show'
               else

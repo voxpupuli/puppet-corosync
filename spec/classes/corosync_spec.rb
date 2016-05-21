@@ -243,7 +243,7 @@ describe 'corosync' do
     end
 
     context 'when configuring defaults for logging' do
-      it 'should configure stderr, syslog priority, func names' do
+      it 'configures stderr, syslog priority, func names' do
         should contain_file('/etc/corosync/corosync.conf').with_content(
           /to_stderr:       yes/
         )
