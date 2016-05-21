@@ -82,15 +82,15 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
                 'crm_resource --list'
               end
     shell(command) do |r|
-      expect(r.stdout).to_not match(/apache_service.*IPaddr2/)
-      expect(r.stdout).to_not match(/apache_vip.*IPaddr2/)
+      expect(r.stdout).not_to match(/apache_service.*IPaddr2/)
+      expect(r.stdout).not_to match(/apache_vip.*IPaddr2/)
     end
   end
 
   it 'does not create the colocation in the cib' do
     shell('cibadmin --query') do |r|
-      expect(r.stdout).to_not match(/colocation.*\swith-rsc="apache_vip"/)
-      expect(r.stdout).to_not match(/colocation.*\srsc="apache_service"/)
+      expect(r.stdout).not_to match(/colocation.*\swith-rsc="apache_vip"/)
+      expect(r.stdout).not_to match(/colocation.*\srsc="apache_service"/)
     end
   end
 

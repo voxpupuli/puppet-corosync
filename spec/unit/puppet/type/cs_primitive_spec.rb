@@ -14,7 +14,7 @@ describe Puppet::Type.type(:cs_primitive) do
       provider_class = Puppet::Type::Cs_primitive.provider(Puppet::Type::Cs_primitive.providers[0])
       Puppet::Type::Cs_primitive.expects(:defaultprovider).returns(provider_class)
 
-      expect(subject.new(name: 'mock_primitive')).to_not be_nil
+      expect(subject.new(name: 'mock_primitive')).not_to be_nil
     end
 
     [:name, :primitive_class, :primitive_type, :provided_by, :cib].each do |param|

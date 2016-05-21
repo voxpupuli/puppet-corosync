@@ -98,7 +98,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       expect(r.stdout).to match(/rsc_location/)
       # Feature not supported in Ubuntu
       expect(r.stdout).to match(/resource-discovery="exclusive"/) if fact('osfamily') == 'RedHat'
-      expect(r.stdout).to_not match(/resource-discovery="exclusive"/) if fact('osfamily') != 'RedHat'
+      expect(r.stdout).not_to match(/resource-discovery="exclusive"/) if fact('osfamily') != 'RedHat'
     end
   end
 end
