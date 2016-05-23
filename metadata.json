@@ -1,6 +1,6 @@
 {
   "name": "puppet-corosync",
-  "version": "1.0.1-rc0",
+  "version": "1.0.1",
   "author": "puppet-community",
   "summary": "This module is a set of manifests and types/providers for quickly setting up highly available clusters using Corosync",
   "license": "Apache-2.0",

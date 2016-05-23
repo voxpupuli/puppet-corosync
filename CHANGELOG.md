@@ -1,3 +1,7 @@
+##2016-05-25 - Release 1.0.1
+###Summary
+- Minor fix to the release scripts
+
 ##2016-05-25 - Release 1.0.0
 ###Summary
 - Ubuntu 14.04 support (#178)
