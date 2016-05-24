@@ -102,7 +102,9 @@ Puppet::Type.newtype(:cs_order) do
   end
 
   autorequire(:cs_shadow) do
-    [@parameters[:cib]]
+    autos = []
+    autos << @parameters[:cib].value if @parameters[:cib]
+    autos
   end
 
   def unmunge_cs_resourcename(name)

@@ -68,7 +68,9 @@ Puppet::Type.newtype(:cs_clone) do
   end
 
   autorequire(:cs_shadow) do
-    [@parameters[:cib]]
+    autos = []
+    autos << @parameters[:cib].value if @parameters[:cib]
+    autos
   end
 
   autorequire(:service) do

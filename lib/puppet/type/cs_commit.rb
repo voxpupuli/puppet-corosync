@@ -24,7 +24,9 @@ Puppet::Type.newtype(:cs_commit) do
   end
 
   autorequire(:cs_shadow) do
-    [@parameters[:cib]]
+    autos = []
+    autos << @parameters[:cib].value if @parameters[:cib]
+    autos
   end
 
   if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '4.0') < 0
