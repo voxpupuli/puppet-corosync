@@ -1,8 +1,13 @@
-## 2016-05-25 - Release 1.0.1
+## 2016-05-24 - Release 1.0.2
+### Summary
+- Puppet 4.5.0 support (#258)
+- Modulesync update
+
+## 2016-05-23 - Release 1.0.1
 ### Summary
 - Minor fix to the release scripts
 
-## 2016-05-25 - Release 1.0.0
+## 2016-05-23 - Release 1.0.0
 ### Summary
 - Ubuntu 14.04 support (#178)
 - pcs provider: improved support for cs\_shadow, cs\_commit(#197 #196 #209)
