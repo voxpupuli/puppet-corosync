@@ -72,4 +72,48 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       expect(r.stdout).to match(/pgsql.*pgsql/)
     end
   end
+
+  describe 'when playing with the unmanaged_metadata option' do
+    def pp(extra = '')
+      <<-EOS
+        cs_primitive { 'pingpong':
+          primitive_class => 'ocf',
+          primitive_type => 'ping',
+          provided_by => 'pacemaker',
+          #{extra}
+          parameters => { 'host_list' => '127.0.0.1' },
+          operations => [
+            { 'monitor' => { 'interval' => '4s', 'timeout' => '60s', 'on-fail' => 'restart' } }
+          ],
+        }
+      EOS
+    end
+
+    it 'runs the manifest' do
+      apply_manifest(pp, catch_failures: true)
+      apply_manifest(pp, catch_changes: true)
+    end
+
+    it 'creates a pingpong resource' do
+      command = if fact('osfamily') == 'RedHat'
+                  'pcs resource show'
+                else
+                  'crm_resource --list'
+                end
+      shell(command) do |r|
+        expect(r.stdout).to match(/pingpong/)
+      end
+    end
+
+    it 'does not change anything if we disable the resource' do
+      shell('crm_resource -r pingpong -m -p target-role -v Stopped')
+      apply_manifest(pp, catch_changes: true, debug: true,)
+    end
+
+    it 'changes a disabled resource if unmanaged_metadata is empty' do
+      shell('crm_resource -r pingpong -m -p target-role -v Stopped')
+      apply_manifest(pp('unmanaged_metadata => [],'), debug: true, expect_changes: true)
+      apply_manifest(pp('unmanaged_metadata => [],'), debug: true, catch_changes: true)
+    end
+  end
 end

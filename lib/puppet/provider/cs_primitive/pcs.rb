@@ -169,16 +169,17 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: Puppet::Provider::Pacemak
           utilization << "#{k}=#{v}"
         end
       end
+      debug("META #{@property_hash[:metadata]}")
+      debug("UNMANAGEDMETA #{@resource[:unmanaged_metadata]}")
+      debug("EXISTINGMETA #{@property_hash[:existing_metadata]}")
+      metadatas = ['meta']
       unless @property_hash[:metadata].empty?
-        metadatas = ['meta']
         @property_hash[:metadata].each_pair do |k, v|
-          metadatas << "#{k}=#{v}"
+          metadatas << "#{k}=#{v}" unless @resource[:unmanaged_metadata].include?(k)
         end
-        unless @property_hash[:existing_metadata].empty?
-          @property_hash[:existing_metadata].keys.reject { |key| @property_hash[:metadata].key?(key) }.each do |k|
-            metadatas << "#{k}="
-          end
-        end
+      end
+      @property_hash[:existing_metadata].keys.reject { |key| @property_hash[:metadata].key?(key) }.each do |k|
+        metadatas << "#{k}=" unless @resource[:unmanaged_metadata].include?(k)
       end
 
       # We destroy the ressource if it's type, class or provider has changed
