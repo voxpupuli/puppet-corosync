@@ -1,7 +1,6 @@
-require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
+require 'puppet_x/voxpupuli/corosync/provider/pcs'
 
-Puppet::Type.type(:cs_group).provide(:pcs, parent: Puppet::Provider::Pacemaker) do
+Puppet::Type.type(:cs_group).provide(:pcs, parent: PuppetX::VoxPupuli::Corosync::Provider::Pcs) do
   desc 'Provider to add, delete, manipulate primitive groups.'
 
   defaultfor operatingsystem: [:fedora, :centos, :redhat]
@@ -15,7 +14,7 @@ Puppet::Type.type(:cs_group).provide(:pcs, parent: Puppet::Provider::Pacemaker) 
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    raw, = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
+    raw, = PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//group') do |e|
@@ -58,7 +57,7 @@ Puppet::Type.type(:cs_group).provide(:pcs, parent: Puppet::Provider::Pacemaker) 
   # we need to stop the group.
   def destroy
     debug('Removing group')
-    Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'ungroup', @property_hash[:name]], @resource[:cib])
+    PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'ungroup', @property_hash[:name]], @resource[:cib])
     @property_hash.clear
   end
 
@@ -84,12 +83,12 @@ Puppet::Type.type(:cs_group).provide(:pcs, parent: Puppet::Provider::Pacemaker) 
     unless @property_hash.empty?
       if @property_hash[:new] == false
         debug('Removing group')
-        Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'ungroup', @property_hash[:name]], @resource[:cib])
+        PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'ungroup', @property_hash[:name]], @resource[:cib])
       end
 
       cmd = [command(:pcs), 'resource', 'group', 'add', (@property_hash[:name]).to_s]
       cmd += @property_hash[:primitives]
-      Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
+      PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
     end
   end
 end

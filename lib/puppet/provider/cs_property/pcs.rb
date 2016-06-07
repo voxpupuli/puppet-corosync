@@ -1,7 +1,6 @@
-require 'pathname' # JJM WORK_AROUND #14073
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
+require 'puppet_x/voxpupuli/corosync/provider/pcs'
 
-Puppet::Type.type(:cs_property).provide(:pcs, parent: Puppet::Provider::Pacemaker) do
+Puppet::Type.type(:cs_property).provide(:pcs, parent: PuppetX::VoxPupuli::Corosync::Provider::Pcs) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived. This provider will check the state
         of Corosync cluster configuration properties.'
@@ -17,7 +16,7 @@ Puppet::Type.type(:cs_property).provide(:pcs, parent: Puppet::Provider::Pacemake
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    raw, = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
+    raw, = PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     cluster_property_set = doc.root.elements["configuration/crm_config/cluster_property_set[@id='cib-bootstrap-options']"]
@@ -52,7 +51,7 @@ Puppet::Type.type(:cs_property).provide(:pcs, parent: Puppet::Provider::Pacemake
   def destroy
     debug('Removing cluster property')
     cmd = [command(:pcs), 'property', 'unset', (@property_hash[:name]).to_s]
-    Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
+    PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
   end
 
@@ -81,7 +80,7 @@ Puppet::Type.type(:cs_property).provide(:pcs, parent: Puppet::Provider::Pacemake
       # clear this on properties, in case it's set from a previous
       # run of a different corosync type
       cmd = [command(:pcs), 'property', 'set', "#{@property_hash[:name]}=#{@property_hash[:value]}"]
-      Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
+      PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
     end
   end
 end

@@ -1,7 +1,6 @@
-require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'crmsh'
+require 'puppet_x/voxpupuli/corosync/provider/crmsh'
 
-Puppet::Type.type(:cs_shadow).provide(:crm, parent: Puppet::Provider::Crmsh) do
+Puppet::Type.type(:cs_shadow).provide(:crm, parent: PuppetX::Voxpupuli::Corosync::Provider::Crmsh) do
   commands crm_shadow: 'crm_shadow'
   commands cibadmin: 'cibadmin'
   # Required for block_until_ready

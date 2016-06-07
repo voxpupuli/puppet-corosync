@@ -1,7 +1,6 @@
-require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
+require 'puppet_x/voxpupuli/corosync/provider/pcs'
 
-Puppet::Type.type(:cs_clone).provide(:pcs, parent: Puppet::Provider::Pacemaker) do
+Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::VoxPupuli::Corosync::Provider::Pcs) do
   desc 'Provider to add, delete, manipulate primitive clones.'
 
   commands pcs: 'pcs'
@@ -14,7 +13,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: Puppet::Provider::Pacemaker) 
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    raw, = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
+    raw, = PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     doc.root.elements['configuration'].elements['resources'].each_element('clone') do |e|
@@ -58,7 +57,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: Puppet::Provider::Pacemaker) 
   # Unlike create we actually immediately delete the item.
   def destroy
     debug 'Removing clone'
-    Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'unclone', @resource[:name]], @resource[:cib])
+    PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'unclone', @resource[:name]], @resource[:cib])
     @property_hash.clear
   end
 
@@ -144,7 +143,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: Puppet::Provider::Pacemaker) 
         # pcs versions earlier than 0.9.116 do not allow updating a cloned
         # resource. Being conservative, we will unclone then create a new clone
         # with the new parameters.
-        Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'unclone', @resource[:primitive]], @resource[:cib])
+        PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'unclone', @resource[:primitive]], @resource[:cib])
       end
       cmd = [command(:pcs), 'resource', 'clone', (@property_hash[:primitive]).to_s]
       cmd << "clone-max=#{@property_hash[:clone_max]}" if @property_hash[:clone_max]
@@ -153,7 +152,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: Puppet::Provider::Pacemaker) 
       cmd << "globally-unique=#{@property_hash[:globally_unique]}" if @property_hash[:globally_unique]
       cmd << "ordered=#{@property_hash[:ordered]}" if @property_hash[:ordered]
       cmd << "interleave=#{@property_hash[:interleave]}" if @property_hash[:interleave]
-      Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
+      PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
     end
   end
 end

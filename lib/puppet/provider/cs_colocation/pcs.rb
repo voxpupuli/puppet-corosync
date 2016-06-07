@@ -1,7 +1,6 @@
-require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
+require 'puppet_x/voxpupuli/corosync/provider/pcs'
 
-Puppet::Type.type(:cs_colocation).provide(:pcs, parent: Puppet::Provider::Pacemaker) do
+Puppet::Type.type(:cs_colocation).provide(:pcs, parent: PuppetX::VoxPupuli::Corosync::Provider::Pcs) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived.  This provider will check the state
         of current primitive colocations on the system; add, delete, or adjust various
@@ -17,7 +16,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, parent: Puppet::Provider::Pacema
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    raw, = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
+    raw, = PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
     resource_set_options = ['sequential', 'require-all', 'action', 'role']
 
@@ -96,7 +95,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, parent: Puppet::Provider::Pacema
   def destroy
     debug('Removing colocation')
     cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
-    Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
+    PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
   end
 
@@ -146,7 +145,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, parent: Puppet::Provider::Pacema
       if @property_hash[:new] == false
         debug('Removing colocation')
         cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
-        Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
+        PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
       end
       first_item = @property_hash[:primitives].shift
       cmd = [command(:pcs), 'constraint', 'colocation']
@@ -190,7 +189,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, parent: Puppet::Provider::Pacema
         cmd << @property_hash[:score]
         cmd << "id=#{@property_hash[:name]}"
       end
-      Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
+      PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
     end
   end
 end

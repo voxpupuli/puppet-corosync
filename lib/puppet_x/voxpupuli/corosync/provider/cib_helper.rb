@@ -1,4 +1,4 @@
-class Puppet::Provider::CibHelper < Puppet::Provider
+class PuppetX::VoxPupuli::Corosync::Provider::CibHelper < Puppet::Provider
   # Yep, that's right we are parsing XML...FUN! (It really wasn't that bad)
   def self.run_command_in_cib(cmd, cib = nil, failonfail = true)
     custom_environment = if cib.nil?
