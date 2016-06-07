@@ -1,6 +1,4 @@
-require Pathname.new(__FILE__).dirname.expand_path + 'cib_helper'
-
-class Puppet::Provider::Pacemaker < Puppet::Provider::CibHelper
+class PuppetX::Voxpupuli::Corosync::Provider::Pcs < PuppetX::Voxpupuli::Corosync::Provider::CibHelper
   # Yep, that's right we are parsing XML...FUN! (It really wasn't that bad)
   require 'rexml/document'
 

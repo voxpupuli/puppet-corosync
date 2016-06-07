@@ -1,7 +1,6 @@
-require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
+require 'puppet_x/voxpupuli/corosync/provider/pcs'
 
-Puppet::Type.type(:cs_commit).provide(:pcs, parent: Puppet::Provider::Pacemaker) do
+Puppet::Type.type(:cs_commit).provide(:pcs, parent: PuppetX::VoxPupuli::Corosync::Provider::Pcs) do
   commands crm_shadow: 'crm_shadow'
   commands cibadmin: 'cibadmin'
   # Required for block_until_ready
@@ -13,7 +12,7 @@ Puppet::Type.type(:cs_commit).provide(:pcs, parent: Puppet::Provider::Pacemaker)
   end
 
   def commit
-    Puppet::Provider::Pacemaker.run_command_in_cib(['crm_shadow', '--force', '--commit', @resource[:name]])
-    Puppet::Provider::Pacemaker.run_command_in_cib(['cibadmin', '--modify', '--xml-text', '<cib admin_epoch="admin_epoch++"/>'])
+    PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(['crm_shadow', '--force', '--commit', @resource[:name]])
+    PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(['cibadmin', '--modify', '--xml-text', '<cib admin_epoch="admin_epoch++"/>'])
   end
 end

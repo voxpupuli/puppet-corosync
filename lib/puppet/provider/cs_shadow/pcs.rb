@@ -1,7 +1,6 @@
-require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
+require 'puppet_x/voxpupuli/corosync/provider/pcs'
 
-Puppet::Type.type(:cs_shadow).provide(:pcs, parent: Puppet::Provider::Pacemaker) do
+Puppet::Type.type(:cs_shadow).provide(:pcs, parent: PuppetX::VoxPupuli::Corosync::Provider::Pcs) do
   commands crm_shadow: 'crm_shadow'
   commands cibadmin: 'cibadmin'
   # Required for block_until_ready

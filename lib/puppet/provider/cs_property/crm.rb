@@ -1,7 +1,6 @@
-require 'pathname' # JJM WORK_AROUND #14073
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'crmsh'
+require 'puppet_x/voxpupuli/corosync/provider/crmsh'
 
-Puppet::Type.type(:cs_property).provide(:crm, parent: Puppet::Provider::Crmsh) do
+Puppet::Type.type(:cs_property).provide(:crm, parent: PuppetX::Voxpupuli::Corosync::Provider::Crmsh) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived. This provider will check the state
         of Corosync cluster configuration properties.'

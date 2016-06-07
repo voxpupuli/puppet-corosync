@@ -1,7 +1,6 @@
-require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
+require 'puppet_x/voxpupuli/corosync/provider/pcs'
 
-Puppet::Type.type(:cs_primitive).provide(:pcs, parent: Puppet::Provider::Pacemaker) do
+Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::VoxPupuli::Corosync::Provider::Pcs) do
   desc 'Specific provider for a rather specific type since I currently have no
         plan to abstract corosync/pacemaker vs. keepalived.  Primitives in
         Corosync are the thing we desire to monitor; websites, ipaddresses,
@@ -81,7 +80,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: Puppet::Provider::Pacemak
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    raw, = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
+    raw, = PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//primitive') do |e|
@@ -115,7 +114,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: Puppet::Provider::Pacemak
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing primitive')
-    Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', @resource[:name]], @resource[:cib])
+    PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', @resource[:name]], @resource[:cib])
     @property_hash.clear
   end
 
@@ -125,7 +124,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: Puppet::Provider::Pacemak
       @property_hash[:promotable] = should
     when :false
       @property_hash[:promotable] = should
-      Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'delete', "ms_#{@resource[:name]}"], @resource[:cib])
+      PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'delete', "ms_#{@resource[:name]}"], @resource[:cib])
     end
   end
 
@@ -188,8 +187,8 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: Puppet::Provider::Pacemak
         existing_ressource_type << (@property_hash[:existing_primitive_type]).to_s
         if existing_ressource_type != ressource_type
           debug('Removing primitive')
-          Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'unclone', (@property_hash[:name]).to_s], @resource[:cib], false)
-          Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', (@property_hash[:name]).to_s], @resource[:cib])
+          PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'unclone', (@property_hash[:name]).to_s], @resource[:cib], false)
+          PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', (@property_hash[:name]).to_s], @resource[:cib])
           force_reinstall = :true
         end
       end
@@ -205,7 +204,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: Puppet::Provider::Pacemak
         cmd += operations unless operations.nil?
         cmd += utilization unless utilization.nil?
         cmd += metadatas unless metadatas.nil?
-        Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
+        PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
         # if we are using a master/slave resource, prepend ms_ before its name
         # and declare it as a master/slave resource
         if @property_hash[:promotable] == :true
@@ -218,17 +217,17 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: Puppet::Provider::Pacemak
               cmd << "#{k}=#{v}"
             end
           end
-          Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
+          PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
         end
         # try to remove the default monitor operation
         default_op = { 'monitor' => { 'interval' => '60s' } }
         unless @property_hash[:operations].include?(default_op)
           cmd = [command(:pcs), 'resource', 'op', 'remove', (@property_hash[:name]).to_s, 'monitor', 'interval=60s']
-          Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib], false)
+          PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib], false)
         end
       else
         if @property_hash[:promotable] == :false && @property_hash[:existing_promotable] == :true
-          Puppet::Provider::Pacemaker.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', "ms_#{@property_hash[:name]}"], @resource[:cib])
+          PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', "ms_#{@property_hash[:name]}"], @resource[:cib])
         end
         @property_hash[:existing_operations].reject { |op| @property_hash[:operations].include?(op) }.each do |o|
           cmd = [command(:pcs), 'resource', 'op', 'remove', (@property_hash[:name]).to_s]
@@ -236,14 +235,14 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: Puppet::Provider::Pacemak
           o.values.first.each_pair do |k, v|
             cmd << "#{k}=#{v}"
           end
-          Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
+          PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
         end
         cmd = [command(:pcs), 'resource', 'update', (@property_hash[:name]).to_s]
         cmd += parameters unless parameters.nil?
         cmd += operations unless operations.nil?
         cmd += utilization unless utilization.nil?
         cmd += metadatas unless metadatas.nil?
-        Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
+        PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
         if @property_hash[:promotable] == :true
           cmd = [command(:pcs), 'resource', 'update', "ms_#{@property_hash[:name]}", (@property_hash[:name]).to_s]
           # rubocop:disable Metrics/BlockNesting
@@ -257,7 +256,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: Puppet::Provider::Pacemak
               cmd << "#{k}="
             end
           end
-          Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
+          PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
         end
       end
     end

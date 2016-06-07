@@ -1,7 +1,6 @@
-require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'crmsh'
+require 'puppet_x/voxpupuli/corosync/provider/crmsh'
 
-Puppet::Type.type(:cs_location).provide(:crm, parent: Puppet::Provider::Crmsh) do
+Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosync::Provider::Crmsh) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived.  This provider will check the state
         of current primitive locations on the system; add, delete, or adjust various
@@ -62,7 +61,7 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: Puppet::Provider::Crmsh) d
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing location')
-    Puppet::Provider::Crmsh.run_command_in_cib(['crm', 'configure', 'delete', @resource[:name]], @resource[:cib])
+    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(['crm', 'configure', 'delete', @resource[:name]], @resource[:cib])
     @property_hash.clear
   end
 
@@ -114,7 +113,7 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: Puppet::Provider::Crmsh) d
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        Puppet::Provider::Crmsh.run_command_in_cib(['crm', 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
+        PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(['crm', 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
       end
     end
   end

@@ -1,7 +1,6 @@
-require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
+require 'puppet_x/voxpupuli/corosync/provider/pcs'
 
-Puppet::Type.type(:cs_order).provide(:pcs, parent: Puppet::Provider::Pacemaker) do
+Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::VoxPupuli::Corosync::Provider::Pcs) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived. This provider will check the state
         of current primitive start orders on the system; add, delete, or adjust various
@@ -22,7 +21,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: Puppet::Provider::Pacemaker) 
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    raw, = Puppet::Provider::Pacemaker.run_command_in_cib(cmd)
+    raw, = PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     constraints = doc.root.elements['configuration'].elements['constraints']
@@ -95,7 +94,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: Puppet::Provider::Pacemaker) 
   def destroy
     debug('Removing order directive')
     cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
-    Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
+    PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
   end
 
@@ -108,7 +107,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: Puppet::Provider::Pacemaker) 
       if @property_hash[:new] == false
         debug('Removing order directive')
         cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
-        Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
+        PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
       end
 
       cmd = [command(:pcs), 'constraint', 'order']
@@ -123,7 +122,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: Puppet::Provider::Pacemaker) 
       cmd << "kind=#{@property_hash[:kind]}"
       cmd << "id=#{@property_hash[:name]}"
       cmd << "symmetrical=#{@property_hash[:symmetrical]}"
-      Puppet::Provider::Pacemaker.run_command_in_cib(cmd, @resource[:cib])
+      PuppetX::VoxPupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
     end
   end
 end
