@@ -1,7 +1,6 @@
-require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'crmsh'
+require 'puppet_x/voxpupuli/corosync/provider/crmsh'
 
-Puppet::Type.type(:cs_primitive).provide(:crm, parent: Puppet::Provider::Crmsh) do
+Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Corosync::Provider::Crmsh) do
   desc 'Specific provider for a rather specific type since I currently have no
         plan to abstract corosync/pacemaker vs. keepalived.  Primitives in
         Corosync are the thing we desire to monitor; websites, ipaddresses,
@@ -233,7 +232,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: Puppet::Provider::Crmsh) 
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        Puppet::Provider::Crmsh.run_command_in_cib(['crm', '-F', 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
+        PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(['crm', '-F', 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
       end
     end
   end

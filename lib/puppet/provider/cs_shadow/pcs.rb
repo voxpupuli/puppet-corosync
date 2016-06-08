@@ -1,7 +1,6 @@
-require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'pacemaker'
+require 'puppet_x/voxpupuli/corosync/provider/pcs'
 
-Puppet::Type.type(:cs_shadow).provide(:pcs, parent: Puppet::Provider::Pacemaker) do
+Puppet::Type.type(:cs_shadow).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync::Provider::Pcs) do
   commands crm_shadow: 'crm_shadow'
   commands cibadmin: 'cibadmin'
   # Required for block_until_ready
@@ -18,7 +17,7 @@ Puppet::Type.type(:cs_shadow).provide(:pcs, parent: Puppet::Provider::Pacemaker)
 
   def get_epoch(cib = nil)
     cmd = [command(:cibadmin), '--query', '--xpath', '/cib', '-l', '-n']
-    raw, status = Puppet::Provider::CibHelper.run_command_in_cib(cmd, cib, false)
+    raw, status = PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, cib, false)
     return :absent if status != 0
     doc = REXML::Document.new(raw)
     current_epoch = REXML::XPath.first(doc, '/cib').attributes['epoch']

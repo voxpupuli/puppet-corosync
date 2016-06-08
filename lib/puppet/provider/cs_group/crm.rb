@@ -1,7 +1,6 @@
-require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'crmsh'
+require 'puppet_x/voxpupuli/corosync/provider/crmsh'
 
-Puppet::Type.type(:cs_group).provide(:crm, parent: Puppet::Provider::Crmsh) do
+Puppet::Type.type(:cs_group).provide(:crm, parent: PuppetX::Voxpupuli::Corosync::Provider::Crmsh) do
   desc 'Provider to add, delete, manipulate primitive groups.'
 
   # Path to the crm binary for interacting with the cluster configuration.

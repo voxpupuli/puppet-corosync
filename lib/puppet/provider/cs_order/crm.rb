@@ -1,7 +1,6 @@
-require 'pathname'
-require Pathname.new(__FILE__).dirname.dirname.expand_path + 'crmsh'
+require 'puppet_x/voxpupuli/corosync/provider/crmsh'
 
-Puppet::Type.type(:cs_order).provide(:crm, parent: Puppet::Provider::Crmsh) do
+Puppet::Type.type(:cs_order).provide(:crm, parent: PuppetX::Voxpupuli::Corosync::Provider::Crmsh) do
   desc 'Specific provider for a rather specific type since I currently have no plan to
         abstract corosync/pacemaker vs. keepalived. This provider will check the state
         of current primitive start orders on the system; add, delete, or adjust various
@@ -18,7 +17,7 @@ Puppet::Type.type(:cs_order).provide(:crm, parent: Puppet::Provider::Crmsh) do
     instances = []
 
     cmd = [command(:crm), 'configure', 'show', 'xml']
-    raw, = Puppet::Provider::Crmsh.run_command_in_cib(cmd)
+    raw, = PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     doc.root.elements['configuration'].elements['constraints'].each_element('rsc_order') do |e|
@@ -75,7 +74,7 @@ Puppet::Type.type(:cs_order).provide(:crm, parent: Puppet::Provider::Crmsh) do
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing order directive')
-    Puppet::Provider::Crmsh.run_command_in_cib([command(:crm), 'configure', 'delete', @resource[:name]], @resource[:cib])
+    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib([command(:crm), 'configure', 'delete', @resource[:name]], @resource[:cib])
     @property_hash.clear
   end
 
@@ -93,7 +92,7 @@ Puppet::Type.type(:cs_order).provide(:crm, parent: Puppet::Provider::Crmsh) do
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        Puppet::Provider::Crmsh.run_command_in_cib([command(:crm), 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
+        PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib([command(:crm), 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
       end
     end
   end
