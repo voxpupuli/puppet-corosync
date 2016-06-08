@@ -1,3 +1,7 @@
+## Next
+### Summary
+- Move helpers functions to PuppetX ruby namespace (#259)
+
 ## 2016-05-24 - Release 1.0.2
 ### Summary
 - Puppet 4.5.0 support (#258)
