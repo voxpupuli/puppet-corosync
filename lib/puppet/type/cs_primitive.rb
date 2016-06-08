@@ -63,6 +63,18 @@ Puppet::Type.newtype(:cs_primitive) do
       also be added to your manifest."
   end
 
+  newparam(:unmanaged_metadata) do
+    desc "A hash of metadata that Puppet will not consider relevant for changes.
+      Usecase: target-role. If sysadmin has stopeed a serource, Puppet will
+      not restart it."
+
+    validate do |value|
+      raise Puppet::Error, 'Puppet::Type::Cs_Primitive: unmanaged_metadata parameter must be an array.' unless value.is_a? Array
+    end
+
+    defaultto ['target-role']
+  end
+
   # Our parameters and operations properties must be hashes.
   newproperty(:parameters) do
     desc "A hash of params for the primitive.  Parameters in a primitive are
@@ -195,6 +207,12 @@ Puppet::Type.newtype(:cs_primitive) do
     validate do |value|
       raise Puppet::Error, 'Puppet::Type::Cs_Primitive: metadata property must be a hash.' unless value.is_a? Hash
     end
+
+    def insync?(is)
+      return super(is.delete_if { |key, _| @resource[:unmanaged_metadata].include?(key) }) if is.is_a? Array
+      super(is)
+    end
+
     # rubocop:disable Style/EmptyLiteral
     defaultto Hash.new
     # rubocop:enable Style/EmptyLiteral

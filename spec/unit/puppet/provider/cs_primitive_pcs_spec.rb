@@ -151,6 +151,43 @@ h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat"
       )
     end
 
+    let :simple_resource do
+      Puppet::Type.type(:cs_primitive).new(
+        name: 'simple',
+        provider: :pcs,
+        primitive_class: 'ocf',
+        provided_by: 'heartbeat',
+        metadata: {},
+        primitive_type: 'IPaddr2'
+      )
+    end
+
+    let :vip_resource do
+      Puppet::Type.type(:cs_primitive).new(
+        name: 'example_vip',
+        provider: :pcs,
+        primitive_class: 'ocf',
+        provided_by: 'heartbeat',
+        primitive_type: 'IPaddr2',
+        parameters: { 'cidr_netmask' => '24', ip: '172.31.110.68' },
+        metadata: {},
+        operations: { 'monitor' => { interval: '10s' } }
+      )
+    end
+
+    let :vip_op_resource do
+      Puppet::Type.type(:cs_primitive).new(
+        name: 'example_vip_with_op',
+        provider: :pcs,
+        primitive_class: 'ocf',
+        provided_by: 'heartbeat',
+        primitive_type: 'IPaddr2',
+        metadata: {},
+        parameters: { 'cidr_netmask' => '24', 'ip' => '172.31.110.68' },
+        operations: { 'monitor' => { interval: '10s' }, 'monitor2' => { interval: '10s' }, 'monitor3' => { interval: '30s' } }
+      )
+    end
+
     let :instance do
       instance = described_class.new(resource)
       instance.create
@@ -158,15 +195,21 @@ h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat"
     end
 
     let :simple_instance do
-      instances.first
+      instance = instances.first
+      instance.resource = simple_resource
+      instance
     end
 
     let :vip_instance do
-      instances[1]
+      instance = instances[1]
+      instance.resource = vip_resource
+      instance
     end
 
     let :vip_op_instance do
-      instances[2]
+      instance = instances[2]
+      instance.resource = vip_op_resource
+      instance
     end
 
     it 'can flush without changes' do
@@ -202,8 +245,8 @@ h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat"
     end
 
     it 'sets metadata' do
-      instance.metadata = { 'target-role' => 'Started' }
-      expect_commands(/^pcs resource create --force testResource ocf:heartbeat:IPaddr2 op .* meta target-role=Started$/)
+      instance.metadata = { 'foo' => 'bar' }
+      expect_commands(/^pcs resource create --force testResource ocf:heartbeat:IPaddr2 op .* meta foo=bar$/)
       instance.flush
     end
 
