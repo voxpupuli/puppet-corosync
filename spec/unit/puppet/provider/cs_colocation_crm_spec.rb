@@ -5,10 +5,6 @@ describe Puppet::Type.type(:cs_colocation).provider(:crm) do
     described_class.stubs(:command).with(:crm).returns 'crm'
   end
 
-  before(:all) do
-    described_class.expects(:block_until_ready).returns(nil)
-  end
-
   # rubocop:disable Lint/UselessAssignment
   let :test_cib do
     test_cib = <<-EOS
@@ -35,6 +31,10 @@ describe Puppet::Type.type(:cs_colocation).provider(:crm) do
   end
 
   context 'when getting instances' do
+    before do
+      described_class.expects(:block_until_ready).returns(nil)
+    end
+
     it 'has an instance for each <colocation>' do
       expect(instances.count).to eq(1)
     end
