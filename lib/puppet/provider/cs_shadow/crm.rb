@@ -31,12 +31,6 @@ Puppet::Type.type(:cs_shadow).provide(:crm, parent: PuppetX::Voxpupuli::Corosync
   end
 
   def sync(_cib)
-    begin
-      crm_shadow('--force', '--delete', @resource[:name])
-    rescue
-      nil
-      # If the CIB doesn't exist, we don't care.
-    end
-    crm_shadow('--batch', '--create', @resource[:name])
+    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.sync_shadow_cib(@resource[:name])
   end
 end

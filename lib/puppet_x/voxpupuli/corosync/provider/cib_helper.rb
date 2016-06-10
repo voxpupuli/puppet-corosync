@@ -33,4 +33,9 @@ class PuppetX::Voxpupuli::Corosync::Provider::CibHelper < Puppet::Provider
 
     hash
   end
+
+  def self.sync_shadow_cib(cib, failondeletefail = false)
+    run_command_in_cib(['crm_shadow', '--force', '--delete', cib], nil, failondeletefail)
+    run_command_in_cib(['crm_shadow', '--batch', '--create', cib])
+  end
 end
