@@ -72,4 +72,23 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       expect(r.stdout).to match(/pgsql.*pgsql/)
     end
   end
+
+  it 'removes the target-role' do
+    pp = <<-EOS
+        cs_primitive { 'test_stop':
+          primitive_class => 'ocf',
+          primitive_type  => 'IPaddr2',
+          provided_by     => 'heartbeat',
+          parameters      => { 'ip' => '172.16.210.142', 'cidr_netmask' => '24' },
+          operations      => { 'monitor' => { 'interval' => '10s' } },
+        }
+    EOS
+    apply_manifest(pp, catch_failures: true)
+    apply_manifest(pp, catch_changes: true)
+
+    shell('crm_resource -r test_stop -m -p target-role -v Stopped')
+
+    apply_manifest(pp, catch_failures: true)
+    apply_manifest(pp, catch_changes: true)
+  end
 end
