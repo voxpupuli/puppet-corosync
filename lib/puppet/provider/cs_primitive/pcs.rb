@@ -168,7 +168,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
           utilization << "#{k}=#{v}"
         end
       end
-      unless @property_hash[:metadata].empty?
+      unless @property_hash[:metadata].empty? && @property_hash[:existing_metadata].empty?
         metadatas = ['meta']
         @property_hash[:metadata].each_pair do |k, v|
           metadatas << "#{k}=#{v}"
@@ -246,7 +246,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
         if @property_hash[:promotable] == :true
           cmd = [command(:pcs), 'resource', 'update', "ms_#{@property_hash[:name]}", (@property_hash[:name]).to_s]
           # rubocop:disable Metrics/BlockNesting
-          unless @property_hash[:ms_metadata].empty?
+          unless @property_hash[:ms_metadata].empty? && @property_hash[:existing_ms_metadata].empty?
             # rubocop:enable Metrics/BlockNesting
             cmd << 'meta'
             @property_hash[:ms_metadata].each_pair do |k, v|
