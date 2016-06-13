@@ -57,14 +57,14 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
 
   context 'when flushing' do
     def expect_update(pattern)
-      instance.expects(:crm).with { |*args|
+      instance.expects(:crm).with do |*args|
         if args.slice(0..2) == %w(configure load update)
           expect(File.read(args[3])).to match(pattern)
           true
         else
           false
         end
-      }
+      end
     end
 
     let :resource do

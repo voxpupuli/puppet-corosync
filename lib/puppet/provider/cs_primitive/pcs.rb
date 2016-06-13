@@ -44,7 +44,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
     operations = e.elements['operations']
     unless operations.nil?
       operations.each_element do |o|
-        valids = o.attributes.reject do |k, _v| k == 'id' end
+        valids = o.attributes.reject { |k, _v| k == 'id' }
         name = valids['name'].to_s
         operation = {}
         operation[name] = {}

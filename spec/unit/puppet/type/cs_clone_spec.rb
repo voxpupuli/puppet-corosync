@@ -51,12 +51,9 @@ describe Puppet::Type.type(:cs_clone) do
       end
 
       it "should validate that the #{attribute} attribute cannot be other values" do
-        ['fail', 42].each do |_value|
-          expect {subject.new(
-            name:     'mock_clone',
-            attribute => 'fail'
-          )
-          }.to raise_error Puppet::Error, %r{(true|false)}
+        ['fail', 42].each do |value|
+          expect { subject.new(name: 'mock_clone', attribute => value) }. \
+            to raise_error Puppet::Error, %r{(true|false)}
         end
       end
     end

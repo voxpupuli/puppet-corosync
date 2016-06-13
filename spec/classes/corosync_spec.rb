@@ -125,10 +125,11 @@ describe 'corosync' do
     end
 
     context 'when cluster_name is not set' do
-      it { should contain_file('/etc/corosync/corosync.conf').without_content(
-        %r{cluster_name\:}
+      it do
+        should contain_file('/etc/corosync/corosync.conf').without_content(
+          %r{cluster_name\:}
         )
-      }
+      end
     end
 
     context 'when cluster_name is set' do
@@ -167,7 +168,7 @@ describe 'corosync' do
       end
     end
 
-    [:package_corosync, :package_pacemaker, :version_corosync, :version_pacemaker].each { |package_param|
+    [:package_corosync, :package_pacemaker, :version_corosync, :version_pacemaker].each do |package_param|
       context "new-style package parameter $#{package_param} mixed with deprecated $packages parameter" do
         before :each do
           params.merge!(
@@ -185,9 +186,9 @@ describe 'corosync' do
           )
         end
       end
-    }
+    end
 
-    [:corosync, :pacemaker].each { |package|
+    [:corosync, :pacemaker].each do |package|
       context "install package #{package} with default version" do
         before :each do
           params.merge!("package_#{package}" => true)
@@ -224,7 +225,7 @@ describe 'corosync' do
           should_not contain_package(package)
         end
       end
-    }
+    end
 
     context 'when set_quorum is true and quorum_members are not set' do
       before :each do

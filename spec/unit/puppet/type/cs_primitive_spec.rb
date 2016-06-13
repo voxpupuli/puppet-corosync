@@ -45,11 +45,12 @@ describe Puppet::Type.type(:cs_primitive) do
       end
 
       it "should validate that the #{attribute} attribute must be a hash" do
-        expect { subject.new(
-          name:       'mock_primitive',
-          parameters: 'fail'
+        expect do
+          subject.new(
+            name:       'mock_primitive',
+            parameters: 'fail'
         )
-        }.to raise_error Puppet::Error, %r{hash}
+        end.to raise_error Puppet::Error, %r{hash}
       end
     end
 
@@ -64,11 +65,12 @@ describe Puppet::Type.type(:cs_primitive) do
 
     it 'validates that the promotable attribute cannot be other values' do
       ['fail', 42].each do |value|
-        expect { subject.new(
-          name:       'mock_primitive',
-          promotable: value
+        expect do
+          subject.new(
+            name:       'mock_primitive',
+            promotable: value
         )
-        }.to raise_error Puppet::Error, %r{(true|false)}
+        end.to raise_error Puppet::Error, %r{(true|false)}
       end
     end
   end

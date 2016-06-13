@@ -7,9 +7,9 @@ describe PuppetX::Voxpupuli::Corosync::Provider::Crmsh do
   end
 
   it 'declares a crm_attribute command' do
-    expect {
+    expect do
       described_class.command :crm_attribute
-    }.not_to raise_error
+    end.not_to raise_error
   end
 
   describe '#ready' do
