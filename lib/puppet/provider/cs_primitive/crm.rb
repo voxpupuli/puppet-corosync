@@ -68,16 +68,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
     instances = []
 
     cmd = [command(:crm), 'configure', 'show', 'xml']
-    if Puppet::PUPPETVERSION.to_f < 3.4
-      # rubocop:disable Lint/UselessAssignment
-      raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
-      # rubocop:enable Lint/UselessAssignment
-    else
-      # rubocop:disable Lint/UselessAssignment
-      raw = Puppet::Util::Execution.execute(cmd)
-      status = raw.exitstatus
-      # rubocop:enable Lint/UselessAssignment
-    end
+    raw, = PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//primitive') do |e|
@@ -109,9 +100,11 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
   # to "stop" the primitive before we are able to remove it.
   def destroy
     debug('Stopping primitive before removing it')
-    crm('resource', 'stop', @resource[:name])
+    cmd = [command(:crm), 'resource', 'stop', @resource[:name]]
+    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
     debug('Removing primitive')
-    crm('configure', 'delete', @resource[:name])
+    cmd = [command(:crm), 'configure', 'delete', @resource[:name]]
+    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
   end
 
@@ -171,8 +164,10 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
       @property_hash[:promotable] = should
     when :false
       @property_hash[:promotable] = should
-      crm('resource', 'stop', "ms_#{@resource[:name]}")
-      crm('configure', 'delete', "ms_#{@resource[:name]}")
+      cmd = [command(:crm), 'resource', 'stop', "ms_#{@resource[:name]}"]
+      PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
+      cmd = [command(:crm), 'configure', 'delete', "ms_#{@resource[:name]}"]
+      PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
     end
   end
 
@@ -242,7 +237,8 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(['crm', '-F', 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
+        cmd = ['crm', '-F', 'configure', 'load', 'update', tmpfile.path.to_s]
+        PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
       end
     end
   end

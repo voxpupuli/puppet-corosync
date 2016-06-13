@@ -41,7 +41,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with(%w(crm configure show xml)).at_least_once.returns([test_cib, 0])
       else
-        Puppet::Util::Execution.expects(:execute).with(%w(crm configure show xml)).at_least_once.returns(
+        Puppet::Util::Execution.expects(:execute).with(%w(crm configure show xml), failonfail: true, combine: true).at_least_once.returns(
           Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
         )
       end
