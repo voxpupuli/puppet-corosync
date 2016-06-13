@@ -15,16 +15,7 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:crm, parent: PuppetX::Voxpupuli::Co
     instances = []
 
     cmd = [command(:crm), 'configure', 'show', 'xml']
-    if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-      # rubocop:disable Lint/UselessAssignment
-      raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
-      # rubocop:enable Lint/UselessAssignment
-    else
-      raw = Puppet::Util::Execution.execute(cmd)
-      # rubocop:disable Lint/UselessAssignment
-      status = raw.exitstatus
-      # rubocop:enable Lint/UselessAssignment
-    end
+    raw, = PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//configuration/rsc_defaults/meta_attributes/nvpair') do |e|
@@ -82,8 +73,8 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:crm, parent: PuppetX::Voxpupuli::Co
       # rubocop:enable Style/GuardClause
       # clear this on properties, in case it's set from a previous
       # run of a different corosync type
-      ENV['CIB_shadow'] = nil
-      crm('configure', 'rsc_defaults', '$id="rsc-options"', "#{@property_hash[:name]}=#{@property_hash[:value]}")
+      cmd = [command(:crm), 'configure', 'rsc_defaults', '$id="rsc-options"', "#{@property_hash[:name]}=#{@property_hash[:value]}"]
+      PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
     end
   end
 end
