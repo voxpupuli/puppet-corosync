@@ -168,6 +168,14 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
           utilization << "#{k}=#{v}"
         end
       end
+
+      if @resource && @resource.class.name == :cs_primitive && !@resource.manage_target_role?
+        @property_hash[:metadata].delete('target-role')
+        @property_hash[:ms_metadata].delete('target-role') if @property_hash[:ms_metadata]
+        @property_hash[:existing_ms_metadata].delete('target-role') if @property_hash[:existing_ms_metadata]
+        @property_hash[:existing_metadata].delete('target-role') if @property_hash[:existing_metadata]
+      end
+
       unless @property_hash[:metadata].empty? && @property_hash[:existing_metadata].empty?
         metadatas = ['meta']
         @property_hash[:metadata].each_pair do |k, v|
