@@ -13,5 +13,5 @@ RSpec.configure do |c|
     macaddress: 'AA:AA:AA:AA:AA:AA'
   }
 end
- require 'spec_helper_methods'
+require 'spec_helper_methods'
 # vim: syntax=ruby
