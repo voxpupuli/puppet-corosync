@@ -83,43 +83,43 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
     end
 
     it 'creates clone' do
-      expect_update(/clone p_keystone-clone p_keystone/)
+      expect_update(%r{clone p_keystone-clone p_keystone})
       instance.flush
     end
 
     it 'sets max clones' do
       instance.clone_max = 3
-      expect_update(/clone-max=3/)
+      expect_update(%r{clone-max=3})
       instance.flush
     end
 
     it 'sets max node clones' do
       instance.clone_node_max = 3
-      expect_update(/clone-node-max=3/)
+      expect_update(%r{clone-node-max=3})
       instance.flush
     end
 
     it 'sets notify_clones' do
       instance.notify_clones = :true
-      expect_update(/notify=true/)
+      expect_update(%r{notify=true})
       instance.flush
     end
 
     it 'sets globally unique' do
       instance.globally_unique = :true
-      expect_update(/globally-unique=true/)
+      expect_update(%r{globally-unique=true})
       instance.flush
     end
 
     it 'sets ordered' do
       instance.ordered = :true
-      expect_update(/ordered=true/)
+      expect_update(%r{ordered=true})
       instance.flush
     end
 
     it 'sets interleave' do
       instance.interleave = :true
-      expect_update(/interleave=true/)
+      expect_update(%r{interleave=true})
       instance.flush
     end
   end

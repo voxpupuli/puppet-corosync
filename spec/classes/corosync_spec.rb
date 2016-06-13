@@ -19,26 +19,26 @@ describe 'corosync' do
 
       it 'configures votequorum' do
         should contain_file('/etc/corosync/corosync.conf').with_content(
-          /nodelist/
+          %r{nodelist}
         )
         should contain_file('/etc/corosync/corosync.conf').with_content(
-          /ring0_addr\: node1\.test\.org\n\s*nodeid: 1/
+          %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 1}
         )
         should contain_file('/etc/corosync/corosync.conf').with_content(
-          /ring0_addr\: node2\.test\.org\n\s*nodeid: 2/
+          %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 2}
         )
       end
 
       it 'supports persistent node IDs' do
         params[:quorum_members_ids] = [3, 11]
         should contain_file('/etc/corosync/corosync.conf').with_content(
-          /nodelist/
+          %r{nodelist}
         )
         should contain_file('/etc/corosync/corosync.conf').with_content(
-          /ring0_addr\: node1\.test\.org\n\s*nodeid: 3/
+          %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 3}
         )
         should contain_file('/etc/corosync/corosync.conf').with_content(
-          /ring0_addr\: node2\.test\.org\n\s*nodeid: 11/
+          %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 11}
         )
       end
     end
@@ -61,26 +61,26 @@ describe 'corosync' do
 
         it 'configures votequorum' do
           should contain_file('/etc/corosync/corosync.conf').with_content(
-            /nodelist/
+            %r{nodelist}
           )
           should contain_file('/etc/corosync/corosync.conf').with_content(
-            /ring0_addr\: node1\.test\.org\n\s*nodeid: 1/
+            %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 1}
           )
           should contain_file('/etc/corosync/corosync.conf').with_content(
-            /ring0_addr\: node2\.test\.org\n\s*nodeid: 2/
+            %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 2}
           )
         end
 
         it 'supports persistent node IDs' do
           params[:quorum_members_ids] = [3, 11]
           should contain_file('/etc/corosync/corosync.conf').with_content(
-            /nodelist/
+            %r{nodelist}
           )
           should contain_file('/etc/corosync/corosync.conf').with_content(
-            /ring0_addr\: node1\.test\.org\n\s*nodeid: 3/
+            %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 3}
           )
           should contain_file('/etc/corosync/corosync.conf').with_content(
-            /ring0_addr\: node2\.test\.org\n\s*nodeid: 11/
+            %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 11}
           )
         end
       end
@@ -95,7 +95,7 @@ describe 'corosync' do
 
         it 'configures the ring properly' do
           should contain_file('/etc/corosync/corosync.conf').with_content(
-            /interface.*memberaddr: 10\.0\.0\.1.*memberaddr: 10\.0\.0\.2.*ringnumber:\s+0.*bindnetaddr: 10\.0\.0\.1/m
+            %r{interface.*memberaddr: 10\.0\.0\.1.*memberaddr: 10\.0\.0\.2.*ringnumber:\s+0.*bindnetaddr: 10\.0\.0\.1}m
           )
         end
       end
@@ -118,7 +118,7 @@ describe 'corosync' do
 
         it 'configures the rings properly' do
           should contain_file('/etc/corosync/corosync.conf').with_content(
-            /interface.*memberaddr: 10\.0\.0\.1.*memberaddr: 10\.0\.0\.2.*ringnumber:\s+0.*bindnetaddr: 10\.0\.0\.1.*interface.*memberaddr: 10\.0\.1\.1.*memberaddr: 10\.0\.1\.2.*ringnumber:\s+1.*bindnetaddr: 10\.0\.1\.1/m
+            %r{interface.*memberaddr: 10\.0\.0\.1.*memberaddr: 10\.0\.0\.2.*ringnumber:\s+0.*bindnetaddr: 10\.0\.0\.1.*interface.*memberaddr: 10\.0\.1\.1.*memberaddr: 10\.0\.1\.2.*ringnumber:\s+1.*bindnetaddr: 10\.0\.1\.1}m
           )
         end
       end
@@ -126,7 +126,7 @@ describe 'corosync' do
 
     context 'when cluster_name is not set' do
       it { should contain_file('/etc/corosync/corosync.conf').without_content(
-        /cluster_name\:/
+        %r{cluster_name\:}
         )
       }
     end
@@ -140,7 +140,7 @@ describe 'corosync' do
 
       it 'configures cluster_name' do
         should contain_file('/etc/corosync/corosync.conf').with_content(
-          /cluster_name\:\s*hacell$/
+          %r{cluster_name\:\s*hacell$}
         )
       end
     end
@@ -154,7 +154,7 @@ describe 'corosync' do
 
       it 'does set to_logfile' do
         should contain_file('/etc/corosync/corosync.conf').with_content(
-          /to_logfile.*yes/
+          %r{to_logfile.*yes}
         )
       end
     end
@@ -162,7 +162,7 @@ describe 'corosync' do
     context 'when log_file is not set' do
       it 'does not set to_logfile' do
         should contain_file('/etc/corosync/corosync.conf').with_content(
-          /to_logfile.*no/
+          %r{to_logfile.*no}
         )
       end
     end
@@ -181,7 +181,7 @@ describe 'corosync' do
         it 'raises error' do
           should raise_error(
             Puppet::Error,
-            /\$corosync::#{package_param} and \$corosync::packages must not be mixed!/
+            %r{\$corosync::#{package_param} and \$corosync::packages must not be mixed!}
           )
         end
       end
@@ -237,7 +237,7 @@ describe 'corosync' do
       it 'raises error' do
         should raise_error(
           Puppet::Error,
-          /set_votequorum is true, but no quorum_members have been passed./
+          %r{set_votequorum is true, but no quorum_members have been passed.}
         )
       end
     end
@@ -245,13 +245,13 @@ describe 'corosync' do
     context 'when configuring defaults for logging' do
       it 'configures stderr, syslog priority, func names' do
         should contain_file('/etc/corosync/corosync.conf').with_content(
-          /to_stderr:       yes/
+          %r{to_stderr:       yes}
         )
         should contain_file('/etc/corosync/corosync.conf').with_content(
-          /syslog_priority: info/
+          %r{syslog_priority: info}
         )
         should_not contain_file('/etc/corosync/corosync.conf').with_content(
-          /function_name:   on/
+          %r{function_name:   on}
         )
       end
     end

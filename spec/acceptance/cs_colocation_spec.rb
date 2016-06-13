@@ -72,15 +72,15 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
                 'crm_resource --list'
               end
     shell(command) do |r|
-      expect(r.stdout).to match(/nginx_service.*IPaddr2/)
-      expect(r.stdout).to match(/nginx_vip.*IPaddr2/)
+      expect(r.stdout).to match(%r{nginx_service.*IPaddr2})
+      expect(r.stdout).to match(%r{nginx_vip.*IPaddr2})
     end
   end
 
   it 'creates the colocation' do
     shell('cibadmin --query | grep vip_with_service') do |r|
-      expect(r.stdout).to match(/colocation.*\swith-rsc="nginx_vip"/)
-      expect(r.stdout).to match(/colocation.*\srsc="nginx_service"/)
+      expect(r.stdout).to match(%r{colocation.*\swith-rsc="nginx_vip"})
+      expect(r.stdout).to match(%r{colocation.*\srsc="nginx_service"})
     end
   end
 end

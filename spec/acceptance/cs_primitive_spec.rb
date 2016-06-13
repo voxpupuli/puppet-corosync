@@ -69,7 +69,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
                 'crm_resource --list'
               end
     shell(command) do |r|
-      expect(r.stdout).to match(/pgsql.*pgsql/)
+      expect(r.stdout).to match(%r{pgsql.*pgsql})
     end
   end
 
@@ -140,8 +140,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
 
     command = 'crm_resource -r test_md -q'
     shell(command) do |r|
-      expect(r.stdout).to match(/is-managed.*false/)
-      expect(r.stdout).to match(/target-role.*stopped/)
+      expect(r.stdout).to match(%r{is-managed.*false})
+      expect(r.stdout).to match(%r{target-role.*stopped})
     end
 
     pp = <<-EOS
@@ -159,8 +159,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     apply_manifest(pp, catch_changes: true)
 
     shell(command) do |r|
-      expect(r.stdout).not_to match(/is-managed.*false/)
-      expect(r.stdout).to match(/target-role.*stopped/)
+      expect(r.stdout).not_to match(%r{is-managed.*false})
+      expect(r.stdout).to match(%r{target-role.*stopped})
     end
   end
 end

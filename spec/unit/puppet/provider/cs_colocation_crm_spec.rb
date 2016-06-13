@@ -101,32 +101,32 @@ describe Puppet::Type.type(:cs_colocation).provider(:crm) do
       end
 
       it 'createses colocation with defaults' do
-        expect_update(/colocation first_with_second INFINITY: second first/)
+        expect_update(%r{colocation first_with_second INFINITY: second first})
       end
 
       it 'updates first primitive' do
         instance.primitives = %w(first_updated second)
-        expect_update(/colocation first_with_second INFINITY: second first_updated/)
+        expect_update(%r{colocation first_with_second INFINITY: second first_updated})
       end
 
       it 'updateses second primitive' do
         instance.primitives = %w(first second_updated)
-        expect_update(/colocation first_with_second INFINITY: second_updated first/)
+        expect_update(%r{colocation first_with_second INFINITY: second_updated first})
       end
 
       it 'updateses both primitives' do
         instance.primitives = %w(first_updated second_updated)
-        expect_update(/colocation first_with_second INFINITY: second_updated first_updated/)
+        expect_update(%r{colocation first_with_second INFINITY: second_updated first_updated})
       end
 
       it 'sets score' do
         instance.score = '-INFINITY'
-        expect_update(/colocation first_with_second -INFINITY: second first/)
+        expect_update(%r{colocation first_with_second -INFINITY: second first})
       end
 
       it 'adds a third primitive' do
         instance.primitives = %w(first second third)
-        expect_update(/colocation first_with_second INFINITY: first second third/)
+        expect_update(%r{colocation first_with_second INFINITY: first second third})
       end
     end
 
@@ -147,7 +147,7 @@ describe Puppet::Type.type(:cs_colocation).provider(:crm) do
       end
 
       it 'creates colocation with 3 primitives' do
-        expect_update(/colocation first_with_second_with_third INFINITY: first second third/)
+        expect_update(%r{colocation first_with_second_with_third INFINITY: first second third})
       end
     end
   end

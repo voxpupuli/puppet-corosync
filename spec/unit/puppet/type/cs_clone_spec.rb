@@ -56,7 +56,7 @@ describe Puppet::Type.type(:cs_clone) do
             name:     'mock_clone',
             attribute => 'fail'
           )
-          }.to raise_error Puppet::Error, /(true|false)/
+          }.to raise_error Puppet::Error, %r{(true|false)}
         end
       end
     end

@@ -82,15 +82,15 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
                 'crm_resource --list'
               end
     shell(command) do |r|
-      expect(r.stdout).not_to match(/apache_service.*IPaddr2/)
-      expect(r.stdout).not_to match(/apache_vip.*IPaddr2/)
+      expect(r.stdout).not_to match(%r{apache_service.*IPaddr2})
+      expect(r.stdout).not_to match(%r{apache_vip.*IPaddr2})
     end
   end
 
   it 'does not create the colocation in the cib' do
     shell('cibadmin --query') do |r|
-      expect(r.stdout).not_to match(/colocation.*\swith-rsc="apache_vip"/)
-      expect(r.stdout).not_to match(/colocation.*\srsc="apache_service"/)
+      expect(r.stdout).not_to match(%r{colocation.*\swith-rsc="apache_vip"})
+      expect(r.stdout).not_to match(%r{colocation.*\srsc="apache_service"})
     end
   end
 
@@ -101,15 +101,15 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
                 'CIB_shadow=puppet crm_resource --list'
               end
     shell(command) do |r|
-      expect(r.stdout).to match(/apache_service.*IPaddr2/)
-      expect(r.stdout).to match(/apache_vip.*IPaddr2/)
+      expect(r.stdout).to match(%r{apache_service.*IPaddr2})
+      expect(r.stdout).to match(%r{apache_vip.*IPaddr2})
     end
   end
 
   it 'creates the colocation in the shadow cib' do
     shell('CIB_shadow=puppet cibadmin --query | grep apache_vip_with_service') do |r|
-      expect(r.stdout).to match(/colocation.*\swith-rsc="apache_vip"/)
-      expect(r.stdout).to match(/colocation.*\srsc="apache_service"/)
+      expect(r.stdout).to match(%r{colocation.*\swith-rsc="apache_vip"})
+      expect(r.stdout).to match(%r{colocation.*\srsc="apache_service"})
     end
   end
 end

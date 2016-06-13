@@ -151,36 +151,36 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
     end
 
     it 'can flush without changes' do
-      expect_update(//)
+      expect_update(%r{})
       instance.flush
     end
 
     it 'sets operations' do
       instance.operations = [{ 'monitor' => { 'interval' => '10s' } }]
-      expect_update(/op monitor interval=10s/)
+      expect_update(%r{op monitor interval=10s})
       instance.flush
     end
 
     it 'sets utilization' do
       instance.utilization = { 'waffles' => '5' }
-      expect_update(/utilization waffles=5/)
+      expect_update(%r{utilization waffles=5})
       instance.flush
     end
 
     it 'sets parameters' do
       instance.parameters = { 'fluffyness' => '12' }
-      expect_update(/params 'fluffyness=12'/)
+      expect_update(%r{params 'fluffyness=12'})
       instance.flush
     end
 
     it 'sets metadata' do
       instance.metadata = { 'target-role' => 'Started' }
-      expect_update(/meta target-role=Started/)
+      expect_update(%r{meta target-role=Started})
       instance.flush
     end
 
     it 'sets the primitive name and type' do
-      expect_update(/primitive testResource ocf:heartbeat:IPaddr2/)
+      expect_update(%r{primitive testResource ocf:heartbeat:IPaddr2})
       instance.flush
     end
   end

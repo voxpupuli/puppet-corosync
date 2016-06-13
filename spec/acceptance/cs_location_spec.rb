@@ -66,7 +66,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     apply_manifest(pp, debug: true, catch_failures: true)
     apply_manifest(pp, debug: true, catch_changes: true)
     shell('cibadmin --query | grep duncan_vip_there') do |r|
-      expect(r.stdout).to match(/rsc_location/)
+      expect(r.stdout).to match(%r{rsc_location})
     end
   end
 
@@ -95,10 +95,10 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     apply_manifest(pp, debug: true, catch_failures: true)
     apply_manifest(pp, debug: true, catch_changes: true)
     shell('cibadmin --query | grep duncan_vip_there') do |r|
-      expect(r.stdout).to match(/rsc_location/)
+      expect(r.stdout).to match(%r{rsc_location})
       # Feature not supported in Ubuntu
-      expect(r.stdout).to match(/resource-discovery="exclusive"/) if fact('osfamily') == 'RedHat'
-      expect(r.stdout).not_to match(/resource-discovery="exclusive"/) if fact('osfamily') != 'RedHat'
+      expect(r.stdout).to match(%r{resource-discovery="exclusive"}) if fact('osfamily') == 'RedHat'
+      expect(r.stdout).not_to match(%r{resource-discovery="exclusive"}) if fact('osfamily') != 'RedHat'
     end
   end
 end

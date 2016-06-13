@@ -49,7 +49,7 @@ describe Puppet::Type.type(:cs_primitive) do
           name:       'mock_primitive',
           parameters: 'fail'
         )
-        }.to raise_error Puppet::Error, /hash/
+        }.to raise_error Puppet::Error, %r{hash}
       end
     end
 
@@ -68,7 +68,7 @@ describe Puppet::Type.type(:cs_primitive) do
           name:       'mock_primitive',
           promotable: value
         )
-        }.to raise_error Puppet::Error, /(true|false)/
+        }.to raise_error Puppet::Error, %r{(true|false)}
       end
     end
   end
