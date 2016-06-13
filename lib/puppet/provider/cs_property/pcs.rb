@@ -74,7 +74,6 @@ Puppet::Type.type(:cs_property).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
   # the updates that need to be made.  The temporary file is then used
   # as stdin for the pcs command.
   def flush
-    # rubocop:disable Style/GuardClause
     unless @property_hash.empty?
       # rubocop:enable Style/GuardClause
       # clear this on properties, in case it's set from a previous

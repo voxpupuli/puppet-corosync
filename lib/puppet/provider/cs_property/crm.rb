@@ -82,7 +82,6 @@ Puppet::Type.type(:cs_property).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
   # as stdin for the crm command.
   def flush
     self.class.block_until_ready
-    # rubocop:disable Style/GuardClause
     unless @property_hash.empty?
       # rubocop:enable Style/GuardClause
       # clear this on properties, in case it's set from a previous

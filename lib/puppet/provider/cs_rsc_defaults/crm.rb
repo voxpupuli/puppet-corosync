@@ -78,7 +78,6 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:crm, parent: PuppetX::Voxpupuli::Co
   # the updates that need to be made.  The temporary file is then used
   # as stdin for the crm command.
   def flush
-    # rubocop:disable Style/GuardClause
     unless @property_hash.empty?
       # rubocop:enable Style/GuardClause
       # clear this on properties, in case it's set from a previous

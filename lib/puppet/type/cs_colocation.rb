@@ -41,7 +41,6 @@ Puppet::Type.newtype(:cs_colocation) do
     # arrays with at least 2 values.
     def should=(value)
       super
-      # rubocop:disable Style/GuardClause
       if value.is_a? Array
         # rubocop:enable Style/GuardClause
         if value.empty?

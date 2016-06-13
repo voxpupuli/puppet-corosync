@@ -250,7 +250,7 @@ Puppet::Type.newtype(:cs_primitive) do
     munge do |value_hash|
       # Ruby 1.8.7 does not support each_with_object
       # rubocop:disable Style/EachWithObject
-      value_hash.inject({}) do |memo, (key, value)|
+      value_hash.reduce({}) do |memo, (key, value)|
         # rubocop:enable Style/EachWithObject
         memo[key] = String(value)
         memo

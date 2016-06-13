@@ -81,7 +81,7 @@ Puppet::Type.newtype(:cs_commit) do
 
   def resources_with_cib(resource_type)
     autos = []
-    catalog.resources.find_all { |r| r.is_a?(Puppet::Type.type(resource_type)) && r.should(:cib) == should(:cib) }.each do |r|
+    catalog.resources.select { |r| r.is_a?(Puppet::Type.type(resource_type)) && r.should(:cib) == should(:cib) }.each do |r|
       autos << r
     end
 
