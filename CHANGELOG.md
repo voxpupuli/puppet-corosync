@@ -1,4 +1,4 @@
-## 2016-06-13 - 1.1.0
+## 2016-06-13 - Release 1.1.0
 ### Summary
 - Move helpers functions to PuppetX ruby namespace (#259)
 - Cs\_commit used with cs\_shadow are now idempotent (#263)
