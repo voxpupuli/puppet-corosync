@@ -16,18 +16,19 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
   # for creating a new provider instance.
   def self.element_to_hash(e)
     hash = {
-      primitive_class: e.attributes['class'],
-      primitive_type:  e.attributes['type'],
-      provided_by:     e.attributes['provider'],
-      name:            e.attributes['id'].to_sym,
-      ensure:          :present,
-      provider:        name,
-      parameters:      nvpairs_to_hash(e.elements['instance_attributes']),
-      operations:      [],
-      utilization:     nvpairs_to_hash(e.elements['utilization']),
-      metadata:        nvpairs_to_hash(e.elements['meta_attributes']),
-      ms_metadata:     {},
-      promotable:      :false
+      primitive_class:   e.attributes['class'],
+      primitive_type:    e.attributes['type'],
+      provided_by:       e.attributes['provider'],
+      name:              e.attributes['id'].to_sym,
+      ensure:            :present,
+      provider:          name,
+      parameters:        nvpairs_to_hash(e.elements['instance_attributes']),
+      operations:        [],
+      utilization:       nvpairs_to_hash(e.elements['utilization']),
+      metadata:          nvpairs_to_hash(e.elements['meta_attributes']),
+      existing_metadata: nvpairs_to_hash(e.elements['meta_attributes']),
+      ms_metadata:       {},
+      promotable:        :false
     }
 
     operations = e.elements['operations']
@@ -55,6 +56,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
           hash[:ms_metadata][m.attributes['name']] = m.attributes['value']
         end
       end
+      hash[:existing_ms_metadata] = hash[:ms_metadata].dup
     end
 
     hash
@@ -190,6 +192,14 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
           o.values.first.each_pair do |k, v|
             operations << "#{k}=#{v} "
           end
+        end
+      end
+      if @resource && !@resource.manage_target_role?
+        if @property_hash[:existing_metadata] && @property_hash[:existing_metadata]['target-role']
+          @property_hash[:metadata]['target-role'] = @property_hash[:existing_metadata]['target-role']
+        end
+        if @property_hash[:existing_ms_metadata] && @property_hash[:existing_ms_metadata]['target-role']
+          @property_hash[:ms_metadata]['target-role'] = @property_hash[:existing_ms_metadata]['target-role']
         end
       end
       unless @property_hash[:parameters].empty?

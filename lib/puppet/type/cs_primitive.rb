@@ -1,3 +1,5 @@
+require 'puppet/parameter/boolean'
+
 Puppet::Type.newtype(:cs_primitive) do
   @doc = "Type for manipulating Corosync/Pacemaker primitives.  Primitives
     are probably the most important building block when creating highly
@@ -61,6 +63,13 @@ Puppet::Type.newtype(:cs_primitive) do
       This paramater sets the CIB this primitive should be created in. A
       cs_shadow resource with a title of the same name as this value should
       also be added to your manifest."
+  end
+
+  newparam(:manage_target_role, boolean: true, parent: Puppet::Parameter::Boolean) do
+    desc "Should manage the target-role metadata? Setting this to false will prevent
+      Puppet to start resources that have been stopped manually"
+
+    defaultto true
   end
 
   # Our parameters and operations properties must be hashes.
@@ -195,6 +204,41 @@ Puppet::Type.newtype(:cs_primitive) do
     validate do |value|
       raise Puppet::Error, 'Puppet::Type::Cs_Primitive: metadata property must be a hash.' unless value.is_a? Hash
     end
+
+    def insync?(is)
+      if @resource.manage_target_role?
+        super
+      else
+        super(is.reject { |k| k == 'target-role' })
+      end
+    end
+
+    # rubocop:disable Style/PredicateName
+    def is_to_s(is)
+      # rubocop:enable Style/PredicateName
+      if @resource.manage_target_role?
+        super
+      else
+        super(is.reject { |k| k == 'target-role' })
+      end
+    end
+
+    def should_to_s(should)
+      if @resource.manage_target_role?
+        super
+      else
+        super(should.reject { |k| k == 'target-role' })
+      end
+    end
+
+    def change_to_s(currentvalue, newvalue)
+      if @resource.manage_target_role?
+        super
+      else
+        super + ' (target-role is not managed)'
+      end
+    end
+
     # rubocop:disable Style/EmptyLiteral
     defaultto Hash.new
     # rubocop:enable Style/EmptyLiteral
@@ -210,6 +254,14 @@ Puppet::Type.newtype(:cs_primitive) do
         # rubocop:enable Style/EachWithObject
         memo[key] = String(value)
         memo
+      end
+    end
+
+    def insync?(is)
+      if @resource.manage_target_role?
+        super
+      else
+        super(is.reject { |k| k == 'target-role' })
       end
     end
 
