@@ -108,8 +108,8 @@ Puppet::Type.type(:cs_colocation).provide(:crm, parent: PuppetX::Voxpupuli::Coro
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing colocation')
-    ENV['CIB_shadow'] = @resource[:cib]
-    crm('configure', 'delete', @resource[:name])
+    cmd = [command(:crm), 'configure', 'delete', @resource[:name]]
+    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
   end
 
