@@ -55,7 +55,7 @@ describe 'corosync' do
         before :each do
           params.merge!(
             set_votequorum: true,
-            quorum_members: ['node1.test.org', 'node2.test.org'],
+            quorum_members: ['node1.test.org', 'node2.test.org']
           )
         end
 
@@ -89,7 +89,7 @@ describe 'corosync' do
         before :each do
           params.merge!(
             bind_address:      '10.0.0.1',
-            unicast_addresses: ['10.0.0.1', '10.0.0.2'],
+            unicast_addresses: ['10.0.0.1', '10.0.0.2']
           )
         end
 
@@ -112,7 +112,7 @@ describe 'corosync' do
                 '10.0.0.2',
                 '10.0.1.2'
               ],
-            ],
+            ]
           )
         end
 
