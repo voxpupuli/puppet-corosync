@@ -62,9 +62,11 @@ Puppet::Type.type(:cs_group).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
   # we need to stop the group.
   def destroy
     debug('Stopping group before removing it')
-    crm('resource', 'stop', @resource[:name])
-    debug('Revmoving group')
-    crm('configure', 'delete', @resource[:name])
+    cmd = [command(:crm), 'resource', 'stop', @resource[:name]]
+    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
+    debug('Removing group')
+    cmd = [command(:crm), 'configure', 'delete', @resource[:name]]
+    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
   end
 
@@ -94,8 +96,8 @@ Puppet::Type.type(:cs_group).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
-        ENV['CIB_shadow'] = @resource[:cib]
-        crm('configure', 'load', 'update', tmpfile.path.to_s)
+        cmd = [command(:crm), 'configure', 'load', 'update', tmpfile.path.to_s]
+        PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
       end
     end
   end
