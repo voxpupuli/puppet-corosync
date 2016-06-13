@@ -1,9 +1,12 @@
-## Next - 1.1.0
+## 2016-06-13 - 1.1.0
 ### Summary
 - Move helpers functions to PuppetX ruby namespace (#259)
-- cs\_commit used with cs\_shadow are now idempotent (#263)
-- cs\_primitive: Fix metadata removal when the metadata parameter is empty (#264)
-- cs\_primivite: Add a manage\_target\_role parameter (#265)
+- Cs\_commit used with cs\_shadow are now idempotent (#263)
+- Cs\_primitive: Fix metadata removal when the metadata parameter is empty (#264)
+- Cs\_primitive: Add a manage\_target\_role parameter (#265)
+- Inner changes to the crm providers to better manage the
+  crm commands (#217 #268 #269 #270 #271 #272 #273)
+- Adoption of Vox Pupuli code of conduct (coc) for further contributions (#267)
 
 ## 2016-05-24 - Release 1.0.2
 ### Summary
