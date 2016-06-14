@@ -2,7 +2,7 @@
 sudo: false
 language: ruby
 cache: bundler
-bundler_args: --without system_tests development
+bundler_args: --without development
 before_install:
   - bundle -v
   - rm Gemfile.lock || true
@@ -29,6 +29,22 @@ matrix:
     env: PUPPET_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK=rubocop
   - rvm: 2.3.1
     env: PUPPET_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK=test
+  - rvm: 2.1
+    env: PUPPET_VERSION="~> 3.0" STRICT_VARIABLES="yes" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/centos-7 PUPPET_INSTALL_TYPE=foss PUPPET_INSTALL_VERSION=3.8.7
+    services: docker
+    sudo: required
+  - rvm: 2.1
+    env: PUPPET_VERSION="~> 3.0" STRICT_VARIABLES="yes" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/ubuntu-14.04 PUPPET_INSTALL_TYPE=foss PUPPET_INSTALL_VERSION=3.8.7
+    services: docker
+    sudo: required
+  - rvm: 2.3.1
+    env: PUPPET_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/centos-7 PUPPET_INSTALL_TYPE=agent PUPPET_INSTALL_VERSION=1.5.1
+    services: docker
+    sudo: required
+  - rvm: 2.3.1
+    env: PUPPET_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/ubuntu-14.04 PUPPET_INSTALL_TYPE=agent PUPPET_INSTALL_VERSION=1.5.1
+    services: docker
+    sudo: required
 notifications:
   email: false
 deploy:
