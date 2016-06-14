@@ -209,6 +209,7 @@ Puppet::Type.newtype(:cs_primitive) do
       if @resource.manage_target_role?
         super
       else
+        Puppet.deprecation_warning 'cs_primitive.rb[manage_target_role]: manage_target_role is deprecated and will be remove in the next major release. It will be replaced by unmanaged_metadata => ["target-role"]'
         super(is.reject { |k| k == 'target-role' })
       end
     end

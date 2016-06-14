@@ -1,3 +1,8 @@
+## 2016-06-14 - Release 1.2.0
+### Summary
+- Deprecate Cs\_primitive[manage\_target\_role] in favour of
+  Cs\_primitive[unmanaged_metadata]
+
 ## 2016-06-13 - Release 1.1.0
 ### Summary
 - Move helpers functions to PuppetX ruby namespace (#259)
