@@ -5,6 +5,8 @@
 # https://github.com/puppetlabs/puppetlabs-stdlib
 # (c) 2015-2015 Puppetlabs and puppetlabs-stdlib contributors
 
+require 'puppet'
+require 'puppet/util/package'
 require 'beaker-rspec'
 require 'beaker/puppet_install_helper'
 
@@ -26,7 +28,13 @@ RSpec.configure do |c|
       default[:default_apply_opts][:parser] = 'future'
     end
 
-    copy_root_module_to(default, source: proj_root, module_name: 'corosync')
+    puppet_version = get_puppet_version
+    if Puppet::Util::Package.versioncmp(puppet_version, '4.0.0') < 0
+      copy_root_module_to(default, source: proj_root, module_name: 'corosync', target_module_path: '/etc/puppet/modules')
+    else
+      copy_root_module_to(default, source: proj_root, module_name: 'corosync')
+    end
+
     hosts.each do |host|
       on host, puppet('module', 'install', 'puppetlabs-stdlib'), acceptable_exit_codes: [0, 1]
     end
