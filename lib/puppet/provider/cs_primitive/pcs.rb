@@ -169,11 +169,13 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
         end
       end
 
-      if @resource && @resource.class.name == :cs_primitive && !@resource.manage_target_role?
-        @property_hash[:metadata].delete('target-role')
-        @property_hash[:ms_metadata].delete('target-role') if @property_hash[:ms_metadata]
-        @property_hash[:existing_ms_metadata].delete('target-role') if @property_hash[:existing_ms_metadata]
-        @property_hash[:existing_metadata].delete('target-role') if @property_hash[:existing_metadata]
+      if @resource && @resource.class.name == :cs_primitive && @resource[:unmanaged_metadata]
+        @resource[:unmanaged_metadata].each do |parameter_name|
+          @property_hash[:metadata].delete(parameter_name)
+          @property_hash[:ms_metadata].delete(parameter_name) if @property_hash[:ms_metadata]
+          @property_hash[:existing_ms_metadata].delete(parameter_name) if @property_hash[:existing_ms_metadata]
+          @property_hash[:existing_metadata].delete(parameter_name) if @property_hash[:existing_metadata]
+        end
       end
 
       unless @property_hash[:metadata].empty? && @property_hash[:existing_metadata].empty?
