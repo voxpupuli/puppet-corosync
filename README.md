@@ -131,15 +131,15 @@ cs_primitive { 'pgsql_service':
 ```
 
 If you do mot want Puppet to interfere with manually stopped resources
-(not change the `target-role` metaparameter), you can use the
-`manage_target_role` parameter:
+(e.g not change the `target-role` metaparameter), you can use the
+`unmanaged_metadata` parameter:
 
 ```puppet
 cs_primitive { 'pgsql_service':
   primitive_class    => 'ocf',
   primitive_type     => 'pgsql',
   provided_by        => 'heartbeat',
-  manage_target_role => false,
+  unmanaged_metadata => ['target-role'],
 }
 ```
 

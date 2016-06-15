@@ -92,7 +92,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     apply_manifest(pp, catch_changes: true)
   end
 
-  it 'respects manage_target_role' do
+  it 'respects unmanaged_metadata' do
     pp = <<-EOS
         cs_primitive { 'test_stop2':
           primitive_class => 'ocf',
@@ -100,7 +100,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           provided_by     => 'heartbeat',
           parameters      => { 'ip' => '172.16.210.142', 'cidr_netmask' => '24' },
           operations      => { 'monitor' => { 'interval' => '10s' } },
-          manage_target_role => false,
+          unmanaged_metadata => ['target-role'],
         }
     EOS
     apply_manifest(pp, expect_changes: true)
@@ -124,7 +124,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     apply_manifest(pp, catch_changes: true)
   end
 
-  it 'removes is-managed but not target-role' do
+  it 'accepts 2 mnetadata names in unmanaged_metadata' do
     pp = <<-EOS
         cs_primitive { 'test_md':
           primitive_class => 'ocf',
@@ -146,12 +146,30 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
 
     pp = <<-EOS
         cs_primitive { 'test_md':
-          primitive_class => 'ocf',
-          primitive_type  => 'IPaddr2',
-          provided_by     => 'heartbeat',
-          parameters      => { 'ip' => '172.16.210.142', 'cidr_netmask' => '24' },
-          operations      => { 'monitor' => { 'interval' => '10s' } },
-          manage_target_role => false,
+          primitive_class    => 'ocf',
+          primitive_type     => 'IPaddr2',
+          provided_by        => 'heartbeat',
+          parameters         => { 'ip' => '172.16.210.142', 'cidr_netmask' => '24' },
+          operations         => { 'monitor' => { 'interval' => '10s' } },
+          unmanaged_metadata => ['target-role', 'is-managed'],
+        }
+    EOS
+
+    apply_manifest(pp, catch_changes: true)
+
+    shell(command) do |r|
+      expect(r.stdout).to match(%r{is-managed.*false})
+      expect(r.stdout).to match(%r{target-role.*stopped})
+    end
+
+    pp = <<-EOS
+        cs_primitive { 'test_md':
+          primitive_class    => 'ocf',
+          primitive_type     => 'IPaddr2',
+          provided_by        => 'heartbeat',
+          parameters         => { 'ip' => '172.16.210.142', 'cidr_netmask' => '24' },
+          operations         => { 'monitor' => { 'interval' => '10s' } },
+          unmanaged_metadata => ['target-role'],
         }
     EOS
 

@@ -65,11 +65,22 @@ Puppet::Type.newtype(:cs_primitive) do
       also be added to your manifest."
   end
 
-  newparam(:manage_target_role, boolean: true, parent: Puppet::Parameter::Boolean) do
-    desc "Should manage the target-role metadata? Setting this to false will prevent
-      Puppet to start resources that have been stopped manually"
+  newparam(:unmanaged_metadata, array_matching: :all) do
+    desc "Metadata options that should not be managed by Puppet.
+      Examples: ['target-role', 'is-managed']"
 
-    defaultto true
+    validate do |value|
+      raise Puppet::Error, "Puppet::Type::Cs_Primitive: unmanaged_metadata parameter must be an array or a string, got #{value.class.name}." unless value.is_a?(Array) || value.is_a?(String) || value.is_a?(Symbol)
+    end
+
+    munge do |value|
+      return [value] if value.is_a?(String) || value.is_a?(Symbol)
+      value
+    end
+
+    # rubocop:disable Style/EmptyLiteral
+    defaultto Array.new
+    # rubocop:enable Style/EmptyLiteral
   end
 
   # Our parameters and operations properties must be hashes.
@@ -206,37 +217,24 @@ Puppet::Type.newtype(:cs_primitive) do
     end
 
     def insync?(is)
-      if @resource.manage_target_role?
-        super
-      else
-        Puppet.deprecation_warning 'cs_primitive.rb[manage_target_role]: manage_target_role is deprecated and will be remove in the next major release. It will be replaced by unmanaged_metadata => ["target-role"]'
-        super(is.reject { |k| k == 'target-role' })
-      end
+      super(is.reject { |k| @resource[:unmanaged_metadata].include?(k) })
     end
 
     # rubocop:disable Style/PredicateName
     def is_to_s(is)
       # rubocop:enable Style/PredicateName
-      if @resource.manage_target_role?
-        super
-      else
-        super(is.reject { |k| k == 'target-role' })
-      end
+      super(is.reject { |k| @resource[:unmanaged_metadata].include?(k) })
     end
 
     def should_to_s(should)
-      if @resource.manage_target_role?
-        super
-      else
-        super(should.reject { |k| k == 'target-role' })
-      end
+      super(should.reject { |k| @resource[:unmanaged_metadata].include?(k) })
     end
 
     def change_to_s(currentvalue, newvalue)
-      if @resource.manage_target_role?
+      if @resource[:unmanaged_metadata].count == 0
         super
       else
-        super + ' (target-role is not managed)'
+        super + " (unmanaged parameters: #{@resource[:unmanaged_metadata].join(', ')})"
       end
     end
 
@@ -259,10 +257,24 @@ Puppet::Type.newtype(:cs_primitive) do
     end
 
     def insync?(is)
-      if @resource.manage_target_role?
+      super(is.reject { |k| @resource[:unmanaged_metadata].include?(k) })
+    end
+
+    # rubocop:disable Style/PredicateName
+    def is_to_s(is)
+      # rubocop:enable Style/PredicateName
+      super(is.reject { |k| @resource[:unmanaged_metadata].include?(k) })
+    end
+
+    def should_to_s(should)
+      super(should.reject { |k| @resource[:unmanaged_metadata].include?(k) })
+    end
+
+    def change_to_s(currentvalue, newvalue)
+      if @resource[:unmanaged_metadata].count == 0
         super
       else
-        super(is.reject { |k| k == 'target-role' })
+        super + " (unmanaged parameters: #{@resource[:unmanaged_metadata].join(', ')})"
       end
     end
 
