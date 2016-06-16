@@ -82,35 +82,55 @@
 #   Time To Live.
 #
 # [*package_corosync*]
-#   Define if package corosync should be installed.
+#   Define if package corosync should be managed.
 #   Defaults to true
+#
+# [*package_crmsh*]
+#   Define if package corosync should be managed.
+#   Defaults to true in Debian-based systems, false otherwise
 #
 # [*version_corosync*]
-#   Define what version of corosync should be installed.
+#   Define what version of corosync should be managed.
 #   Defaults to present
-#
-# [*packageopts_corosync*]
-#   Additional install-options for package-resource.
-#   Defaults to undef
 #
 # [*package_pacemaker*]
-#   Define if package pacemaker should be installed.
+#   Define if package pacemaker should be managed.
 #   Defaults to true
-#
-# [*version_pacemaker*]
-#   Define what version of pacemaker should be installed.
-#   Defaults to present
-#
-# [*packageopts_pacemaker*]
-#   Additional install-options for package-resource.
-#   Defaults to undef
 #
 # [*package_pcs*]
-#   Define if package pcs should be installed.
-#   Defaults to true
+#   Define if package pcs should be managed.
+#   Defaults to true on Red-hat based systems, false otherwise
+#
+# [*packageopts_corosync*]
+#   Additional install-options for the corosync package resource.
+#   Defaults to ['-t', 'jessie-backports'] on Jessie, undef otherwise.
+#
+# [*packageopts_crmsh*]
+#   Additional install-options for the crmsh package resource.
+#   Defaults to ['-t', 'jessie-backports'] on Jessie, undef otherwise.
+#
+# [*packageopts_pacemaker*]
+#   Additional install-options for the pacemaker package resource.
+#   Defaults to ['-t', 'jessie-backports'] on Jessie, undef otherwise.
+#
+# [*packageopts_pcs*]
+#   Additional install-options for the pcs package resource.
+#   Defaults to ['-t', 'jessie-backports'] on Jessie, undef otherwise.
+#
+# [*version_corosync*]
+#   Define what version of the corosync package should be installed.
+#   Defaults to present
+#
+# [*version_crmsh*]
+#   Define what version of the crmsh package should be installed.
+#   Defaults to present
+#
+# [*version_pacemaker*]
+#   Define what version of the pacemaker package should be installed.
+#   Defaults to present
 #
 # [*version_pcs*]
-#   Define what version of pcs should be installed.
+#   Define what version of the pcs package should be installed.
 #   Defaults to present
 #
 # [*set_votequorum*]
@@ -172,12 +192,6 @@
 #   to 256000 / netmtu to prevent overflow of the kernel transmit buffers.
 #   Defaults to 17
 #
-# === Deprecated Parameters
-#
-# [*packages*]
-#   Deprecated in favour of package_{corosync,pacemaker} and
-#   version_{corosync,pacemaker}. Array of packages to install.
-#
 # === Examples
 #
 #  class { 'corosync':
@@ -212,15 +226,18 @@ class corosync(
   $log_function_name                   = $::corosync::params::log_function_name,
   $rrp_mode                            = $::corosync::params::rrp_mode,
   $ttl                                 = $::corosync::params::ttl,
-  $packages                            = undef,
-  $package_corosync                    = undef,
-  $version_corosync                    = undef,
-  $packageopts_corosync                = undef,
-  $package_pacemaker                   = undef,
-  $version_pacemaker                   = undef,
-  $packageopts_pacemaker               = undef,
-  $package_pcs                         = undef,
-  $version_pcs                         = undef,
+  $package_corosync                    = $::corosync::params::package_corosync,
+  $package_crmsh                       = $::corosync::params::package_crmsh,
+  $package_pacemaker                   = $::corosync::params::package_pacemaker,
+  $package_pcs                         = $::corosync::params::package_pcs,
+  $packageopts_corosync                = $::corosync::params::package_install_options,
+  $packageopts_pacemaker               = $::corosync::params::package_install_options,
+  $packageopts_crmsh                   = $::corosync::params::package_install_options,
+  $packageopts_pcs                     = $::corosync::params::package_install_options,
+  $version_corosync                    = $::corosync::params::version_corosync,
+  $version_crmsh                       = $::corosync::params::version_crmsh,
+  $version_pacemaker                   = $::corosync::params::version_pacemaker,
+  $version_pcs                         = $::corosync::params::version_pcs,
   $set_votequorum                      = $::corosync::params::set_votequorum,
   $votequorum_expected_votes           = $::corosync::params::votequorum_expected_votes,
   $quorum_members                      = ['localhost'],
@@ -244,85 +261,33 @@ class corosync(
     fail('quorum_members_ids may not be used without the quorum_members.')
   }
 
-  if $packages {
-    warning('$corosync::packages is deprecated, use $corosync::package_{corosync,pacemaker} instead!')
-
-    package{ $packages:
-      ensure => present,
+  if $package_corosync {
+    package { 'corosync':
+      ensure          => $version_corosync,
+      install_options => $packageopts_corosync,
     }
+  }
 
-    # Ensure no options conflicting with $packages are set:
-
-    if $package_corosync {
-      fail('$corosync::package_corosync and $corosync::packages must not be mixed!')
+  if $package_pacemaker {
+    package { 'pacemaker':
+      ensure          => $version_pacemaker,
+      install_options => $packageopts_pacemaker,
     }
-    if $packageopts_corosync {
-      fail('$corosync::packageopts_corosync and $corosync::packages must not be mixed!')
+  }
+
+  if $package_crmsh {
+    package { 'crmsh':
+      ensure          => $version_crmsh,
+      install_options => $packageopts_crmsh,
     }
-    if $package_pacemaker {
-      fail('$corosync::package_pacemaker and $corosync::packages must not be mixed!')
+  }
+
+  if $package_pcs {
+    package { 'pcs':
+      ensure          => $version_pcs,
+      install_options => $packageopts_pcs,
     }
-    if $version_corosync {
-      fail('$corosync::version_corosync and $corosync::packages must not be mixed!')
-    }
-    if $version_pacemaker {
-      fail('$corosync::version_pacemaker and $corosync::packages must not be mixed!')
-    }
-    if $packageopts_pacemaker {
-      fail('$corosync::packageopts_pacemaker and $corosync::packages must not be mixed!')
-    }
-  } else {
-      # Handle defaults for new-style package parameters here to allow co-existence with $packages.
-      if $package_corosync == undef {
-        $_package_corosync = true
-      } else {
-        $_package_corosync = $package_corosync
-      }
-
-      if $packageopts_corosync == undef {
-        $_packageopts_corosync = undef
-      } else {
-        $_packageopts_corosync = $packageopts_corosync
-      }
-
-      if $package_pacemaker == undef {
-        $_package_pacemaker = true
-      } else {
-        $_package_pacemaker = $package_pacemaker
-      }
-
-      if $version_corosync == undef {
-        $_version_corosync = present
-      } else {
-        $_version_corosync = $version_corosync
-      }
-
-      if $version_pacemaker == undef {
-        $_version_pacemaker = present
-      } else {
-        $_version_pacemaker = $version_pacemaker
-      }
-
-      if $packageopts_pacemaker == undef {
-        $_packageopts_pacemaker = undef
-      } else {
-        $_packageopts_pacemaker = $packageopts_pacemaker
-      }
-
-      if $_package_corosync == true {
-        package { 'corosync':
-          ensure          => $_version_corosync,
-          install_options => $_packageopts_corosync,
-        }
-      }
-
-      if $_package_pacemaker == true {
-        package { 'pacemaker':
-          ensure          => $_version_pacemaker,
-          install_options => $_packageopts_pacemaker,
-        }
-      }
-    }
+  }
 
   if ! is_bool($enable_secauth) {
     validate_re($enable_secauth, '^(on|off)$')
@@ -384,30 +349,11 @@ class corosync(
     }
   }
 
-  if $::osfamily == 'RedHat' {
-    if $package_pcs == undef {
-      $_package_pcs = true
-    } else {
-      $_package_pcs = $package_pcs
-    }
-
-    if $version_pcs == undef {
-      $_version_pcs = present
-    } else {
-      $_version_pcs = $version_pcs
-    }
-
-    if $_package_pcs {
-      package { 'pcs':
-        ensure => $_version_pcs,
-      }
-      if $manage_pcsd_service {
-        service { 'pcsd':
-          ensure  => running,
-          enable  => true,
-          require => Package['pcs'],
-        }
-      }
+  if $manage_pcsd_service {
+    service { 'pcsd':
+      ensure  => running,
+      enable  => true,
+      require => Package['pcs'],
     }
   }
 

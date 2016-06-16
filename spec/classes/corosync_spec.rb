@@ -168,26 +168,6 @@ describe 'corosync' do
       end
     end
 
-    [:package_corosync, :package_pacemaker, :version_corosync, :version_pacemaker].each do |package_param|
-      context "new-style package parameter $#{package_param} mixed with deprecated $packages parameter" do
-        before :each do
-          params.merge!(
-            package_param => true, # value does not really matter here: these
-            # two params must not both be defined
-            # at the same time.
-            packages: %w(corosync pacemaker)
-          )
-        end
-
-        it 'raises error' do
-          should raise_error(
-            Puppet::Error,
-            %r{\$corosync::#{package_param} and \$corosync::packages must not be mixed!}
-          )
-        end
-      end
-    end
-
     [:corosync, :pacemaker].each do |package|
       context "install package #{package} with default version" do
         before :each do
@@ -260,10 +240,13 @@ describe 'corosync' do
 
   context 'on Debian platforms' do
     let :facts do
-      { osfamily:        'Debian',
+      {
+        osfamily:        'Debian',
         operatingsystem: 'Debian',
+        operatingsystemrelease: '8.5',
         processorcount:  '3',
-        ipaddress:       '127.0.0.1' }
+        ipaddress:       '127.0.0.1'
+      }
     end
 
     it_configures 'corosync'
