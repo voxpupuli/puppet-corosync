@@ -4,6 +4,7 @@
   Cs\_primitive[unmanaged\_metadata] parameter (#275)
 - Support Debian 8. Requires jessie-backports apt repository (not included in
   this module) (#282)
+- Set Puppet requirement version to >= 3.0.0 < 5.0.0 (#286)
 
 ### Backward incompatible changes
 - Cs\_primitive[manage\_target\_role] parameter (introduced in 1.1.0, deprecated
@@ -12,6 +13,11 @@
   replace `manage_target_role => false` by `unmanaged_metadata => ['targes-role']`
 - The class parameter corosync::packages has been removed (was deprecated in
   0.8.0) (#282)
+
+### Deprecation notes
+
+We will remove support for Puppet <= 3.6.0 in two major releases of this module
+(4.0.0).
 
 ## 2016-06-16 - Release 1.2.1
 ### Summary
