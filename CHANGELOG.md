@@ -1,7 +1,17 @@
+## 2016-06-16 - Release 1.2.1
+### Summary
+- Workaround upstream Puppet bug regarding PuppetX ruby namespace (#278 #284
+  SERVER-973)
+
 ## 2016-06-14 - Release 1.2.0
 ### Summary
 - Deprecate Cs\_primitive[manage\_target\_role] in favour of
   Cs\_primitive[unmanaged_metadata]
+
+## 2016-06-16 - Release 1.1.1
+### Summary
+- Workaround upstream Puppet bug regarding PuppetX ruby namespace (#278 #284
+  SERVER-973)
 
 ## 2016-06-13 - Release 1.1.0
 ### Summary
