@@ -1,3 +1,18 @@
+## Nxt - Release 2.0.0
+### Summary
+- Replate Cs\_primitive[manage\_target\_role] parameter by
+  Cs\_primitive[unmanaged\_metadata] parameter (#275)
+- Support Debian 8. Requires jessie-backports apt repository (not included in
+  this module) (#282)
+
+### Backward incompatible changes
+- Cs\_primitive[manage\_target\_role] parameter (introduced in 1.1.0, deprecated
+  in 1.2.0) has ben replaced by the more powerful
+  Cs\_primitive[unmanaged\_metadata] parameter (#275). To update, you need to
+  replace `manage_target_role => false` by `unmanaged_metadata => ['targes-role']`
+- The class parameter corosync::packages has been removed (was deprecated in
+  0.8.0) (#282)
+
 ## 2016-06-14 - Release 1.2.0
 ### Summary
 - Deprecate Cs\_primitive[manage\_target\_role] in favour of
