@@ -54,7 +54,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       }
     EOS
 
-    apply_manifest(pp, catch_failures: true)
+    apply_manifest(pp, expect_changes: true)
     apply_manifest(pp, catch_changes: true)
   end
 
@@ -69,7 +69,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         second  => 'second_vip',
       }
     EOS
-    apply_manifest(pp, debug: true, catch_failures: true)
+    apply_manifest(pp, debug: true, expect_changes: true)
     apply_manifest(pp, debug: true, catch_changes: true)
     shell('cibadmin --query | grep first_then_two') do |r|
       expect(r.stdout).to match(%r{rsc_order})
@@ -87,7 +87,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         ensure => absent,
       }
     EOS
-    apply_manifest(pp, catch_failures: true)
+    apply_manifest(pp, expect_changes: true)
     apply_manifest(pp, catch_changes: true)
     assert_raises(Beaker::Host::CommandFailure) do
       shell('cibadmin --query | grep first_then_two')
@@ -102,7 +102,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         kind   => 'Optional',
       }
     EOS
-    apply_manifest(pp, debug: true, catch_failures: true)
+    apply_manifest(pp, debug: true, expect_changes: true)
     apply_manifest(pp, debug: true, catch_changes: true)
     shell('cibadmin --query | grep one_then_two_complex') do |r|
       expect(r.stdout).to match(%r{rsc_order})
