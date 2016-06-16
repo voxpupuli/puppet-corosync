@@ -340,6 +340,16 @@ fall together a point you in the right direction when Corosync fails unexpectedl
 A simple but complete manifest example can be found on [Cody Herriges' Github](https://github.com/ody/ha-demo), plus
 there are more incomplete examples spread across the [Puppet Labs Github](https://github.com/puppetlabs).
 
+Debian 8 Support
+----------------
+
+In order to have this module working with Debian 8, you need to enable the
+jessie-backport apt repository.
+
+We are only running acceptance tests for Puppet-Agent under Debian Jessie
+because Puppetlabs does not provide official Puppet 3.8 packages for that
+platform.
+
 Contributors
 ------------
 

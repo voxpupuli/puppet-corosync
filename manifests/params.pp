@@ -23,19 +23,30 @@ class corosync::params {
   $join                                = 50
   $consensus                           = false
   $max_messages                        = 17
+  $package_corosync                    = true
+  $package_pacemaker                   = true
+  $version_corosync                    = 'present'
+  $version_crmsh                       = 'present'
+  $version_pacemaker                   = 'present'
+  $version_pcs                         = 'present'
 
   case $::osfamily {
     'RedHat': {
+      $package_crmsh  = false
+      $package_pcs    = true
       $set_votequorum = true
-      $compatibility = 'whitetank'
+      $compatibility  = 'whitetank'
       if versioncmp($::operatingsystemrelease, '7') >= 0 {
         $manage_pacemaker_service = true
       } else {
         $manage_pacemaker_service = false
       }
+      $package_install_options = undef
     }
 
     'Debian': {
+      $package_crmsh  = true
+      $package_pcs    = false
       case $::operatingsystem {
         'Ubuntu': {
           if versioncmp($::operatingsystemrelease, '14.04') >= 0 {
@@ -53,11 +64,26 @@ class corosync::params {
             $set_votequorum = false
             $manage_pacemaker_service = false
           }
+          $package_install_options = undef
+        }
+        'Debian': {
+          if versioncmp($::operatingsystemrelease, '8') >= 0 {
+            $set_votequorum = true
+            $compatibility = false
+            $manage_pacemaker_service = true
+            $package_install_options = ['-t', 'jessie-backports']
+          } else {
+            $set_votequorum = false
+            $compatibility = 'whitetank'
+            $manage_pacemaker_service = false
+            $package_install_options = undef
+          }
         }
         default : {
           $compatibility = 'whitetank'
           $set_votequorum = false
           $manage_pacemaker_service = false
+          $package_install_options = undef
         }
       }
     }
