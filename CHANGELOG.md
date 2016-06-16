@@ -1,3 +1,8 @@
+## 2016-06-16 - Release 1.1.1
+### Summary
+- Workaround upstream Puppet bug regarding PuppetX ruby namespace (#278 #284
+  SERVER-973)
+
 ## 2016-06-13 - Release 1.1.0
 ### Summary
 - Move helpers functions to PuppetX ruby namespace (#259)
