@@ -142,6 +142,8 @@
 # [*quorum_members*]
 #   Array of quorum member hostname. This is required if set_votequorum
 #   is set to true.
+#   You can also have an array of arrays to have multiple rings. In that case,
+#   each subarray matches a member IP addresses.
 #   Defaults to ['localhost']
 #
 # [*quorum_members_ids*]

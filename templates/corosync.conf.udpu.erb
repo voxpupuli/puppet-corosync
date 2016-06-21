@@ -20,11 +20,11 @@ totem {
   secauth:                             <%= @enable_secauth_real %>
   threads:                             <%= @threads %>
   transport:                           udpu
-<% (0..Array(@unicast_addresses.first).length-1).each do |interface| -%>
+<% Array(@unicast_addresses.first).each_index do |interface| -%>
   interface {
-<% @unicast_addresses.each do |addr| -%>
+<% Array(Array(@unicast_addresses.map{|x| Array(x).flatten}).transpose[interface]).each do |addr| -%>
     member {
-      memberaddr: <%= Array(addr)[interface] %>
+      memberaddr: <%= addr %>
     }
 <% end -%>
     ringnumber:  <%= interface %>
@@ -88,9 +88,11 @@ quorum {
 
 <% unless @votequorum_expected_votes -%>
 nodelist {
-<% [@quorum_members].flatten.each_index do |i| -%>
+<% Array(@quorum_members).each_index do |i| -%>
   node {
-    ring0_addr: <%= [@quorum_members].flatten[i] %>
+<% Array(Array(@quorum_members.map{|node| Array(node).flatten})[i]).each_with_index do |addr,ring| -%>
+    ring<%= ring %>_addr: <%= addr %>
+<% end -%>
 <% if @quorum_members_ids.nil? -%>
     nodeid: <%= i+1 %>
 <% else -%>
