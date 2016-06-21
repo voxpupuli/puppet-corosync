@@ -142,6 +142,8 @@
 # [*quorum_members*]
 #   Array of quorum member hostname. This is required if set_votequorum
 #   is set to true.
+#   You can also have an array of arrays to have multiple rings. In that case,
+#   each subarray matches a member IP addresses.
 #   Defaults to ['localhost']
 #
 # [*quorum_members_ids*]
@@ -316,6 +318,14 @@ class corosync(
   # $multicast_address or $unicast_address or $cluster_name
   if $multicast_address == 'UNSET' and $unicast_addresses == 'UNSET' and !$cluster_name {
       fail('You must provide a value for multicast_address, unicast_address or cluster_name.')
+  }
+
+  # $rrp_mode value of 'none' isn't allowed with multiple rings
+  if ( ( is_array($multicast_address) and size($multicast_address) > 1 )
+  or ( is_array($unicast_addresses) and is_array($unicast_addresses[0]) and size($unicast_addresses[0]) > 1 )
+  or ( is_array($quorum_members) and is_array($quorum_members[0]) and size($quorum_members[0]) > 1 ) )
+  and $rrp_mode == 'none' {
+    fail('You must set rrp_mode to active or passive with multiple rings')
   }
 
   case $enable_secauth {
