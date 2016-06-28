@@ -1,6 +1,6 @@
 ## 2016-06-28 - Release 2.0.0
 ### Summary
-- Replate Cs\_primitive[manage\_target\_role] parameter by
+- Replace Cs\_primitive[manage\_target\_role] parameter by
   Cs\_primitive[unmanaged\_metadata] parameter (#275)
 - Support Debian 8. Requires jessie-backports apt repository (not included in
   this module) (#282)
