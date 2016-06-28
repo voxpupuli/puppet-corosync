@@ -1,10 +1,11 @@
-## Nxt - Release 2.0.0
+## 2016-06-28 - Release 2.0.0
 ### Summary
 - Replate Cs\_primitive[manage\_target\_role] parameter by
   Cs\_primitive[unmanaged\_metadata] parameter (#275)
 - Support Debian 8. Requires jessie-backports apt repository (not included in
   this module) (#282)
 - Set Puppet requirement version to >= 3.0.0 < 5.0.0 (#286)
+- Add a `cib` parameter to cs\_rsc\_default (#296)
 
 ### Backward incompatible changes
 - Cs\_primitive[manage\_target\_role] parameter (introduced in 1.1.0, deprecated
