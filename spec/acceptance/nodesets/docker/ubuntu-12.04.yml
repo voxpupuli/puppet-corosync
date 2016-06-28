@@ -1,0 +1,16 @@
+# This file comes from puppetlabs-apache and camptocamp-rsyslogv8, and is released under the apache-2.0 licence
+# https://github.com/puppetlabs/modulesync_configs/blob/master/moduleroot/spec/acceptance/nodesets/docker/ubuntu-14.04.yml.yml
+# https://github.com/camptocamp/puppet-rsyslogv8/blob/master/spec/acceptance/nodesets/ubuntu-12.04.yml
+HOSTS:
+  ubuntu-1204-x64:
+    platform: ubuntu-12.04-amd64
+    hypervisor: docker
+    image: ubuntu:12.04
+    docker_preserve_image: true
+    docker_cmd: '["/sbin/init"]'
+    docker_image_commands:
+      - 'apt-get install -y net-tools wget'
+      - 'locale-gen en_US.UTF-8'
+CONFIG:
+  trace_limit: 200
+  masterless: true

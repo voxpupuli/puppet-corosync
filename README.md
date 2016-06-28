@@ -346,9 +346,19 @@ Debian 8 Support
 In order to have this module working with Debian 8, you need to enable the
 jessie-backport apt repository.
 
-We are only running acceptance tests for Puppet-Agent under Debian Jessie
-because Puppetlabs does not provide official Puppet 3.8 packages for that
-platform.
+
+Operating System support matrix
+-------------------------------
+
+| OS          | release | Puppet 3.X    | Puppet 4.X (PC1) |
+|-------------|---------|---------------|------------------|
+| CentOS/RHEL | 5       | Not supported | Not supported    |
+| CentOS/RHEL | 6       | Not supported | Not supported    |
+| CentOS/RHEL | 7       | **Supported** | **Supported**    |
+| Debian      | 8       | Not supported | **Supported**    |
+| Ubuntu      | 12.04   | Not supported | Not supported    |
+| Ubuntu      | 14.04   | **Supported** | **Supported**    |
+| Ubuntu      | 16.04   | Not supported | **Supported**    |
 
 Contributors
 ------------
