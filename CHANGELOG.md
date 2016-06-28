@@ -1,3 +1,7 @@
+## Next
+### Summary
+- Support Ubuntu 16.04 (#288)
+
 ## 2016-06-28 - Release 2.0.0
 ### Summary
 - Replace Cs\_primitive[manage\_target\_role] parameter by
