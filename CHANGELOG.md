@@ -1,6 +1,7 @@
-## Next
+## 2016-06-28 - Release 2.0.1
 ### Summary
 - Support Ubuntu 16.04 (#288)
+- Fix travis release (#302)
 
 ## 2016-06-28 - Release 2.0.0
 ### Summary

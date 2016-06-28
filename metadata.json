@@ -1,6 +1,6 @@
 {
   "name": "puppet-corosync",
-  "version": "2.0.1-rc0",
+  "version": "2.0.1",
   "author": "voxpupuli",
   "summary": "This module is a set of manifests and types/providers for quickly setting up highly available clusters using Corosync",
   "license": "Apache-2.0",
@@ -34,11 +34,13 @@
       ]
     }
   ],
-  "dependencies": [
+  "requirements": [
     {
       "name": "puppet",
       "version_requirement": ">= 3.0.0 < 5.0.0"
-    },
+    }
+  ],
+  "dependencies": [
     {
       "name": "puppetlabs/stdlib",
       "version_requirement": "4.x"
