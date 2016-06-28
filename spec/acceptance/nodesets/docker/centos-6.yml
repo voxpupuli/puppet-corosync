@@ -1,0 +1,15 @@
+# This file comes from puppetlabs-apache, and is released under the apache-2.0 licence
+# https://github.com/puppetlabs/modulesync_configs/blob/master/moduleroot/spec/acceptance/nodesets/docker/centos-7.yml
+HOSTS:
+  centos-6-x64:
+    platform: el-6-x86_64
+    hypervisor: docker
+    image: centos:6
+    docker_preserve_image: true
+    docker_cmd: '["/sbin/init"]'
+    # install various tools required to get the image up to usable levels
+    docker_image_commands:
+      - 'yum install -y crontabs tar wget openssl sysvinit-tools iproute which initscripts'
+CONFIG:
+  trace_limit: 200
+  masterless: true
