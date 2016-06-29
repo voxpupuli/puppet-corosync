@@ -35,8 +35,16 @@ RSpec.configure do |c|
       copy_root_module_to(default, source: proj_root, module_name: 'corosync')
     end
 
+
     hosts.each do |host|
       on host, puppet('module', 'install', 'puppetlabs-stdlib'), acceptable_exit_codes: [0, 1]
+      if fact('osfamily') =~ %r{RedHat}i and Puppet::Util::Package.versioncmp(fact('operatingsystemmajrelease'), '7.0') < 0
+        shell('git clone https://github.com/kbon/puppet-cman /etc/puppetlabs/code/modules/cman')
+        on host, puppet('apply', '-e', 'include cman')
+        on host, puppet('apply', '-e', 'cman_cluster { "test": ensure => present, multicast => "10.1.1.1", altmulticast => "10.1.1.2", }')
+        on host, puppet('apply', '-e', 'cman_clusternode { "127.0.0.1": ensure => present, }')
+        on host, puppet('apply', '-e', 'include cman::service')
+      end
     end
   end
 end
