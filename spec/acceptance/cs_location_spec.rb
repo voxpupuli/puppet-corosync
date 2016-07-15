@@ -114,4 +114,33 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       end
     end
   end
+
+  it 'creates a location with a rule' do
+    pp = <<-EOS
+      cs_location { 'duncan_vip_not_in_container':
+        primitive => 'duncan_vip',
+        rules     => [
+          { 'duncan_vip_not_in_container-rule' => {
+              score      => '-INFINITY',
+              expression => [
+                { attribute => '#kind',
+                  operation => 'eq',
+                  value     => 'container',
+                },
+              ],
+            },
+          },
+        ],
+      }
+    EOS
+    apply_manifest(pp, debug: true, catch_failures: true)
+    apply_manifest(pp, debug: true, catch_changes: true)
+    shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_container-rule\']"') do |r|
+      # attribute order in XML might be non-deterministic
+      expect(r.stdout).to match(%r{<rule .*score="-INFINITY"})
+      expect(r.stdout).to match(%r{<expression .*attribute="#kind"})
+      expect(r.stdout).to match(%r{<expression .*operation="eq"})
+      expect(r.stdout).to match(%r{<expression .*value="container"})
+    end
+  end
 end

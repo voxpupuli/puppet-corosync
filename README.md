@@ -174,6 +174,80 @@ cs_location { 'nginx_service_location':
 }
 ```
 
+To manage rule on a location.
+Example to force the location to not run on a container (VM).
+
+```puppet
+cs_location { 'nginx_service_location':
+  primitive => 'nginx_service',
+  rules     => [
+    { 'nginx-service-avoid-container-rule' => {
+        'score'      => '-INFINITY',
+        'expression' => [
+          { 'attribute' => '#kind',
+            'operation' => 'eq',
+            'value'     => 'container'
+          },
+        ],
+      },
+    },
+  ],
+}
+```
+
+Example of a virtual ip location that checks ping connectivity for placement.
+
+```puppet
+cs_location { 'vip-ping-connected':
+  primitive => 'vip',
+  rules     => [
+    { 'vip-ping-exclude-rule' => {
+        'score'      => '-INFINITY',
+        'expression' => [
+          { 'attribute' => 'pingd',
+            'operation' => 'lt',
+            'value'     => '100',
+          },
+        ],
+      },
+    },
+    { 'vip-ping-prefer-rule' => {
+        'score-attribute' => 'pingd',
+        'expression'      => [
+          { 'attribute' => 'pingd',
+            'operation' => 'defined',
+          }
+        ],
+      },
+    },
+  ],
+}
+```
+
+Example of another possibility to use ping connectivity for placement.
+
+```puppet
+cs_location { 'vip-ping-connected':
+  primitive => 'vip',
+  rules     => [
+    { 'vip-ping-connected-rule' => {
+        'score'      => '-INFINITY',
+        'boolean-op' => 'or',
+        'expression' => [
+          { 'attribute' => 'pingd',
+            'operation' => 'not_defined',
+          },
+          { 'attribute' => 'pingd',
+            'operation' => 'lte',
+            'value'     => '100',
+          },
+        ],
+      },
+    },
+  ],
+}
+```
+
 ### Configuring colocations
 
 Colocations keep primitives together.  Meaning if a vip moves to web02 from web01
