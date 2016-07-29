@@ -24,7 +24,7 @@ class PuppetX::Voxpupuli::Corosync::Provider::CibHelper < Puppet::Provider
       raw = Puppet::Util::Execution.execute(cmd, { failonfail: failonfail }.merge(custom_environment))
       status = raw.exitstatus
     end
-    return raw, status if status == 0 || failonfail == false
+    return raw, status if status.zero? || failonfail == false
     raise Puppet::Error, "Command #{cmd.join(' ')} failed" if cib.nil?
     raise Puppet::Error, "Command #{cmd.join(' ')} failed in the shadow CIB \"#{cib}\"" unless cib.nil?
   end
