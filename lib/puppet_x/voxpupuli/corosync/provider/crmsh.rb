@@ -28,7 +28,7 @@ class PuppetX::Voxpupuli::Corosync::Provider::Crmsh < PuppetX::Voxpupuli::Corosy
     return true if @@crmready
     cmd =  [command(:crm_attribute), '--type', 'crm_config', '--query', '--name', 'dc-version']
     raw, status = run_command_in_cib(cmd, nil, false)
-    if status == 0
+    if status.zero?
       # rubocop:disable Style/ClassVars
       @@crmready = true
       # rubocop:enable Style/ClassVars

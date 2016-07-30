@@ -231,7 +231,7 @@ Puppet::Type.newtype(:cs_primitive) do
     end
 
     def change_to_s(currentvalue, newvalue)
-      if @resource[:unmanaged_metadata].count == 0
+      if @resource[:unmanaged_metadata].count.zero?
         super
       else
         super + " (unmanaged parameters: #{@resource[:unmanaged_metadata].join(', ')})"
@@ -271,7 +271,7 @@ Puppet::Type.newtype(:cs_primitive) do
     end
 
     def change_to_s(currentvalue, newvalue)
-      if @resource[:unmanaged_metadata].count == 0
+      if @resource[:unmanaged_metadata].count.zero?
         super
       else
         super + " (unmanaged parameters: #{@resource[:unmanaged_metadata].join(', ')})"

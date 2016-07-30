@@ -27,7 +27,7 @@ class PuppetX::Voxpupuli::Corosync::Provider::Pcs < PuppetX::Voxpupuli::Corosync
     return true if @@pcsready
     cmd = [command(:pcs), 'property', 'show', 'dc-version']
     raw, status = run_command_in_cib(cmd, nil, false)
-    if status == 0
+    if status.zero?
       # rubocop:disable Style/ClassVars
       @@pcsready = true
       # rubocop:enable Style/ClassVars

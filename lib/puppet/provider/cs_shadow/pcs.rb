@@ -25,7 +25,7 @@ Puppet::Type.type(:cs_shadow).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync
   def get_epoch(cib = nil)
     cmd = [command(:cibadmin), '--query', '--xpath', '/cib', '-l', '-n']
     raw, status = PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, cib, false)
-    return :absent if status != 0
+    return :absent if status.nonzero?
     doc = REXML::Document.new(raw)
     current_epoch = REXML::XPath.first(doc, '/cib').attributes['epoch']
     current_admin_epoch = REXML::XPath.first(doc, '/cib').attributes['admin_epoch']
