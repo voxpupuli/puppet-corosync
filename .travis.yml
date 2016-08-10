@@ -31,6 +31,8 @@ matrix:
     env: PUPPET_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK=rubocop
   - rvm: 2.3.1
     env: PUPPET_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK=test
+  - rvm: 2.4.0-preview1
+    env: PUPPET_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK=test
   - rvm: 2.1
     env: PUPPET_VERSION="~> 3.0" STRICT_VARIABLES="yes" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/centos-7 PUPPET_INSTALL_TYPE=foss PUPPET_INSTALL_VERSION=3.8.7
     services: docker
@@ -61,6 +63,8 @@ matrix:
     services: docker
     sudo: required
     bundler_args: --without development
+  allow_failures:
+    - rvm: 2.4.0-preview1
 notifications:
   email: false
 deploy:
