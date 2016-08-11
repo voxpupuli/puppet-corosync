@@ -10,10 +10,8 @@ rescue LoadError
 end
 
 class PuppetX::Voxpupuli::Corosync::Provider::Pcs < PuppetX::Voxpupuli::Corosync::Provider::CibHelper
-  # Yep, that's right we are parsing XML...FUN! (It really wasn't that bad)
-  require 'rexml/document'
-
   initvars
+  commands cibadmin: 'cibadmin'
   commands pcs: 'pcs'
 
   # Corosync takes a while to build the initial CIB configuration once the
@@ -23,18 +21,29 @@ class PuppetX::Voxpupuli::Corosync::Provider::Pcs < PuppetX::Voxpupuli::Corosync
   # rubocop:disable Style/ClassVars
   @@pcsready = nil
   # rubocop:enable Style/ClassVars
-  def self.ready?
+  def self.ready?(shadow_cib)
     return true if @@pcsready
     cmd = [command(:pcs), 'property', 'show', 'dc-version']
     raw, status = run_command_in_cib(cmd, nil, false)
     if status.zero?
+      # Wait until epoch is not 0.0.
+      # On empty cluster it will stay 0.0 so there you wait the 60 seconds.
+      # On new nodes you wait just enough time to allow the node to join the cluster.
+      # That should not happen often, so it is acceptable to sleep up to 60 seconds here.
+      cib_epoch = wait_for_nonzero_epoch(shadow_cib)
+
+      warn("Pacemaker: CIB epoch is #{cib_epoch}. You can ignore this message if you are bootstrapping a new cluster.") if cib_epoch == '0.0'
+
+      if cib_epoch == :absent
+        debug('Corosync is not ready (no CIB available)')
+        return false
+      end
+
       # rubocop:disable Style/ClassVars
       @@pcsready = true
       # rubocop:enable Style/ClassVars
-      # Sleeping a spare five since it seems that dc-version is returning before
-      # It is really ready to take config changes, but it is close enough.
-      # Probably need to find a better way to check for reediness.
-      debug('Corosync seems to be ready, sleeping 5 more seconds for safety')
+
+      debug("Corosync is ready, CIB epoch is #{cib_epoch}. Sleeping 5 seconds for safety.")
       sleep 5
       return true
     else
@@ -43,9 +52,9 @@ class PuppetX::Voxpupuli::Corosync::Provider::Pcs < PuppetX::Voxpupuli::Corosync
     end
   end
 
-  def self.block_until_ready(timeout = 120)
+  def self.block_until_ready(timeout = 120, shadow_cib = false)
     Timeout.timeout(timeout) do
-      sleep 2 until ready?
+      sleep 2 until ready?(shadow_cib)
     end
   end
 

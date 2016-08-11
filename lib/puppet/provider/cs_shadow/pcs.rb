@@ -14,23 +14,17 @@ Puppet::Type.type(:cs_shadow).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync
   commands pcs: 'pcs'
 
   def self.instances
-    block_until_ready
+    block_until_ready(120, true)
     []
+  end
+
+  # Need this available at the provider level, for types
+  def get_epoch(cib = nil)
+    PuppetX::Voxpupuli::Corosync::Provider::Pcs.get_epoch(cib)
   end
 
   def epoch
     get_epoch(resource.cib)
-  end
-
-  def get_epoch(cib = nil)
-    cmd = [command(:cibadmin), '--query', '--xpath', '/cib', '-l', '-n']
-    raw, status = PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, cib, false)
-    return :absent if status.nonzero?
-    doc = REXML::Document.new(raw)
-    current_epoch = REXML::XPath.first(doc, '/cib').attributes['epoch']
-    current_admin_epoch = REXML::XPath.first(doc, '/cib').attributes['admin_epoch']
-    currentvalue = "#{current_admin_epoch}.#{current_epoch}" if current_epoch && current_admin_epoch
-    currentvalue || :absent
   end
 
   def insync?(cib)
