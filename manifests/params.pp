@@ -36,12 +36,7 @@ class corosync::params {
       $package_pcs    = true
       $set_votequorum = true
       $compatibility  = 'whitetank'
-      if versioncmp($::operatingsystemrelease, '7') >= 0 {
-        $manage_pacemaker_service = true
-      } else {
-        $manage_pacemaker_service = false
-      }
-      $package_install_options = undef
+      $manage_pacemaker_service = true
     }
 
     'Debian': {
