@@ -27,6 +27,9 @@ describe 'corosync' do
         should contain_file('/etc/corosync/corosync.conf').with_content(
           %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 2}
         )
+        should contain_file('/etc/corosync/corosync.conf').with_content(
+          %r{two_node: 1}
+        )
       end
 
       it 'supports persistent node IDs' do
@@ -39,6 +42,22 @@ describe 'corosync' do
         )
         should contain_file('/etc/corosync/corosync.conf').with_content(
           %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 11}
+        )
+      end
+    end
+
+    context 'when set_quorum is true and quorum_members are set and there are 3 nodes' do
+      before :each do
+        params.merge!(
+          set_votequorum: true,
+          quorum_members: ['node1.test.org', 'node2.test.org', 'node3.test.org'],
+          votequorum_expected_votes: 2
+        )
+      end
+
+      it 'does not configure two_nodes option' do
+        should_not contain_file('/etc/corosync/corosync.conf').with_content(
+          %r{two_node: 1}
         )
       end
     end
