@@ -1,4 +1,10 @@
-# 2016-08-12 - Release 3.0.0
+# 2016-08-18 - Release 3.0.0
+### Summary
+- Fixed a bug with two\_nodes option and three-node clusters (#316)
+- Improved corosync readiness detection (#314)
+- Modulesync updates
+- Introduce a public [roadmap](ROADMAP.md)
+
 ### Backward incompatible changes
 - Providers now wait up to 60 seconds to get a non null CIB. On new clusters, it
   means that you wait 60 seconds for nothing, but when adding a node to the
@@ -6,12 +12,36 @@
   puppet module. If you are using Cs\_shadow and all your resources depend on
   that one, then instead of a non-null (non `0.0`) epoch, we wait for a non 
   `0.*` epoch, because the Cs\_shadow and Cs\_commit couple will update the
-  epoch anyway.
+  epoch anyway. (#314)
 
 ### Deprecation notes
 
-We will remove support for Puppet <= 3.6.0 in the next major release of this module
-(4.0.0).
+Deprecating old Puppet releases:
+
+- We will remove support for Puppet <= 3.6.0 in the next major release of this
+  module (v4.0.0).
+- We will remove support for Puppet <= 3.8.0 in two major releases of this
+  module (v5.0.0).
+- We will remove support for Puppet <= 4.6.0 in three major releases of this
+  module (v6.0.0).
+
+#### Puppet 3 support
+
+The 5.0.0 release will be a LTS and will be supported until VoxPupuli stops
+Puppet 3 support (voxpupuli/plumbing#21). It will be the latest release to
+support Puppet 3. After its release, only bugfixes and security fixes will be
+applied. We will not introduce backward incompatible changes in this LTS
+release.
+
+That LTS release will be available under the "puppet3" branch of this module.
+
+Please consider moving straight to Puppet 4.
+
+#### Naming of this module
+
+The issue [#32](https://github.com/voxpupuli/puppet-corosync/issues/32)
+concerning the naming of this module will be closed in three major releases
+of this module. In v6.0.0, this module could be rebranded to a better name.
 
 ## 2016-06-28 - Release 2.0.1
 ### Summary
