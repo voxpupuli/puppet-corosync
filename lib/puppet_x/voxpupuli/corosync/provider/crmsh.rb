@@ -10,10 +10,8 @@ rescue LoadError
 end
 
 class PuppetX::Voxpupuli::Corosync::Provider::Crmsh < PuppetX::Voxpupuli::Corosync::Provider::CibHelper
-  # Yep, that's right we are parsing XML...FUN! (It really wasn't that bad)
-  require 'rexml/document'
-
   initvars
+  commands cibadmin: 'cibadmin'
   commands crm_attribute: 'crm_attribute'
   commands crm: 'crm'
 
@@ -24,18 +22,29 @@ class PuppetX::Voxpupuli::Corosync::Provider::Crmsh < PuppetX::Voxpupuli::Corosy
   # rubocop:disable Style/ClassVars
   @@crmready = nil
   # rubocop:enable Style/ClassVars
-  def self.ready?
+  def self.ready?(shadow_cib)
     return true if @@crmready
     cmd =  [command(:crm_attribute), '--type', 'crm_config', '--query', '--name', 'dc-version']
     raw, status = run_command_in_cib(cmd, nil, false)
     if status.zero?
+      # Wait until epoch is not 0.0.
+      # On empty cluster it will stay 0.0 so there you wait the 60 seconds.
+      # On new nodes you wait just enough time to allow the node to join the cluster.
+      # That should not happen often, so it is acceptable to sleep up to 60 seconds here.
+      cib_epoch = wait_for_nonzero_epoch(shadow_cib)
+
+      warn("Pacemaker: CIB epoch is #{cib_epoch}. You can ignore this message if you are bootstrapping a new cluster.") if cib_epoch == '0.0'
+
+      if cib_epoch == :absent
+        debug('Corosync is not ready (no CIB available)')
+        return false
+      end
+
       # rubocop:disable Style/ClassVars
       @@crmready = true
       # rubocop:enable Style/ClassVars
-      # Sleeping a spare two since it seems that dc-version is returning before
-      # It is really ready to take config changes, but it is close enough.
-      # Probably need to find a better way to check for readiness.
-      sleep 2
+
+      debug("Corosync is ready, CIB epoch is #{cib_epoch}.")
       return true
     else
       debug("Corosync not ready, retrying: #{raw}")
@@ -43,9 +52,9 @@ class PuppetX::Voxpupuli::Corosync::Provider::Crmsh < PuppetX::Voxpupuli::Corosy
     end
   end
 
-  def self.block_until_ready(timeout = 120)
-    Timeout.timeout(timeout) do
-      sleep 2 until ready?
+  def self.block_until_ready(timeout = 120, shadow_cib = false)
+    Timeout.timeout(timeout, shadow_cib) do
+      sleep 2 until ready?(shadow_cib)
     end
   end
 

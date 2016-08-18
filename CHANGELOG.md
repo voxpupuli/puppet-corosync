@@ -1,3 +1,18 @@
+# 2016-08-12 - Release 3.0.0
+### Backward incompatible changes
+- Providers now wait up to 60 seconds to get a non null CIB. On new clusters, it
+  means that you wait 60 seconds for nothing, but when adding a node to the
+  cluster, it means that we join the cluster before operating it with this
+  puppet module. If you are using Cs\_shadow and all your resources depend on
+  that one, then instead of a non-null (non `0.0`) epoch, we wait for a non 
+  `0.*` epoch, because the Cs\_shadow and Cs\_commit couple will update the
+  epoch anyway.
+
+### Deprecation notes
+
+We will remove support for Puppet <= 3.6.0 in the next major release of this module
+(4.0.0).
+
 ## 2016-06-28 - Release 2.0.1
 ### Summary
 - Support Ubuntu 16.04 (#288)
