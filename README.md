@@ -10,6 +10,11 @@ during failures or partitionable networks.
 Most famous for being the cluster stack used by Pacemaker to support n-code
 clusters that can respond to node and resource level events.
 
+Roadmap
+-------
+
+We do maintain a [roadmap regarding next releases of this module](ROADMAP.md).
+
 Basic usage
 -----------
 
