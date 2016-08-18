@@ -23,7 +23,8 @@ totem {
   interface {
     ringnumber:  <%= i %>
     bindnetaddr: <%= [@bind_address].flatten[i] %>
-<% if [@multicast_address].flatten[i] == 'broadcast' -%>
+<% if @multicast_address == 'UNSET' -%>
+<% elsif [@multicast_address].flatten[i] == 'broadcast' -%>
     broadcast:   yes
 <% else -%>
     mcastaddr:   <%= [@multicast_address].flatten[i] %>
