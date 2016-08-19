@@ -15,6 +15,8 @@ group :test do
   gem 'rspec-puppet',                                               :require => false, :git => 'https://github.com/rodjek/rspec-puppet.git'
   gem 'rspec-puppet-facts',                                         :require => false
   gem 'rspec-puppet-utils',                                         :require => false
+  # Temporary Workaround
+  gem 'puppet-lint', '2.0.0'                                        :require => false
   gem 'puppet-lint-absolute_classname-check',                       :require => false
   gem 'puppet-lint-leading_zero-check',                             :require => false
   gem 'puppet-lint-trailing_comma-check',                           :require => false
