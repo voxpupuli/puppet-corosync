@@ -1,13 +1,18 @@
 # 2016-08-28 - Release 4.0.0
 ### Summary
+- Validate corosync configuration before overwriting (available in EL7, Ubuntu
+  16.04, and Debian Jessie) (#294)
+- multicast\_address and unicast\_addresses are no longer mandatory if
+  clustername is set (#318)
 
 ### Backward incompatible changes
-- Support for Puppet <= 3.6.0 is removed
+- Support for Puppet <= 3.6.0 is removed (#319)
 
 ### Deprecation notes
 
-We have plans to rename this module and deprecated old Puppet releases.
-Please refer to our [roadmap](ROADMAP.md) for further details.
+We have plans to rename this module and deprecated old Puppet releases and
+Puppet distributions. Please refer to our [roadmap](ROADMAP.md) for further
+details.
 
 #### Naming of this module
 
