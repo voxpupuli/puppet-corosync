@@ -40,6 +40,15 @@ Please consider moving straight to Puppet 4.
 - Close discussions around the name of this module (and maybe rename it)
   ([#32](https://github.com/voxpupuli/puppet-corosync/issues/32))
 
+### Cleanup old distributions
+
+The module currently supports Ubuntu 14.04, 16.04, Debian Jessie and EL7
+distributions. In v6.0.0 we will remove all the references to any other
+distributions.
+
+In the meantime, we will be happy to welcome pull requests if you want to fix
+or add support for any other distribution.
+
 ### Naming of this module
 
 The issue [#32](https://github.com/voxpupuli/puppet-corosync/issues/32)
