@@ -355,15 +355,15 @@ jessie-backport apt repository.
 Operating System support matrix
 -------------------------------
 
-| OS          | release | Puppet 3.X    | Puppet 4.X (PC1) |
-|-------------|---------|---------------|------------------|
-| CentOS/RHEL | 5       | Not supported | Not supported    |
-| CentOS/RHEL | 6       | Not supported | Not supported    |
-| CentOS/RHEL | 7       | **Supported** | **Supported**    |
-| Debian      | 8       | Not supported | **Supported**    |
-| Ubuntu      | 12.04   | Not supported | Not supported    |
-| Ubuntu      | 14.04   | **Supported** | **Supported**    |
-| Ubuntu      | 16.04   | Not supported | **Supported**    |
+| OS          | release | Puppet 3.6-3.8 | Puppet 4.X (PC1) |
+|-------------|---------|----------------|------------------|
+| CentOS/RHEL | 5       | Not supported  | Not supported    |
+| CentOS/RHEL | 6       | Not supported  | Not supported    |
+| CentOS/RHEL | 7       | **Supported**  | **Supported**    |
+| Debian      | 8       | Not supported  | **Supported**    |
+| Ubuntu      | 12.04   | Not supported  | Not supported    |
+| Ubuntu      | 14.04   | **Supported**  | **Supported**    |
+| Ubuntu      | 16.04   | Not supported  | **Supported**    |
 
 Contributors
 ------------

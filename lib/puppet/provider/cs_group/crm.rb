@@ -19,16 +19,7 @@ Puppet::Type.type(:cs_group).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
     instances = []
 
     cmd = [command(:crm), 'configure', 'show', 'xml']
-    if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-      # rubocop:disable Lint/UselessAssignment
-      raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
-      # rubocop:enable Lint/UselessAssignment
-    else
-      raw = Puppet::Util::Execution.execute(cmd)
-      # rubocop:disable Lint/UselessAssignment
-      status = raw.exitstatus
-      # rubocop:enable Lint/UselessAssignment
-    end
+    raw = Puppet::Util::Execution.execute(cmd)
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//group') do |e|

@@ -6,9 +6,8 @@ describe Puppet::Type.type(:cs_order).provider(:crm) do
     described_class.expects(:block_until_ready).returns(nil)
   end
 
-  # rubocop:disable Lint/UselessAssignment
   let :test_cib do
-    test_cib = <<-EOS
+    <<-EOS
       <cib>
       <configuration>
         <constraints>
@@ -17,18 +16,13 @@ describe Puppet::Type.type(:cs_order).provider(:crm) do
         </constraints>
       </configuration>
       </cib>
-      EOS
+    EOS
   end
-  # rubocop:enable Lint/UselessAssignment
 
   let :instances do
-    if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-      Puppet::Util::SUIDManager.expects(:run_and_capture).with(%w(crm configure show xml)).at_least_once.returns([test_cib, 0])
-    else
-      Puppet::Util::Execution.expects(:execute).with(%w(crm configure show xml), failonfail: true, combine: true).at_least_once.returns(
-        Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
-      )
-    end
+    Puppet::Util::Execution.expects(:execute).with(%w(crm configure show xml), failonfail: true, combine: true).at_least_once.returns(
+      Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
+    )
     described_class.instances
   end
 

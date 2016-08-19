@@ -38,16 +38,10 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
       EOS
 
       described_class.expects(:block_until_ready).returns(nil)
-      if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-        Puppet::Util::SUIDManager.expects(:run_and_capture).with(%w(crm configure show xml)).at_least_once.returns([test_cib, 0])
-      else
-        Puppet::Util::Execution.expects(:execute).with(%w(crm configure show xml), failonfail: true, combine: true).at_least_once.returns(
-          Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
-        )
-      end
-      # rubocop:disable Lint/UselessAssignment
-      instances = described_class.instances
-      # rubocop:enable Lint/UselessAssignment
+      Puppet::Util::Execution.expects(:execute).with(%w(crm configure show xml), failonfail: true, combine: true).at_least_once.returns(
+        Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
+      )
+      described_class.instances
     end
 
     it 'has an instance for each <primitive>' do
