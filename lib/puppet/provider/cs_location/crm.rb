@@ -23,16 +23,7 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
     instances = []
 
     cmd = [command(:crm), 'configure', 'show', 'xml']
-    if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-      # rubocop:disable Lint/UselessAssignment
-      raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd)
-      # rubocop:enable Lint/UselessAssignment
-    else
-      # rubocop:disable Lint/UselessAssignment
-      raw = Puppet::Util::Execution.execute(cmd)
-      status = raw.exitstatus
-      # rubocop:enable Lint/UselessAssignment
-    end
+    raw = Puppet::Util::Execution.execute(cmd)
     doc = REXML::Document.new(raw)
 
     doc.root.elements['configuration'].elements['constraints'].each_element('rsc_location') do |e|

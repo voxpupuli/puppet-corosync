@@ -19,13 +19,8 @@ class PuppetX::Voxpupuli::Corosync::Provider::CibHelper < Puppet::Provider
                          end
     debug("Executing #{cmd} in the CIB") if cib.nil?
     debug("Executing #{cmd} in the shadow CIB \"#{cib}\"") unless cib.nil?
-    if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-      Puppet.deprecation_warning 'voxpupuli-corosync: Support for Puppet < 3.6 will be dropped in the release 4.0.0 of the voxpupuli-corosync module'
-      raw, status = Puppet::Util::SUIDManager.run_and_capture(cmd, nil, nil, custom_environment)
-    else
-      raw = Puppet::Util::Execution.execute(cmd, { failonfail: failonfail }.merge(custom_environment))
-      status = raw.exitstatus
-    end
+    raw = Puppet::Util::Execution.execute(cmd, { failonfail: failonfail }.merge(custom_environment))
+    status = raw.exitstatus
     return raw, status if status.zero? || failonfail == false
     raise Puppet::Error, "Command #{cmd.join(' ')} failed" if cib.nil?
     raise Puppet::Error, "Command #{cmd.join(' ')} failed in the shadow CIB \"#{cib}\"" unless cib.nil?

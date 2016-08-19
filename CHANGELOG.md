@@ -1,3 +1,20 @@
+# 2016-08-28 - Release 4.0.0
+### Summary
+
+### Backward incompatible changes
+- Support for Puppet <= 3.6.0 is removed
+
+### Deprecation notes
+
+We have plans to rename this module and deprecated old Puppet releases.
+Please refer to our [roadmap](ROADMAP.md) for further details.
+
+#### Naming of this module
+
+The issue [#32](https://github.com/voxpupuli/puppet-corosync/issues/32)
+concerning the naming of this module will be closed in three major releases
+of this module. In v6.0.0, this module could be rebranded to a better name.
+
 # 2016-08-18 - Release 3.0.0
 ### Summary
 - Fixed a bug with two\_nodes option and three-node clusters (#316)
