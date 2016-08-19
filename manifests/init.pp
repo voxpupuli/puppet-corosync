@@ -192,6 +192,10 @@
 #   to 256000 / netmtu to prevent overflow of the kernel transmit buffers.
 #   Defaults to 17
 #
+# [*test_corosync_config*]
+#   Wheter we should test new configuration files with `corosync -t`.
+#   Defaults to true on OS that allows that (requires corosync 2.3.4).
+#
 # === Examples
 #
 #  class { 'corosync':
@@ -251,6 +255,7 @@ class corosync(
   $join                                = $::corosync::params::join,
   $consensus                           = $::corosync::params::consensus,
   $max_messages                        = $::corosync::params::max_messages,
+  $test_corosync_config                = $::corosync::params::test_corosync_config,
 ) inherits ::corosync::params {
 
   if $set_votequorum and !$quorum_members {
@@ -370,13 +375,29 @@ class corosync(
   # - $join
   # - $consensus
   # - $max_messages
-  file { '/etc/corosync/corosync.conf':
-    ensure  => file,
-    mode    => '0644',
-    owner   => 'root',
-    group   => 'root',
-    content => template($corosync_conf),
-    require => Package['corosync'],
+  if $test_corosync_config {
+    # corosync -t is only included since 2.3.4
+    file { '/etc/corosync/corosync.conf':
+      ensure       => file,
+      mode         => '0644',
+      owner        => 'root',
+      group        => 'root',
+      content      => template($corosync_conf),
+      validate_cmd => '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t',
+      require      => [
+        File['/etc/corosync/authkey'],
+        Package['corosync'],
+      ],
+    }
+  } else {
+    file { '/etc/corosync/corosync.conf':
+      ensure  => file,
+      mode    => '0644',
+      owner   => 'root',
+      group   => 'root',
+      content => template($corosync_conf),
+      require => Package['corosync'],
+    }
   }
 
   file { '/etc/corosync/service.d':

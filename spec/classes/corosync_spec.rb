@@ -268,6 +268,12 @@ describe 'corosync' do
       }
     end
 
+    it 'validates the corosync configuration' do
+      should contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
+        '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
+      )
+    end
+
     it_configures 'corosync'
   end
 
@@ -288,6 +294,10 @@ describe 'corosync' do
       it 'does not manage the pacemaker service' do
         should_not contain_service('pacemaker')
       end
+
+      it 'does not validate the corosync configuration' do
+        should contain_file('/etc/corosync/corosync.conf').without_validate_cmd
+      end
     end
 
     context 'major version is 7' do
@@ -300,6 +310,12 @@ describe 'corosync' do
       it 'does manage the pacemaker service' do
         should contain_service('pacemaker').with(
           ensure: 'running'
+        )
+      end
+
+      it 'validates the corosync configuration' do
+        should contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
+          '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
         )
       end
     end

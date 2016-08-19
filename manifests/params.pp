@@ -38,8 +38,10 @@ class corosync::params {
       $compatibility  = 'whitetank'
       if versioncmp($::operatingsystemrelease, '7') >= 0 {
         $manage_pacemaker_service = true
+        $test_corosync_config = true
       } else {
         $manage_pacemaker_service = false
+        $test_corosync_config = false
       }
       $package_install_options = undef
     }
@@ -54,15 +56,23 @@ class corosync::params {
             $set_votequorum = true
             $manage_pacemaker_service = true
 
-            file {'/etc/default/cman':
-              ensure  => present,
-              content => template('corosync/cman.erb'),
-            }
+            if versioncmp($::operatingsystemrelease, '16.04') >= 0 {
+              $test_corosync_config = true
+            } else {
 
+              #FIXME should be moved in another place
+              file {'/etc/default/cman':
+                ensure  => present,
+                content => template('corosync/cman.erb'),
+              }
+
+              $test_corosync_config = false
+            }
           } else {
             $compatibility = 'whitetank'
             $set_votequorum = false
             $manage_pacemaker_service = false
+            $test_corosync_config = false
           }
           $package_install_options = undef
         }
@@ -72,11 +82,13 @@ class corosync::params {
             $compatibility = false
             $manage_pacemaker_service = true
             $package_install_options = ['-t', 'jessie-backports']
+            $test_corosync_config = true
           } else {
             $set_votequorum = false
             $compatibility = 'whitetank'
             $manage_pacemaker_service = false
             $package_install_options = undef
+            $test_corosync_config = false
           }
         }
         default : {
@@ -84,6 +96,7 @@ class corosync::params {
           $set_votequorum = false
           $manage_pacemaker_service = false
           $package_install_options = undef
+          $test_corosync_config = false
         }
       }
     }
