@@ -307,7 +307,8 @@ class corosync(
     $corosync_conf = "${module_name}/corosync.conf.udpu.erb"
   }
 
-  #  You have to specify at least one of the following parameters # $multicast_address or $unicast_address or $cluster_name
+  # You have to specify at least one of the following parameters:
+  # $multicast_address or $unicast_address or $cluster_name
   if $multicast_address == 'UNSET' and $unicast_addresses == 'UNSET' and !$cluster_name {
       fail('You must provide a value for multicast_address, unicast_address or cluster_name.')
   }
