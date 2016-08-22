@@ -165,6 +165,39 @@ describe 'corosync' do
       end
     end
 
+    context 'when multicast_address, unicast_addresses and cluster_name are not set' do
+      before :each do
+        params.merge!(
+          multicast_address: 'UNSET'
+        )
+      end
+
+      it 'raises error' do
+        should raise_error(
+          Puppet::Error,
+          %r{You must provide a value for multicast_address, unicast_address or cluster_name\.}
+        )
+      end
+    end
+
+    context 'when only cluster_name is set' do
+      before :each do
+        params.merge!(
+          multicast_address: 'UNSET',
+          cluster_name: 'mycluster'
+        )
+      end
+
+      it 'does not configure multicast' do
+        should contain_file('/etc/corosync/corosync.conf').without_content(
+          %r{broadcast}
+        )
+        should contain_file('/etc/corosync/corosync.conf').without_content(
+          %r{mcastaddr}
+        )
+      end
+    end
+
     context 'when log_file is set' do
       before :each do
         params.merge!(
