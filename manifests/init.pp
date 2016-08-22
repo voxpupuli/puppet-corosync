@@ -312,9 +312,9 @@ class corosync(
     $corosync_conf = "${module_name}/corosync.conf.udpu.erb"
   }
 
-  # $multicast_address is NOT required if $unicast_address is provided
-  if $multicast_address == 'UNSET' and $unicast_addresses == 'UNSET' {
-      fail('You must provide a value for multicast_address')
+  #  You have to specify at least one of the following parameters $multicast_address, $unicast_address or $cluster_name
+  if $multicast_address == 'UNSET' and $unicast_addresses == 'UNSET' and !$cluster_name {
+      fail('You must provide a value for multicast_address, unicast_address or cluster_name.')
   }
 
   case $enable_secauth {
@@ -365,6 +365,7 @@ class corosync(
   # Template uses:
   # - $unicast_addresses
   # - $multicast_address
+  # - $cluster_name
   # - $log_file
   # - $debug
   # - $bind_address
