@@ -20,6 +20,35 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
 
   mk_resource_methods
 
+  # given an XML element containing some <expression>s, return a hash. Return an
+  # empty hash if `e` is nil.
+  def self.rules_to_hash(e)
+    return {} if e.nil?
+
+    hash = {}
+    e.each_element do |i|
+      hash[i.attributes['name']] = i.attributes['value']
+    end
+
+    hash
+  end
+
+  # given an XML element (a <rsc_location> from cibadmin), produce a hash
+  # suitable for creating a new provider instance.
+  def self.element_to_hash(e)
+    hash = {
+      name:      e.attributes['id'],
+      ensure:    :present,
+      primitive: e.attributes['rsc'],
+      node_name: e.attributes['node'],
+      score:     e.attributes['score'],
+      rule:      rules_to_hash(e.elements['rule']),
+      provider:  name
+    }
+
+    hash
+  end
+
   def self.instances
     block_until_ready
 
@@ -41,6 +70,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
           node_name:          items['node'],
           score:              items['score'],
           resource_discovery: items['resource-discovery'],
+          rule:               items['rule'],
           provider:           name
         }
         instances << new(location_instance)
@@ -58,7 +88,8 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
       primitive:          @resource[:primitive],
       node_name:          @resource[:node_name],
       score:              @resource[:score],
-      resource_discovery: @resource[:resource_discovery]
+      resource_discovery: @resource[:resource_discovery],
+      rule:               @resource[:rule]
     }
   end
 
@@ -82,6 +113,20 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
       cmd = ['pcs', 'constraint', 'location', 'add', @property_hash[:name], @property_hash[:primitive], @property_hash[:node_name], @property_hash[:score]]
       cmd << "resource-discovery=#{@property_hash[:resource_discovery]}" unless @property_hash[:resource_discovery].nil?
       PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+
+      unless @property_hash[:rule].nil?
+        score_param = [] # default value: score=INFINITY
+        rule_params = []
+        @property_hash[:rule].each_pair do |k, v|
+          if k == 'expression' # expression
+            rule_params = [v['attribute'], v['operation'], v['value']]
+          elsif k == 'score' || k == 'score-attribute' # score or score-attribute
+            score_param = "#{k}=#{v}"
+          end
+        end
+        cmd_rule = [command(:pcs), 'constraint', 'location', @property_hash[:primitive], 'rule', score_param, rule_params]
+        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd_rule, @resource[:cib])
+      end
     end
   end
 end
