@@ -83,7 +83,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
   end
 
-  it 'creates a location with resource-discovery' do
+  it 'creates a location with resource-discovery parameter' do
     pp = <<-EOS
       cs_location { 'duncan_vip_there':
         primitive          => 'duncan_vip',
@@ -96,9 +96,22 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     apply_manifest(pp, debug: true, catch_changes: true)
     shell('cibadmin --query | grep duncan_vip_there') do |r|
       expect(r.stdout).to match(%r{rsc_location})
-      # Feature not supported in Ubuntu
-      expect(r.stdout).to match(%r{resource-discovery="exclusive"}) if fact('osfamily') == 'RedHat'
-      expect(r.stdout).not_to match(%r{resource-discovery="exclusive"}) if fact('osfamily') != 'RedHat'
+    end
+  end
+
+  if fact('osfamily') == 'RedHat'
+    it 'creates a location with resource-discovery=exclusive on EL-based systems' do
+      shell('cibadmin --query | grep duncan_vip_there') do |r|
+        expect(r.stdout).to match(%r{resource-discovery="exclusive"})
+      end
+    end
+  end
+
+  if fact('osfamily') != 'RedHat'
+    it 'creates a location without resource-discovery=exclusive on non-RH systems' do
+      shell('cibadmin --query | grep duncan_vip_there') do |r|
+        expect(r.stdout).not_to match(%r{resource-discovery="exclusive"})
+      end
     end
   end
 end
