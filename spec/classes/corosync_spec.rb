@@ -10,7 +10,7 @@ describe 'corosync' do
     it { is_expected.to compile }
 
     context 'when set_quorum is true and quorum_members are set' do
-      before :each do
+      before do
         params.merge!(
           set_votequorum: true,
           quorum_members: ['node1.test.org', 'node2.test.org']
@@ -47,7 +47,7 @@ describe 'corosync' do
     end
 
     context 'when set_quorum is true and quorum_members are set and there are 3 nodes' do
-      before :each do
+      before do
         params.merge!(
           set_votequorum: true,
           quorum_members: ['node1.test.org', 'node2.test.org', 'node3.test.org'],
@@ -63,7 +63,7 @@ describe 'corosync' do
     end
 
     context 'when unicast is used' do
-      before :each do
+      before do
         params.merge!(
           multicast_address: 'UNSET',
           unicast_addresses: ['192.168.1.1', '192.168.1.2']
@@ -71,7 +71,7 @@ describe 'corosync' do
       end
 
       context 'when set_quorum is true' do
-        before :each do
+        before do
           params.merge!(
             set_votequorum: true,
             quorum_members: ['node1.test.org', 'node2.test.org']
@@ -105,7 +105,7 @@ describe 'corosync' do
       end
 
       context 'with one ring' do
-        before :each do
+        before do
           params.merge!(
             bind_address:      '10.0.0.1',
             unicast_addresses: ['10.0.0.1', '10.0.0.2']
@@ -120,7 +120,7 @@ describe 'corosync' do
       end
 
       context 'with multiple rings ' do
-        before :each do
+        before do
           params.merge!(
             bind_address:      ['10.0.0.1', '10.0.1.1'],
             unicast_addresses: [
@@ -152,7 +152,7 @@ describe 'corosync' do
     end
 
     context 'when cluster_name is set' do
-      before :each do
+      before do
         params.merge!(
           cluster_name: 'hacell'
         )
@@ -166,7 +166,7 @@ describe 'corosync' do
     end
 
     context 'when multicast_address, unicast_addresses and cluster_name are not set' do
-      before :each do
+      before do
         params.merge!(
           multicast_address: 'UNSET'
         )
@@ -181,7 +181,7 @@ describe 'corosync' do
     end
 
     context 'when only cluster_name is set' do
-      before :each do
+      before do
         params.merge!(
           multicast_address: 'UNSET',
           cluster_name: 'mycluster'
@@ -199,7 +199,7 @@ describe 'corosync' do
     end
 
     context 'when log_file is set' do
-      before :each do
+      before do
         params.merge!(
           log_file: true
         )
@@ -222,7 +222,7 @@ describe 'corosync' do
 
     [:corosync, :pacemaker].each do |package|
       context "install package #{package} with default version" do
-        before :each do
+        before do
           params.merge!("package_#{package}" => true)
         end
 
@@ -234,11 +234,11 @@ describe 'corosync' do
       end
 
       context "install package #{package} with custom version" do
-        before :each do
+        before do
           params.merge!(
             "package_#{package}" => true,
             "version_#{package}" => '1.1.1'
-                       )
+          )
         end
 
         it "does install #{package} with version 1.1.1" do
@@ -249,7 +249,7 @@ describe 'corosync' do
       end
 
       context "do not install #{package}" do
-        before :each do
+        before do
           params.merge!("package_#{package}" => false)
         end
 
@@ -260,7 +260,7 @@ describe 'corosync' do
     end
 
     context 'when set_quorum is true and quorum_members are not set' do
-      before :each do
+      before do
         params.merge!(
           set_votequorum: true,
           quorum_members: false

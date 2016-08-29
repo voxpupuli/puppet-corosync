@@ -65,7 +65,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     it { is_expected.to be_running }
   end
 
-  it 'creates the resources' do
+  it 'creates the service resource' do
     command = if fact('osfamily') == 'RedHat'
                 'pcs resource show'
               else
@@ -73,13 +73,28 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
               end
     shell(command) do |r|
       expect(r.stdout).to match(%r{nginx_service.*IPaddr2})
+    end
+  end
+
+  it 'creates the vip resource' do
+    command = if fact('osfamily') == 'RedHat'
+                'pcs resource show'
+              else
+                'crm_resource --list'
+              end
+    shell(command) do |r|
       expect(r.stdout).to match(%r{nginx_vip.*IPaddr2})
     end
   end
 
-  it 'creates the colocation' do
+  it 'creates the colocation and nginx_vip is the "with" resource' do
     shell('cibadmin --query | grep vip_with_service') do |r|
       expect(r.stdout).to match(%r{colocation.*\swith-rsc="nginx_vip"})
+    end
+  end
+
+  it 'creates the colocation and nginx_service is the main resource' do
+    shell('cibadmin --query | grep vip_with_service') do |r|
       expect(r.stdout).to match(%r{colocation.*\srsc="nginx_service"})
     end
   end

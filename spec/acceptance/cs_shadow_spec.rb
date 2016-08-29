@@ -75,7 +75,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     it { is_expected.to be_running }
   end
 
-  it 'does not create the resources in the cib' do
+  it 'does not create the service resource in the cib' do
     command = if fact('osfamily') == 'RedHat'
                 'pcs resource show'
               else
@@ -83,18 +83,33 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
               end
     shell(command) do |r|
       expect(r.stdout).not_to match(%r{apache_service.*IPaddr2})
+    end
+  end
+
+  it 'does not create the vip resource in the cib' do
+    command = if fact('osfamily') == 'RedHat'
+                'pcs resource show'
+              else
+                'crm_resource --list'
+              end
+    shell(command) do |r|
       expect(r.stdout).not_to match(%r{apache_vip.*IPaddr2})
     end
   end
 
-  it 'does not create the colocation in the cib' do
+  it 'does not create the colocation identified by with-rsc="apache_vip" in the cib' do
     shell('cibadmin --query') do |r|
       expect(r.stdout).not_to match(%r{colocation.*\swith-rsc="apache_vip"})
+    end
+  end
+
+  it 'does not create the colocation identified by rsc="apache_service" in the cib' do
+    shell('cibadmin --query') do |r|
       expect(r.stdout).not_to match(%r{colocation.*\srsc="apache_service"})
     end
   end
 
-  it 'creates the resources in the shadow cib' do
+  it 'creates the service resource in the shadow cib' do
     command = if fact('osfamily') == 'RedHat'
                 'CIB_shadow=puppet pcs resource show'
               else
@@ -102,13 +117,28 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
               end
     shell(command) do |r|
       expect(r.stdout).to match(%r{apache_service.*IPaddr2})
+    end
+  end
+
+  it 'creates the vip resource in the shadow cib' do
+    command = if fact('osfamily') == 'RedHat'
+                'CIB_shadow=puppet pcs resource show'
+              else
+                'CIB_shadow=puppet crm_resource --list'
+              end
+    shell(command) do |r|
       expect(r.stdout).to match(%r{apache_vip.*IPaddr2})
     end
   end
 
-  it 'creates the colocation in the shadow cib' do
+  it 'creates the colocation identified by with-rsc="apache_vip" in the shadow cib' do
     shell('CIB_shadow=puppet cibadmin --query | grep apache_vip_with_service') do |r|
       expect(r.stdout).to match(%r{colocation.*\swith-rsc="apache_vip"})
+    end
+  end
+
+  it 'creates the colocation identified by rsc="apache_service" in the shadow cib' do
+    shell('CIB_shadow=puppet cibadmin --query | grep apache_vip_with_service') do |r|
       expect(r.stdout).to match(%r{colocation.*\srsc="apache_service"})
     end
   end

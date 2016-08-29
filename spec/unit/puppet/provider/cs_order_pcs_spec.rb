@@ -49,10 +49,19 @@ describe Puppet::Type.type(:cs_order).provider(:pcs) do
         instances.first
       end
 
-      it 'has attributes' do
+      it 'has first equal to nul-messagebus:start' do
         expect(instance.first).to eq('nul-messagebus:start')
+      end
+
+      it 'has second equal to nul-interface-2:start' do
         expect(instance.second).to eq('nul-interface-2:start')
+      end
+
+      it 'has kind equal to Mandatory' do
         expect(instance.kind).to eq('Mandatory')
+      end
+
+      it 'has symmetrical set to true' do
         expect(instance.symmetrical).to eq(true)
       end
     end
@@ -62,10 +71,19 @@ describe Puppet::Type.type(:cs_order).provider(:pcs) do
         instances[1]
       end
 
-      it 'has attributes' do
+      it 'has first equal to nul2-messagebus:promote' do
         expect(instance.first).to eq('nul2-messagebus:promote')
+      end
+
+      it 'has second equal to nul-interface-2b:start' do
         expect(instance.second).to eq('nul-interface-2b:start')
+      end
+
+      it 'has kind equal to Optional' do
         expect(instance.kind).to eq('Optional')
+      end
+
+      it 'has symmetrical set to false' do
         expect(instance.symmetrical).to eq(false)
       end
     end

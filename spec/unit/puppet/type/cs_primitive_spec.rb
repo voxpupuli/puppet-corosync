@@ -49,7 +49,7 @@ describe Puppet::Type.type(:cs_primitive) do
           subject.new(
             name:       'mock_primitive',
             parameters: 'fail'
-        )
+          )
         end.to raise_error Puppet::Error, %r{hash}
       end
     end
@@ -69,7 +69,7 @@ describe Puppet::Type.type(:cs_primitive) do
           subject.new(
             name:       'mock_primitive',
             promotable: value
-        )
+          )
         end.to raise_error Puppet::Error, %r{(true|false)}
       end
     end

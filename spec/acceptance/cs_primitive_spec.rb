@@ -124,7 +124,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     apply_manifest(pp, catch_changes: true)
   end
 
-  it 'accepts 2 mnetadata names in unmanaged_metadata' do
+  it 'accepts 2 metadata names in unmanaged_metadata' do
     pp = <<-EOS
         cs_primitive { 'test_md':
           primitive_class => 'ocf',
@@ -137,13 +137,21 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     EOS
     apply_manifest(pp, expect_changes: true)
     apply_manifest(pp, catch_changes: true)
+  end
 
-    command = 'crm_resource -r test_md -q'
-    shell(command) do |r|
+  it 'does set is-managed in test_md' do
+    shell('crm_resource -r test_md -q') do |r|
       expect(r.stdout).to match(%r{is-managed.*false})
+    end
+  end
+
+  it 'does set target-role in test_md' do
+    shell('crm_resource -r test_md -q') do |r|
       expect(r.stdout).to match(%r{target-role.*stopped})
     end
+  end
 
+  it 'does accept 2 items in unmanaged_metadata' do
     pp = <<-EOS
         cs_primitive { 'test_md':
           primitive_class    => 'ocf',
@@ -156,12 +164,21 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     EOS
 
     apply_manifest(pp, catch_changes: true)
+  end
 
-    shell(command) do |r|
+  it 'does not delete or change is-managed if it is in unmanaged_metadata' do
+    shell('crm_resource -r test_md -q') do |r|
       expect(r.stdout).to match(%r{is-managed.*false})
+    end
+  end
+
+  it 'does not delete or change target-role if it is in unmanaged_metadata' do
+    shell('crm_resource -r test_md -q') do |r|
       expect(r.stdout).to match(%r{target-role.*stopped})
     end
+  end
 
+  it 'can manage again is-managed' do
     pp = <<-EOS
         cs_primitive { 'test_md':
           primitive_class    => 'ocf',
@@ -175,9 +192,16 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
 
     apply_manifest(pp, expect_changes: true)
     apply_manifest(pp, catch_changes: true)
+  end
 
-    shell(command) do |r|
+  it 'does delete is-managed because it is no longer in unmanaged_metadata' do
+    shell('crm_resource -r test_md -q') do |r|
       expect(r.stdout).not_to match(%r{is-managed.*false})
+    end
+  end
+
+  it 'does not delete target-role because it is still in unmanaged_metadata' do
+    shell('crm_resource -r test_md -q') do |r|
       expect(r.stdout).to match(%r{target-role.*stopped})
     end
   end

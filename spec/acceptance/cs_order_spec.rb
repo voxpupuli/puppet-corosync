@@ -73,11 +73,38 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     apply_manifest(pp, debug: true, catch_changes: true)
     shell('cibadmin --query | grep first_then_two') do |r|
       expect(r.stdout).to match(%r{rsc_order})
+    end
+  end
+
+  it 'creates a simple order constraint with first_vip as first' do
+    shell('cibadmin --query | grep first_then_two') do |r|
       expect(r.stdout).to match(%r{first="first_vip"})
+    end
+  end
+
+  it 'creates a simple order constraint with start as first-action' do
+    shell('cibadmin --query | grep first_then_two') do |r|
       expect(r.stdout).to match(%r{first-action="start"})
+    end
+  end
+
+  it 'creates a simple order constraint with second_vip as then' do
+    shell('cibadmin --query | grep first_then_two') do |r|
       expect(r.stdout).to match(%r{then="second_vip"})
+    end
+  end
+
+  it 'creates a simple order constraint with start as then-action' do
+    shell('cibadmin --query | grep first_then_two') do |r|
       expect(r.stdout).to match(%r{then-action="start"})
-      expect(r.stdout).to match(%r{kind="Mandatory"}) if fact('osfamily') == 'RedHat'
+    end
+  end
+
+  if fact('osfamily') == 'RedHat'
+    it 'creates a simple order constraint with Mandatory as kind' do
+      shell('cibadmin --query | grep first_then_two') do |r|
+        expect(r.stdout).to match(%r{kind="Mandatory"})
+      end
     end
   end
 
@@ -106,11 +133,38 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     apply_manifest(pp, debug: true, catch_changes: true)
     shell('cibadmin --query | grep one_then_two_complex') do |r|
       expect(r.stdout).to match(%r{rsc_order})
+    end
+  end
+
+  it 'creates a more complex order constraint with first_vip as first' do
+    shell('cibadmin --query | grep one_then_two_complex') do |r|
       expect(r.stdout).to match(%r{first="first_vip"})
+    end
+  end
+
+  it 'creates a more complex order constraint with stop as first-action' do
+    shell('cibadmin --query | grep one_then_two_complex') do |r|
       expect(r.stdout).to match(%r{first-action="stop"})
+    end
+  end
+
+  it 'creates a more complex order constraint with second_vip as then' do
+    shell('cibadmin --query | grep one_then_two_complex') do |r|
       expect(r.stdout).to match(%r{then="second_vip"})
+    end
+  end
+
+  it 'creates a more complex order constraint with promote as then-action' do
+    shell('cibadmin --query | grep one_then_two_complex') do |r|
       expect(r.stdout).to match(%r{then-action="promote"})
-      expect(r.stdout).to match(%r{kind="Optional"}) if fact('osfamily') == 'RedHat'
+    end
+  end
+
+  if fact('osfamily') == 'RedHat'
+    it 'creates a more complex order constraint with Optional as kind' do
+      shell('cibadmin --query | grep one_then_two_complex') do |r|
+        expect(r.stdout).to match(%r{kind="Optional"})
+      end
     end
   end
 end

@@ -46,15 +46,18 @@ describe Puppet::Type.type(:cs_colocation).provider(:crm) do
         expect(instance.name).to eq('first_with_second')
       end
 
-      it 'has attributes' do
+      it 'has primitives set to second and first' do
         expect(instance.primitives).to eq(%w(second first))
+      end
+
+      it 'has score set to INFINITY' do
         expect(instance.score).to eq('INFINITY')
       end
     end
   end
 
   context 'when flushing' do
-    after :each do
+    after do
       instance.flush
     end
 
