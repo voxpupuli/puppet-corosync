@@ -74,12 +74,12 @@ RSpec.shared_context 'with faked facts' do
     end
   end
 
-  before :each do
+  before do
     # No need to create on windows, PE creates by default
     shell("mkdir -p '#{facts_d}'") if fact('osfamily') !~ %r{windows}i
   end
 
-  after :each do
+  after do
     shell("rm -f '#{facts_d}/fqdn.txt'", acceptable_exit_codes: [0, 1])
   end
 

@@ -54,7 +54,7 @@ describe Puppet::Type.type(:cs_colocation).provider(:crm) do
   end
 
   context 'when flushing' do
-    after :each do
+    after do
       instance.flush
     end
 
