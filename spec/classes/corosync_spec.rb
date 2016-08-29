@@ -238,7 +238,7 @@ describe 'corosync' do
           params.merge!(
             "package_#{package}" => true,
             "version_#{package}" => '1.1.1'
-                       )
+          )
         end
 
         it "does install #{package} with version 1.1.1" do
