@@ -73,6 +73,29 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
   end
 
+  it 'creates a haproxy_vip resources' do
+    pp = <<-EOS
+    cs_primitive { 'haproxy_vip':
+      primitive_class  => 'ocf',
+      primitive_type   => 'IPaddr2',
+      provided_by      => 'heartbeat',
+      parameters       => {
+        'ip'           => '1.2.3.4',
+        'cidr_netmask' => '24'
+      },
+      operations       => {
+        'monitor'      => {
+        'interval'     => '30s' }
+      },
+    }
+    EOS
+    apply_manifest(pp, expect_changes: true)
+    apply_manifest(pp, catch_changes: true)
+    shell('cibadmin --query') do |r|
+      expect(r.stdout).to match(%r{haproxy_vip})
+    end
+  end
+
   it 'removes the target-role' do
     pp = <<-EOS
         cs_primitive { 'test_stop':
