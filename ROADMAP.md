@@ -1,15 +1,10 @@
 # Public Roadmap
 
-## voxpupuli-corosync v3.0.0
-
-- Minimum Puppet version: 3.0.0
-
 ## voxpupuli-corosync v4.0.0
 
 - Minimum Puppet version: 3.6.0
 - Cleanup Pre-Puppet 3.6 workarounds
 - PR [#294](https://github.com/voxpupuli/puppet-corosync/pull/294)
-  [#291](https://github.com/voxpupuli/puppet-corosync/pull/291)
 
 ## voxpupuli-corosync v5.0.0
 
@@ -17,6 +12,8 @@
 - Long Term Support release
 - General code optimization and cleanup
 - Branched off to a "puppet 3 branch"
+- PR [#291](https://github.com/voxpupuli/puppet-corosync/pull/291)
+- PR [#310](https://github.com/voxpupuli/puppet-corosync/pull/310)
 
 ### Puppet 3 support
 
