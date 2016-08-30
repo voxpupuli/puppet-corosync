@@ -1,10 +1,7 @@
 require 'spec_helper'
 
 describe Puppet::Type.type(:cs_order).provider(:pcs) do
-  before do
-    described_class.stubs(:command).with(:pcs).returns 'pcs'
-    described_class.expects(:block_until_ready).returns(nil)
-  end
+  include_context 'pcs'
 
   let :test_cib do
     <<-EOS
