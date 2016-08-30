@@ -1,9 +1,7 @@
 require 'spec_helper'
 
 describe Puppet::Type.type(:cs_property).provider(:pcs) do
-  before do
-    described_class.stubs(:command).with(:pcs).returns 'pcs'
-  end
+  include_context 'pcs'
 
   context 'when getting instances' do
     let :instances do
@@ -23,7 +21,6 @@ describe Puppet::Type.type(:cs_property).provider(:pcs) do
         </cib>
       EOS
 
-      described_class.expects(:block_until_ready).returns(nil)
       Puppet::Util::Execution.expects(:execute).with(%w(pcs cluster cib), failonfail: true, combine: true).at_least_once.returns(
         Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
       )
