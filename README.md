@@ -68,9 +68,24 @@ class { 'corosync':
   quorum_members_ids => [ 10, 11, 12 ],
 }
 ```
+
 Note: custom IDs may be required when adding or removing
 nodes to a cluster on a fly. Then each node shall have an
 unique and persistent ID.
+
+*To have multiple rings in the nodelist*
+```puppet
+class { 'corosync':
+  set_votequorum     => true,
+  quorum_members     => [
+    ['172.31.110.1', '172.31.111.1'],
+    ['172.31.110.2', '172.31.111.2'],
+  ],
+}
+```
+
+When `quorum_members` is an array of arrays, each sub array represents one
+host IP addresses.
 
 ### Configuring primitives
 

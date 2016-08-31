@@ -88,9 +88,11 @@ quorum {
 
 <% unless @votequorum_expected_votes -%>
 nodelist {
-<% [@quorum_members].flatten.each_index do |i| -%>
+<% Array(@quorum_members).each_index do |i| -%>
   node {
-    ring0_addr: <%= [@quorum_members].flatten[i] %>
+<% Array(Array(@quorum_members.map{|node| Array(node).flatten})[i]).each_with_index do |addr,ring| -%>
+    ring<%= ring %>_addr: <%= addr %>
+<% end -%>
 <% if @quorum_members_ids.nil? -%>
     nodeid: <%= i+1 %>
 <% else -%>
