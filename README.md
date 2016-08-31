@@ -1,22 +1,23 @@
-Puppet Community module for Corosync
-============================
+# Puppet module for Corosync & Pacemaker
 
 [![Pupet Forge Release](https://img.shields.io/puppetforge/v/puppet/corosync.svg)](https://forge.puppet.com/puppet/corosync) [![Downloads](https://img.shields.io/puppetforge/dt/puppet/corosync.svg)](https://forge.puppet.com/puppet/corosync) [![Build Status](https://travis-ci.org/voxpupuli/puppet-corosync.png?branch=master)](https://travis-ci.org/voxpupuli/puppet-corosync) [![Endorsement](https://img.shields.io/puppetforge/e/puppet/corosync.svg)](https://forge.puppet.com/approved)
 
-Corosync is a cluster stack written as a reimplementation of all the core
-functionalities required by openais.  Meant to provide 100% correct operation
-during failures or partitionable networks.
+The [clusterlabs][cl] stack incorporates Corosync and Pacemaker in an
+Open-Source, High Availability stack for both small and large deployments.
 
-Most famous for being the cluster stack used by Pacemaker to support n-code
-clusters that can respond to node and resource level events.
+It supports a lot of different HA setups and is very flexible.
 
-Roadmap
--------
+This puppet module is suitable for the management of both the software stack
+(pacemaker and corosync) and the cluster resources (via puppet types and
+providers).
 
-We do maintain a [roadmap regarding next releases of this module](ROADMAP.md).
+*Note:* This module is the successor of *puppetlabs-corosync*.
 
-Basic usage
------------
+[cl]:http://clusterlabs.org/
+
+## Documentation
+
+### Basic usage
 
 *To install and configure Corosync*
 
@@ -47,8 +48,7 @@ class { 'corosync':
 }
 ```
 
-Configure votequorum
---------------------
+### Configure votequorum
 
 *To enable Corosync 2 votequorum and define a nodelist
 of nodes named n1, n2, n3 with auto generated node IDs*
@@ -72,8 +72,7 @@ Note: custom IDs may be required when adding or removing
 nodes to a cluster on a fly. Then each node shall have an
 unique and persistent ID.
 
-Configuring primitives
-------------------------
+### Configuring primitives
 
 The resources that Corosync will manage can be referred to as a primitive.
 These are things like virtual IPs or services like drbd, nginx, and apache.
@@ -148,8 +147,7 @@ cs_primitive { 'pgsql_service':
 }
 ```
 
-Configuring locations
------------------------
+### Configuring locations
 
 Locations determine on which nodes primitive resources run.
 
@@ -160,8 +158,8 @@ cs_location { 'nginx_service_location':
   score     => 'INFINITY'
 }
 ```
-Configuring colocations
------------------------
+
+### Configuring colocations
 
 Colocations keep primitives together.  Meaning if a vip moves to web02 from web01
 because web01 just hit the dirt it will drag the nginx service with it.
@@ -194,8 +192,7 @@ cs_colocation { 'mysql_apache_munin_and_ptheartbeat':
 }
 ```
 
-Configuring migration or state order
-------------------------------------
+### Configuring migration or state order
 
 Colocation defines that a set of primitives must live together on the same node
 but order definitions will define the order of which each primitive is started.  If
@@ -210,8 +207,7 @@ cs_order { 'vip_before_service':
 }
 ```
 
-Configuring cloned resources
-----------------------------
+### Configuring cloned resources
 
 Cloned resources should be active on multiple hosts at the same time. You can
 clone any existing resource provided the resource agent supports it.
@@ -225,10 +221,9 @@ cs_clone { 'nginx_service-clone' :
 }
 ```
 
-Corosync Properties
-------------------
-A few global settings can be changed with the "cs_property" section.
+### Corosync Properties
 
+A few global settings can be changed with the "cs_property" section.
 
 Disable STONITH if required.
 ```puppet
@@ -253,8 +248,8 @@ cs_property { 'maintenance-mode':
 }
 ```
 
-Resource defaults
------------------
+### Resource defaults
+
 A few global settings can be changed with the "cs_rsc_defaults" section.
 
 Don't move resources.
@@ -264,8 +259,7 @@ cs_rsc_defaults { 'resource-stickiness' :
 }
 ```
 
-Multiple rings
---------------
+### Multiple rings
 
 In unicast mode, you can have multiple rings by specifying unicast_address and
 bind_address as arrays:
@@ -289,8 +283,7 @@ class { 'corosync':
 The unicast_addresses is an array of arrays. One sub array matches one host
 IP addresses. In this example host2 has IP addresses 10.0.0.2 and 10.0.1.2.
 
-Shadow CIB
-----------
+### Shadow CIB
 
 Shadow CIB allows you to apply all the changes at the same time. For that, you
 need to use the `cib` parameter and the `cs_commit` and `cs_shadow` types.
@@ -322,60 +315,53 @@ In Puppet < 4.0, you also need the resources to notify their `cs_commit`:
 Cs_primitive['pgsql_service'] ~> Cs_commit['puppet']
 ```
 
-Dependencies
-------------
+### Dependencies
 
 Tested and built on Debian 6 using backports so version 1.4.2 of Corosync is validated
 to function.
 
-Notes
------
+## Notes
 
-This module doesn't abstract away everything about managing Corosync but makes setup
-and automation easier.  Things that are currently outstanding...
+### Upstream documentation
 
- * Needs a lot more tests.
- * There is already a handful of bugs that need to be worked out.
- * Plus a other things since Corosync and Pacemaker do a lot.
-
-We suggest you at least go read the [Clusters from Scratch](http://www.clusterlabs.org/doc/en-US/Pacemaker/1.1/html-single/Clusters_from_Scratch) document
+We suggest you at least go read the [Clusters from Scratch](http://clusterlabs.org/doc/) document
 from Cluster Labs.  It will help you out a lot when understanding how all the pieces
-fall together a point you in the right direction when Corosync fails unexpectedly.
+fall together a point you in the right direction when Corosync/Pacemaker fails unexpectedly.
 
-A simple but complete manifest example can be found on [Cody Herriges' Github](https://github.com/ody/ha-demo), plus
-there are more incomplete examples spread across the [Puppet Labs Github](https://github.com/puppetlabs).
+### Roadmap
 
-Debian 8 Support
-----------------
+We do maintain a [roadmap regarding next releases of this module](ROADMAP.md).
 
-In order to have this module working with Debian 8, you need to enable the
-jessie-backport apt repository.
-
-
-Operating System support matrix
--------------------------------
+### Operating System support matrix
 
 | OS          | release | Puppet 3.6-3.8 | Puppet 4.X (PC1) |
 |-------------|---------|----------------|------------------|
 | CentOS/RHEL | 5       | Not supported  | Not supported    |
 | CentOS/RHEL | 6       | Not supported  | Not supported    |
 | CentOS/RHEL | 7       | **Supported**  | **Supported**    |
-| Debian      | 8       | Not supported  | **Supported**    |
+| Debian      | 8       | Not supported  | **Supported[1]** |
 | Ubuntu      | 12.04   | Not supported  | Not supported    |
 | Ubuntu      | 14.04   | **Supported**  | **Supported**    |
 | Ubuntu      | 16.04   | Not supported  | **Supported**    |
 
-Contributors
-------------
+**[1] Debian 8 Support**: In order to have this module working with Debian 8, you
+need to enable the jessie-backport apt repository.
 
-  * [See Github](https://github.com/voxpupuli/puppet-corosync/graphs/contributors)
+## Contributors
 
-Copyright and License
----------------------
+[See Github](https://github.com/voxpupuli/puppet-corosync/graphs/contributors).
 
-Copyright (C) 2012 [Puppet Labs](https://www.puppetlabs.com/) Inc
+Special thanks to [Puppet, Inc](http://puppet.com) for initial development and
+[Vox Pupuli](https://voxpupuli.org) to provide a platform that allows us to
+continue the development of this module.
 
-Puppet Labs can be contacted at: info@puppetlabs.com
+## Copyright and License
+
+Copyright © 2012-2014 [Puppet Inc](https://www.puppet.com/)
+
+Copyright © 2012-2016 [Multiple contributors][mc]
+
+[mc]:https://github.com/voxpupuli/puppet-corosync/graphs/contributors
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
