@@ -334,15 +334,15 @@ We do maintain a [roadmap regarding next releases of this module](ROADMAP.md).
 
 ### Operating System support matrix
 
-| OS          | release | Puppet 3.6-3.8 | Puppet 4.X (PC1) |
-|-------------|---------|----------------|------------------|
-| CentOS/RHEL | 5       | Not supported  | Not supported    |
-| CentOS/RHEL | 6       | Not supported  | Not supported    |
-| CentOS/RHEL | 7       | **Supported**  | **Supported**    |
-| Debian      | 8       | Not supported  | **Supported[1]** |
-| Ubuntu      | 12.04   | Not supported  | Not supported    |
-| Ubuntu      | 14.04   | **Supported**  | **Supported**    |
-| Ubuntu      | 16.04   | Not supported  | **Supported**    |
+| OS          | release | Puppet 3.8    | Puppet 4.X (PC1) |
+|-------------|---------|---------------|------------------|
+| CentOS/RHEL | 5       | Not supported | Not supported    |
+| CentOS/RHEL | 6       | Not supported | Not supported    |
+| CentOS/RHEL | 7       | **Supported** | **Supported**    |
+| Debian      | 8       | Not supported | **Supported[1]** |
+| Ubuntu      | 12.04   | Not supported | Not supported    |
+| Ubuntu      | 14.04   | **Supported** | **Supported**    |
+| Ubuntu      | 16.04   | Not supported | **Supported**    |
 
 **[1] Debian 8 Support**: In order to have this module working with Debian 8, you
 need to enable the jessie-backport apt repository.
