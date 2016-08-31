@@ -22,17 +22,17 @@ matrix:
   - rvm: 2.1
     env: PUPPET_VERSION="~> 3.0" STRICT_VARIABLES="yes" CHECK=test
   - rvm: 2.1
-    env: PUPPET_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK=test
+    env: PUPPET_VERSION="~> 4.0" CHECK=test
   - rvm: 2.2
-    env: PUPPET_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK=test
+    env: PUPPET_VERSION="~> 4.0" CHECK=test
   - rvm: 2.3.1
-    env: PUPPET_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK=build
+    env: PUPPET_VERSION="~> 4.0" CHECK=build DEPLOY_TO_FORGE=yes
   - rvm: 2.3.1
-    env: PUPPET_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK=rubocop
+    env: PUPPET_VERSION="~> 4.0" CHECK=rubocop
   - rvm: 2.3.1
-    env: PUPPET_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK=test
+    env: PUPPET_VERSION="~> 4.0" CHECK=test
   - rvm: 2.4.0-preview1
-    env: PUPPET_VERSION="~> 4.0" STRICT_VARIABLES="yes" CHECK=test
+    env: PUPPET_VERSION="~> 4.0" CHECK=test
   - rvm: 2.1
     env: PUPPET_VERSION="~> 3.0" STRICT_VARIABLES="yes" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/centos-7 PUPPET_INSTALL_TYPE=foss PUPPET_INSTALL_VERSION=3.8.7
     services: docker
@@ -78,5 +78,5 @@ deploy:
     tags: true
     # all_branches is required to use tags
     all_branches: true
-    # Only publish if our main Ruby target builds
-    rvm: 2.3.1
+    # Only publish the build marked with "DEPLOY_TO_FORGE"
+    condition: "$DEPLOY_TO_FORGE = yes"
