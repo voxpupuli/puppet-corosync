@@ -6,7 +6,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
 
   context 'when getting instances' do
     let :instances do
-      test_cib = <<-EOS
+      cib = <<-EOS
         <configuration>
           <resources>
             <primitive class="ocf" id="example_vm" provider="heartbeat" type="Xen">
@@ -30,9 +30,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
         </configuration>
       EOS
 
-      Puppet::Util::Execution.expects(:execute).with(%w(pcs cluster cib), failonfail: true, combine: true).at_least_once.returns(
-        Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
-      )
+      pcs_load_cib(cib)
       described_class.instances
     end
 
@@ -86,7 +84,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
 
   context 'when flushing' do
     let :instances do
-      test_cib = <<-EOS
+      cib = <<-EOS
         <configuration>
           <resources>
             <primitive class="ocf" id="simple" provider="heartbeat" type="IPaddr2" />
@@ -114,14 +112,7 @@ h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat"
         </configuration>
       EOS
 
-      described_class.expects(:block_until_ready).returns(nil)
-      if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-        Puppet::Util::SUIDManager.expects(:run_and_capture).with(%w(pcs cluster cib)).at_least_once.returns([test_cib, 0])
-      else
-        Puppet::Util::Execution.expects(:execute).with(%w(pcs cluster cib), failonfail: true, combine: true).at_least_once.returns(
-          Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
-        )
-      end
+      pcs_load_cib(cib)
       described_class.instances
     end
 
