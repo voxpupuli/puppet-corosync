@@ -29,6 +29,8 @@ class corosync::params {
   $version_crmsh                       = 'present'
   $version_pacemaker                   = 'present'
   $version_pcs                         = 'present'
+  $restart_corosync_command            = '/usr/sbin/corosync-cfgtool -R'
+  $restart_pacemaker_command           = '/usr/bin/systemctl reload pacemaker'
 
   case $::osfamily {
     'RedHat': {
@@ -39,9 +41,13 @@ class corosync::params {
       if versioncmp($::operatingsystemrelease, '7') >= 0 {
         $manage_pacemaker_service = true
         $test_corosync_config = true
+        $has_corosync_restart = true
+        $has_pacemaker_restart = true
       } else {
         $manage_pacemaker_service = false
         $test_corosync_config = false
+        $has_corosync_restart = false
+        $has_pacemaker_restart = false
       }
       $package_install_options = undef
     }
@@ -58,6 +64,8 @@ class corosync::params {
 
             if versioncmp($::operatingsystemrelease, '16.04') >= 0 {
               $test_corosync_config = true
+              $has_corosync_restart = true
+              $has_pacemaker_restart = true
             } else {
 
               #FIXME should be moved in another place
@@ -67,12 +75,16 @@ class corosync::params {
               }
 
               $test_corosync_config = false
+              $has_corosync_restart = false
+              $has_pacemaker_restart = false
             }
           } else {
             $compatibility = 'whitetank'
             $set_votequorum = false
             $manage_pacemaker_service = false
             $test_corosync_config = false
+            $has_corosync_restart = false
+            $has_pacemaker_restart = false
           }
           $package_install_options = undef
         }
@@ -83,12 +95,16 @@ class corosync::params {
             $manage_pacemaker_service = true
             $package_install_options = ['-t', 'jessie-backports']
             $test_corosync_config = true
+            $has_corosync_restart = true
+            $has_pacemaker_restart = true
           } else {
             $set_votequorum = false
             $compatibility = 'whitetank'
             $manage_pacemaker_service = false
             $package_install_options = undef
             $test_corosync_config = false
+            $has_corosync_restart = false
+            $has_pacemaker_restart = false
           }
         }
         default : {
@@ -97,6 +113,8 @@ class corosync::params {
           $manage_pacemaker_service = false
           $package_install_options = undef
           $test_corosync_config = false
+          $has_corosync_restart = false
+          $has_pacemaker_restart = false
         }
       }
     }

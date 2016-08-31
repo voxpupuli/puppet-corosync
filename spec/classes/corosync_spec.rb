@@ -330,6 +330,22 @@ describe 'corosync' do
     end
 
     it_configures 'corosync'
+
+    it 'does use restart with the corosync service' do
+      should contain_service('corosync').with(hasrestart: true)
+    end
+
+    it 'does use restart with the pacemaker service' do
+      should contain_service('pacemaker').with(hasrestart: true)
+    end
+
+    it 'does use systemnctl reload to restart the corosync service' do
+      should contain_service('corosync').with(restart: '/usr/bin/systemctl reload corosync')
+    end
+
+    it 'does use systemnctl reload with the pacemaker service' do
+      should contain_service('pacemaker').with(restart: '/usr/bin/systemctl reload pacemaker')
+    end
   end
 
   context 'on RedHat platforms' do
@@ -350,6 +366,10 @@ describe 'corosync' do
         should_not contain_service('pacemaker')
       end
 
+      it 'does not use restart with the corosync service' do
+        should contain_service('corosync').with(hasrestart: false)
+      end
+
       it 'does not validate the corosync configuration' do
         should contain_file('/etc/corosync/corosync.conf').without_validate_cmd
       end
@@ -366,6 +386,22 @@ describe 'corosync' do
         should contain_service('pacemaker').with(
           ensure: 'running'
         )
+      end
+
+      it 'does use restart with the corosync service' do
+        should contain_service('corosync').with(hasrestart: true)
+      end
+
+      it 'does use restart with the pacemaker service' do
+        should contain_service('pacemaker').with(hasrestart: true)
+      end
+
+      it 'does use systemnctl reload to restart the corosync service' do
+        should contain_service('corosync').with(restart: '/usr/bin/systemctl reload corosync')
+      end
+
+      it 'does use systemnctl reload with the pacemaker service' do
+        should contain_service('pacemaker').with(restart: '/usr/bin/systemctl reload pacemaker')
       end
 
       it 'validates the corosync configuration' do
