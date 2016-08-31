@@ -54,8 +54,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       }
     EOS
 
-    apply_manifest(pp, catch_failures: true)
-    apply_manifest(pp, catch_changes: true)
+    apply_manifest(pp, catch_failures: true, debug: true, trace: true)
+    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
   end
 
   describe service('corosync') do
@@ -89,8 +89,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       },
     }
     EOS
-    apply_manifest(pp, expect_changes: true)
-    apply_manifest(pp, catch_changes: true)
+    apply_manifest(pp, expect_changes: true, debug: true, trace: true)
+    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
     shell('cibadmin --query') do |r|
       expect(r.stdout).to match(%r{haproxy_vip})
     end
@@ -106,13 +106,13 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           operations      => { 'monitor' => { 'interval' => '10s' } },
         }
     EOS
-    apply_manifest(pp, expect_changes: true)
-    apply_manifest(pp, catch_changes: true)
+    apply_manifest(pp, expect_changes: true, debug: true, trace: true)
+    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
 
     shell('crm_resource -r test_stop -m -p target-role -v Stopped')
 
-    apply_manifest(pp, expect_changes: true)
-    apply_manifest(pp, catch_changes: true)
+    apply_manifest(pp, expect_changes: true, debug: true, trace: true)
+    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
   end
 
   it 'respects unmanaged_metadata' do
@@ -126,12 +126,12 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           unmanaged_metadata => ['target-role'],
         }
     EOS
-    apply_manifest(pp, expect_changes: true)
-    apply_manifest(pp, catch_changes: true)
+    apply_manifest(pp, expect_changes: true, debug: true, trace: true)
+    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
 
     shell('crm_resource -r test_stop2 -m -p target-role -v Stopped')
 
-    apply_manifest(pp, catch_changes: true)
+    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
 
     pp = <<-EOS
         cs_primitive { 'test_stop2':
@@ -143,8 +143,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         }
     EOS
 
-    apply_manifest(pp, expect_changes: true)
-    apply_manifest(pp, catch_changes: true)
+    apply_manifest(pp, expect_changes: true, debug: true, trace: true)
+    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
   end
 
   it 'accepts 2 metadata names in unmanaged_metadata' do
@@ -158,8 +158,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           metadata        => {'is-managed' => 'false', 'target-role' => 'stopped'}
         }
     EOS
-    apply_manifest(pp, expect_changes: true)
-    apply_manifest(pp, catch_changes: true)
+    apply_manifest(pp, expect_changes: true, debug: true, trace: true)
+    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
   end
 
   it 'does set is-managed in test_md' do
@@ -186,7 +186,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         }
     EOS
 
-    apply_manifest(pp, catch_changes: true)
+    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
   end
 
   it 'does not delete or change is-managed if it is in unmanaged_metadata' do
@@ -213,8 +213,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         }
     EOS
 
-    apply_manifest(pp, expect_changes: true)
-    apply_manifest(pp, catch_changes: true)
+    apply_manifest(pp, expect_changes: true, debug: true, trace: true)
+    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
   end
 
   it 'does delete is-managed because it is no longer in unmanaged_metadata' do

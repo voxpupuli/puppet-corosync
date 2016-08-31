@@ -64,11 +64,11 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       }
     EOS
 
-    apply_manifest(pp, catch_failures: true)
+    apply_manifest(pp, catch_failures: true, debug: true, trace: true)
     # This catalog should always generate changes because we did not put a cs_commit resource and
     # we have set autocommit to false.
-    apply_manifest(pp, expect_changes: true)
-    apply_manifest(pp, expect_changes: true)
+    apply_manifest(pp, expect_changes: true, debug: true, trace: true)
+    apply_manifest(pp, expect_changes: true, debug: true, trace: true)
   end
 
   describe service('corosync') do
