@@ -320,6 +320,14 @@ class corosync(
       fail('You must provide a value for multicast_address, unicast_address or cluster_name.')
   }
 
+  # $rrp_mode value of 'none' isn't allowed with multiple rings
+  if ( ( is_array($multicast_address) and size($multicast_address) > 1 )
+  or ( is_array($unicast_addresses) and is_array($unicast_addresses[0]) and size($unicast_addresses[0]) > 1 )
+  or ( is_array($quorum_members) and is_array($quorum_members[0]) and size($quorum_members[0]) > 1 ) )
+  and $rrp_mode == 'none' {
+    fail('You must set rrp_mode to active or passive with multiple rings')
+  }
+
   case $enable_secauth {
     true:    { $enable_secauth_real = 'on' }
     false:   { $enable_secauth_real = 'off' }
