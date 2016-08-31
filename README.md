@@ -23,10 +23,10 @@ providers).
 
 ```puppet
 class { 'corosync':
-  enable_secauth    => true,
-  authkey           => '/var/lib/puppet/ssl/certs/ca.pem',
-  bind_address      => $ipaddress,
-  multicast_address => '239.1.1.2',
+  authkey        => '/var/lib/puppet/ssl/certs/ca.pem',
+  bind_address   => $::ipaddress,
+  cluster_name   => 'mycluster',
+  enable_secauth => true,
 }
 ```
 
@@ -97,8 +97,8 @@ cs_primitive { 'nginx_service':
   primitive_type  => 'nginx_fixed',
   provided_by     => 'pacemaker',
   operations      => {
-    'monitor' => { 'interval' => '10s', 'timeout' => '30s' },
-    'start'   => { 'interval' => '0', 'timeout' => '30s', 'on-fail' => 'restart' }
+    'monitor'     => { 'interval' => '10s', 'timeout' => '30s' },
+    'start'       => { 'interval' => '0', 'timeout' => '30s', 'on-fail' => 'restart' }
   },
   require         => Cs_primitive['nginx_vip'],
 }
@@ -112,8 +112,8 @@ cs_primitive { 'apache_service':
   primitive_type  => 'apache2',
   provided_by     => 'heartbeat',
   operations      => {
-    'monitor' => { 'interval' => '10s', 'timeout' => '30s' },
-    'start'   => { 'interval' => '0', 'timeout' => '30s', 'on-fail' => 'restart' }
+    'monitor'     => { 'interval' => '10s', 'timeout' => '30s' },
+    'start'       => { 'interval' => '0', 'timeout' => '30s', 'on-fail' => 'restart' }
   },
   require         => Cs_primitive['apache2_vip'],
 }
