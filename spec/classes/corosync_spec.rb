@@ -62,6 +62,28 @@ describe 'corosync' do
       end
     end
 
+    context 'when set_quorum is true and quorum_members are an array of arrays' do
+      before do
+        params.merge!(
+          set_votequorum: true,
+          quorum_members: [
+            ['172.31.10.1', '172.31.11.1', '172.31.12.1'],
+            ['172.31.10.2', '172.31.11.2', '172.31.12.2'],
+            ['172.31.10.3', '172.31.11.3', '172.31.12.3'],
+            ['172.31.10.4', '172.31.11.4', '172.31.12.4']
+          ]
+        )
+      end
+
+      (1..4).each do |node_id|
+        it "configures rings for host #{node_id} correctly" do
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{ring0_addr: 172.31.10.#{node_id}\n\s*ring1_addr: 172.31.11.#{node_id}\n\s*ring2_addr: 172.31.12.#{node_id}\n\s*nodeid: #{node_id}}
+          )
+        end
+      end
+    end
+
     context 'when unicast is used' do
       before do
         params.merge!(

@@ -1,3 +1,6 @@
+# 2016-09-15 - Release 5.0.0
+- Allow multiple rings in nodelist (#262, #291, #336)
+
 # 2016-08-30 - Release 4.0.0
 ### Summary
 - Validate corosync configuration before overwriting (available in EL7, Ubuntu
