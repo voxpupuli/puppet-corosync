@@ -1,5 +1,23 @@
 # 2016-09-15 - Release 5.0.0
 - Allow multiple rings in nodelist (#262, #291, #336)
+- Improve tests (#335, #337, #331 #328)
+- Modulesync (#330)
+
+### Backward incompatible changes
+- Support for Puppet < 3.8.0 is removed (#334)
+
+### Deprecation notes
+
+We have plans to rename this module and deprecated old Puppet releases and
+Puppet distributions. Please refer to our [roadmap](ROADMAP.md) for further
+details.
+
+#### Naming of this module
+
+The issue [#32](https://github.com/voxpupuli/puppet-corosync/issues/32)
+concerning the naming of this module will be closed in the next major releases
+of this module. In v6.0.0, this module could be rebranded to a better name.
+
 
 # 2016-08-30 - Release 4.0.0
 ### Summary
@@ -21,7 +39,7 @@ details.
 #### Naming of this module
 
 The issue [#32](https://github.com/voxpupuli/puppet-corosync/issues/32)
-concerning the naming of this module will be closed in three major releases
+concerning the naming of this module will be closed in two major releases
 of this module. In v6.0.0, this module could be rebranded to a better name.
 
 # 2016-08-18 - Release 3.0.0
