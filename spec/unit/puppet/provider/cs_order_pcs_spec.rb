@@ -3,8 +3,8 @@ require 'spec_helper'
 describe Puppet::Type.type(:cs_order).provider(:pcs) do
   include_context 'pcs'
 
-  let :test_cib do
-    <<-EOS
+  let :instances do
+    cib = <<-EOS
       <cib>
       <configuration>
         <constraints>
@@ -14,12 +14,8 @@ describe Puppet::Type.type(:cs_order).provider(:pcs) do
       </configuration>
       </cib>
     EOS
-  end
 
-  let :instances do
-    Puppet::Util::Execution.expects(:execute).with(%w(pcs cluster cib), failonfail: true, combine: true).at_least_once.returns(
-      Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
-    )
+    pcs_load_cib(cib)
     described_class.instances
   end
 

@@ -5,7 +5,7 @@ describe Puppet::Type.type(:cs_property).provider(:pcs) do
 
   context 'when getting instances' do
     let :instances do
-      test_cib = <<-EOS
+      cib = <<-EOS
         <cib>
           <configuration>
             <crm_config>
@@ -21,9 +21,7 @@ describe Puppet::Type.type(:cs_property).provider(:pcs) do
         </cib>
       EOS
 
-      Puppet::Util::Execution.expects(:execute).with(%w(pcs cluster cib), failonfail: true, combine: true).at_least_once.returns(
-        Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
-      )
+      pcs_load_cib(cib)
       described_class.instances
     end
 
