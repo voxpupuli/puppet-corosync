@@ -18,6 +18,9 @@ The issue [#32](https://github.com/voxpupuli/puppet-corosync/issues/32)
 concerning the naming of this module will be closed in the next major releases
 of this module. In v6.0.0, this module could be rebranded to a better name.
 
+# 2016-09-02 - Release 4.0.1
+### Summary
+- Fix enable_secauth => false (#341)
 
 # 2016-08-30 - Release 4.0.0
 ### Summary
