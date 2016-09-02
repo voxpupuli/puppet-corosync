@@ -1,3 +1,7 @@
+# 2016-09-02 - Release 4.0.1
+### Summary
+- Fix enable_secauth => false (#341)
+
 # 2016-08-30 - Release 4.0.0
 ### Summary
 - Validate corosync configuration before overwriting (available in EL7, Ubuntu
