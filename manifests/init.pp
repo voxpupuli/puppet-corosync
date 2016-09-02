@@ -341,6 +341,7 @@ class corosync(
           notify  => Service['corosync'],
           require => Package['corosync'],
         }
+        File['/etc/corosync/authkey'] -> File['/etc/corosync/corosync.conf']
       }
       'string': {
         file { '/etc/corosync/authkey':
@@ -352,6 +353,7 @@ class corosync(
           notify  => Service['corosync'],
           require => Package['corosync'],
         }
+        File['/etc/corosync/authkey'] -> File['/etc/corosync/corosync.conf']
       }
       default: {}
     }
@@ -388,10 +390,7 @@ class corosync(
       group        => 'root',
       content      => template($corosync_conf),
       validate_cmd => '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t',
-      require      => [
-        File['/etc/corosync/authkey'],
-        Package['corosync'],
-      ],
+      require      => Package['corosync'],
     }
   } else {
     file { '/etc/corosync/corosync.conf':

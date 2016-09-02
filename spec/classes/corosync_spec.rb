@@ -7,7 +7,7 @@ describe 'corosync' do
   end
 
   shared_examples_for 'corosync' do
-    it { is_expected.to compile }
+    it { is_expected.to compile.with_all_deps }
 
     context 'when set_quorum is true and quorum_members are set' do
       before do
@@ -122,6 +122,22 @@ describe 'corosync' do
           )
           should contain_file('/etc/corosync/corosync.conf').with_content(
             %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 11}
+          )
+        end
+      end
+
+      context 'witout secauth' do
+        before do
+          params.merge!(
+            enable_secauth: false
+          )
+        end
+
+        it { is_expected.to compile.with_all_deps }
+
+        it 'configures secauth correctly' do
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{secauth:\s+off}
           )
         end
       end
