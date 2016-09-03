@@ -96,14 +96,18 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
           name = rule_item.keys.first
           rule = rule_item[name]
 
-          score = rule['score-attribute'] || rule['score']
+          if rule['score-attribute'].nil?
+            score = "score=#{rule['score']}"
+          else
+            score = "score-attribute=\"#{rule['score-attribute']}\""
+          end
 
           boolean_op = rule['boolean-op'] || 'and'
           expression = self.class.rule_expression(name, rule['expression'], boolean_op)
 
           params << " id=\"#{name}\""
           params << " role=\"#{rule['role']}\"" unless rule['role'].nil?
-          params << " score=#{score} #{expression}"
+          params << " #{score} #{expression}"
         end
 
         cmd_rule = [command(:pcs), 'constraint', 'location', @property_hash[:primitive], 'rule', params]
