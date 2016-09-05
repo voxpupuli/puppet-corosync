@@ -2,9 +2,19 @@
 - Allow multiple rings in nodelist (#262, #291, #336)
 - Improve tests (#335, #337, #331 #328)
 - Modulesync (#330)
+- New class parameter: vsftype (#345)
 
 ### Backward incompatible changes
 - Support for Puppet < 3.8.0 is removed (#334)
+- Logging to file is enabled by default. (#345)
+- Corosync.conf got a major cleanup. Most of the parameters are now implicit so
+  we get pacemaker defaults. List of affected parameters: compatibility,
+  consensus, join, max\_messages, rrp\_mode, threads, token,
+  token\_retransmits\_before\_loss\_const, vsftype.
+  Those parameters can now be specified as class parameters. (#345)
+- Removed legacy configuration sections: amf, aisexec, logging.logger\_subsys
+  (#345)
+- Fix two\_nodes behaviour with expected\_votes = 2 introduced in 3.0.0 (#246)
 
 ### Deprecation notes
 

@@ -20,7 +20,7 @@
 #
 # [*threads*]
 #   How many threads you are going to let corosync use to encode and decode
-#   multicast messages.  If you turn off secauth then corosync wil ignore
+#   multicast messages.  If you turn off secauth then corosync will ignore
 #   threads.
 #
 # [*bind_address*]
@@ -56,7 +56,7 @@
 #
 # [*log_file*]
 #   Boolean parameter specifying whether Corosync should produce debug
-#   output in a logfile. Default: false.
+#   output in a logfile. Default: true.
 #
 # [*debug*]
 #   True/false parameter specifying whether Corosync should produce debug
@@ -80,6 +80,9 @@
 #
 # [*ttl*]
 #   Time To Live.
+#
+# [*vsftype*]
+#   Virtual synchrony filter type
 #
 # [*package_corosync*]
 #   Define if package corosync should be managed.
@@ -232,6 +235,7 @@ class corosync(
   $log_function_name                   = $::corosync::params::log_function_name,
   $rrp_mode                            = $::corosync::params::rrp_mode,
   $ttl                                 = $::corosync::params::ttl,
+  $vsftype                             = $::corosync::params::vsftype,
   $package_corosync                    = $::corosync::params::package_corosync,
   $package_crmsh                       = $::corosync::params::package_crmsh,
   $package_pacemaker                   = $::corosync::params::package_pacemaker,
@@ -249,7 +253,7 @@ class corosync(
   $quorum_members                      = ['localhost'],
   $quorum_members_ids                  = undef,
   $token                               = $::corosync::params::token,
-  $token_retransmits_before_loss_const = $::corosync::params::token_retransmits_before_lost_const,
+  $token_retransmits_before_loss_const = $::corosync::params::token_retransmits_before_loss_const,
   $compatibility                       = $::corosync::params::compatibility,
   $manage_pacemaker_service            = $::corosync::params::manage_pacemaker_service,
   $manage_pcsd_service                 = false,
@@ -307,12 +311,6 @@ class corosync(
   validate_bool($log_stderr)
   validate_re($syslog_priority, '^(debug|info|notice|warning|err|emerg)$')
   validate_bool($log_function_name)
-
-  if $unicast_addresses == 'UNSET' {
-    $corosync_conf = "${module_name}/corosync.conf.erb"
-  } else {
-    $corosync_conf = "${module_name}/corosync.conf.udpu.erb"
-  }
 
   # You have to specify at least one of the following parameters:
   # $multicast_address or $unicast_address or $cluster_name
@@ -386,7 +384,7 @@ class corosync(
       mode         => '0644',
       owner        => 'root',
       group        => 'root',
-      content      => template($corosync_conf),
+      content      => template("${module_name}/corosync.conf.erb"),
       validate_cmd => '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t',
       require      => [
         File['/etc/corosync/authkey'],
@@ -399,7 +397,7 @@ class corosync(
       mode    => '0644',
       owner   => 'root',
       group   => 'root',
-      content => template($corosync_conf),
+      content => template("${module_name}/corosync.conf.erb"),
       require => Package['corosync'],
     }
   }
