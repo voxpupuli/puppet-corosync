@@ -16,6 +16,7 @@
   Those parameters can now be specified as class parameters. (#345)
 - Removed legacy configuration sections: amf, aisexec, logging.logger\_subsys
   (#345)
+- Fix two\_nodes behaviour with expected\_votes = 2 introduced in 3.0.0 (#246)
 
 ### Deprecation notes
 
