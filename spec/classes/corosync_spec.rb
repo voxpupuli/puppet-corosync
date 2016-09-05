@@ -34,7 +34,7 @@ describe 'corosync' do
             %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 2}
           )
           should contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{two_node: 1}
+            %r{two_node: 1\n}
           )
         end
 
@@ -62,7 +62,7 @@ describe 'corosync' do
 
         it 'does not configure two_nodes option' do
           should_not contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{two_node: 1}
+            %r{two_node: 1\n}
           )
         end
       end
@@ -76,7 +76,7 @@ describe 'corosync' do
 
         it 'configures two_node' do
           should contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{two_node: 1}
+            %r{two_node: 1\n}
           )
         end
       end
@@ -100,7 +100,7 @@ describe 'corosync' do
             %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 2}
           )
           should contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{two_node: 1}
+            %r{two_node: 1\n}
           )
         end
       end
