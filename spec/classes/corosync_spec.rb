@@ -220,13 +220,7 @@ describe 'corosync' do
       end
     end
 
-    context 'when log_file is set' do
-      before do
-        params.merge!(
-          log_file: true
-        )
-      end
-
+    context 'when log_file is not set' do
       it 'does set to_logfile' do
         should contain_file('/etc/corosync/corosync.conf').with_content(
           %r{to_logfile.*yes}
@@ -234,11 +228,51 @@ describe 'corosync' do
       end
     end
 
-    context 'when log_file is not set' do
+    context 'when log_file is disabled' do
+      before do
+        params.merge!(
+          log_file: false
+        )
+      end
+
       it 'does not set to_logfile' do
         should contain_file('/etc/corosync/corosync.conf').with_content(
           %r{to_logfile.*no}
         )
+      end
+    end
+
+    {
+      'threads' => 10,
+      'rrp_mode' => 'none',
+      'token' => 3000,
+      'vsftype' => 'none',
+      'token_retransmits_before_loss_const' => 10,
+      'join' => '50',
+      'consensus' => 'false',
+      'max_messages' => 17,
+      'compatibility' => 'whitetank'
+    }.each do |optional_parameter, possible_value|
+      context "when #{optional_parameter} is not set" do
+        it 'is not in corosync.conf' do
+          should contain_file('/etc/corosync/corosync.conf').without_content(
+            %r{#{optional_parameter}}
+          )
+        end
+      end
+
+      context "when #{optional_parameter} is set" do
+        before do
+          params.merge!(
+            optional_parameter => possible_value
+          )
+        end
+
+        it 'is set in corosync.conf' do
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{#{optional_parameter}:\s*#{possible_value}\n}
+          )
+        end
       end
     end
 

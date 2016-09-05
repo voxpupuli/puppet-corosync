@@ -2,40 +2,41 @@ class corosync::params {
   $enable_secauth                      = true
   $authkey_source                      = 'file'
   $authkey                             = '/etc/puppet/ssl/certs/ca.pem'
-  $threads                             = $::processorcount
+  $threads                             = undef
   $port                                = '5405'
   $bind_address                        = $::ipaddress
   $multicast_address                   = 'UNSET'
   $unicast_addresses                   = 'UNSET'
   $force_online                        = false
   $check_standby                       = false
-  $log_file                            = false
+  $log_file                            = true
   $debug                               = false
   $log_stderr                          = true
   $syslog_priority                     = 'info'
   $log_function_name                   = false
-  $rrp_mode                            = 'none'
+  $rrp_mode                            = undef
   $ttl                                 = false
-  $token                               = 3000
-  $token_retransmits_before_lost_const = 10
+  $vsftype                             = undef
+  $token                               = undef
+  $token_retransmits_before_loss_const = undef
   $votequorum_expected_votes           = false
   $cluster_name                        = undef
-  $join                                = 50
-  $consensus                           = false
-  $max_messages                        = 17
+  $join                                = undef
+  $consensus                           = undef
+  $max_messages                        = undef
   $package_corosync                    = true
   $package_pacemaker                   = true
   $version_corosync                    = 'present'
   $version_crmsh                       = 'present'
   $version_pacemaker                   = 'present'
   $version_pcs                         = 'present'
+  $compatibility                       = undef
 
   case $::osfamily {
     'RedHat': {
       $package_crmsh  = false
       $package_pcs    = true
       $set_votequorum = true
-      $compatibility  = 'whitetank'
       if versioncmp($::operatingsystemrelease, '7') >= 0 {
         $manage_pacemaker_service = true
         $test_corosync_config = true
@@ -52,7 +53,6 @@ class corosync::params {
       case $::operatingsystem {
         'Ubuntu': {
           if versioncmp($::operatingsystemrelease, '14.04') >= 0 {
-            $compatibility = false
             $set_votequorum = true
             $manage_pacemaker_service = true
 
@@ -69,7 +69,6 @@ class corosync::params {
               $test_corosync_config = false
             }
           } else {
-            $compatibility = 'whitetank'
             $set_votequorum = false
             $manage_pacemaker_service = false
             $test_corosync_config = false
@@ -79,20 +78,17 @@ class corosync::params {
         'Debian': {
           if versioncmp($::operatingsystemrelease, '8') >= 0 {
             $set_votequorum = true
-            $compatibility = false
             $manage_pacemaker_service = true
             $package_install_options = ['-t', 'jessie-backports']
             $test_corosync_config = true
           } else {
             $set_votequorum = false
-            $compatibility = 'whitetank'
             $manage_pacemaker_service = false
             $package_install_options = undef
             $test_corosync_config = false
           }
         }
         default : {
-          $compatibility = 'whitetank'
           $set_votequorum = false
           $manage_pacemaker_service = false
           $package_install_options = undef
