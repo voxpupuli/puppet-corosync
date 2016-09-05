@@ -106,7 +106,7 @@ quorum {
 <% end -%>
 }
 
-<% unless @votequorum_expected_votes -%>
+<% if Array(@quorum_members).length > 0 -%>
 nodelist {
 <% Array(@quorum_members).each_index do |i| -%>
   node {
