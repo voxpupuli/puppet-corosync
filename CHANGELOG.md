@@ -1,4 +1,4 @@
-# 2016-09-15 - Release 5.0.0
+# 2016-09-05 - Release 5.0.0-beta1
 - Allow multiple rings in nodelist (#262, #291, #336)
 - Improve tests (#335, #337, #331 #328)
 - Modulesync (#330)
