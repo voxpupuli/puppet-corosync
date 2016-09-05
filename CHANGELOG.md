@@ -1,6 +1,6 @@
 # 2016-09-05 - Release 5.0.0-beta1
 - Allow multiple rings in nodelist (#262, #291, #336)
-- Improve tests (#335, #337, #331 #328)
+- Improve tests (#335, #337, #331, #328)
 - Modulesync (#330)
 - New class parameter: vsftype (#345)
 - Add the nodelist to corosync.conf even if we set the expected votes count
@@ -27,8 +27,9 @@ details.
 #### Naming of this module
 
 The issue [#32](https://github.com/voxpupuli/puppet-corosync/issues/32)
-concerning the naming of this module will be closed in the next major releases
-of this module. In v6.0.0, this module could be rebranded to a better name.
+concerning the naming of this module will be closed in the next major release
+of this module. In v6.0.0, this module could be rebranded to a better name, as
+well as the types and resources.
 
 # 2016-09-02 - Release 4.0.1
 ### Summary
