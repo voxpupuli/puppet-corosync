@@ -51,11 +51,26 @@ describe 'corosync' do
         params.merge!(
           set_votequorum: true,
           quorum_members: ['node1.test.org', 'node2.test.org', 'node3.test.org'],
-          votequorum_expected_votes: 2
+          votequorum_expected_votes: 3
         )
       end
 
       it 'does not configure two_nodes option' do
+        should_not contain_file('/etc/corosync/corosync.conf').with_content(
+          %r{two_node: 1}
+        )
+      end
+    end
+
+    context 'when set_quorum is true and votequorum_expected_votes is 2' do
+      before do
+        params.merge!(
+          set_votequorum: true,
+          votequorum_expected_votes: 2
+        )
+      end
+
+      it 'does configure two_nodes option' do
         should_not contain_file('/etc/corosync/corosync.conf').with_content(
           %r{two_node: 1}
         )
@@ -268,7 +283,7 @@ describe 'corosync' do
           )
         end
 
-        it 'is set in corosync.conf' do
+        it 'is present in corosync.conf' do
           should contain_file('/etc/corosync/corosync.conf').with_content(
             %r{#{optional_parameter}:\s*#{possible_value}\n}
           )
