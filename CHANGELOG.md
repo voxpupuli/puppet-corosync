@@ -3,6 +3,8 @@
 - Improve tests (#335, #337, #331 #328)
 - Modulesync (#330)
 - New class parameter: vsftype (#345)
+- Add the nodelist to corosync.conf even if we set the expected votes count
+  (#347)
 
 ### Backward incompatible changes
 - Support for Puppet < 3.8.0 is removed (#334)
