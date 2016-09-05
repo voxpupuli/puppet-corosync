@@ -100,8 +100,11 @@ quorum {
   provider: corosync_votequorum
 <% if @votequorum_expected_votes -%>
   expected_votes: <%= @votequorum_expected_votes %>
+<%-# .to_i is needed for Puppet 3 -%>
+<% if @votequorum_expected_votes.to_i == 2 -%>
+  two_node: 1
 <% end -%>
-<% if [@quorum_members].flatten.count == 2 -%>
+<% elsif [@quorum_members].flatten.count == 2 -%>
   two_node: 1
 <% end -%>
 }
