@@ -137,10 +137,10 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     apply_manifest(pp, debug: true, catch_changes: true)
     shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_container-rule\']"') do |r|
       # attribute order in XML might be non-deterministic
-      expect(r.stdout).to match(%r{<rule .*score="-INFINITY"})
-      expect(r.stdout).to match(%r{<expression .*attribute="#kind"})
-      expect(r.stdout).to match(%r{<expression .*operation="eq"})
-      expect(r.stdout).to match(%r{<expression .*value="container"})
+      it { expect(r.stdout).to match(%r{<rule .*score="-INFINITY"}) }
+      it { expect(r.stdout).to match(%r{<expression .*attribute="#kind"}) }
+      it { expect(r.stdout).to match(%r{<expression .*operation="eq"}) }
+      it { expect(r.stdout).to match(%r{<expression .*value="container"}) }
     end
   end
 end

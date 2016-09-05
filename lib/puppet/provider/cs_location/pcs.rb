@@ -96,11 +96,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
           name = rule_item.keys.first
           rule = rule_item[name]
 
-          if rule['score-attribute'].nil?
-            score = "score=#{rule['score']}"
-          else
-            score = "score-attribute=\"#{rule['score-attribute']}\""
-          end
+          score = (rule['score-attribute'].nil?) ? "score=#{rule['score']}" : "score-attribute=\"#{rule['score-attribute']}\""
 
           boolean_op = rule['boolean-op'] || 'and'
           expression = self.class.rule_expression(name, rule['expression'], boolean_op)
