@@ -100,13 +100,15 @@ quorum {
   provider: corosync_votequorum
 <% if @votequorum_expected_votes -%>
   expected_votes: <%= @votequorum_expected_votes %>
+<% if @votequorum_expected_votes == 2 -%>
+  two_node: 1
 <% end -%>
-<% if [@quorum_members].flatten.count == 2 -%>
+<% elsif [@quorum_members].flatten.count == 2 -%>
   two_node: 1
 <% end -%>
 }
 
-<% unless @votequorum_expected_votes -%>
+<% if Array(@quorum_members).length > 0 -%>
 nodelist {
 <% Array(@quorum_members).each_index do |i| -%>
   node {

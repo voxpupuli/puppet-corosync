@@ -9,77 +9,106 @@ describe 'corosync' do
   shared_examples_for 'corosync' do
     it { is_expected.to compile.with_all_deps }
 
-    context 'when set_quorum is true and quorum_members are set' do
+    context 'when set_votequorum is true' do
       before do
         params.merge!(
-          set_votequorum: true,
-          quorum_members: ['node1.test.org', 'node2.test.org']
+          set_votequorum: true
         )
       end
 
-      it 'configures votequorum' do
-        should contain_file('/etc/corosync/corosync.conf').with_content(
-          %r{nodelist}
-        )
-        should contain_file('/etc/corosync/corosync.conf').with_content(
-          %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 1}
-        )
-        should contain_file('/etc/corosync/corosync.conf').with_content(
-          %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 2}
-        )
-        should contain_file('/etc/corosync/corosync.conf').with_content(
-          %r{two_node: 1}
-        )
-      end
-
-      it 'supports persistent node IDs' do
-        params[:quorum_members_ids] = [3, 11]
-        should contain_file('/etc/corosync/corosync.conf').with_content(
-          %r{nodelist}
-        )
-        should contain_file('/etc/corosync/corosync.conf').with_content(
-          %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 3}
-        )
-        should contain_file('/etc/corosync/corosync.conf').with_content(
-          %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 11}
-        )
-      end
-    end
-
-    context 'when set_quorum is true and quorum_members are set and there are 3 nodes' do
-      before do
-        params.merge!(
-          set_votequorum: true,
-          quorum_members: ['node1.test.org', 'node2.test.org', 'node3.test.org'],
-          votequorum_expected_votes: 2
-        )
-      end
-
-      it 'does not configure two_nodes option' do
-        should_not contain_file('/etc/corosync/corosync.conf').with_content(
-          %r{two_node: 1}
-        )
-      end
-    end
-
-    context 'when set_quorum is true and quorum_members are an array of arrays' do
-      before do
-        params.merge!(
-          set_votequorum: true,
-          quorum_members: [
-            ['172.31.10.1', '172.31.11.1', '172.31.12.1'],
-            ['172.31.10.2', '172.31.11.2', '172.31.12.2'],
-            ['172.31.10.3', '172.31.11.3', '172.31.12.3'],
-            ['172.31.10.4', '172.31.11.4', '172.31.12.4']
-          ]
-        )
-      end
-
-      (1..4).each do |node_id|
-        it "configures rings for host #{node_id} correctly" do
-          should contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr: 172.31.10.#{node_id}\n\s*ring1_addr: 172.31.11.#{node_id}\n\s*ring2_addr: 172.31.12.#{node_id}\n\s*nodeid: #{node_id}}
+      context 'when 2 quorum_members are set' do
+        before do
+          params.merge!(
+            quorum_members: ['node1.test.org', 'node2.test.org']
           )
+        end
+
+        it 'configures votequorum' do
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{nodelist}
+          )
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 1}
+          )
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 2}
+          )
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{two_node: 1}
+          )
+        end
+
+        it 'supports persistent node IDs' do
+          params[:quorum_members_ids] = [3, 11]
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{nodelist}
+          )
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 3}
+          )
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 11}
+          )
+        end
+      end
+
+      context 'when quorum_members are set and there are 3 nodes' do
+        before do
+          params.merge!(
+            quorum_members: ['node1.test.org', 'node2.test.org', 'node3.test.org'],
+            votequorum_expected_votes: 3
+          )
+        end
+
+        it 'does not configure two_nodes option' do
+          should_not contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{two_node: 1}
+          )
+        end
+      end
+
+      context 'when 2 quorum_members are set and votequorum_expected_votes is set' do
+        before do
+          params.merge!(
+            quorum_members: ['node1.test.org', 'node2.test.org'],
+            votequorum_expected_votes: 2
+          )
+        end
+
+        it 'configures nodelist' do
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{nodelist}
+          )
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 1}
+          )
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 2}
+          )
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{two_node: 1}
+          )
+        end
+      end
+
+      context 'when quorum_members are an array of arrays' do
+        before do
+          params.merge!(
+            quorum_members: [
+              ['172.31.10.1', '172.31.11.1', '172.31.12.1'],
+              ['172.31.10.2', '172.31.11.2', '172.31.12.2'],
+              ['172.31.10.3', '172.31.11.3', '172.31.12.3'],
+              ['172.31.10.4', '172.31.11.4', '172.31.12.4']
+            ]
+          )
+        end
+
+        (1..4).each do |node_id|
+          it "configures rings for host #{node_id} correctly" do
+            should contain_file('/etc/corosync/corosync.conf').with_content(
+              %r{ring0_addr: 172.31.10.#{node_id}\n\s*ring1_addr: 172.31.11.#{node_id}\n\s*ring2_addr: 172.31.12.#{node_id}\n\s*nodeid: #{node_id}}
+            )
+          end
         end
       end
     end
@@ -284,7 +313,7 @@ describe 'corosync' do
           )
         end
 
-        it 'is set in corosync.conf' do
+        it 'is present in corosync.conf' do
           should contain_file('/etc/corosync/corosync.conf').with_content(
             %r{#{optional_parameter}:\s*#{possible_value}\n}
           )
