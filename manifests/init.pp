@@ -81,6 +81,20 @@
 # [*ttl*]
 #   Time To Live.
 #
+# [*has_corosync_restart*]
+#   Does the corosync service support a restart command. Default to true with
+#   operating systems that have systemd.
+#
+# [*has_pacemaker_restart*]
+#   Does the pacemaker service support a restart command. Default to true with
+#   operating systems that have systemd.
+#
+# [*restart_corosync_command*]
+#   Command used to restart corosync. Defaults to use systenmctl reload.
+#
+# [*restart_pacemaker_command*]
+#   Command used to restart corosync. Defaults to use systenmctl reload.
+#
 # [*package_corosync*]
 #   Define if package corosync should be managed.
 #   Defaults to true
@@ -232,6 +246,10 @@ class corosync(
   $log_function_name                   = $::corosync::params::log_function_name,
   $rrp_mode                            = $::corosync::params::rrp_mode,
   $ttl                                 = $::corosync::params::ttl,
+  $has_corosync_restart                = $::corosync::params::has_corosync_restart,
+  $has_pacemaker_restart               = $::corosync::params::has_pacemaker_restart,
+  $restart_corosync_command            = $::corosync::params::restart_corosync_command,
+  $restart_pacemaker_command           = $::corosync::params::restart_pacemaker_command,
   $package_corosync                    = $::corosync::params::package_corosync,
   $package_crmsh                       = $::corosync::params::package_crmsh,
   $package_pacemaker                   = $::corosync::params::package_pacemaker,
@@ -452,14 +470,17 @@ class corosync(
     service { 'pacemaker':
       ensure     => running,
       enable     => true,
-      hasrestart => true,
+      hasrestart => $has_pacemaker_restart,
+      restart    => $restart_pacemaker_command,
       subscribe  => Service['corosync'],
     }
   }
 
   service { 'corosync':
-    ensure    => running,
-    enable    => true,
-    subscribe => File[ [ '/etc/corosync/corosync.conf', '/etc/corosync/service.d' ] ],
+    ensure     => running,
+    enable     => true,
+    hasrestart => $has_corosync_restart,
+    restart    => $restart_corosync_command,
+    subscribe  => File[ [ '/etc/corosync/corosync.conf', '/etc/corosync/service.d' ] ],
   }
 }
