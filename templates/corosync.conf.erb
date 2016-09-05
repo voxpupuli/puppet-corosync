@@ -1,4 +1,4 @@
-<% if @compatibility -%>
+<% unless @compatibility.nil? -%>
 compatibility: <%= @compatibility %>
 <% end -%>
 
@@ -7,18 +7,52 @@ totem {
 <% unless @cluster_name.nil? -%>
   cluster_name:                        <%= @cluster_name %>
 <% end -%>
+<% unless @token.nil? -%>
   token:                               <%= @token %>
+<% end -%>
+<% unless @token_retransmits_before_loss_const.nil? -%>
   token_retransmits_before_loss_const: <%= @token_retransmits_before_loss_const %>
+<% end -%>
+<% unless @join.nil? -%>
   join:                                <%= @join %>
-<% if @consensus -%>
+<% end -%>
+<% unless @consensus.nil? -%>
   consensus:                           <%= @consensus %>
 <% end -%>
-  vsftype:                             none
+<% unless @vsftype.nil? -%>
+  vsftype:                             <%= @vsftype %>
+<% end -%>
+<% unless @max_messages.nil? -%>
   max_messages:                        <%= @max_messages %>
-  clear_node_high_bit:                 yes
+<% end -%>
+<% unless @clear_node_high_bit.nil? -%>
+  clear_node_high_bit:                 <% @clear_node_high_bit %>
+<% end -%>
+<% unless @rrp_mode.nil? -%>
   rrp_mode:                            <%= @rrp_mode %>
+<% end -%>
   secauth:                             <%= @enable_secauth_real %>
+<% unless @threads.nil? -%>
   threads:                             <%= @threads %>
+<% end -%>
+<% if @unicast_addresses != 'UNSET' -%>
+  transport:                           udpu
+<% Array(@unicast_addresses.first).each_index do |interface| -%>
+  interface {
+<% Array(Array(@unicast_addresses.map{|x| Array(x).flatten}).transpose[interface]).each do |addr| -%>
+    member {
+      memberaddr: <%= addr %>
+    }
+<% end -%>
+    ringnumber:  <%= interface %>
+    bindnetaddr: <%= Array(@bind_address)[interface] %>
+    mcastport:   <%= Array(@port)[interface] || @port %>
+<% if @ttl -%>
+    ttl:         <%= Array(@ttl)[interface] || @ttl %>
+<% end -%>
+  }
+<% end -%>
+<% else -%>
 <% [@bind_address].flatten.each_index do |i| -%>
   interface {
     ringnumber:  <%= i %>
@@ -34,6 +68,7 @@ totem {
     ttl:         <%= @ttl %>
 <% end -%>
   }
+<% end -%>
 <% end -%>
 }
 
@@ -58,21 +93,6 @@ logging {
   function_name:   on
 <% end -%>
   debug:           <%= @debug ? 'on' : 'off' %>
-  timestamp:       on
-  logger_subsys {
-    subsys: AMF
-    debug:  off
-    tags:   enter|leave|trace1|trace2|trace3|trace4|trace6
-  }
-}
-
-amf {
-  mode: disabled
-}
-
-aisexec {
-  user:  root
-  group: root
 }
 
 <% if @set_votequorum -%>
