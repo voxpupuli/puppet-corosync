@@ -79,6 +79,10 @@ Puppet::Type.newtype(:cs_location) do
             },
           ],
         }"
+
+    def insync?(is)
+      ((should - is) + (is - should)).empty?
+    end
   end
 
   autorequire(:cs_shadow) do

@@ -99,7 +99,7 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
 
           updated << " rule $id=\"#{name}\""
           updated << " $role=\"#{rule['role']}\"" unless rule['role'].nil?
-          updated << " #{score}: #{expression}"
+          updated << " #{score}: #{expression.join(' ')}"
         end
       end
 

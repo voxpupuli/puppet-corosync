@@ -71,7 +71,7 @@ class PuppetX::Voxpupuli::Corosync::Provider::CibHelper < Puppet::Provider
   # - expressions is an array of expressions as returned by node2hash()
   # - boolean_op is the operator; this must be either 'and' or 'or'
   def self.rule_expression(rulename, expressions, boolean_op = 'and')
-    param = []
+    rule_parameters = []
     count = 0
 
     if boolean_op != 'and' && boolean_op != 'or'
@@ -79,6 +79,7 @@ class PuppetX::Voxpupuli::Corosync::Provider::CibHelper < Puppet::Provider
     end
 
     expressions.each do |expr|
+      rule_parameters << boolean_op if count > 0
       count += 1
 
       if expr['attribute'].nil?
@@ -94,14 +95,17 @@ class PuppetX::Voxpupuli::Corosync::Provider::CibHelper < Puppet::Provider
 
       case operation
       when 'defined', 'not_defined'
-        param << "#{operation} #{attribute}"
+        rule_parameters << operation
+        rule_parameters << attribute
 
       when 'lt', 'gt', 'lte', 'gte', 'eq', 'ne'
         if expr['value'].nil?
           raise Puppet::Error, "value must be defined for expression #{count} in rule #{rulename}"
         end
 
-        param << "'#{attribute}' #{operation} #{expr['value']}"
+        rule_parameters << attribute
+        rule_parameters << operation
+        rule_parameters << expr['value']
 
       else
         # FIXME: time- and date-based expressions not yet implemented
@@ -109,7 +113,7 @@ class PuppetX::Voxpupuli::Corosync::Provider::CibHelper < Puppet::Provider
       end
     end
 
-    param.join(" #{boolean_op} ")
+    rule_parameters
   end
 
   def self.sync_shadow_cib(cib, failondeletefail = false)

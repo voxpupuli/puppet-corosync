@@ -83,16 +83,18 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
   def flush
     unless @property_hash.empty?
       # Remove existing location
-      cmd = ['pcs', 'constraint', 'resource', 'remove', @resource[:name]]
+      cmd = ['pcs', 'constraint', 'remove', @resource[:name]]
       PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib], false)
-      cmd = ['pcs', 'constraint', 'location', 'add', @property_hash[:name], @property_hash[:primitive], @property_hash[:node_name], @property_hash[:score]]
-      cmd << "resource-discovery=#{@property_hash[:resource_discovery]}" unless @property_hash[:resource_discovery].nil?
-      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
-
-      params = ''
+      unless @property_hash[:node_name].nil?
+        cmd = ['pcs', 'constraint', 'location', 'add', @property_hash[:name], @property_hash[:primitive], @property_hash[:node_name], @property_hash[:score]]
+        cmd << "resource-discovery=#{@property_hash[:resource_discovery]}" unless @property_hash[:resource_discovery].nil?
+        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+      end
 
       unless @property_hash[:rules].nil?
+        count = 0
         @property_hash[:rules].each do |rule_item|
+          params = []
           name = rule_item.keys.first
           rule = rule_item[name]
 
@@ -101,13 +103,21 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
           boolean_op = rule['boolean-op'] || 'and'
           expression = self.class.rule_expression(name, rule['expression'], boolean_op)
 
-          params << " id=\"#{name}\""
-          params << " role=\"#{rule['role']}\"" unless rule['role'].nil?
-          params << " #{score} #{expression}"
+          params << "id=#{name}"
+          params << "constraint-id=#{@resource[:name]}" if count.zero?
+          params << "role=#{rule['role']}" unless rule['role'].nil?
+          params << score
+          params += expression
+          cmd_rule = if count.zero?
+                       [command(:pcs), 'constraint', 'location', @resource[:primitive],
+                        'rule'] + params
+                     else
+                       [command(:pcs), 'constraint', 'rule', 'add', @resource[:name]] + params
+                     end
+          PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd_rule, @resource[:cib])
+          count += 1
         end
 
-        cmd_rule = [command(:pcs), 'constraint', 'location', @property_hash[:primitive], 'rule', params]
-        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd_rule, @resource[:cib])
       end
     end
   end

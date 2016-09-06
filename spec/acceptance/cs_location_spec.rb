@@ -115,50 +115,135 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
   end
 
-  it 'creates a location with a rule' do
-    pp = <<-EOS
-      cs_location { 'duncan_vip_not_in_container':
-        primitive => 'duncan_vip',
-        rules     => [
-          { 'duncan_vip_not_in_container-rule' => {
-              score      => '-INFINITY',
-              expression => [
-                { attribute => '#kind',
-                  operation => 'eq',
-                  value     => 'container',
-                },
-              ],
+  context 'with one rule' do
+    it 'creates a location' do
+      pp = <<-EOS
+        cs_location { 'duncan_vip_not_in_container':
+          primitive => 'duncan_vip',
+          rules     => [
+            { 'duncan_vip_not_in_container-rule' => {
+                score      => '-INFINITY',
+                expression => [
+                  { attribute => '#kind',
+                    operation => 'eq',
+                    value     => 'container',
+                  },
+                ],
+              },
             },
-          },
-        ],
-      }
-    EOS
-    apply_manifest(pp, debug: true, catch_failures: true)
-    apply_manifest(pp, debug: true, catch_changes: true)
-  end
+          ],
+        }
+      EOS
+      apply_manifest(pp, catch_failures: true, debug: true, trace: true)
+      apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+    end
 
-  # attribute order in XML might be non-deterministic
-  it 'contains the score attribute' do
-    shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_container-rule\']"') do |r|
-      expect(r.stdout).to match(%r{<rule .*score="-INFINITY"})
+    # attribute order in XML might be non-deterministic
+    it 'contains the score attribute' do
+      shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_container-rule\']"') do |r|
+        expect(r.stdout).to match(%r{<rule .*score="-INFINITY"})
+      end
+    end
+
+    it 'contains the attribute attribute' do
+      shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_container-rule\']"') do |r|
+        expect(r.stdout).to match(%r{<expression .*attribute="#kind"})
+      end
+    end
+
+    it 'contains the operation atribute' do
+      shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_container-rule\']"') do |r|
+        expect(r.stdout).to match(%r{<expression .*operation="eq"})
+      end
+    end
+
+    it 'contains the value attribute' do
+      shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_container-rule\']"') do |r|
+        expect(r.stdout).to match(%r{<expression .*value="container"})
+      end
     end
   end
 
-  it 'contains the attribute attribute' do
-    shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_container-rule\']"') do |r|
-      expect(r.stdout).to match(%r{<expression .*attribute="#kind"})
+  context 'with two rules' do
+    it 'creates a location' do
+      pp = <<-EOS
+        cs_location { 'duncan_vip_not_in_container':
+          primitive => 'duncan_vip',
+          rules     => [
+            { 'duncan_vip_not_in_host3' => {
+                score      => '200',
+                expression => [
+                  { attribute => '#uname',
+                    operation => 'eq',
+                    value     => 'host3',
+                  },
+                ],
+              },
+            },
+            { 'duncan_vip_not_in_container-rule' => {
+                score      => '-INFINITY',
+                expression => [
+                  { attribute => '#kind',
+                    operation => 'eq',
+                    value     => 'container',
+                  },
+                ],
+              },
+            },
+          ],
+        }
+      EOS
+      apply_manifest(pp, catch_failures: true, debug: true, trace: true)
+      apply_manifest(pp, catch_changes: true, debug: true, trace: true)
     end
-  end
 
-  it 'contains the operation atribute' do
-    shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_container-rule\']"') do |r|
-      expect(r.stdout).to match(%r{<expression .*operation="eq"})
+    # attribute order in XML might be non-deterministic
+    it 'contains the value attribute for duncan_vip_not_in_container-rule' do
+      shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_container-rule\']"') do |r|
+        expect(r.stdout).to match(%r{<expression .*value="container"})
+      end
     end
-  end
 
-  it 'contains the value attribute' do
-    shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_container-rule\']"') do |r|
-      expect(r.stdout).to match(%r{<expression .*value="container"})
+    it 'contains the score attribute -INFINITY for duncan_vip_not_in_container-rule' do
+      shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_container-rule\']"') do |r|
+        expect(r.stdout).to match(%r{<rule .*score="-INFINITY"})
+      end
+    end
+
+    it 'contains the attribute attribute #kind for duncan_vip_not_in_container-rule' do
+      shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_container-rule\']"') do |r|
+        expect(r.stdout).to match(%r{<expression .*attribute="#kind"})
+      end
+    end
+
+    it 'contains the operation atribute eq for duncan_vip_not_in_container-rule' do
+      shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_container-rule\']"') do |r|
+        expect(r.stdout).to match(%r{<expression .*operation="eq"})
+      end
+    end
+
+    it 'contains the value attribute for duncan_vip_not_in_host3' do
+      shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_host3\']"') do |r|
+        expect(r.stdout).to match(%r{<expression .*value="host3"})
+      end
+    end
+
+    it 'contains the score attribute -INFINITY for duncan_vip_not_in_host3' do
+      shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_host3\']"') do |r|
+        expect(r.stdout).to match(%r{<rule .*score="200"})
+      end
+    end
+
+    it 'contains the attribute attribute #kind for duncan_vip_not_in_host3' do
+      shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_host3\']"') do |r|
+        expect(r.stdout).to match(%r{<expression .*attribute="#uname"})
+      end
+    end
+
+    it 'contains the operation atribute eq for duncan_vip_not_in_host3' do
+      shell('cibadmin --query --xpath "//rule[@id=\'duncan_vip_not_in_host3\']"') do |r|
+        expect(r.stdout).to match(%r{<expression .*operation="eq"})
+      end
     end
   end
 end
