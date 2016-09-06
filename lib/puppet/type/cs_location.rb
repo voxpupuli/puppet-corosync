@@ -51,13 +51,55 @@ Puppet::Type.newtype(:cs_location) do
     defaultto 'INFINITY'
   end
 
+  newproperty(:rules, array_matching: :all) do
+    desc "The rules of this location.  This is an array of hashes where
+      each hash contains an array of one or more expressions.
+
+      Example:
+
+        cs_location { 'vip-ping-connected':
+          primitive => 'vip',
+          rules     => [
+            'vip-ping-exclude-rule' => {
+              'score'      => '-INFINITY',
+              'expression' => [
+                { 'attribute' => 'pingd',
+                  'operation' => 'lt',
+                  'value'     => '100',
+                },
+              ],
+            },
+            'vip-ping-prefer-rule'  => {
+              'score-attribute' => 'pingd',
+              'expression'      => [
+                { 'attribute' => 'pingd',
+                  'operation' => 'defined',
+                },
+              ],
+            },
+          ],
+        }"
+  end
+
   autorequire(:cs_shadow) do
     autos = []
     autos << @parameters[:cib].value if @parameters[:cib]
     autos
   end
 
+  autorequire(:cs_primitive) do
+    autos = []
+    autos << @parameters[:primitive].value if @parameters[:primitive]
+    autos
+  end
+
   autorequire(:service) do
     %w(corosync pacemaker)
+  end
+
+  validate do
+    if [self[:node_name], self[:rules]].compact.length > 1
+      raise Puppet::Error, 'Location constraints dictate that node_name and rules cannot co-exist for this type.'
+    end
   end
 end

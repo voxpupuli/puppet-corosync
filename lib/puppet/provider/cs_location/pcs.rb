@@ -32,14 +32,19 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
     constraints = doc.root.elements['configuration'].elements['constraints']
     unless constraints.nil?
       constraints.each_element('rsc_location') do |e|
-        items = e.attributes
+        # The node2hash method maps resource locations from XML into hashes.
+        # The expression key is handled differently because the result must
+        # not contain the id of the XML node. The crm command can not set the
+        # expression id so Puppet would try to update the rule at every run.
+        id, items = PuppetX::Voxpupuli::Corosync::Provider::CibHelper.node2hash(e, ['expression']).first
 
         location_instance = {
-          name:               items['id'],
+          name:               id,
           ensure:             :present,
           primitive:          items['rsc'],
           node_name:          items['node'],
-          score:              items['score'],
+          score:              items['score'] || 'INFINITY',
+          rules:              items['rule'],
           resource_discovery: items['resource-discovery'],
           provider:           name
         }
@@ -58,6 +63,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
       primitive:          @resource[:primitive],
       node_name:          @resource[:node_name],
       score:              @resource[:score],
+      rules:              @resource[:rules],
       resource_discovery: @resource[:resource_discovery]
     }
   end
@@ -82,6 +88,27 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
       cmd = ['pcs', 'constraint', 'location', 'add', @property_hash[:name], @property_hash[:primitive], @property_hash[:node_name], @property_hash[:score]]
       cmd << "resource-discovery=#{@property_hash[:resource_discovery]}" unless @property_hash[:resource_discovery].nil?
       PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+
+      params = ''
+
+      unless @property_hash[:rules].nil?
+        @property_hash[:rules].each do |rule_item|
+          name = rule_item.keys.first
+          rule = rule_item[name]
+
+          score = rule['score-attribute'].nil? ? "score=#{rule['score']}" : "score-attribute=\"#{rule['score-attribute']}\""
+
+          boolean_op = rule['boolean-op'] || 'and'
+          expression = self.class.rule_expression(name, rule['expression'], boolean_op)
+
+          params << " id=\"#{name}\""
+          params << " role=\"#{rule['role']}\"" unless rule['role'].nil?
+          params << " #{score} #{expression}"
+        end
+
+        cmd_rule = [command(:pcs), 'constraint', 'location', @property_hash[:primitive], 'rule', params]
+        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd_rule, @resource[:cib])
+      end
     end
   end
 end
