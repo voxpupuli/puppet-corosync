@@ -1,7 +1,10 @@
+# This file is managed by Puppet.
+# Changes made manually may be lost.
+
 <% unless @compatibility.nil? -%>
 compatibility: <%= @compatibility %>
-<% end -%>
 
+<% end -%>
 totem {
   version:                             2
 <% unless @cluster_name.nil? -%>
