@@ -7,7 +7,7 @@ Puppet::Type.newtype(:cs_clone) do
   ensurable
 
   newparam(:name) do
-    desc "Identifier of the location entry.  This value needs to be unique
+    desc "Identifier of the location entry. This value needs to be unique
       across the entire Corosync/Pacemaker configuration since it doesn't have
       the concept of name spaces per type."
 
@@ -15,7 +15,7 @@ Puppet::Type.newtype(:cs_clone) do
   end
 
   newproperty(:primitive) do
-    desc 'The corosync resource primitive to be cloned.  '
+    desc 'The corosync resource primitive to be cloned.'
   end
 
   newproperty(:clone_max) do
@@ -67,13 +67,26 @@ Puppet::Type.newtype(:cs_clone) do
       also be added to your manifest."
   end
 
+  autorequire(:service) do
+    %w(corosync pacemaker)
+  end
+
   autorequire(:cs_shadow) do
     autos = []
     autos << @parameters[:cib].value if @parameters[:cib]
     autos
   end
 
-  autorequire(:service) do
-    %w(corosync pacemaker)
+  [:cs_primitive, :cs_clone].each do |type|
+    autorequire(type) do
+      [unmunge_cs_primitive(@parameters[:primitive].value)]
+    end
+  end
+
+  def unmunge_cs_primitive(name)
+    name = name.split(':')[0]
+    name = name[3..-1] if name.start_with? 'ms_'
+
+    name
   end
 end
