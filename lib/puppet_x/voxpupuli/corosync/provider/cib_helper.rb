@@ -39,6 +39,83 @@ class PuppetX::Voxpupuli::Corosync::Provider::CibHelper < Puppet::Provider
     hash
   end
 
+  # The node2hash method maps resource locations from XML into hashes.
+  # An anonymous hash is returned for node names given in `anon_hash_nodes`.
+  def self.node2hash(node, anon_hash_nodes = [])
+    attr = {}
+    name = ''
+
+    return nil unless node.instance_of? REXML::Element
+
+    # Add attributes from the node
+    node.attributes.each do |key, val|
+      if key == 'id'
+        name = val
+      else
+        attr[key] = val
+      end
+    end
+
+    # Traverse elements in the XML tree recursively
+    node.elements.each do |child|
+      attr[child.name] = [] unless attr[child.name].is_a? Array
+      attr[child.name] << node2hash(child, anon_hash_nodes)
+    end
+
+    # Return only the attributes if requested and a hash otherwise
+    anon_hash_nodes.include?(node.name) ? attr : { name => attr }
+  end
+
+  # Generate a string with the rule expression
+  # - rulename is the name of the rule (used in error messages)
+  # - expressions is an array of expressions as returned by node2hash()
+  # - boolean_op is the operator; this must be either 'and' or 'or'
+  def self.rule_expression(rulename, expressions, boolean_op = 'and')
+    rule_parameters = []
+    count = 0
+
+    if boolean_op != 'and' && boolean_op != 'or'
+      raise Puppet::Error, "boolean-op must be 'and' or 'or' in rule #{rulename}"
+    end
+
+    expressions.each do |expr|
+      rule_parameters << boolean_op if count > 0
+      count += 1
+
+      if expr['attribute'].nil?
+        raise Puppet::Error, "attribute must be defined for expression #{count} in rule #{rulename}"
+      end
+
+      if expr['operation'].nil?
+        raise Puppet::Error, "operation must be defined for expression #{count} in rule #{rulename}"
+      end
+
+      attribute = expr['attribute']
+      operation = expr['operation']
+
+      case operation
+      when 'defined', 'not_defined'
+        rule_parameters << operation
+        rule_parameters << attribute
+
+      when 'lt', 'gt', 'lte', 'gte', 'eq', 'ne'
+        if expr['value'].nil?
+          raise Puppet::Error, "value must be defined for expression #{count} in rule #{rulename}"
+        end
+
+        rule_parameters << attribute
+        rule_parameters << operation
+        rule_parameters << expr['value']
+
+      else
+        # FIXME: time- and date-based expressions not yet implemented
+        raise Puppet::Error, "illegal operation '#{operation}' for expression #{count} in rule #{rulename}"
+      end
+    end
+
+    rule_parameters
+  end
+
   def self.sync_shadow_cib(cib, failondeletefail = false)
     run_command_in_cib(['crm_shadow', '--force', '--delete', cib], nil, failondeletefail)
     run_command_in_cib(['crm_shadow', '--batch', '--create', cib])

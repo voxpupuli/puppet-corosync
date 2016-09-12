@@ -17,6 +17,8 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
   # Decided to just go with relative.
   commands crm: 'crm'
 
+  mk_resource_methods
+
   def self.instances
     block_until_ready
 
@@ -27,14 +29,19 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
     doc = REXML::Document.new(raw)
 
     doc.root.elements['configuration'].elements['constraints'].each_element('rsc_location') do |e|
-      items = e.attributes
+      # The node2hash method maps resource locations from XML into hashes.
+      # The expression key is handled differently because the result must not
+      # contain the id of the XML node. The crm command can not set the
+      # expression id so Puppet would try to update the rule at every run.
+      id, items = PuppetX::Voxpupuli::Corosync::Provider::CibHelper.node2hash(e, ['expression']).first
 
       location_instance = {
-        name:               items['id'],
+        name:               id,
         ensure:             :present,
         primitive:          items['rsc'],
         node_name:          items['node'],
-        score:              items['score'],
+        score:              items['score'] || 'INFINITY',
+        rules:              items['rule'],
         resource_discovery: items['resource-discovery'],
         provider:           name
       }
@@ -43,8 +50,8 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
     instances
   end
 
-  # Create just adds our resource to the property_hash and flush will take care
-  # of actually doing the work.
+  # Create just adds our resource to the property_hash and flush will take
+  # care of actually doing the work.
   def create
     @property_hash = {
       name:               @resource[:name],
@@ -52,6 +59,7 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
       primitive:          @resource[:primitive],
       node_name:          @resource[:node_name],
       score:              @resource[:score],
+      rules:              @resource[:rules],
       resource_discovery: @resource[:resource_discovery]
     }
   end
@@ -63,41 +71,6 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
     @property_hash.clear
   end
 
-  #
-  # Getter that obtains the our service that should have been populated by
-  # prefetch or instances (depends on if your using puppet resource or not).
-  def primitive
-    @property_hash[:primitive]
-  end
-
-  # Getter that obtains the our node_name that should have been populated by
-  # prefetch or instances (depends on if your using puppet resource or not).
-  def node_name
-    @property_hash[:node_name]
-  end
-
-  # Getter that obtains the our score that should have been populated by
-  # prefetch or instances (depends on if your using puppet resource or not).
-  def score
-    @property_hash[:score]
-  end
-
-  # Our setters for the node_name and score.  Setters are used when the
-  # resource already exists so we just update the current value in the property
-  # hash and doing this marks it to be flushed.
-
-  def primitive=(should)
-    @property_hash[:primitive] = should
-  end
-
-  def node_name=(should)
-    @property_hash[:node_name] = should
-  end
-
-  def score=(should)
-    @property_hash[:score] = should
-  end
-
   # Flush is triggered on anything that has been detected as being
   # modified in the property_hash.  It generates a temporary file with
   # the updates that need to be made.  The temporary file is then used
@@ -105,8 +78,31 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
   def flush
     unless @property_hash.empty?
       updated = "location #{@property_hash[:name]} #{@property_hash[:primitive]}"
-      updated << " resource-discovery=#{@property_hash[:resource_discovery]}" if feature?(:discovery)
-      updated << " #{@property_hash[:score]}: #{@property_hash[:node_name]}"
+
+      if feature?(:discovery)
+        updated << " resource-discovery=#{@property_hash[:resource_discovery]}"
+      end
+
+      unless @property_hash[:node_name].nil?
+        updated << " #{@property_hash[:score]}: #{@property_hash[:node_name]}"
+      end
+
+      unless @property_hash[:rules].nil?
+        @property_hash[:rules].each do |rule_item|
+          name = rule_item.keys.first
+          rule = rule_item[name]
+
+          score = rule['score-attribute'] || rule['score']
+
+          boolean_op = rule['boolean-op'] || 'and'
+          expression = self.class.rule_expression(name, rule['expression'], boolean_op)
+
+          updated << " rule $id=\"#{name}\""
+          updated << " $role=\"#{rule['role']}\"" unless rule['role'].nil?
+          updated << " #{score}: #{expression.join(' ')}"
+        end
+      end
+
       debug("Loading update: #{updated}")
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
