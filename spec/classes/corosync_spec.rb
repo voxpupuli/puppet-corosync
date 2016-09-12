@@ -16,7 +16,7 @@ describe 'corosync' do
         )
       end
 
-      context 'when 2 quorum_members are set' do
+      context 'when quorum_members is an array with 2 items' do
         before do
           params.merge!(
             quorum_members: ['node1.test.org', 'node2.test.org']
@@ -52,7 +52,7 @@ describe 'corosync' do
         end
       end
 
-      context 'when quorum_members are set and there are 3 nodes' do
+      context 'when quorum_members is set to an array with 3 items' do
         before do
           params.merge!(
             quorum_members: ['node1.test.org', 'node2.test.org', 'node3.test.org'],
@@ -81,7 +81,7 @@ describe 'corosync' do
         end
       end
 
-      context 'when 2 quorum_members are set and votequorum_expected_votes is set' do
+      context 'when quorum_members is set to an array with 2 items and votequorum_expected_votes is set' do
         before do
           params.merge!(
             quorum_members: ['node1.test.org', 'node2.test.org'],
@@ -105,7 +105,7 @@ describe 'corosync' do
         end
       end
 
-      context 'when quorum_members are an array of arrays' do
+      context 'when quorum_members is an array of arrays' do
         before do
           params.merge!(
             quorum_members: [
@@ -123,6 +123,37 @@ describe 'corosync' do
               %r{ring0_addr: 172.31.10.#{node_id}\n\s*ring1_addr: 172.31.11.#{node_id}\n\s*ring2_addr: 172.31.12.#{node_id}\n\s*nodeid: #{node_id}}
             )
           end
+        end
+
+        it 'does not configure two_nodes option' do
+          should_not contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{two_node: 1\n}
+          )
+        end
+      end
+
+      context 'when quorum_members is an array of 2 arrays' do
+        before do
+          params.merge!(
+            quorum_members: [
+              ['172.31.10.1', '172.31.11.1', '172.31.12.1'],
+              ['172.31.10.2', '172.31.11.2', '172.31.12.2']
+            ]
+          )
+        end
+
+        (1..2).each do |node_id|
+          it "configures rings for host #{node_id} correctly" do
+            should contain_file('/etc/corosync/corosync.conf').with_content(
+              %r{ring0_addr: 172.31.10.#{node_id}\n\s*ring1_addr: 172.31.11.#{node_id}\n\s*ring2_addr: 172.31.12.#{node_id}\n\s*nodeid: #{node_id}}
+            )
+          end
+        end
+
+        it 'configures two_node' do
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{two_node: 1\n}
+          )
         end
       end
     end
@@ -152,6 +183,9 @@ describe 'corosync' do
           )
           should contain_file('/etc/corosync/corosync.conf').with_content(
             %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 2}
+          )
+          should contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{two_node: 1\n}
           )
         end
 
@@ -374,7 +408,7 @@ describe 'corosync' do
       end
     end
 
-    context 'when set_quorum is true and quorum_members are not set' do
+    context 'when set_quorum is true and quorum_members is not set' do
       before do
         params.merge!(
           set_votequorum: true,

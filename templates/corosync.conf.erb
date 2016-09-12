@@ -107,7 +107,7 @@ quorum {
 <% if @votequorum_expected_votes.to_i == 2 -%>
   two_node: 1
 <% end -%>
-<% elsif [@quorum_members].flatten.count == 2 -%>
+<% elsif Array(@quorum_members).count == 2 -%>
   two_node: 1
 <% end -%>
 }
