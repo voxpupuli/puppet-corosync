@@ -1,8 +1,8 @@
 {
   "name": "puppet-corosync",
-  "version": "5.0.0-beta1",
+  "version": "5.0.0-beta2",
   "author": "Vox Pupuli",
-  "summary": "This module is a set of manifests and types/providers for quickly setting up highly available clusters using Corosync",
+  "summary": "This module is a set of manifests and types/providers for quickly setting up highly available clusters using Corosync and Pacemaker",
   "license": "Apache-2.0",
   "source": "https://github.com/voxpupuli/puppet-corosync",
   "project_page": "https://github.com/voxpupuli/puppet-corosync",

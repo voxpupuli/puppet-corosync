@@ -1,10 +1,13 @@
-# 2016-09-05 - Release 5.0.0-beta1
-- Allow multiple rings in nodelist (#262, #291, #336)
+# 2016-09-13 - Release 5.0.0-beta2
+- Allow multiple rings in nodelist (#262, #291, #336, #358)
 - Add support for cs\_location rules (#132, #310, #356)
 - New class parameter: vsftype (#345)
 - Add the nodelist to corosync.conf even if we set the expected votes count
   (#347)
-- Improve tests (#335, #337, #331, #328)
+- Add autorequirement between cs\_location and cs\_primitives/cs\_clone (#359)
+- Add autorequirement between cs\_clone and cs\_primitive (#357, #365)
+- Add "Managed By Puppet" header to corosync.conf (#360)
+- Improve tests (#335, #337, #331, #328, #364)
 - Modulesync (#330)
 
 ### Backward incompatible changes
