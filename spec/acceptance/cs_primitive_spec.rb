@@ -228,4 +228,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       expect(r.stdout).to match(%r{target-role.*stopped})
     end
   end
+
+  after :all do
+    cleanup_cs_resources
+  end
 end

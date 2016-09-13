@@ -142,4 +142,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       expect(r.stdout).to match(%r{colocation.*\srsc="apache_service"})
     end
   end
+
+  after :all do
+    cleanup_cs_resources
+  end
 end
