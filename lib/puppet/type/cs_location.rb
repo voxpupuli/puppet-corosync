@@ -91,14 +91,24 @@ Puppet::Type.newtype(:cs_location) do
     autos
   end
 
-  autorequire(:cs_primitive) do
-    autos = []
-    autos << @parameters[:primitive].value if @parameters[:primitive]
-    autos
-  end
-
   autorequire(:service) do
     %w(corosync pacemaker)
+  end
+
+  [:cs_primitive, :cs_clone].each do |type|
+    autorequire(type) do
+      autos = []
+      autos << unmunge_cs_primitive(should(:primitive)) if should(:primitive)
+
+      autos
+    end
+  end
+
+  def unmunge_cs_primitive(name)
+    name = name.split(':')[0]
+    name = name[3..-1] if name.start_with? 'ms_'
+
+    name
   end
 
   validate do

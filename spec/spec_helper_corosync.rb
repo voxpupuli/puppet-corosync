@@ -34,6 +34,23 @@ def pcs_load_cib(cib)
   )
 end
 
+def create_cs_location_resource(primitive)
+  cs_location_class = Puppet::Type.type(:cs_location)
+  cs_location_class.new(
+    name: "#{primitive}_location",
+    primitive: primitive
+  )
+end
+
+def create_cs_location_resource_with_cib(primitive, cib)
+  cs_location_class = Puppet::Type.type(:cs_location)
+  cs_location_class.new(
+    name: "#{primitive}_location",
+    primitive: primitive,
+    cib: cib
+  )
+end
+
 def create_cs_clone_resource(primitive)
   cs_clone_class = Puppet::Type.type(:cs_clone)
   cs_clone_class.new(
