@@ -58,6 +58,35 @@ def get_puppet_version
 end
 # rubocop:enable Style/AccessorMethodName
 
+def cleanup_cs_resources
+  pp = <<-EOS
+      resources { 'cs_clone' :
+        purge => true,
+      }
+      resources { 'cs_group' :
+        purge => true,
+      }
+      resources { 'cs_colocation' :
+        purge => true,
+      }
+      resources { 'cs_location' :
+        purge => true,
+      }
+    EOS
+
+  apply_manifest(pp, catch_failures: true, debug: true, trace: true)
+  apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+
+  pp = <<-EOS
+      resources { 'cs_primitive' :
+        purge => true,
+      }
+    EOS
+
+  apply_manifest(pp, catch_failures: true, debug: true, trace: true)
+  apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+end
+
 RSpec.shared_context 'with faked facts' do
   let(:facts_d) do
     puppet_version = get_puppet_version

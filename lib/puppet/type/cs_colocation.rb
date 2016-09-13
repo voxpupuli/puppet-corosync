@@ -86,16 +86,18 @@ Puppet::Type.newtype(:cs_colocation) do
 
   def extract_primitives
     result = []
-    if @parameters[:primitives].should.first.is_a?(Hash)
-      @parameters[:primitives].should.each do |colocation_set|
-        if colocation_set.key?('primitives')
-          result << colocation_set['primitives']
+    unless @parameters[:primitives].should.nil?
+      if @parameters[:primitives].should.first.is_a?(Hash)
+        @parameters[:primitives].should.each do |colocation_set|
+          if colocation_set.key?('primitives')
+            result << colocation_set['primitives']
+          end
         end
       end
-    end
-    if @parameters[:primitives].should.first.is_a?(String)
-      @parameters[:primitives].should.each do |val|
-        result << unmunge_cs_primitive(val)
+      if @parameters[:primitives].should.first.is_a?(String)
+        @parameters[:primitives].should.each do |val|
+          result << unmunge_cs_primitive(val)
+        end
       end
     end
     result.flatten

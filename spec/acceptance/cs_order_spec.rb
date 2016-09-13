@@ -167,4 +167,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       end
     end
   end
+
+  after :all do
+    cleanup_cs_resources
+  end
 end
