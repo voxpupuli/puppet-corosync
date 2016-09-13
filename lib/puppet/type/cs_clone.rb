@@ -77,10 +77,11 @@ Puppet::Type.newtype(:cs_clone) do
     autos
   end
 
-  [:cs_primitive, :cs_clone].each do |type|
-    autorequire(type) do
-      [unmunge_cs_primitive(@parameters[:primitive].value)]
-    end
+  autorequire(:cs_primitive) do
+    autos = []
+    autos << unmunge_cs_primitive(should(:primitive)) if should(:primitive)
+
+    autos
   end
 
   def unmunge_cs_primitive(name)

@@ -33,3 +33,50 @@ def pcs_load_cib(cib)
     Puppet::Util::Execution::ProcessOutput.new(cib, 0)
   )
 end
+
+def create_cs_clone_resource(primitive)
+  cs_clone_class = Puppet::Type.type(:cs_clone)
+  cs_clone_class.new(
+    name: "#{primitive}_clone",
+    primitive: primitive
+  )
+end
+
+def create_cs_clone_resource_with_cib(primitive, cib)
+  cs_clone_class = Puppet::Type.type(:cs_clone)
+  cs_clone_class.new(
+    name: "#{primitive}_clone",
+    primitive: primitive,
+    cib: cib
+  )
+end
+
+def create_cs_primitive_resource(primitive)
+  cs_primitive_class = Puppet::Type.type(:cs_primitive)
+  cs_primitive_class.new(
+    name: primitive
+  )
+end
+
+def create_cs_shadow_resource(cib)
+  cs_shadow_class = Puppet::Type.type(:cs_shadow)
+  cs_shadow_class.new(
+    name: cib
+  )
+end
+
+def create_service_resource(name)
+  cs_shadow_class = Puppet::Type.type(:service)
+  cs_shadow_class.new(
+    name: name
+  )
+end
+
+def create_catalog(*resources)
+  catalog = Puppet::Resource::Catalog.new
+  resources.each do |resource|
+    catalog.add_resource resource
+  end
+
+  catalog
+end
