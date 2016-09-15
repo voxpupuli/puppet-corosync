@@ -24,6 +24,7 @@ end
 shared_context 'pcs' do
   before do
     described_class.stubs(:command).with(:pcs).returns 'pcs'
+    described_class.stubs(:command).with(:cibadmin).returns 'cibadmin'
     described_class.expects(:block_until_ready).returns(nil).at_most(1)
   end
 end

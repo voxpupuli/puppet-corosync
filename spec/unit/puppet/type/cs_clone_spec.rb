@@ -6,7 +6,7 @@ describe Puppet::Type.type(:cs_clone) do
   end
 
   it "has a 'name' parameter" do
-    expect(subject.new(name: 'mock_clone')[:name]).to eq('mock_clone')
+    expect(subject.new(name: 'mock_clone', primitive: 'mock_primitive')[:name]).to eq('mock_clone')
   end
 
   describe 'basic structure' do
@@ -14,7 +14,7 @@ describe Puppet::Type.type(:cs_clone) do
       provider_class = Puppet::Type::Cs_clone.provider(Puppet::Type::Cs_clone.providers[0])
       Puppet::Type::Cs_clone.expects(:defaultprovider).returns(provider_class)
 
-      expect(subject.new(name: 'mock_clone')).not_to be_nil
+      expect(subject.new(name: 'mock_clone', primitive: 'mock_primitive')).not_to be_nil
     end
 
     [:name, :cib].each do |param|
@@ -44,7 +44,8 @@ describe Puppet::Type.type(:cs_clone) do
       it "should validate that the #{attribute} attribute can be true/false" do
         [true, false].each do |value|
           expect(subject.new(
-            name:     'mock_clone',
+            name:      'mock_clone',
+            primitive: 'mock_primitive',
             attribute => value
           )[attribute]).to eq(value.to_s.to_sym)
         end
