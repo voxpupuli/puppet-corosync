@@ -51,7 +51,7 @@ Puppet::Type.type(:cs_group).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
     @property_hash = {
       name:       @resource[:name],
       ensure:     :present,
-      primitives: @resource[:primitives]
+      primitives: Array(@resource[:primitives])
     }
     @property_hash[:cib] = @resource[:cib] unless @resource[:cib].nil?
   end
@@ -89,7 +89,7 @@ Puppet::Type.type(:cs_group).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
   def flush
     unless @property_hash.empty?
       updated = 'group '
-      updated << "#{@property_hash[:name]} #{@property_hash[:primitives].join(' ')}"
+      updated << "#{@property_hash[:name]} #{Array(@property_hash[:primitives]).join(' ')}"
       debug("Loading update: #{updated}")
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)

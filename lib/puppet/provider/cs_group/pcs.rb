@@ -54,7 +54,7 @@ Puppet::Type.type(:cs_group).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
     @property_hash = {
       name:       @resource[:name],
       ensure:     :present,
-      primitives: @resource[:primitives],
+      primitives: Array(@resource[:primitives]),
       new:        true
     }
     @property_hash[:cib] = @resource[:cib] unless @resource[:cib].nil?

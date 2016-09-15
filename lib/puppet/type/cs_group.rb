@@ -20,20 +20,14 @@ Puppet::Type.newtype(:cs_group) do
     desc "An array of primitives to have in this group.  Must be listed in the
       order that you wish them to start."
 
-    # We want this to be an array, even if it has only one
-    # value. Prior to 4.x (and unless using the future parser in
-    # 3.x), Puppet would munge single-parameter arrays into scalar
-    # values. See also
-    # https://tickets.puppetlabs.com/browse/PUP-1299.
-    munge do |value|
-      Array(value)
+    def insync?(is)
+      Array(is) == Array(should)
     end
 
-    # Have to redefine should= here so we can sort the array that is given to
-    # us by the manifest.  While were checking on the class of our value we
-    # are going to go ahead and do some validation too.
     validate do |value|
-      raise Puppet::Error, "Puppet::Type::Cs_Group: primitives property must be at least a 1-element array." unless value.is_a? Array and value.length >= 1
+      err = 'Puppet::Type::Cs_Group: primitives property must be at least a 1-element array'
+      raise Puppet::Error, err if value.is_a?(Array) && value.empty?
+      raise Puppet::Error, err unless value.is_a?(Array) || value.is_a?(String)
     end
   end
 
@@ -60,8 +54,10 @@ Puppet::Type.newtype(:cs_group) do
 
   autorequire(:cs_primitive) do
     autos = []
-    @parameters[:primitives].should.each do |val|
-      autos << unmunge_cs_primitive(val)
+    if should(:primitives)
+      should(:primitives).each do |val|
+        autos << unmunge_cs_primitive(val)
+      end
     end
 
     autos
