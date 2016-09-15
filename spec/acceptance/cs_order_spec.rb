@@ -55,7 +55,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     EOS
 
     apply_manifest(pp, expect_changes: true, debug: true, trace: true)
-    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+    apply_manifest(pp, catch_changes: true, debug: false, trace: true)
   end
 
   describe service('corosync') do
@@ -70,7 +70,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       }
     EOS
     apply_manifest(pp, expect_changes: true, debug: true, trace: true)
-    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+    apply_manifest(pp, catch_changes: true, debug: false, trace: true)
     shell('cibadmin --query | grep first_then_two') do |r|
       expect(r.stdout).to match(%r{rsc_order})
     end
@@ -115,7 +115,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       }
     EOS
     apply_manifest(pp, expect_changes: true, debug: true, trace: true)
-    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+    apply_manifest(pp, catch_changes: true, debug: false, trace: true)
     assert_raises(Beaker::Host::CommandFailure) do
       shell('cibadmin --query | grep first_then_two')
     end
@@ -130,7 +130,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       }
     EOS
     apply_manifest(pp, expect_changes: true, debug: true, trace: true)
-    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+    apply_manifest(pp, catch_changes: true, debug: false, trace: true)
     shell('cibadmin --query | grep one_then_two_complex') do |r|
       expect(r.stdout).to match(%r{rsc_order})
     end

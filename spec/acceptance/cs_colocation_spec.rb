@@ -58,7 +58,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     EOS
 
     apply_manifest(pp, catch_failures: true, debug: true, trace: true)
-    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+    apply_manifest(pp, catch_changes: true, debug: false, trace: true)
   end
 
   describe service('corosync') do
