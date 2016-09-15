@@ -21,6 +21,8 @@
 - Removed legacy configuration sections: amf, aisexec, logging.logger\_subsys
   (#345)
 - Fix two\_nodes behaviour with expected\_votes = 2 introduced in 3.0.0 (#246)
+- Cs\_clones are now stopped before being removed (crm provider) (#367)
+- Cs\_clones now use the resource name as clone id (pcs provider) (#149, #367)
 
 ### Deprecation notes
 

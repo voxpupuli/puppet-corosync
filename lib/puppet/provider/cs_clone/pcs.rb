@@ -11,8 +11,23 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
   desc 'Provider to add, delete, manipulate primitive clones.'
 
   commands pcs: 'pcs'
+  commands cibadmin: 'cibadmin'
+
+  mk_resource_methods
 
   defaultfor operatingsystem: [:fedora, :centos, :redhat]
+
+  def change_clone_id(primitive, id, cib)
+    xpath = "/cib/configuration/resources/clone[descendant::primitive[@id='#{primitive}']]"
+    cmd = [command(:cibadmin), '--query', '--xpath', xpath]
+    raw, = PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, cib)
+    doc = REXML::Document.new(raw)
+    if doc.root.attributes['id'] != id
+      doc.root.attributes['id'] = id
+      cmd = [command(:cibadmin), '--replace', '--xpath', xpath, '--xml-text', doc.to_s.chop]
+      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, cib)
+    end
+  end
 
   def self.instances
     block_until_ready
@@ -48,7 +63,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
   # of actually doing the work.
   def create
     @property_hash = {
-      name:              @resource[:primitive] + '-clone',
+      name:              @resource[:name],
       ensure:            :present,
       primitive:         @resource[:primitive],
       clone_max:         @resource[:clone_max],
@@ -66,71 +81,6 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
     debug 'Removing clone'
     PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'unclone', @resource[:name]], @resource[:cib])
     @property_hash.clear
-  end
-
-  #
-  # Getter that obtains the our service that should have been populated by
-  # prefetch or instances (depends on if your using puppet resource or not).
-  def primitive
-    @property_hash[:primitive]
-  end
-
-  # Getter that obtains the our clone_max that should have been populated by
-  # prefetch or instances (depends on if your using puppet resource or not).
-  def clone_max
-    @property_hash[:clone_max]
-  end
-
-  def clone_node_max
-    @property_hash[:clone_node_max]
-  end
-
-  def notify_clones
-    @property_hash[:notify_clones]
-  end
-
-  def globally_unique
-    @property_hash[:globally_unique]
-  end
-
-  def ordered
-    @property_hash[:ordered]
-  end
-
-  def interleave
-    @property_hash[:interleave]
-  end
-
-  # Our setters.  Setters are used when the
-  # resource already exists so we just update the current value in the property
-  # hash and doing this marks it to be flushed.
-
-  def primitive=(should)
-    @property_hash[:primitive] = should
-  end
-
-  def clone_max=(should)
-    @property_hash[:clone_max] = should
-  end
-
-  def clone_node_max=(should)
-    @property_hash[:clone_node_max] = should
-  end
-
-  def notify_clones=(should)
-    @property_hash[:notify_clones] = should
-  end
-
-  def globally_unique=(should)
-    @property_hash[:globally_unique] = should
-  end
-
-  def ordered=(should)
-    @property_hash[:ordered] = should
-  end
-
-  def interleave=(should)
-    @property_hash[:interleave] = should
   end
 
   def exists?
@@ -160,6 +110,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
       cmd << "ordered=#{@property_hash[:ordered]}" if @property_hash[:ordered]
       cmd << "interleave=#{@property_hash[:interleave]}" if @property_hash[:interleave]
       PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+      change_clone_id(@property_hash[:primitive], @property_hash[:name], @resource[:cib])
     end
   end
 end

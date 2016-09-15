@@ -7,7 +7,7 @@ Puppet::Type.newtype(:cs_clone) do
   ensurable
 
   newparam(:name) do
-    desc "Identifier of the location entry. This value needs to be unique
+    desc "Identifier of the clone entry. This value needs to be unique
       across the entire Corosync/Pacemaker configuration since it doesn't have
       the concept of name spaces per type."
 
@@ -89,5 +89,10 @@ Puppet::Type.newtype(:cs_clone) do
     name = name[3..-1] if name.start_with? 'ms_'
 
     name
+  end
+
+  validate do
+    return if self[:ensure] == :absent
+    raise Puppet::Error, 'primitive is mandatory' unless self[:primitive]
   end
 end

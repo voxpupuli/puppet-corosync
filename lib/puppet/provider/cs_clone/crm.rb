@@ -15,6 +15,8 @@ Puppet::Type.type(:cs_clone).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
   commands crm: 'crm'
   commands crm_attribute: 'crm_attribute'
 
+  mk_resource_methods
+
   def self.instances
     block_until_ready
 
@@ -66,74 +68,11 @@ Puppet::Type.type(:cs_clone).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing clone')
+    cmd = [command(:crm), '-w', 'resource', 'stop', @resource[:name]]
+    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib], false)
     cmd = [command(:crm), 'configure', 'delete', @resource[:name]]
     PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
-  end
-
-  #
-  # Getter that obtains the our service that should have been populated by
-  # prefetch or instances (depends on if your using puppet resource or not).
-  def primitive
-    @property_hash[:primitive]
-  end
-
-  # Getter that obtains the our clone_max that should have been populated by
-  # prefetch or instances (depends on if your using puppet resource or not).
-  def clone_max
-    @property_hash[:clone_max]
-  end
-
-  def clone_node_max
-    @property_hash[:clone_node_max]
-  end
-
-  def notify_clones
-    @property_hash[:notify_clones]
-  end
-
-  def globally_unique
-    @property_hash[:globally_unique]
-  end
-
-  def ordered
-    @property_hash[:ordered]
-  end
-
-  def interleave
-    @property_hash[:interleave]
-  end
-
-  # Our setters.  Setters are used when the
-  # resource already exists so we just update the current value in the property
-  # hash and doing this marks it to be flushed.
-
-  def primitive=(should)
-    @property_hash[:primitive] = should
-  end
-
-  def clone_max=(should)
-    @property_hash[:clone_max] = should
-  end
-
-  def clone_node_max=(should)
-    @property_hash[:clone_node_max] = should
-  end
-
-  def notify_clones=(should)
-    @property_hash[:notify_clones] = should
-  end
-
-  def globally_unique=(should)
-    @property_hash[:globally_unique] = should
-  end
-
-  def ordered=(should)
-    @property_hash[:ordered] = should
-  end
-
-  def interleave=(should)
-    @property_hash[:interleave] = should
   end
 
   # Flush is triggered on anything that has been detected as being
