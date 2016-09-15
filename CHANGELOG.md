@@ -7,7 +7,7 @@
 - Add autorequirement between cs\_location and cs\_primitives/cs\_clone (#359)
 - Add autorequirement between cs\_clone and cs\_primitive (#357, #365)
 - Add "Managed By Puppet" header to corosync.conf (#360)
-- Improve tests (#335, #337, #331, #328, #364)
+- Improve tests (#335, #337, #331, #328, #364, #369)
 - Modulesync (#330)
 
 ### Backward incompatible changes

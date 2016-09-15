@@ -48,7 +48,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     EOS
 
     apply_manifest(pp, catch_failures: true, debug: true, trace: true)
-    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+    apply_manifest(pp, catch_changes: true, debug: false, trace: true)
   end
 
   describe service('corosync') do
@@ -64,7 +64,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       }
     EOS
     apply_manifest(pp, catch_failures: true, debug: true, trace: true)
-    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+    apply_manifest(pp, catch_changes: true, debug: false, trace: true)
     shell('cibadmin --query | grep duncan_vip_there') do |r|
       expect(r.stdout).to match(%r{rsc_location})
     end
@@ -77,7 +77,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       }
     EOS
     apply_manifest(pp, catch_failures: true, debug: true, trace: true)
-    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+    apply_manifest(pp, catch_changes: true, debug: false, trace: true)
     assert_raises(Beaker::Host::CommandFailure) do
       shell('cibadmin --query | grep duncan_vip_there')
     end
@@ -93,7 +93,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       }
     EOS
     apply_manifest(pp, catch_failures: true, debug: true, trace: true)
-    apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+    apply_manifest(pp, catch_changes: true, debug: false, trace: true)
     shell('cibadmin --query | grep duncan_vip_there') do |r|
       expect(r.stdout).to match(%r{rsc_location})
     end
@@ -135,7 +135,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         }
       EOS
       apply_manifest(pp, catch_failures: true, debug: true, trace: true)
-      apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+      apply_manifest(pp, catch_changes: true, debug: false, trace: true)
     end
 
     # attribute order in XML might be non-deterministic
@@ -194,7 +194,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         }
       EOS
       apply_manifest(pp, catch_failures: true, debug: true, trace: true)
-      apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+      apply_manifest(pp, catch_changes: true, debug: false, trace: true)
     end
 
     # attribute order in XML might be non-deterministic

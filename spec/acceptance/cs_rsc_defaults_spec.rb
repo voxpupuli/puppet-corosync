@@ -42,7 +42,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       EOS
 
       apply_manifest(pp, catch_failures: true, debug: true, trace: true)
-      apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+      apply_manifest(pp, catch_changes: true, debug: false, trace: true)
 
       shell('cibadmin --query') do |r|
         expect(r.stdout).to match(%r{resource-stickiness.*98898})
@@ -56,7 +56,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           }
       EOS
       apply_manifest(pp, expect_changes: true, debug: true, trace: true)
-      apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+      apply_manifest(pp, catch_changes: true, debug: false, trace: true)
 
       shell('cibadmin --query') do |r|
         expect(r.stdout).not_to match(%r{resource-stickiness.*98898})
