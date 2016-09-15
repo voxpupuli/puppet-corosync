@@ -20,14 +20,14 @@ Puppet::Type.newtype(:cs_group) do
     desc "An array of primitives to have in this group.  Must be listed in the
       order that you wish them to start."
 
-    # Have to redefine should= here so we can sort the array that is given to
-    # us by the manifest.  While were checking on the class of our value we
-    # are going to go ahead and do some validation too.  The way Corosync
-    # colocation works we need to only accept two value arrays.
-    def should=(value)
-      super
-      raise Puppet::Error, 'Puppet::Type::Cs_Group: primitives property must be at least a 2-element array.' unless value.is_a?(Array) && value.length > 1
-      @should
+    def insync?(is)
+      Array(is) == Array(should)
+    end
+
+    validate do |value|
+      err = 'Puppet::Type::Cs_Group: primitives property must be at least a 1-element array'
+      raise Puppet::Error, err if value.is_a?(Array) && value.empty?
+      raise Puppet::Error, err unless value.is_a?(Array) || value.is_a?(String)
     end
   end
 
@@ -54,8 +54,10 @@ Puppet::Type.newtype(:cs_group) do
 
   autorequire(:cs_primitive) do
     autos = []
-    @parameters[:primitives].should.each do |val|
-      autos << unmunge_cs_primitive(val)
+    if should(:primitives)
+      should(:primitives).each do |val|
+        autos << unmunge_cs_primitive(val)
+      end
     end
 
     autos

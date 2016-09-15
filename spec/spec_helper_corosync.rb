@@ -52,6 +52,23 @@ def create_cs_location_resource_with_cib(primitive, cib)
   )
 end
 
+def create_cs_group_resource(name, primitives)
+  cs_group_class = Puppet::Type.type(:cs_group)
+  cs_group_class.new(
+    name: name,
+    primitives: primitives
+  )
+end
+
+def create_cs_group_resource_with_cib(name, primitives, cib)
+  cs_group_class = Puppet::Type.type(:cs_group)
+  cs_group_class.new(
+    name: name,
+    primitives: primitives,
+    cib: cib
+  )
+end
+
 def create_cs_clone_resource(primitive)
   cs_clone_class = Puppet::Type.type(:cs_clone)
   cs_clone_class.new(
