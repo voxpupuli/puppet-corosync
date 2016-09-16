@@ -5,7 +5,7 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
     described_class.stubs(:command).with(:crm).returns 'crm'
   end
 
-  context 'when getting instances' do
+  context 'when getting instances with primitive' do
     let :instances do
       test_cib = <<-EOS
         <cib>
@@ -45,6 +45,76 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
 
       it "is named by the <primitive>'s id attribute" do
         expect(instance.name).to eq('p_keystone-clone')
+      end
+
+      it 'has the correct primitive property' do
+        expect(instance.primitive).to eq('p_keystone')
+      end
+
+      it 'has no group property' do
+        expect(instance.group).to eq(:absent)
+      end
+    end
+  end
+
+  context 'when getting instances with group' do
+    let :instances do
+      test_cib = <<-EOS
+        <cib>
+        <configuration>
+          <resources>
+            <clone id="duncan_vip_clone_group">
+              <group id="duncan_group">
+                <primitive id="duncan_vip2" class="ocf" provider="heartbeat" type="IPaddr2">
+                  <operations>
+                    <op name="monitor" interval="10s" id="duncan_vip2-monitor-10s"/>
+                  </operations>
+                  <instance_attributes id="duncan_vip2-instance_attributes">
+                    <nvpair name="ip" value="172.16.210.102" id="duncan_vip2-instance_attributes-ip"/>
+                    <nvpair name="cidr_netmask" value="24" id="duncan_vip2-instance_attributes-cidr_netmask"/>
+                  </instance_attributes>
+                </primitive>
+              </group>
+            </clone>
+          </resources>
+        </configuration>
+        </cib>
+      EOS
+
+      described_class.expects(:block_until_ready).returns(nil)
+      Puppet::Util::Execution.expects(:execute).with(%w(crm configure show xml), combine: true, failonfail: true).at_least_once.returns(
+        Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
+      )
+      described_class.instances
+    end
+
+    it 'has an instance for each <clone>' do
+      expect(instances.count).to eq(1)
+    end
+
+    describe 'each instance' do
+      let :instance do
+        instances.first
+      end
+
+      before do
+        instance.stubs(:change_clone_id) { nil }
+      end
+
+      it "is a kind of #{described_class.name}" do
+        expect(instance).to be_a_kind_of(described_class)
+      end
+
+      it "is named by the <primitive>'s id attribute" do
+        expect(instance.name).to eq('duncan_vip_clone_group')
+      end
+
+      it 'has the correct group property' do
+        expect(instance.group).to eq('duncan_group')
+      end
+
+      it 'has no primitive property' do
+        expect(instance.primitive).to eq(:absent)
       end
     end
   end
@@ -91,38 +161,38 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
     end
 
     it 'sets max clones' do
-      instance.clone_max = 3
-      expect_update(%r{clone-max=3})
+      instance.resource[:clone_max] = 3
+      expect_update(%r{\sclone-max=3})
       instance.flush
     end
 
     it 'sets max node clones' do
-      instance.clone_node_max = 3
-      expect_update(%r{clone-node-max=3})
+      instance.resource[:clone_node_max] = 3
+      expect_update(%r{\sclone-node-max=3})
       instance.flush
     end
 
     it 'sets notify_clones' do
-      instance.notify_clones = :true
-      expect_update(%r{notify=true})
+      instance.resource[:notify_clones] = :true
+      expect_update(%r{\snotify=true})
       instance.flush
     end
 
     it 'sets globally unique' do
-      instance.globally_unique = :true
-      expect_update(%r{globally-unique=true})
+      instance.resource[:globally_unique] = :true
+      expect_update(%r{\sglobally-unique=true})
       instance.flush
     end
 
     it 'sets ordered' do
-      instance.ordered = :true
-      expect_update(%r{ordered=true})
+      instance.resource[:ordered] = :true
+      expect_update(%r{\sordered=true})
       instance.flush
     end
 
     it 'sets interleave' do
-      instance.interleave = :true
-      expect_update(%r{interleave=true})
+      instance.resource[:interleave] = :true
+      expect_update(%r{\sinterleave=true})
       instance.flush
     end
   end

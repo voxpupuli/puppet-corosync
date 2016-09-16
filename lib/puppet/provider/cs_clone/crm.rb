@@ -26,14 +26,12 @@ Puppet::Type.type(:cs_clone).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
     raw, = PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
-    doc.root.elements['configuration'].elements['resources'].each_element('clone') do |e|
-      primitive_id = e.elements['primitive'].attributes['id']
+    REXML::XPath.each(doc, '//resources//clone') do |e|
       items = nvpairs_to_hash(e.elements['meta_attributes'])
 
       clone_instance = {
         name:              e.attributes['id'],
         ensure:            :present,
-        primitive:         primitive_id,
         clone_max:         items['clone-max'],
         clone_node_max:    items['clone-node-max'],
         notify_clones:     items['notify'],
@@ -42,6 +40,14 @@ Puppet::Type.type(:cs_clone).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
         interleave:        items['interleave'],
         existing_resource: :true
       }
+
+      if e.elements['primitive']
+        clone_instance[:primitive] = e.elements['primitive'].attributes['id']
+      end
+
+      if e.elements['group']
+        clone_instance[:group] = e.elements['group'].attributes['id']
+      end
       instances << new(clone_instance)
     end
     instances
@@ -81,38 +87,34 @@ Puppet::Type.type(:cs_clone).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
   # as stdin for the crm command.
   def flush
     unless @property_hash.empty?
-      if @property_hash[:existing_resource] == :false
-        debug 'Creating clone resource'
-        updated = 'clone '
-        updated << "#{@property_hash[:name]} "
-        updated << "#{@property_hash[:primitive]} "
-        meta = ''
-        meta << "clone-max=#{@property_hash[:clone_max]} " if @property_hash[:clone_max]
-        meta << "clone-node-max=#{@property_hash[:clone_node_max]} " if @property_hash[:clone_node_max]
-        meta << "notify=#{@property_hash[:notify_clones]} " if @property_hash[:notify_clones]
-        meta << "globally-unique=#{@property_hash[:globally_unique]} " if @property_hash[:globally_unique]
-        meta << "ordered=#{@property_hash[:ordered]} " if @property_hash[:ordered]
-        meta << "interleave=#{@property_hash[:interleave]}" if @property_hash[:interleave]
-        updated << 'meta ' << meta unless meta.empty?
+      if @resource.should(:primitive)
+        target = @resource.should(:primitive)
+      elsif @resource.should(:group)
+        target = @resource.should(:group)
       else
-        debug 'Updating clone resource'
-        updated = 'resource meta '
-        updated << "#{@property_hash[:name]} "
-        meta = 'set '
-        meta << "clone-max=#{@property_hash[:clone_max]} " if @property_hash[:clone_max]
-        meta << "clone-node-max=#{@property_hash[:clone_node_max]} " if @property_hash[:clone_node_max]
-        meta << "notify=#{@property_hash[:notify_clones]} " if @property_hash[:notify_clones]
-        meta << "globally-unique=#{@property_hash[:globally_unique]} " if @property_hash[:globally_unique]
-        meta << "ordered=#{@property_hash[:ordered]} " if @property_hash[:ordered]
-        meta << "interleave=#{@property_hash[:interleave]}" if @property_hash[:interleave]
-        updated << meta unless meta.empty?
-        debug "Loading update: #{updated}"
+        raise Puppet::Error, 'No primitive or group'
       end
+      updated = 'clone '
+      updated << "#{@resource.value(:name)} "
+      updated << "#{target} "
+      meta = []
+      {
+        clone_max: 'clone-max',
+        clone_node_max: 'clone-node-max',
+        notify_clones: 'notify',
+        globally_unique: 'globally-unique',
+        ordered: 'ordered',
+        interleave: 'interleave'
+      }.each do |property, clone_property|
+        meta << "#{clone_property}=#{@resource.should(property)}" unless @resource.should(property) == :absent
+      end
+      updated << 'meta ' << meta.join(' ') unless meta.empty?
+      debug "Update: #{updated}"
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
         cmd = [command(:crm), 'configure', 'load', 'update', tmpfile.path.to_s]
-        PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
+        PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource.value(:cib))
       end
     end
   end

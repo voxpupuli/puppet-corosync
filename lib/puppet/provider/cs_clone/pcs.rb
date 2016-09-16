@@ -17,8 +17,8 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
 
   defaultfor operatingsystem: [:fedora, :centos, :redhat]
 
-  def change_clone_id(primitive, id, cib)
-    xpath = "/cib/configuration/resources/clone[descendant::primitive[@id='#{primitive}']]"
+  def change_clone_id(type, primitive, id, cib)
+    xpath = "/cib/configuration/resources/clone[descendant::#{type}[@id='#{primitive}']]"
     cmd = [command(:cibadmin), '--query', '--xpath', xpath]
     raw, = PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, cib)
     doc = REXML::Document.new(raw)
@@ -38,22 +38,32 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
     raw, = PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
-    doc.root.elements['configuration'].elements['resources'].each_element('clone') do |e|
-      primitive_id = e.elements['primitive'].attributes['id']
+    REXML::XPath.each(doc, '//resources//clone') do |e|
       items = nvpairs_to_hash(e.elements['meta_attributes'])
 
       clone_instance = {
         name:              e.attributes['id'],
         ensure:            :present,
-        primitive:         primitive_id,
         clone_max:         items['clone-max'],
         clone_node_max:    items['clone-node-max'],
         notify_clones:     items['notify'],
         globally_unique:   items['globally-unique'],
         ordered:           items['ordered'],
-        interleave:        items['interleave'],
-        existing_resource: :true
+        interleave:        items['interleave']
       }
+
+      if e.elements['primitive']
+        primitive_id = e.elements['primitive'].attributes['id']
+        clone_instance[:primitive] = primitive_id
+        clone_instance[:existing_clone_element] = primitive_id
+      end
+
+      if e.elements['group']
+        group_id = e.elements['group'].attributes['id']
+        clone_instance[:group] = group_id
+        clone_instance[:existing_clone_element] = group_id
+      end
+
       instances << new(clone_instance)
     end
     instances
@@ -66,13 +76,13 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
       name:              @resource[:name],
       ensure:            :present,
       primitive:         @resource[:primitive],
+      group:             @resource[:group],
       clone_max:         @resource[:clone_max],
       clone_node_max:    @resource[:clone_node_max],
       notify_clones:     @resource[:notify_clones],
       globally_unique:   @resource[:globally_unique],
       ordered:           @resource[:ordered],
-      interleave:        @resource[:interleave],
-      existing_resource: :false
+      interleave:        @resource[:interleave]
     }
   end
 
@@ -83,34 +93,43 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
     @property_hash.clear
   end
 
-  def exists?
-    @property_hash[:existing_resource] == :true
-  end
-
   # Flush is triggered on anything that has been detected as being
   # modified in the property_hash.  It generates a temporary file with
   # the updates that need to be made.  The temporary file is then used
   # as stdin for the crm command.
   def flush
     unless @property_hash.empty?
-      if @property_hash[:existing_resource] == :false
+      if @resource.should(:primitive)
+        target = @resource.should(:primitive)
+        target_type = 'primitive'
+      elsif @resource.should(:group)
+        target = @resource.should(:group)
+        target_type = 'group'
+      else
+        raise Puppet::Error, 'No primitive or group'
+      end
+      if @property_hash[:existing_clone_element].nil?
         debug 'Creating clone resource'
       else
         debug 'Updating clone resource'
         # pcs versions earlier than 0.9.116 do not allow updating a cloned
         # resource. Being conservative, we will unclone then create a new clone
         # with the new parameters.
-        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'unclone', @resource[:primitive]], @resource[:cib])
+        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'unclone', @property_hash[:existing_clone_element]], @resource.value(:cib))
       end
-      cmd = [command(:pcs), 'resource', 'clone', (@property_hash[:primitive]).to_s]
-      cmd << "clone-max=#{@property_hash[:clone_max]}" if @property_hash[:clone_max]
-      cmd << "clone-node-max=#{@property_hash[:clone_node_max]}" if @property_hash[:clone_node_max]
-      cmd << "notify=#{@property_hash[:notify_clones]}" if @property_hash[:notify_clones]
-      cmd << "globally-unique=#{@property_hash[:globally_unique]}" if @property_hash[:globally_unique]
-      cmd << "ordered=#{@property_hash[:ordered]}" if @property_hash[:ordered]
-      cmd << "interleave=#{@property_hash[:interleave]}" if @property_hash[:interleave]
-      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
-      change_clone_id(@property_hash[:primitive], @property_hash[:name], @resource[:cib])
+      cmd = [command(:pcs), 'resource', 'clone', target.to_s]
+      {
+        clone_max: 'clone-max',
+        clone_node_max: 'clone-node-max',
+        notify_clones: 'notify',
+        globally_unique: 'globally-unique',
+        ordered: 'ordered',
+        interleave: 'interleave'
+      }.each do |property, clone_property|
+        cmd << "#{clone_property}=#{@resource.should(property)}" unless @resource.should(property) == :absent
+      end
+      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource.value(:cib))
+      change_clone_id(target_type, target, @resource.value(:name), @resource.value(:cib))
     end
   end
 end

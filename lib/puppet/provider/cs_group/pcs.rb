@@ -25,9 +25,6 @@ Puppet::Type.type(:cs_group).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//group') do |e|
-      items = e.attributes
-      group = { name: items['id'].to_sym }
-
       primitives = []
 
       unless e.elements['primitive'].nil?
@@ -37,7 +34,7 @@ Puppet::Type.type(:cs_group).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
       end
 
       group_instance = {
-        name:       group[:name],
+        name:       e.attributes['id'],
         ensure:     :present,
         primitives: primitives,
         provider:   name,

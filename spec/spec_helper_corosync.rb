@@ -77,6 +77,14 @@ def create_cs_clone_resource(primitive)
   )
 end
 
+def create_cs_clone_resource_with_group(group)
+  cs_clone_class = Puppet::Type.type(:cs_clone)
+  cs_clone_class.new(
+    name: "#{group}_clone",
+    group: group
+  )
+end
+
 def create_cs_clone_resource_with_cib(primitive, cib)
   cs_clone_class = Puppet::Type.type(:cs_clone)
   cs_clone_class.new(

@@ -95,7 +95,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
   end
 
-  it 'creates a group with 2 prinitives' do
+  it 'creates a group with 2 primitives' do
     pp = <<-EOS
       cs_group { 'duncan_vip_there':
         primitives => ['duncan_vip2', 'duncan_vip3'],
@@ -106,6 +106,10 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     shell('cibadmin --query | grep duncan_vip_there') do |r|
       expect(r.stdout).to match(%r{group})
     end
+  end
+
+  it 'DEBUG' do
+    shell('cibadmin --query')
   end
 
   after :all do

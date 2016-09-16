@@ -65,11 +65,9 @@ describe Puppet::Type.type(:cs_clone) do
     let(:apache_clone) { create_cs_clone_resource('apache') }
     let(:mysql_primitive) { create_cs_primitive_resource('mysql') }
     let(:mysql_clone) { create_cs_clone_resource('ms_mysql') }
-    let(:puppetcib_shadow) { create_cs_shadow_resource('puppetcib') }
-    let(:nginx_clone_in_puppetcib_cib) { create_cs_clone_resource_with_cib('nginx', 'puppetcib') }
 
     before do
-      create_catalog(apache_primitive, apache_clone, mysql_primitive, mysql_clone, puppetcib_shadow, nginx_clone_in_puppetcib_cib)
+      create_catalog(apache_primitive, apache_clone, mysql_primitive, mysql_clone)
     end
 
     context 'between a clone and its primitive' do
@@ -102,21 +100,49 @@ describe Puppet::Type.type(:cs_clone) do
         expect(autorequire_relationship.target).to eq mysql_clone
       end
     end
+  end
 
-    context 'between a clone and its shadow cib' do
-      let(:autorequire_relationship) { nginx_clone_in_puppetcib_cib.autorequire[0] }
+  describe 'establishing autorequires between clones and groups' do
+    let(:apache_group) { create_cs_group_resource('apache-gr', 'apache') }
+    let(:apache_clone) { create_cs_clone_resource_with_group('apache-gr') }
 
-      it 'has exactly one autorequire' do
-        expect(nginx_clone_in_puppetcib_cib.autorequire.count).to eq(1)
-      end
+    before do
+      create_catalog(apache_group, apache_clone)
+    end
 
-      it 'has puppetcib shadow cib as source of autorequire' do
-        expect(autorequire_relationship.source).to eq puppetcib_shadow
-      end
+    let(:autorequire_relationship) { apache_clone.autorequire[0] }
 
-      it 'has nginx clone as target of autorequire' do
-        expect(autorequire_relationship.target).to eq nginx_clone_in_puppetcib_cib
-      end
+    it 'has exactly one autorequire' do
+      expect(apache_clone.autorequire.count).to eq(1)
+    end
+
+    it 'has apache group as source of autorequire' do
+      expect(autorequire_relationship.source).to eq apache_group
+    end
+    it 'has apache clone as target of autorequire' do
+      expect(autorequire_relationship.target).to eq apache_clone
+    end
+  end
+
+  describe 'establishing autorequires between clones and shadow cib' do
+    let(:puppetcib_shadow) { create_cs_shadow_resource('puppetcib') }
+    let(:nginx_clone_in_puppetcib_cib) { create_cs_clone_resource_with_cib('nginx', 'puppetcib') }
+    let(:autorequire_relationship) { nginx_clone_in_puppetcib_cib.autorequire[0] }
+
+    before do
+      create_catalog(puppetcib_shadow, nginx_clone_in_puppetcib_cib)
+    end
+
+    it 'has exactly one autorequire' do
+      expect(nginx_clone_in_puppetcib_cib.autorequire.count).to eq(1)
+    end
+
+    it 'has puppetcib shadow cib as source of autorequire' do
+      expect(autorequire_relationship.source).to eq puppetcib_shadow
+    end
+
+    it 'has nginx clone as target of autorequire' do
+      expect(autorequire_relationship.target).to eq nginx_clone_in_puppetcib_cib
     end
   end
 

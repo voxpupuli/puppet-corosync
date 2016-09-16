@@ -6,8 +6,9 @@
   (#347)
 - Add autorequirement between cs\_location and cs\_primitives/cs\_clone (#359)
 - Add autorequirement between cs\_clone and cs\_primitive (#357, #365)
+- Lots of fixes regarding cs\_clone (#367, #149, #370)
 - Add "Managed By Puppet" header to corosync.conf (#360)
-- Improve tests (#335, #337, #331, #328, #364, #369)
+- Improve tests (#335, #337, #331, #328, #364, #369, #370)
 - Modulesync (#330)
 
 ### Backward incompatible changes
@@ -21,8 +22,9 @@
 - Removed legacy configuration sections: amf, aisexec, logging.logger\_subsys
   (#345)
 - Fix two\_nodes behaviour with expected\_votes = 2 introduced in 3.0.0 (#246)
-- Cs\_clones are now stopped before being removed (crm provider) (#367)
-- Cs\_clones now use the resource name as clone id (pcs provider) (#149, #367)
+- Cs\_clone: clones are now stopped before being removed (crm provider) (#367)
+- Cs\_clone now uses the resource name as clone id (pcs provider) (#149, #367)
+- Cs\_clone purges parameters that are not explicitly set (#370)
 
 ### Deprecation notes
 
