@@ -296,7 +296,7 @@ cs_order { 'vip_before_service':
 }
 ```
 
-### Configuring cloned resources
+### Configuring cloned resources/groups
 
 Cloned resources should be active on multiple hosts at the same time. You can
 clone any existing resource provided the resource agent supports it.
@@ -305,6 +305,17 @@ clone any existing resource provided the resource agent supports it.
 cs_clone { 'nginx_service-clone' :
   ensure    => present,
   primitive => 'nginx_service',
+  clone_max => 3,
+  require   => Cs_primitive['nginx_service'],
+}
+```
+
+You can also clone groups:
+
+```puppet
+cs_clone { 'nginx_service-clone' :
+  ensure    => present,
+  group     => 'nginx_group',
   clone_max => 3,
   require   => Cs_primitive['nginx_service'],
 }

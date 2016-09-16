@@ -19,13 +19,10 @@ Puppet::Type.type(:cs_group).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
     instances = []
 
     cmd = [command(:crm), 'configure', 'show', 'xml']
-    raw = Puppet::Util::Execution.execute(cmd)
+    raw, = PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//group') do |e|
-      items = e.attributes
-      group = { name: items['id'].to_sym }
-
       primitives = []
 
       unless e.elements['primitive'].nil?
@@ -35,7 +32,7 @@ Puppet::Type.type(:cs_group).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
       end
 
       group_instance = {
-        name:       group[:name],
+        name:       e.attributes['id'],
         ensure:     :present,
         primitives: primitives,
         provider:   name
@@ -60,8 +57,8 @@ Puppet::Type.type(:cs_group).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
   # we need to stop the group.
   def destroy
     debug('Stopping group before removing it')
-    cmd = [command(:crm), 'resource', 'stop', @resource[:name]]
-    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
+    cmd = [command(:crm), '-w', 'resource', 'stop', @resource[:name]]
+    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib], false)
     debug('Removing group')
     cmd = [command(:crm), 'configure', 'delete', @resource[:name]]
     PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])

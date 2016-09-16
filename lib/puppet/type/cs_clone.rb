@@ -18,6 +18,10 @@ Puppet::Type.newtype(:cs_clone) do
     desc 'The corosync resource primitive to be cloned.'
   end
 
+  newproperty(:group) do
+    desc 'The corosync resource group to be cloned.'
+  end
+
   newproperty(:clone_max) do
     desc "How many copies of the resource to start.
       Defaults to the number of nodes in the cluster."
@@ -93,11 +97,13 @@ Puppet::Type.newtype(:cs_clone) do
     autos
   end
 
-  autorequire(:cs_primitive) do
-    autos = []
-    autos << unmunge_cs_primitive(should(:primitive)) if should(:primitive)
+  { cs_group: :group, cs_primitive: :primitive }.each do |type, property|
+    autorequire(type) do
+      autos = []
+      autos << unmunge_cs_primitive(should(property)) if should(property)
 
-    autos
+      autos
+    end
   end
 
   def unmunge_cs_primitive(name)
@@ -109,6 +115,9 @@ Puppet::Type.newtype(:cs_clone) do
 
   validate do
     return if self[:ensure] == :absent
-    raise Puppet::Error, 'primitive is mandatory' unless self[:primitive]
+    mandatory_single_properties = [:primitive, :group]
+    has_should = mandatory_single_properties.select { |prop| should(prop) }
+    raise Puppet::Error, "You cannot specify #{has_should.join(' and ')} on this type (only one)" if has_should.length > 1
+    raise Puppet::Error, "You must specify #{mandatory_single_properties.join(' or ')}" if has_should.length != 1
   end
 end
