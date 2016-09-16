@@ -1,6 +1,8 @@
-# 2016-09-13 - Release 5.0.0-beta2
+# 2016-09-16 - Release 5.0.0
 - Allow multiple rings in nodelist (#262, #291, #336, #358)
 - Add support for cs\_location rules (#132, #310, #356)
+- Allow 1-element arrays for primitives in cs\_group (#152, #368)
+- Add support for clone of groups (#176, #371)
 - New class parameter: vsftype (#345)
 - Add the nodelist to corosync.conf even if we set the expected votes count
   (#347)
