@@ -75,37 +75,37 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
     end
 
     it 'sets max clones' do
-      instance.clone_max = 3
+      instance.resource[:clone_max] = 3
       expect_commands(%r{clone-max=3})
       instance.flush
     end
 
     it 'sets max node clones' do
-      instance.clone_node_max = 3
+      instance.resource[:clone_node_max] = 3
       expect_commands(%r{clone-node-max=3})
       instance.flush
     end
 
     it 'sets notify_clones' do
-      instance.notify_clones = :true
+      instance.resource[:notify_clones] = :true
       expect_commands(%r{notify=true})
       instance.flush
     end
 
     it 'sets globally unique' do
-      instance.globally_unique = :true
+      instance.resource[:globally_unique] = :true
       expect_commands(%r{globally-unique=true})
       instance.flush
     end
 
     it 'sets ordered' do
-      instance.ordered = :true
+      instance.resource[:ordered] = :true
       expect_commands(%r{ordered=true})
       instance.flush
     end
 
     it 'sets interleave' do
-      instance.interleave = :true
+      instance.resource[:interleave] = :true
       expect_commands(%r{interleave=true})
       instance.flush
     end

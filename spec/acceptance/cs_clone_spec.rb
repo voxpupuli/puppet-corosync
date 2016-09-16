@@ -84,6 +84,181 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
   end
 
+  context 'with all the parameters' do
+    let(:xpath) { '/cib/configuration/resources/clone[@id="duncan_vip_complex_clone"]' }
+    let(:fetch_clone_command) { "cibadmin --query --xpath '#{xpath}'" }
+    def fetch_value_command(name)
+      "cibadmin --query --xpath '#{xpath}/meta_attributes/nvpair[@name=\"#{name}\"]'"
+    end
+
+    it 'creates the clone' do
+      pp = <<-EOS
+         cs_clone { 'duncan_vip_complex_clone':
+           ensure => present,
+           primitive => 'duncan_vip',
+           clone_max => 42,
+           notify_clones => false,
+           clone_node_max => 2,
+           globally_unique => true,
+           ordered => false,
+           interleave => false,
+         }
+      EOS
+      apply_manifest(pp, catch_failures: true, debug: true, trace: true)
+      apply_manifest(pp, catch_changes: true, debug: false, trace: true)
+
+      shell(fetch_clone_command) do |r|
+        expect(r.stdout).to match(%r{<clone})
+      end
+    end
+
+    it 'sets clone_max' do
+      shell(fetch_value_command('clone-max')) do |r|
+        expect(r.stdout).to match(%r{value="42"})
+      end
+    end
+
+    it 'sets clone_node_max' do
+      shell(fetch_value_command('clone-node-max')) do |r|
+        expect(r.stdout).to match(%r{value="2"})
+      end
+    end
+
+    it 'sets notify_clones' do
+      shell(fetch_value_command('notify')) do |r|
+        expect(r.stdout).to match(%r{value="false"})
+      end
+    end
+
+    it 'sets globally_unique' do
+      shell(fetch_value_command('globally-unique')) do |r|
+        expect(r.stdout).to match(%r{value="true"})
+      end
+    end
+
+    it 'sets ordered' do
+      shell(fetch_value_command('ordered')) do |r|
+        expect(r.stdout).to match(%r{value="false"})
+      end
+    end
+
+    it 'sets interleave' do
+      shell(fetch_value_command('interleave')) do |r|
+        expect(r.stdout).to match(%r{value="false"})
+      end
+    end
+
+    it 'changes the clone' do
+      pp = <<-EOS
+         cs_clone { 'duncan_vip_complex_clone':
+           ensure => present,
+           primitive => 'duncan_vip',
+           clone_max => 43,
+           clone_node_max => 1,
+           notify_clones => true,
+           globally_unique => false,
+           ordered => true,
+           interleave => true,
+         }
+      EOS
+      apply_manifest(pp, catch_failures: true, debug: true, trace: true)
+      apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+
+      shell(fetch_clone_command) do |r|
+        expect(r.stdout).to match(%r{<clone})
+      end
+    end
+
+    it 'changes clone_max' do
+      shell(fetch_value_command('clone-max')) do |r|
+        expect(r.stdout).to match(%r{value="43"})
+      end
+    end
+
+    it 'sets clone_node_max' do
+      shell(fetch_value_command('clone-node-max')) do |r|
+        expect(r.stdout).to match(%r{value="1"})
+      end
+    end
+
+    it 'changes notify_clones' do
+      shell(fetch_value_command('notify')) do |r|
+        expect(r.stdout).to match(%r{value="true"})
+      end
+    end
+
+    it 'changes globally_unique' do
+      shell(fetch_value_command('globally-unique')) do |r|
+        expect(r.stdout).to match(%r{value="false"})
+      end
+    end
+
+    it 'changes ordered' do
+      shell(fetch_value_command('ordered')) do |r|
+        expect(r.stdout).to match(%r{value="true"})
+      end
+    end
+
+    it 'changes interleave' do
+      shell(fetch_value_command('interleave')) do |r|
+        expect(r.stdout).to match(%r{value="true"})
+      end
+    end
+
+    it 'removes some parameters' do
+      pp = <<-EOS
+         cs_clone { 'duncan_vip_complex_clone':
+           ensure => present,
+           primitive => 'duncan_vip',
+           clone_max => 43,
+           interleave => true,
+         }
+      EOS
+      apply_manifest(pp, catch_failures: true, debug: true, trace: true)
+      apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+
+      shell(fetch_clone_command) do |r|
+        expect(r.stdout).to match(%r{<clone})
+      end
+    end
+
+    it 'keeps clone_max' do
+      shell(fetch_value_command('clone-max')) do |r|
+        expect(r.stdout).to match(%r{value="43"})
+      end
+    end
+
+    it 'deletes clone_node_max' do
+      assert_raises(Beaker::Host::CommandFailure) do
+        shell(fetch_value_command('clone-node-max'))
+      end
+    end
+
+    it 'deletes notify_clones' do
+      assert_raises(Beaker::Host::CommandFailure) do
+        shell(fetch_value_command('notify'))
+      end
+    end
+
+    it 'deletes globally_unique' do
+      assert_raises(Beaker::Host::CommandFailure) do
+        shell(fetch_value_command('globally-unique'))
+      end
+    end
+
+    it 'deletes ordered' do
+      assert_raises(Beaker::Host::CommandFailure) do
+        shell(fetch_value_command('ordered'))
+      end
+    end
+
+    it 'keeps interleave' do
+      shell(fetch_value_command('interleave')) do |r|
+        expect(r.stdout).to match(%r{value="true"})
+      end
+    end
+  end
+
   after :all do
     cleanup_cs_resources
   end

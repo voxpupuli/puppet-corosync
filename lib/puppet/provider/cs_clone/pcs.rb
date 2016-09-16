@@ -100,17 +100,21 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
         # pcs versions earlier than 0.9.116 do not allow updating a cloned
         # resource. Being conservative, we will unclone then create a new clone
         # with the new parameters.
-        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'unclone', @resource[:primitive]], @resource[:cib])
+        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'unclone', @resource.should(:primitive)], @resource.value(:cib))
       end
-      cmd = [command(:pcs), 'resource', 'clone', (@property_hash[:primitive]).to_s]
-      cmd << "clone-max=#{@property_hash[:clone_max]}" if @property_hash[:clone_max]
-      cmd << "clone-node-max=#{@property_hash[:clone_node_max]}" if @property_hash[:clone_node_max]
-      cmd << "notify=#{@property_hash[:notify_clones]}" if @property_hash[:notify_clones]
-      cmd << "globally-unique=#{@property_hash[:globally_unique]}" if @property_hash[:globally_unique]
-      cmd << "ordered=#{@property_hash[:ordered]}" if @property_hash[:ordered]
-      cmd << "interleave=#{@property_hash[:interleave]}" if @property_hash[:interleave]
-      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
-      change_clone_id(@property_hash[:primitive], @property_hash[:name], @resource[:cib])
+      cmd = [command(:pcs), 'resource', 'clone', @resource.should(:primitive).to_s]
+      {
+        clone_max: 'clone-max',
+        clone_node_max: 'clone-node-max',
+        notify_clones: 'notify',
+        globally_unique: 'globally-unique',
+        ordered: 'ordered',
+        interleave: 'interleave'
+      }.each do |property, clone_property|
+        cmd << "#{clone_property}=#{@resource.should(property)}" unless @resource.should(property) == :absent
+      end
+      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource.value(:cib))
+      change_clone_id(@resource.should(:primitive), @resource.value(:name), @resource.value(:cib))
     end
   end
 end

@@ -21,10 +21,18 @@ Puppet::Type.newtype(:cs_clone) do
   newproperty(:clone_max) do
     desc "How many copies of the resource to start.
       Defaults to the number of nodes in the cluster."
+
+    newvalues(%r{\d+}, :absent)
+
+    defaultto :absent
   end
   newproperty(:clone_node_max) do
     desc "How many copies of the resource can be started on a single node.
     Defaults to 1."
+
+    newvalues(%r{\d+}, :absent)
+
+    defaultto :absent
   end
 
   newproperty(:notify_clones) do
@@ -32,20 +40,26 @@ Puppet::Type.newtype(:cs_clone) do
       and when the action was successful.
       Allowed values: true, false"
 
-    newvalues(:true, :false)
+    newvalues(:true, :false, :absent)
+
+    defaultto :absent
   end
 
   newproperty(:globally_unique) do
     desc "Does each copy of the clone perform a different function?
       Allowed values: true, false"
 
-    newvalues(:true, :false)
+    newvalues(:true, :false, :absent)
+
+    defaultto :absent
   end
 
   newproperty(:ordered) do
     desc 'Should the copies be started in series (instead of in parallel). Allowed values: true, false'
 
-    newvalues(:true, :false)
+    newvalues(:true, :false, :absent)
+
+    defaultto :absent
   end
 
   newproperty(:interleave) do
@@ -53,7 +67,9 @@ Puppet::Type.newtype(:cs_clone) do
       as soon as their peer instance has (rather than waiting for every instance of the other clone has).
       Allowed values: true, false"
 
-    newvalues(:true, :false)
+    newvalues(:true, :false, :absent)
+
+    defaultto :absent
   end
 
   newparam(:cib) do

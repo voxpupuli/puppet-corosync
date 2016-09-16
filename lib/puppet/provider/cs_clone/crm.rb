@@ -81,38 +81,27 @@ Puppet::Type.type(:cs_clone).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
   # as stdin for the crm command.
   def flush
     unless @property_hash.empty?
-      if @property_hash[:existing_resource] == :false
-        debug 'Creating clone resource'
-        updated = 'clone '
-        updated << "#{@property_hash[:name]} "
-        updated << "#{@property_hash[:primitive]} "
-        meta = ''
-        meta << "clone-max=#{@property_hash[:clone_max]} " if @property_hash[:clone_max]
-        meta << "clone-node-max=#{@property_hash[:clone_node_max]} " if @property_hash[:clone_node_max]
-        meta << "notify=#{@property_hash[:notify_clones]} " if @property_hash[:notify_clones]
-        meta << "globally-unique=#{@property_hash[:globally_unique]} " if @property_hash[:globally_unique]
-        meta << "ordered=#{@property_hash[:ordered]} " if @property_hash[:ordered]
-        meta << "interleave=#{@property_hash[:interleave]}" if @property_hash[:interleave]
-        updated << 'meta ' << meta unless meta.empty?
-      else
-        debug 'Updating clone resource'
-        updated = 'resource meta '
-        updated << "#{@property_hash[:name]} "
-        meta = 'set '
-        meta << "clone-max=#{@property_hash[:clone_max]} " if @property_hash[:clone_max]
-        meta << "clone-node-max=#{@property_hash[:clone_node_max]} " if @property_hash[:clone_node_max]
-        meta << "notify=#{@property_hash[:notify_clones]} " if @property_hash[:notify_clones]
-        meta << "globally-unique=#{@property_hash[:globally_unique]} " if @property_hash[:globally_unique]
-        meta << "ordered=#{@property_hash[:ordered]} " if @property_hash[:ordered]
-        meta << "interleave=#{@property_hash[:interleave]}" if @property_hash[:interleave]
-        updated << meta unless meta.empty?
-        debug "Loading update: #{updated}"
+      updated = 'clone '
+      updated << "#{@resource.value(:name)} "
+      updated << "#{@resource.should(:primitive)} "
+      meta = []
+      {
+        clone_max: 'clone-max',
+        clone_node_max: 'clone-node-max',
+        notify_clones: 'notify',
+        globally_unique: 'globally-unique',
+        ordered: 'ordered',
+        interleave: 'interleave'
+      }.each do |property, clone_property|
+        meta << "#{clone_property}=#{@resource.should(property)}" unless @resource.should(property) == :absent
       end
+      updated << 'meta ' << meta.join(' ') unless meta.empty?
+      debug "Update: #{updated}"
       Tempfile.open('puppet_crm_update') do |tmpfile|
         tmpfile.write(updated)
         tmpfile.flush
         cmd = [command(:crm), 'configure', 'load', 'update', tmpfile.path.to_s]
-        PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
+        PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource.value(:cib))
       end
     end
   end
