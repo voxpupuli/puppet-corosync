@@ -41,14 +41,8 @@ Puppet::Type.newtype(:cs_colocation) do
     # arrays with at least 2 values.
     def should=(value)
       super
-      if value.is_a? Array
-        # rubocop:enable Style/GuardClause
-        if value.empty?
-          raise Puppet::Error, 'Puppet::Type::Cs_Colocation: The primitives property must be an array of at least one element.'
-        end
-      else
-        raise Puppet::Error, 'Puppet::Type::Cs_Colocation: The primitives property must be an array.'
-      end
+      raise Puppet::Error, 'Puppet::Type::Cs_Colocation: The primitives property must be an array.' unless value.is_a? Array
+      raise Puppet::Error, 'Puppet::Type::Cs_Colocation: The primitives property must be an array of at least one element.' if value.empty?
       @should
     end
   end

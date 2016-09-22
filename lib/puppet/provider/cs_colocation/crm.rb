@@ -137,23 +137,23 @@ Puppet::Type.type(:cs_colocation).provide(:crm, parent: PuppetX::Voxpupuli::Coro
   # the updates that need to be made.  The temporary file is then used
   # as stdin for the crm command.
   def flush
-    unless @property_hash.empty?
-      primitives = if @property_hash[:primitives].count == 2
-                     # crm configure colocation works backwards when exactly 2 primitives are
-                     # defined. This is different from how >2 primitives are colocated, so to
-                     # fix this the primitives are reversed.
-                     @property_hash[:primitives].reverse
-                   else
-                     @property_hash[:primitives]
-                   end
-      updated = 'colocation '
-      updated << "#{@property_hash[:name]} #{@property_hash[:score]}: #{primitives.join(' ')}"
-      debug("Loading update: #{updated}")
-      Tempfile.open('puppet_crm_update') do |tmpfile|
-        tmpfile.write(updated)
-        tmpfile.flush
-        PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(['crm', 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
-      end
+    return if @property_hash.empty?
+
+    primitives = if @property_hash[:primitives].count == 2
+                   # crm configure colocation works backwards when exactly 2 primitives are
+                   # defined. This is different from how >2 primitives are colocated, so to
+                   # fix this the primitives are reversed.
+                   @property_hash[:primitives].reverse
+                 else
+                   @property_hash[:primitives]
+                 end
+    updated = 'colocation '
+    updated << "#{@property_hash[:name]} #{@property_hash[:score]}: #{primitives.join(' ')}"
+    debug("Loading update: #{updated}")
+    Tempfile.open('puppet_crm_update') do |tmpfile|
+      tmpfile.write(updated)
+      tmpfile.flush
+      PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(['crm', 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
     end
   end
 end

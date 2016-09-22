@@ -140,141 +140,137 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
   # It calls several pcs commands to make the resource look like the
   # params.
   def flush
-    unless @property_hash.empty?
-      # Required for tests
-      @resource = {} if @resource.nil?
-      # The ressource_type variable is used to check if one of the class,
-      # provider or type has changed
-      ressource_type = "#{@property_hash[:primitive_class]}:"
-      if @property_hash[:provided_by]
-        ressource_type << "#{@property_hash[:provided_by]}:"
-      end
-      ressource_type << (@property_hash[:primitive_type]).to_s
+    return if @property_hash.empty?
 
-      unless @property_hash[:operations].empty?
-        operations = []
-        @property_hash[:operations].each do |o|
-          # o is {k => v}
-          op_name = o.keys.first.to_s
-          operations << 'op'
-          operations << op_name
-          o.values.first.each_pair do |k, v|
-            operations << "#{k}=#{v}"
-          end
-        end
-      end
-      unless @property_hash[:parameters].empty?
-        parameters = []
-        @property_hash[:parameters].each_pair do |k, v|
-          parameters << "#{k}=#{v}"
-        end
-      end
-      unless @property_hash[:utilization].empty?
-        utilization = ['utilization']
-        @property_hash[:utilization].each_pair do |k, v|
-          utilization << "#{k}=#{v}"
-        end
-      end
+    # Required for tests
+    @resource = {} if @resource.nil?
+    # The ressource_type variable is used to check if one of the class,
+    # provider or type has changed
+    ressource_type = "#{@property_hash[:primitive_class]}:"
+    if @property_hash[:provided_by]
+      ressource_type << "#{@property_hash[:provided_by]}:"
+    end
+    ressource_type << (@property_hash[:primitive_type]).to_s
 
-      if @resource && @resource.class.name == :cs_primitive && @resource[:unmanaged_metadata]
-        @resource[:unmanaged_metadata].each do |parameter_name|
-          @property_hash[:metadata].delete(parameter_name)
-          @property_hash[:ms_metadata].delete(parameter_name) if @property_hash[:ms_metadata]
-          @property_hash[:existing_ms_metadata].delete(parameter_name) if @property_hash[:existing_ms_metadata]
-          @property_hash[:existing_metadata].delete(parameter_name) if @property_hash[:existing_metadata]
+    unless @property_hash[:operations].empty?
+      operations = []
+      @property_hash[:operations].each do |o|
+        # o is {k => v}
+        op_name = o.keys.first.to_s
+        operations << 'op'
+        operations << op_name
+        o.values.first.each_pair do |k, v|
+          operations << "#{k}=#{v}"
         end
       end
+    end
+    unless @property_hash[:parameters].empty?
+      parameters = []
+      @property_hash[:parameters].each_pair do |k, v|
+        parameters << "#{k}=#{v}"
+      end
+    end
+    unless @property_hash[:utilization].empty?
+      utilization = ['utilization']
+      @property_hash[:utilization].each_pair do |k, v|
+        utilization << "#{k}=#{v}"
+      end
+    end
 
-      unless @property_hash[:metadata].empty? && @property_hash[:existing_metadata].empty?
-        metadatas = ['meta']
-        @property_hash[:metadata].each_pair do |k, v|
-          metadatas << "#{k}=#{v}"
-        end
-        unless @property_hash[:existing_metadata].empty?
-          @property_hash[:existing_metadata].keys.reject { |key| @property_hash[:metadata].key?(key) }.each do |k|
-            metadatas << "#{k}="
-          end
+    if @resource && @resource.class.name == :cs_primitive && @resource[:unmanaged_metadata]
+      @resource[:unmanaged_metadata].each do |parameter_name|
+        @property_hash[:metadata].delete(parameter_name)
+        @property_hash[:ms_metadata].delete(parameter_name) if @property_hash[:ms_metadata]
+        @property_hash[:existing_ms_metadata].delete(parameter_name) if @property_hash[:existing_ms_metadata]
+        @property_hash[:existing_metadata].delete(parameter_name) if @property_hash[:existing_metadata]
+      end
+    end
+
+    unless @property_hash[:metadata].empty? && @property_hash[:existing_metadata].empty?
+      metadatas = ['meta']
+      @property_hash[:metadata].each_pair do |k, v|
+        metadatas << "#{k}=#{v}"
+      end
+      unless @property_hash[:existing_metadata].empty?
+        @property_hash[:existing_metadata].keys.reject { |key| @property_hash[:metadata].key?(key) }.each do |k|
+          metadatas << "#{k}="
         end
       end
+    end
 
-      # We destroy the ressource if it's type, class or provider has changed
-      unless @property_hash[:existing_resource] == :false
-        existing_ressource_type = "#{@property_hash[:existing_primitive_class]}:"
-        existing_ressource_type << "#{@property_hash[:existing_provided_by]}:" if @property_hash[:existing_provided_by]
-        existing_ressource_type << (@property_hash[:existing_primitive_type]).to_s
-        if existing_ressource_type != ressource_type
-          debug('Removing primitive')
-          PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'unclone', (@property_hash[:name]).to_s], @resource[:cib], false)
-          PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', (@property_hash[:name]).to_s], @resource[:cib])
-          force_reinstall = :true
-        end
+    # We destroy the ressource if it's type, class or provider has changed
+    unless @property_hash[:existing_resource] == :false
+      existing_ressource_type = "#{@property_hash[:existing_primitive_class]}:"
+      existing_ressource_type << "#{@property_hash[:existing_provided_by]}:" if @property_hash[:existing_provided_by]
+      existing_ressource_type << (@property_hash[:existing_primitive_type]).to_s
+      if existing_ressource_type != ressource_type
+        debug('Removing primitive')
+        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'unclone', (@property_hash[:name]).to_s], @resource[:cib], false)
+        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', (@property_hash[:name]).to_s], @resource[:cib])
+        force_reinstall = :true
       end
+    end
 
-      if @property_hash[:existing_resource] == :false || force_reinstall == :true
-        cmd = if Facter.value(:osfamily) == 'RedHat' && Facter.value(:operatingsystemmajrelease).to_s == '7'
-                [command(:pcs), 'resource', 'create', '--force', '--no-default-ops', (@property_hash[:name]).to_s]
-              else
-                cmd = [command(:pcs), 'resource', 'create', '--force', (@property_hash[:name]).to_s]
-              end
-        cmd << ressource_type
-        cmd += parameters unless parameters.nil?
-        cmd += operations unless operations.nil?
-        cmd += utilization unless utilization.nil?
-        cmd += metadatas unless metadatas.nil?
-        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
-        # if we are using a master/slave resource, prepend ms_ before its name
-        # and declare it as a master/slave resource
-        if @property_hash[:promotable] == :true
-          cmd = [command(:pcs), 'resource', 'master', "ms_#{@property_hash[:name]}", (@property_hash[:name]).to_s]
-          # rubocop:disable Metrics/BlockNesting
-          unless @property_hash[:ms_metadata].empty?
-            # rubocop:enable Metrics/BlockNesting
-            cmd << 'meta'
-            @property_hash[:ms_metadata].each_pair do |k, v|
-              cmd << "#{k}=#{v}"
+    if @property_hash[:existing_resource] == :false || force_reinstall == :true
+      cmd = if Facter.value(:osfamily) == 'RedHat' && Facter.value(:operatingsystemmajrelease).to_s == '7'
+              [command(:pcs), 'resource', 'create', '--force', '--no-default-ops', (@property_hash[:name]).to_s]
+            else
+              cmd = [command(:pcs), 'resource', 'create', '--force', (@property_hash[:name]).to_s]
             end
-          end
-          PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
-        end
-        # try to remove the default monitor operation
-        default_op = { 'monitor' => { 'interval' => '60s' } }
-        unless @property_hash[:operations].include?(default_op)
-          cmd = [command(:pcs), 'resource', 'op', 'remove', (@property_hash[:name]).to_s, 'monitor', 'interval=60s']
-          PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib], false)
-        end
-      else
-        if @property_hash[:promotable] == :false && @property_hash[:existing_promotable] == :true
-          PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', "ms_#{@property_hash[:name]}"], @resource[:cib])
-        end
-        @property_hash[:existing_operations].reject { |op| @property_hash[:operations].include?(op) }.each do |o|
-          cmd = [command(:pcs), 'resource', 'op', 'remove', (@property_hash[:name]).to_s]
-          cmd << o.keys.first.to_s
-          o.values.first.each_pair do |k, v|
+      cmd << ressource_type
+      cmd += parameters unless parameters.nil?
+      cmd += operations unless operations.nil?
+      cmd += utilization unless utilization.nil?
+      cmd += metadatas unless metadatas.nil?
+      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+      # if we are using a master/slave resource, prepend ms_ before its name
+      # and declare it as a master/slave resource
+      if @property_hash[:promotable] == :true
+        cmd = [command(:pcs), 'resource', 'master', "ms_#{@property_hash[:name]}", (@property_hash[:name]).to_s]
+        unless @property_hash[:ms_metadata].empty?
+          cmd << 'meta'
+          @property_hash[:ms_metadata].each_pair do |k, v|
             cmd << "#{k}=#{v}"
           end
-          PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
         end
-        cmd = [command(:pcs), 'resource', 'update', (@property_hash[:name]).to_s]
-        cmd += parameters unless parameters.nil?
-        cmd += operations unless operations.nil?
-        cmd += utilization unless utilization.nil?
-        cmd += metadatas unless metadatas.nil?
         PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
-        if @property_hash[:promotable] == :true
-          cmd = [command(:pcs), 'resource', 'update', "ms_#{@property_hash[:name]}", (@property_hash[:name]).to_s]
-          # rubocop:disable Metrics/BlockNesting
-          unless @property_hash[:ms_metadata].empty? && @property_hash[:existing_ms_metadata].empty?
-            # rubocop:enable Metrics/BlockNesting
-            cmd << 'meta'
-            @property_hash[:ms_metadata].each_pair do |k, v|
-              cmd << "#{k}=#{v}"
-            end
-            @property_hash[:existing_ms_metadata].keys.reject { |key| @property_hash[:ms_metadata].key?(key) }.each do |k|
-              cmd << "#{k}="
-            end
-          end
-          PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+      end
+      # try to remove the default monitor operation
+      default_op = { 'monitor' => { 'interval' => '60s' } }
+      unless @property_hash[:operations].include?(default_op)
+        cmd = [command(:pcs), 'resource', 'op', 'remove', (@property_hash[:name]).to_s, 'monitor', 'interval=60s']
+        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib], false)
+      end
+    else
+      if @property_hash[:promotable] == :false && @property_hash[:existing_promotable] == :true
+        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', "ms_#{@property_hash[:name]}"], @resource[:cib])
+      end
+      @property_hash[:existing_operations].reject { |op| @property_hash[:operations].include?(op) }.each do |o|
+        cmd = [command(:pcs), 'resource', 'op', 'remove', (@property_hash[:name]).to_s]
+        cmd << o.keys.first.to_s
+        o.values.first.each_pair do |k, v|
+          cmd << "#{k}=#{v}"
         end
+        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+      end
+      cmd = [command(:pcs), 'resource', 'update', (@property_hash[:name]).to_s]
+      cmd += parameters unless parameters.nil?
+      cmd += operations unless operations.nil?
+      cmd += utilization unless utilization.nil?
+      cmd += metadatas unless metadatas.nil?
+      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+      if @property_hash[:promotable] == :true
+        cmd = [command(:pcs), 'resource', 'update', "ms_#{@property_hash[:name]}", (@property_hash[:name]).to_s]
+        unless @property_hash[:ms_metadata].empty? && @property_hash[:existing_ms_metadata].empty?
+          cmd << 'meta'
+          @property_hash[:ms_metadata].each_pair do |k, v|
+            cmd << "#{k}=#{v}"
+          end
+          @property_hash[:existing_ms_metadata].keys.reject { |key| @property_hash[:ms_metadata].key?(key) }.each do |k|
+            cmd << "#{k}="
+          end
+        end
+        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
       end
     end
   end

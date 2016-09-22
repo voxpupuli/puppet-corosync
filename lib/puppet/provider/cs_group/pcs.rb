@@ -84,15 +84,15 @@ Puppet::Type.type(:cs_group).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
   # the updates that need to be made.  The temporary file is then used
   # as stdin for the pcs command.
   def flush
-    unless @property_hash.empty?
-      if @property_hash[:new] == false
-        debug('Removing group')
-        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'ungroup', @property_hash[:name]], @resource[:cib])
-      end
+    return if @property_hash.empty?
 
-      cmd = [command(:pcs), 'resource', 'group', 'add', (@property_hash[:name]).to_s]
-      cmd += @property_hash[:primitives]
-      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+    if @property_hash[:new] == false
+      debug('Removing group')
+      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'ungroup', @property_hash[:name]], @resource[:cib])
     end
+
+    cmd = [command(:pcs), 'resource', 'group', 'add', (@property_hash[:name]).to_s]
+    cmd += @property_hash[:primitives]
+    PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
   end
 end

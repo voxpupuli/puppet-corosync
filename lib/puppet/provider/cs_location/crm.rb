@@ -76,39 +76,39 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
   # the updates that need to be made.  The temporary file is then used
   # as stdin for the crm command.
   def flush
-    unless @property_hash.empty?
-      updated = "location #{@property_hash[:name]} #{@property_hash[:primitive]}"
+    return if @property_hash.empty?
 
-      if feature?(:discovery)
-        updated << " resource-discovery=#{@property_hash[:resource_discovery]}"
+    updated = "location #{@property_hash[:name]} #{@property_hash[:primitive]}"
+
+    if feature?(:discovery)
+      updated << " resource-discovery=#{@property_hash[:resource_discovery]}"
+    end
+
+    unless @property_hash[:node_name].nil?
+      updated << " #{@property_hash[:score]}: #{@property_hash[:node_name]}"
+    end
+
+    unless @property_hash[:rules].nil?
+      @property_hash[:rules].each do |rule_item|
+        name = rule_item.keys.first
+        rule = rule_item[name]
+
+        score = rule['score-attribute'] || rule['score']
+
+        boolean_op = rule['boolean-op'] || 'and'
+        expression = self.class.rule_expression(name, rule['expression'], boolean_op)
+
+        updated << " rule $id=\"#{name}\""
+        updated << " $role=\"#{rule['role']}\"" unless rule['role'].nil?
+        updated << " #{score}: #{expression.join(' ')}"
       end
+    end
 
-      unless @property_hash[:node_name].nil?
-        updated << " #{@property_hash[:score]}: #{@property_hash[:node_name]}"
-      end
-
-      unless @property_hash[:rules].nil?
-        @property_hash[:rules].each do |rule_item|
-          name = rule_item.keys.first
-          rule = rule_item[name]
-
-          score = rule['score-attribute'] || rule['score']
-
-          boolean_op = rule['boolean-op'] || 'and'
-          expression = self.class.rule_expression(name, rule['expression'], boolean_op)
-
-          updated << " rule $id=\"#{name}\""
-          updated << " $role=\"#{rule['role']}\"" unless rule['role'].nil?
-          updated << " #{score}: #{expression.join(' ')}"
-        end
-      end
-
-      debug("Loading update: #{updated}")
-      Tempfile.open('puppet_crm_update') do |tmpfile|
-        tmpfile.write(updated)
-        tmpfile.flush
-        PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(['crm', 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
-      end
+    debug("Loading update: #{updated}")
+    Tempfile.open('puppet_crm_update') do |tmpfile|
+      tmpfile.write(updated)
+      tmpfile.flush
+      PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(['crm', 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
     end
   end
 end

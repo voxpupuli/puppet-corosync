@@ -84,16 +84,16 @@ Puppet::Type.type(:cs_group).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
   # the updates that need to be made.  The temporary file is then used
   # as stdin for the crm command.
   def flush
-    unless @property_hash.empty?
-      updated = 'group '
-      updated << "#{@property_hash[:name]} #{Array(@property_hash[:primitives]).join(' ')}"
-      debug("Loading update: #{updated}")
-      Tempfile.open('puppet_crm_update') do |tmpfile|
-        tmpfile.write(updated)
-        tmpfile.flush
-        cmd = [command(:crm), 'configure', 'load', 'update', tmpfile.path.to_s]
-        PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
-      end
+    return if @property_hash.empty?
+
+    updated = 'group '
+    updated << "#{@property_hash[:name]} #{Array(@property_hash[:primitives]).join(' ')}"
+    debug("Loading update: #{updated}")
+    Tempfile.open('puppet_crm_update') do |tmpfile|
+      tmpfile.write(updated)
+      tmpfile.flush
+      cmd = [command(:crm), 'configure', 'load', 'update', tmpfile.path.to_s]
+      PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
     end
   end
 end
