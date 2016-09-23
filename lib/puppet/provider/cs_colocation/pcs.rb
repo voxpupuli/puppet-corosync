@@ -148,55 +148,54 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, parent: PuppetX::Voxpupuli::Coro
   # the updates that need to be made.  The temporary file is then used
   # as stdin for the pcs command.
   def flush
-    unless @property_hash.empty?
-      if @property_hash[:new] == false
-        debug('Removing colocation')
-        cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
-        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
-      end
-      first_item = @property_hash[:primitives].shift
-      cmd = [command(:pcs), 'constraint', 'colocation']
-      if first_item.is_a?(Array)
-        cmd << 'set'
-        cmd << format_resource_set(first_item)
-        until @property_hash[:primitives].empty?
-          cmd += format_resource_set(@property_hash[:primitives].shift)
-        end
-        cmd << 'setoptions'
-        cmd << "id=#{@property_hash[:name]}"
-        cmd << "score=#{@property_hash[:score]}"
-      else
-        with_rsc = first_item
-        rsc = @property_hash[:primitives].shift
-        cmd << 'add'
-        if rsc.include? ':'
-          items = rsc.split(':')
-          # rubocop:disable Metrics/BlockNesting
-          if items[1] == 'Master'
-            cmd << 'master'
-          elsif items[1] == 'Slave'
-            cmd << 'slave'
-          end
-          cmd << items[0]
-        else
-          cmd << rsc
-        end
-        cmd << 'with'
-        if with_rsc.include? ':'
-          items = with_rsc.split(':')
-          if items[1] == 'Master'
-            cmd << 'master'
-          elsif items[1] == 'Slave'
-            cmd << 'slave'
-          end
-          cmd << items[0]
-        else
-          cmd << with_rsc
-        end
-        cmd << @property_hash[:score]
-        cmd << "id=#{@property_hash[:name]}"
-      end
+    return if @property_hash.empty?
+
+    if @property_hash[:new] == false
+      debug('Removing colocation')
+      cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
       PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
     end
+    first_item = @property_hash[:primitives].shift
+    cmd = [command(:pcs), 'constraint', 'colocation']
+    if first_item.is_a?(Array)
+      cmd << 'set'
+      cmd << format_resource_set(first_item)
+      until @property_hash[:primitives].empty?
+        cmd += format_resource_set(@property_hash[:primitives].shift)
+      end
+      cmd << 'setoptions'
+      cmd << "id=#{@property_hash[:name]}"
+      cmd << "score=#{@property_hash[:score]}"
+    else
+      with_rsc = first_item
+      rsc = @property_hash[:primitives].shift
+      cmd << 'add'
+      if rsc.include? ':'
+        items = rsc.split(':')
+        if items[1] == 'Master'
+          cmd << 'master'
+        elsif items[1] == 'Slave'
+          cmd << 'slave'
+        end
+        cmd << items[0]
+      else
+        cmd << rsc
+      end
+      cmd << 'with'
+      if with_rsc.include? ':'
+        items = with_rsc.split(':')
+        if items[1] == 'Master'
+          cmd << 'master'
+        elsif items[1] == 'Slave'
+          cmd << 'slave'
+        end
+        cmd << items[0]
+      else
+        cmd << with_rsc
+      end
+      cmd << @property_hash[:score]
+      cmd << "id=#{@property_hash[:name]}"
+    end
+    PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
   end
 end

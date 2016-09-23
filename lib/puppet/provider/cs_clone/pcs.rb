@@ -22,11 +22,11 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
     cmd = [command(:cibadmin), '--query', '--xpath', xpath]
     raw, = PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, cib)
     doc = REXML::Document.new(raw)
-    if doc.root.attributes['id'] != id
-      doc.root.attributes['id'] = id
-      cmd = [command(:cibadmin), '--replace', '--xpath', xpath, '--xml-text', doc.to_s.chop]
-      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, cib)
-    end
+    return unless doc.root.attributes['id'] != id
+
+    doc.root.attributes['id'] = id
+    cmd = [command(:cibadmin), '--replace', '--xpath', xpath, '--xml-text', doc.to_s.chop]
+    PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, cib)
   end
 
   def self.instances
@@ -98,38 +98,38 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
   # the updates that need to be made.  The temporary file is then used
   # as stdin for the crm command.
   def flush
-    unless @property_hash.empty?
-      if @resource.should(:primitive)
-        target = @resource.should(:primitive)
-        target_type = 'primitive'
-      elsif @resource.should(:group)
-        target = @resource.should(:group)
-        target_type = 'group'
-      else
-        raise Puppet::Error, 'No primitive or group'
-      end
-      if @property_hash[:existing_clone_element].nil?
-        debug 'Creating clone resource'
-      else
-        debug 'Updating clone resource'
-        # pcs versions earlier than 0.9.116 do not allow updating a cloned
-        # resource. Being conservative, we will unclone then create a new clone
-        # with the new parameters.
-        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'unclone', @property_hash[:existing_clone_element]], @resource.value(:cib))
-      end
-      cmd = [command(:pcs), 'resource', 'clone', target.to_s]
-      {
-        clone_max: 'clone-max',
-        clone_node_max: 'clone-node-max',
-        notify_clones: 'notify',
-        globally_unique: 'globally-unique',
-        ordered: 'ordered',
-        interleave: 'interleave'
-      }.each do |property, clone_property|
-        cmd << "#{clone_property}=#{@resource.should(property)}" unless @resource.should(property) == :absent
-      end
-      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource.value(:cib))
-      change_clone_id(target_type, target, @resource.value(:name), @resource.value(:cib))
+    return if @property_hash.empty?
+
+    if @resource.should(:primitive)
+      target = @resource.should(:primitive)
+      target_type = 'primitive'
+    elsif @resource.should(:group)
+      target = @resource.should(:group)
+      target_type = 'group'
+    else
+      raise Puppet::Error, 'No primitive or group'
     end
+    if @property_hash[:existing_clone_element].nil?
+      debug 'Creating clone resource'
+    else
+      debug 'Updating clone resource'
+      # pcs versions earlier than 0.9.116 do not allow updating a cloned
+      # resource. Being conservative, we will unclone then create a new clone
+      # with the new parameters.
+      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'unclone', @property_hash[:existing_clone_element]], @resource.value(:cib))
+    end
+    cmd = [command(:pcs), 'resource', 'clone', target.to_s]
+    {
+      clone_max: 'clone-max',
+      clone_node_max: 'clone-node-max',
+      notify_clones: 'notify',
+      globally_unique: 'globally-unique',
+      ordered: 'ordered',
+      interleave: 'interleave'
+    }.each do |property, clone_property|
+      cmd << "#{clone_property}=#{@resource.should(property)}" unless @resource.should(property) == :absent
+    end
+    PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource.value(:cib))
+    change_clone_id(target_type, target, @resource.value(:name), @resource.value(:cib))
   end
 end

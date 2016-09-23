@@ -185,70 +185,70 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
   # operations and parameters hash to eventually flatten them into a string
   # that can be used by the crm command.
   def flush
-    unless @property_hash.empty?
-      unless @property_hash[:operations].empty?
-        operations = ''
-        @property_hash[:operations].each do |o|
-          op_name = o.keys.first
-          operations << "op #{op_name} "
-          o.values.first.each_pair do |k, v|
-            operations << "#{k}=#{v} "
-          end
+    return if @property_hash.empty?
+
+    unless @property_hash[:operations].empty?
+      operations = ''
+      @property_hash[:operations].each do |o|
+        op_name = o.keys.first
+        operations << "op #{op_name} "
+        o.values.first.each_pair do |k, v|
+          operations << "#{k}=#{v} "
         end
       end
-      if @resource && @resource.class.name == :cs_primitive && @resource[:unmanaged_metadata]
-        @resource[:unmanaged_metadata].each do |parameter_name|
-          if @property_hash[:existing_metadata] && @property_hash[:existing_metadata][parameter_name]
-            @property_hash[:metadata][parameter_name] = @property_hash[:existing_metadata]['target-role']
-          end
-          if @property_hash[:existing_ms_metadata] && @property_hash[:existing_ms_metadata][parameter_name]
-            @property_hash[:ms_metadata][parameter_name] = @property_hash[:existing_ms_metadata]['target-role']
-          end
+    end
+    if @resource && @resource.class.name == :cs_primitive && @resource[:unmanaged_metadata]
+      @resource[:unmanaged_metadata].each do |parameter_name|
+        if @property_hash[:existing_metadata] && @property_hash[:existing_metadata][parameter_name]
+          @property_hash[:metadata][parameter_name] = @property_hash[:existing_metadata]['target-role']
+        end
+        if @property_hash[:existing_ms_metadata] && @property_hash[:existing_ms_metadata][parameter_name]
+          @property_hash[:ms_metadata][parameter_name] = @property_hash[:existing_ms_metadata]['target-role']
         end
       end
-      unless @property_hash[:parameters].empty?
-        parameters = 'params '
-        @property_hash[:parameters].each_pair do |k, v|
-          parameters << "'#{k}=#{v}' "
+    end
+    unless @property_hash[:parameters].empty?
+      parameters = 'params '
+      @property_hash[:parameters].each_pair do |k, v|
+        parameters << "'#{k}=#{v}' "
+      end
+    end
+    unless @property_hash[:utilization].empty?
+      utilization = 'utilization '
+      @property_hash[:utilization].each_pair do |k, v|
+        utilization << "#{k}=#{v} "
+      end
+    end
+    unless @property_hash[:metadata].empty?
+      metadatas = 'meta '
+      @property_hash[:metadata].each_pair do |k, v|
+        metadatas << "#{k}=#{v} "
+      end
+    end
+    updated = 'primitive '
+    updated << "#{@property_hash[:name]} #{@property_hash[:primitive_class]}:"
+    updated << "#{@property_hash[:provided_by]}:" if @property_hash[:provided_by]
+    updated << "#{@property_hash[:primitive_type]} "
+    updated << "#{operations} " unless operations.nil?
+    updated << "#{parameters} " unless parameters.nil?
+    updated << "#{utilization} " unless utilization.nil?
+    updated << "#{metadatas} " unless metadatas.nil?
+    if @property_hash[:promotable] == :true
+      updated << "\n"
+      updated << "ms ms_#{@property_hash[:name]} #{@property_hash[:name]} "
+      unless @property_hash[:ms_metadata].empty?
+        updated << 'meta '
+        @property_hash[:ms_metadata].each_pair do |k, v|
+          updated << "#{k}=#{v} "
         end
       end
-      unless @property_hash[:utilization].empty?
-        utilization = 'utilization '
-        @property_hash[:utilization].each_pair do |k, v|
-          utilization << "#{k}=#{v} "
-        end
-      end
-      unless @property_hash[:metadata].empty?
-        metadatas = 'meta '
-        @property_hash[:metadata].each_pair do |k, v|
-          metadatas << "#{k}=#{v} "
-        end
-      end
-      updated = 'primitive '
-      updated << "#{@property_hash[:name]} #{@property_hash[:primitive_class]}:"
-      updated << "#{@property_hash[:provided_by]}:" if @property_hash[:provided_by]
-      updated << "#{@property_hash[:primitive_type]} "
-      updated << "#{operations} " unless operations.nil?
-      updated << "#{parameters} " unless parameters.nil?
-      updated << "#{utilization} " unless utilization.nil?
-      updated << "#{metadatas} " unless metadatas.nil?
-      if @property_hash[:promotable] == :true
-        updated << "\n"
-        updated << "ms ms_#{@property_hash[:name]} #{@property_hash[:name]} "
-        unless @property_hash[:ms_metadata].empty?
-          updated << 'meta '
-          @property_hash[:ms_metadata].each_pair do |k, v|
-            updated << "#{k}=#{v} "
-          end
-        end
-      end
-      debug("Loading update: #{updated}")
-      Tempfile.open('puppet_crm_update') do |tmpfile|
-        tmpfile.write(updated)
-        tmpfile.flush
-        cmd = ['crm', '-F', 'configure', 'load', 'update', tmpfile.path.to_s]
-        PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
-      end
+    end
+    debug("Loading update: #{updated}")
+    Tempfile.open('puppet_crm_update') do |tmpfile|
+      tmpfile.write(updated)
+      tmpfile.flush
+      cmd = ['crm', '-F', 'configure', 'load', 'update', tmpfile.path.to_s]
+      PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
     end
   end
 end

@@ -86,36 +86,36 @@ Puppet::Type.type(:cs_clone).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
   # the updates that need to be made.  The temporary file is then used
   # as stdin for the crm command.
   def flush
-    unless @property_hash.empty?
-      if @resource.should(:primitive)
-        target = @resource.should(:primitive)
-      elsif @resource.should(:group)
-        target = @resource.should(:group)
-      else
-        raise Puppet::Error, 'No primitive or group'
-      end
-      updated = 'clone '
-      updated << "#{@resource.value(:name)} "
-      updated << "#{target} "
-      meta = []
-      {
-        clone_max: 'clone-max',
-        clone_node_max: 'clone-node-max',
-        notify_clones: 'notify',
-        globally_unique: 'globally-unique',
-        ordered: 'ordered',
-        interleave: 'interleave'
-      }.each do |property, clone_property|
-        meta << "#{clone_property}=#{@resource.should(property)}" unless @resource.should(property) == :absent
-      end
-      updated << 'meta ' << meta.join(' ') unless meta.empty?
-      debug "Update: #{updated}"
-      Tempfile.open('puppet_crm_update') do |tmpfile|
-        tmpfile.write(updated)
-        tmpfile.flush
-        cmd = [command(:crm), 'configure', 'load', 'update', tmpfile.path.to_s]
-        PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource.value(:cib))
-      end
+    return if @property_hash.empty?
+
+    if @resource.should(:primitive)
+      target = @resource.should(:primitive)
+    elsif @resource.should(:group)
+      target = @resource.should(:group)
+    else
+      raise Puppet::Error, 'No primitive or group'
+    end
+    updated = 'clone '
+    updated << "#{@resource.value(:name)} "
+    updated << "#{target} "
+    meta = []
+    {
+      clone_max: 'clone-max',
+      clone_node_max: 'clone-node-max',
+      notify_clones: 'notify',
+      globally_unique: 'globally-unique',
+      ordered: 'ordered',
+      interleave: 'interleave'
+    }.each do |property, clone_property|
+      meta << "#{clone_property}=#{@resource.should(property)}" unless @resource.should(property) == :absent
+    end
+    updated << 'meta ' << meta.join(' ') unless meta.empty?
+    debug "Update: #{updated}"
+    Tempfile.open('puppet_crm_update') do |tmpfile|
+      tmpfile.write(updated)
+      tmpfile.flush
+      cmd = [command(:crm), 'configure', 'load', 'update', tmpfile.path.to_s]
+      PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource.value(:cib))
     end
   end
 end
