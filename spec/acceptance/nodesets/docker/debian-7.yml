@@ -3,20 +3,17 @@
 # https://github.com/voxpupuli/modulesync
 # https://github.com/voxpupuli/modulesync_config
 HOSTS:
-  ubuntu-1404-x64:
+  debian-7-x64:
     default_apply_opts:
       order: random
       strict_variables:
-    platform: ubuntu-14.04-amd64
+    platform: debian-7-amd64
     hypervisor : docker
-    image: ubuntu:14.04
+    image: debian:7
     docker_preserve_image: true
     docker_cmd: '["/sbin/init"]'
     docker_image_commands:
-      - 'rm /usr/sbin/policy-rc.d'
-      - 'rm /sbin/initctl; dpkg-divert --rename --remove /sbin/initctl'
-      - 'apt-get install -y net-tools wget'
-      - 'locale-gen en_US.UTF-8'
+      - 'apt-get install -y cron locales-all net-tools wget'
 CONFIG:
   type: aio
   log_level: debug
