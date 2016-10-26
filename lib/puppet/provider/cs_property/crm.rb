@@ -55,7 +55,7 @@ Puppet::Type.type(:cs_property).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
 
   # Unlike create we actually immediately delete the item.
   def destroy
-    debug('Revmoving cluster property')
+    debug('Removing cluster property')
     cibadmin('--scope', 'crm_config', '--delete', '--xpath', "//nvpair[@name='#{resource[:name]}']")
     @property_hash.clear
   end
