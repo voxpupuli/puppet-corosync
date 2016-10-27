@@ -15,6 +15,7 @@ class corosync::params {
   $syslog_priority                     = 'info'
   $log_function_name                   = false
   $rrp_mode                            = undef
+  $netmtu                              = undef
   $ttl                                 = false
   $vsftype                             = undef
   $token                               = undef
