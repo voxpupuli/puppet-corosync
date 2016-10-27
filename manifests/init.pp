@@ -78,6 +78,9 @@
 # [*rrp_mode*]
 #   Mode of redundant ring. May be none, active, or passive.
 #
+# [*netmtu*]
+#   This specifies the network maximum transmit unit.
+#
 # [*ttl*]
 #   Time To Live.
 #
@@ -234,6 +237,7 @@ class corosync(
   $syslog_priority                     = $::corosync::params::syslog_priority,
   $log_function_name                   = $::corosync::params::log_function_name,
   $rrp_mode                            = $::corosync::params::rrp_mode,
+  $netmtu                              = $::corosync::params::netmtu,
   $ttl                                 = $::corosync::params::ttl,
   $vsftype                             = $::corosync::params::vsftype,
   $package_corosync                    = $::corosync::params::package_corosync,

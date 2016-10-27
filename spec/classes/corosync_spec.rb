@@ -338,6 +338,7 @@ describe 'corosync' do
     {
       'threads' => 10,
       'rrp_mode' => 'none',
+      'netmtu' => '1500',
       'token' => 3000,
       'vsftype' => 'none',
       'token_retransmits_before_loss_const' => 10,

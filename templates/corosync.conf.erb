@@ -34,6 +34,9 @@ totem {
 <% unless @rrp_mode.nil? -%>
   rrp_mode:                            <%= @rrp_mode %>
 <% end -%>
+<% unless @netmtu.nil? -%>
+  netmtu:                              <%= @netmtu %>
+<% end -%>
   secauth:                             <%= @enable_secauth_real %>
 <% unless @threads.nil? -%>
   threads:                             <%= @threads %>
