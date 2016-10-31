@@ -24,29 +24,29 @@ describe 'corosync' do
         end
 
         it 'configures votequorum' do
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{nodelist}
           )
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 1}
           )
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 2}
           )
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{two_node: 1\n}
           )
         end
 
         it 'supports persistent node IDs' do
           params[:quorum_members_ids] = [3, 11]
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{nodelist}
           )
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 3}
           )
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 11}
           )
         end
@@ -61,7 +61,7 @@ describe 'corosync' do
         end
 
         it 'does not configure two_nodes option' do
-          should_not contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.not_to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{two_node: 1\n}
           )
         end
@@ -75,7 +75,7 @@ describe 'corosync' do
         end
 
         it 'configures two_node' do
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{two_node: 1\n}
           )
         end
@@ -90,16 +90,16 @@ describe 'corosync' do
         end
 
         it 'configures nodelist' do
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{nodelist}
           )
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 1}
           )
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 2}
           )
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{two_node: 1\n}
           )
         end
@@ -119,14 +119,14 @@ describe 'corosync' do
 
         (1..4).each do |node_id|
           it "configures rings for host #{node_id} correctly" do
-            should contain_file('/etc/corosync/corosync.conf').with_content(
+            is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
               %r{ring0_addr: 172.31.10.#{node_id}\n\s*ring1_addr: 172.31.11.#{node_id}\n\s*ring2_addr: 172.31.12.#{node_id}\n\s*nodeid: #{node_id}}
             )
           end
         end
 
         it 'does not configure two_nodes option' do
-          should_not contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.not_to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{two_node: 1\n}
           )
         end
@@ -144,14 +144,14 @@ describe 'corosync' do
 
         (1..2).each do |node_id|
           it "configures rings for host #{node_id} correctly" do
-            should contain_file('/etc/corosync/corosync.conf').with_content(
+            is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
               %r{ring0_addr: 172.31.10.#{node_id}\n\s*ring1_addr: 172.31.11.#{node_id}\n\s*ring2_addr: 172.31.12.#{node_id}\n\s*nodeid: #{node_id}}
             )
           end
         end
 
         it 'configures two_node' do
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{two_node: 1\n}
           )
         end
@@ -175,29 +175,29 @@ describe 'corosync' do
         end
 
         it 'configures votequorum' do
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{nodelist}
           )
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 1}
           )
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 2}
           )
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{two_node: 1\n}
           )
         end
 
         it 'supports persistent node IDs' do
           params[:quorum_members_ids] = [3, 11]
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{nodelist}
           )
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 3}
           )
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 11}
           )
         end
@@ -213,7 +213,7 @@ describe 'corosync' do
         it { is_expected.to compile.with_all_deps }
 
         it 'configures secauth correctly' do
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{secauth:\s+off}
           )
         end
@@ -228,7 +228,7 @@ describe 'corosync' do
         end
 
         it 'configures the ring properly' do
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{interface.*memberaddr: 10\.0\.0\.1.*memberaddr: 10\.0\.0\.2.*ringnumber:\s+0.*bindnetaddr: 10\.0\.0\.1}m
           )
         end
@@ -251,7 +251,7 @@ describe 'corosync' do
         end
 
         it 'configures the rings properly' do
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{interface.*memberaddr: 10\.0\.0\.1.*memberaddr: 10\.0\.0\.2.*ringnumber:\s+0.*bindnetaddr: 10\.0\.0\.1.*interface.*memberaddr: 10\.0\.1\.1.*memberaddr: 10\.0\.1\.2.*ringnumber:\s+1.*bindnetaddr: 10\.0\.1\.1}m
           )
         end
@@ -260,7 +260,7 @@ describe 'corosync' do
 
     context 'when cluster_name is not set' do
       it do
-        should contain_file('/etc/corosync/corosync.conf').without_content(
+        is_expected.to contain_file('/etc/corosync/corosync.conf').without_content(
           %r{cluster_name\:}
         )
       end
@@ -274,7 +274,7 @@ describe 'corosync' do
       end
 
       it 'configures cluster_name' do
-        should contain_file('/etc/corosync/corosync.conf').with_content(
+        is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
           %r{cluster_name\:\s*hacell$}
         )
       end
@@ -288,7 +288,7 @@ describe 'corosync' do
       end
 
       it 'raises error' do
-        should raise_error(
+        is_expected.to raise_error(
           Puppet::Error,
           %r{You must provide a value for multicast_address, unicast_address or cluster_name\.}
         )
@@ -304,10 +304,10 @@ describe 'corosync' do
       end
 
       it 'does not configure multicast' do
-        should contain_file('/etc/corosync/corosync.conf').without_content(
+        is_expected.to contain_file('/etc/corosync/corosync.conf').without_content(
           %r{broadcast}
         )
-        should contain_file('/etc/corosync/corosync.conf').without_content(
+        is_expected.to contain_file('/etc/corosync/corosync.conf').without_content(
           %r{mcastaddr}
         )
       end
@@ -315,7 +315,7 @@ describe 'corosync' do
 
     context 'when log_file is not set' do
       it 'does set to_logfile' do
-        should contain_file('/etc/corosync/corosync.conf').with_content(
+        is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
           %r{to_logfile.*yes}
         )
       end
@@ -329,7 +329,7 @@ describe 'corosync' do
       end
 
       it 'does not set to_logfile' do
-        should contain_file('/etc/corosync/corosync.conf').with_content(
+        is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
           %r{to_logfile.*no}
         )
       end
@@ -349,7 +349,7 @@ describe 'corosync' do
     }.each do |optional_parameter, possible_value|
       context "when #{optional_parameter} is not set" do
         it 'is not in corosync.conf' do
-          should contain_file('/etc/corosync/corosync.conf').without_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').without_content(
             %r{#{optional_parameter}}
           )
         end
@@ -363,7 +363,7 @@ describe 'corosync' do
         end
 
         it 'is set in corosync.conf' do
-          should contain_file('/etc/corosync/corosync.conf').with_content(
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{#{optional_parameter}:\s*#{possible_value}\n}
           )
         end
@@ -377,7 +377,7 @@ describe 'corosync' do
         end
 
         it "does install #{package}" do
-          should contain_package(package).with(
+          is_expected.to contain_package(package).with(
             ensure: 'present'
           )
         end
@@ -392,7 +392,7 @@ describe 'corosync' do
         end
 
         it "does install #{package} with version 1.1.1" do
-          should contain_package(package).with(
+          is_expected.to contain_package(package).with(
             ensure: '1.1.1'
           )
         end
@@ -404,7 +404,7 @@ describe 'corosync' do
         end
 
         it "does not install #{package}" do
-          should_not contain_package(package)
+          is_expected.not_to contain_package(package)
         end
       end
     end
@@ -418,7 +418,7 @@ describe 'corosync' do
       end
 
       it 'raises error' do
-        should raise_error(
+        is_expected.to raise_error(
           Puppet::Error,
           %r{set_votequorum is true, but no quorum_members have been passed.}
         )
@@ -427,13 +427,13 @@ describe 'corosync' do
 
     context 'when configuring defaults for logging' do
       it 'configures stderr, syslog priority, func names' do
-        should contain_file('/etc/corosync/corosync.conf').with_content(
+        is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
           %r{to_stderr:       yes}
         )
-        should contain_file('/etc/corosync/corosync.conf').with_content(
+        is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
           %r{syslog_priority: info}
         )
-        should_not contain_file('/etc/corosync/corosync.conf').with_content(
+        is_expected.not_to contain_file('/etc/corosync/corosync.conf').with_content(
           %r{function_name:   on}
         )
       end
@@ -452,7 +452,7 @@ describe 'corosync' do
     end
 
     it 'validates the corosync configuration' do
-      should contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
+      is_expected.to contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
         '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
       )
     end
@@ -475,11 +475,11 @@ describe 'corosync' do
       it_configures 'corosync'
 
       it 'does not manage the pacemaker service' do
-        should_not contain_service('pacemaker')
+        is_expected.not_to contain_service('pacemaker')
       end
 
       it 'does not validate the corosync configuration' do
-        should contain_file('/etc/corosync/corosync.conf').without_validate_cmd
+        is_expected.to contain_file('/etc/corosync/corosync.conf').without_validate_cmd
       end
     end
 
@@ -491,13 +491,13 @@ describe 'corosync' do
       it_configures 'corosync'
 
       it 'does manage the pacemaker service' do
-        should contain_service('pacemaker').with(
+        is_expected.to contain_service('pacemaker').with(
           ensure: 'running'
         )
       end
 
       it 'validates the corosync configuration' do
-        should contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
+        is_expected.to contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
           '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
         )
       end
