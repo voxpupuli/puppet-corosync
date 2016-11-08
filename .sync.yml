@@ -2,32 +2,32 @@
 .travis.yml:
   extras:
   - rvm: 2.1.9
-    env: BEAKER_VERSION="~> 2.51" PUPPET_VERSION="~> 3.0" STRICT_VARIABLES="yes" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/centos-7 PUPPET_INSTALL_TYPE=foss PUPPET_INSTALL_VERSION=3.8.7
+    env: PUPPET_INSTALL_TYPE=foss PUPPET_VERSION="~> 3.0" STRICT_VARIABLES="yes" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/centos-7
     services: docker
     sudo: required
     bundler_args: --without development
   - rvm: 2.1.9
-    env: BEAKER_VERSION="~> 2.51" PUPPET_VERSION="~> 3.0" STRICT_VARIABLES="yes" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/ubuntu-14.04 PUPPET_INSTALL_TYPE=foss PUPPET_INSTALL_VERSION=3.8.7
+    env: PUPPET_INSTALL_TYPE=foss PUPPET_VERSION="~> 3.0" STRICT_VARIABLES="yes" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/ubuntu-14.04
     services: docker
     sudo: required
     bundler_args: --without development
   - rvm: 2.3.1
-    env: BEAKER_VERSION="~> 2.51" PUPPET_VERSION="~> 4.0" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/centos-7 PUPPET_INSTALL_TYPE=agent PUPPET_INSTALL_VERSION=1.7.1
+    env: PUPPET_INSTALL_TYPE=foss PUPPET_VERSION="~> 4.0" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/centos-7
     services: docker
     sudo: required
     bundler_args: --without development
   - rvm: 2.3.1
-    env: BEAKER_VERSION="~> 2.51" PUPPET_VERSION="~> 4.0" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/debian-8 PUPPET_INSTALL_TYPE=agent PUPPET_INSTALL_VERSION=1.7.1
+    env: PUPPET_INSTALL_TYPE=foss PUPPET_VERSION="~> 4.0" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/debian-8
     services: docker
     sudo: required
     bundler_args: --without development
   - rvm: 2.3.1
-    env: BEAKER_VERSION="~> 2.51" PUPPET_VERSION="~> 4.0" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/ubuntu-14.04 PUPPET_INSTALL_TYPE=agent PUPPET_INSTALL_VERSION=1.7.1
+    env: PUPPET_INSTALL_TYPE=foss PUPPET_VERSION="~> 4.0" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/ubuntu-14.04
     services: docker
     sudo: required
     bundler_args: --without development
   - rvm: 2.3.1
-    env: BEAKER_VERSION="~> 2.51" PUPPET_VERSION="~> 4.0" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/ubuntu-16.04 PUPPET_INSTALL_TYPE=agent PUPPET_INSTALL_VERSION=1.7.1
+    env: PUPPET_INSTALL_TYPE=foss PUPPET_VERSION="~> 4.0" CHECK=acceptance BEAKER_debug=true BEAKER_set=docker/ubuntu-16.04
     services: docker
     sudo: required
     bundler_args: --without development
