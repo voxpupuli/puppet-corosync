@@ -54,7 +54,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       }
     EOS
 
-    apply_manifest(pp, catch_failures: true, debug: true, trace: true)
+    apply_manifest(pp, catch_failures: true, debug: false, trace: true)
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
   end
 
@@ -89,7 +89,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       },
     }
     EOS
-    apply_manifest(pp, expect_changes: true, debug: true, trace: true)
+    apply_manifest(pp, expect_changes: true, debug: false, trace: true)
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
     shell('cibadmin --query') do |r|
       expect(r.stdout).to match(%r{haproxy_vip})
@@ -106,12 +106,12 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           operations      => { 'monitor' => { 'interval' => '10s' } },
         }
     EOS
-    apply_manifest(pp, expect_changes: true, debug: true, trace: true)
+    apply_manifest(pp, expect_changes: true, debug: false, trace: true)
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
 
     shell('crm_resource -r test_stop -m -p target-role -v Stopped')
 
-    apply_manifest(pp, expect_changes: true, debug: true, trace: true)
+    apply_manifest(pp, expect_changes: true, debug: false, trace: true)
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
   end
 
@@ -126,7 +126,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           unmanaged_metadata => ['target-role'],
         }
     EOS
-    apply_manifest(pp, expect_changes: true, debug: true, trace: true)
+    apply_manifest(pp, expect_changes: true, debug: false, trace: true)
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
 
     shell('crm_resource -r test_stop2 -m -p target-role -v Stopped')
@@ -143,7 +143,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         }
     EOS
 
-    apply_manifest(pp, expect_changes: true, debug: true, trace: true)
+    apply_manifest(pp, expect_changes: true, debug: false, trace: true)
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
   end
 
@@ -158,7 +158,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           metadata        => {'is-managed' => 'false', 'target-role' => 'stopped'}
         }
     EOS
-    apply_manifest(pp, expect_changes: true, debug: true, trace: true)
+    apply_manifest(pp, expect_changes: true, debug: false, trace: true)
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
   end
 
@@ -213,7 +213,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         }
     EOS
 
-    apply_manifest(pp, expect_changes: true, debug: true, trace: true)
+    apply_manifest(pp, expect_changes: true, debug: false, trace: true)
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
   end
 

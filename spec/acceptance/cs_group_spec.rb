@@ -61,7 +61,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       }
     EOS
 
-    apply_manifest(pp, catch_failures: true, debug: true, trace: true)
+    apply_manifest(pp, catch_failures: true, debug: false, trace: true)
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
   end
 
@@ -75,7 +75,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         primitives => ['duncan_vip'],
       }
     EOS
-    apply_manifest(pp, catch_failures: true, debug: true, trace: true)
+    apply_manifest(pp, catch_failures: true, debug: false, trace: true)
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
     shell('cibadmin --query | grep duncan_vip_there') do |r|
       expect(r.stdout).to match(%r{group})
@@ -88,7 +88,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         ensure => absent,
       }
     EOS
-    apply_manifest(pp, catch_failures: true, debug: true, trace: true)
+    apply_manifest(pp, catch_failures: true, debug: false, trace: true)
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
     assert_raises(Beaker::Host::CommandFailure) do
       shell('cibadmin --query | grep duncan_vip_there')
@@ -101,7 +101,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         primitives => ['duncan_vip2', 'duncan_vip3'],
       }
     EOS
-    apply_manifest(pp, catch_failures: true, debug: true, trace: true)
+    apply_manifest(pp, catch_failures: true, debug: false, trace: true)
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
     shell('cibadmin --query | grep duncan_vip_there') do |r|
       expect(r.stdout).to match(%r{group})

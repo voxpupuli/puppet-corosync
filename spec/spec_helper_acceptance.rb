@@ -74,8 +74,8 @@ def cleanup_cs_resources
       }
     EOS
 
-  apply_manifest(pp, catch_failures: true, debug: true, trace: true)
-  apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+  apply_manifest(pp, catch_failures: true, debug: false, trace: true)
+  apply_manifest(pp, catch_changes: true, debug: false, trace: true)
 
   pp = <<-EOS
       resources { 'cs_primitive' :
@@ -83,8 +83,8 @@ def cleanup_cs_resources
       }
     EOS
 
-  apply_manifest(pp, catch_failures: true, debug: true, trace: true)
-  apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+  apply_manifest(pp, catch_failures: true, debug: false, trace: true)
+  apply_manifest(pp, catch_changes: true, debug: false, trace: true)
 end
 
 RSpec.shared_context 'with faked facts' do

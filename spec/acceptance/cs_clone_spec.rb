@@ -57,7 +57,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       }
     EOS
 
-    apply_manifest(pp, catch_failures: true, debug: true, trace: true)
+    apply_manifest(pp, catch_failures: true, debug: false, trace: true)
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
   end
 
@@ -77,8 +77,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
            #{type} => '#{property_value}',
          }
          EOS
-        apply_manifest(pp, catch_failures: true, debug: true, trace: true)
-        apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+        apply_manifest(pp, catch_failures: true, debug: false, trace: true)
+        apply_manifest(pp, catch_changes: true, debug: false, trace: true)
         command = "cibadmin --query | grep duncan_vip_clone_#{type}"
         shell(command) do |r|
           expect(r.stdout).to match(%r{<clone})
@@ -95,7 +95,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
            ensure => absent,
          }
          EOS
-        apply_manifest(pp, catch_failures: true, debug: true, trace: true)
+        apply_manifest(pp, catch_failures: true, debug: false, trace: true)
         apply_manifest(pp, catch_changes: true, debug: false, trace: true)
         command = "cibadmin --query | grep duncan_vip_clone_#{type}"
         assert_raises(Beaker::Host::CommandFailure) do
@@ -123,8 +123,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
            interleave      => false,
          }
       EOS
-          apply_manifest(pp, catch_failures: true, debug: true, trace: true)
-          apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+          apply_manifest(pp, catch_failures: true, debug: false, trace: true)
+          apply_manifest(pp, catch_changes: true, debug: false, trace: true)
 
           shell(fetch_clone_command) do |r|
             expect(r.stdout).to match(%r{<clone})
@@ -184,8 +184,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
            interleave      => true,
          }
       EOS
-          apply_manifest(pp, catch_failures: true, debug: true, trace: true)
-          apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+          apply_manifest(pp, catch_failures: true, debug: false, trace: true)
+          apply_manifest(pp, catch_changes: true, debug: false, trace: true)
 
           shell(fetch_clone_command) do |r|
             expect(r.stdout).to match(%r{<clone})
@@ -237,8 +237,8 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
            interleave => true,
          }
       EOS
-          apply_manifest(pp, catch_failures: true, debug: true, trace: true)
-          apply_manifest(pp, catch_changes: true, debug: true, trace: true)
+          apply_manifest(pp, catch_failures: true, debug: false, trace: true)
+          apply_manifest(pp, catch_changes: true, debug: false, trace: true)
 
           shell(fetch_clone_command) do |r|
             expect(r.stdout).to match(%r{<clone})
