@@ -13,6 +13,10 @@ providers).
 
 *Note:* This module is the successor of *puppetlabs-corosync*.
 
+*Note:* This module only works with *Puppet >= 4.6*. If you are using an old
+release, please stick to the major release 5 of this module, which is a LTS
+(Long Term Support) release.
+
 [cl]:http://clusterlabs.org/
 
 ## Documentation
@@ -441,11 +445,15 @@ We do maintain a [roadmap regarding next releases of this module](ROADMAP.md).
 | CentOS/RHEL | 7       | **Supported** | **Supported**    |
 | Debian      | 8       | Not supported | **Supported[1]** |
 | Ubuntu      | 12.04   | Not supported | Not supported    |
-| Ubuntu      | 14.04   | **Supported** | **Supported**    |
-| Ubuntu      | 16.04   | Not supported | **Supported**    |
+| Ubuntu      | 14.04   | **Supported** | **Supported** |
+| Ubuntu      | 16.04   | Not supported | **Supported** |
 
-**[1] Debian 8 Support**: In order to have this module working with Debian 8, you
+**[2] Debian 8 Support**: In order to have this module working with Debian 8, you
 need to enable the jessie-backport apt repository.
+
+**Puppet 3.8-4.5 Support**: If you are using a Puppet version between 3.8
+and 4.5 (included), you must use Puppet-Corosync 5 (Long Term support release).
+
 
 ## Contributors
 
