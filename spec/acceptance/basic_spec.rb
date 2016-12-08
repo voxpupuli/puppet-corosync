@@ -43,6 +43,14 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
   end
 
+  it 'WHAT IS HAPPENING HERE??' do
+      shell("systemctl status openhpid.service")
+  end
+
+  it 'WHAT IS REALLY HAPPENING HERE??' do
+      shell("journalctl -xn")
+  end
+
   describe service('corosync') do
     it { is_expected.to be_running }
   end
