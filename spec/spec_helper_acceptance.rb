@@ -1,5 +1,3 @@
-#! /usr/bin/env ruby -S rspec
-
 # This file comes from puppetlabs-stdlib
 # which is licensed under the Apache-2.0 License.
 # https://github.com/puppetlabs/puppetlabs-stdlib

@@ -38,7 +38,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
       EOS
 
       described_class.expects(:block_until_ready).returns(nil)
-      Puppet::Util::Execution.expects(:execute).with(%w(crm configure show xml), failonfail: true, combine: true).at_least_once.returns(
+      Puppet::Util::Execution.expects(:execute).with(%w[crm configure show xml], failonfail: true, combine: true).at_least_once.returns(
         Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
       )
       described_class.instances
@@ -127,14 +127,14 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
     def expect_update(pattern)
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with do |*args|
-          if args.slice(0..2) == %w(configure load update)
+          if args.slice(0..2) == %w[configure load update]
             expect(File.read(args[3])).to match(pattern)
           end
           true
         end.at_least_once.returns(['', 0])
       else
         Puppet::Util::Execution.expects(:execute).with do |*args|
-          if args.slice(0..2) == %w(configure load update)
+          if args.slice(0..2) == %w[configure load update]
             expect(File.read(args[3])).to match(pattern)
           end
           true

@@ -130,7 +130,7 @@ describe Puppet::Type.type(:cs_location) do
   end
 
   describe 'establishing autorequires between locations and groups' do
-    let(:apache_group) { create_cs_group_resource('apache_group', ['apache_vip', 'apache_service']) }
+    let(:apache_group) { create_cs_group_resource('apache_group', %w[apache_vip apache_service]) }
     let(:apache_location) { create_cs_location_resource('apache_group') }
 
     before do

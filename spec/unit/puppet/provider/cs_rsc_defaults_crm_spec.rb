@@ -21,7 +21,7 @@ describe Puppet::Type.type(:cs_rsc_defaults).provider(:crm) do
       EOS
 
       described_class.expects(:block_until_ready).returns(nil)
-      Puppet::Util::Execution.expects(:execute).with(%w(crm configure show xml), combine: true, failonfail: true).at_least_once.returns(
+      Puppet::Util::Execution.expects(:execute).with(%w[crm configure show xml], combine: true, failonfail: true).at_least_once.returns(
         Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
       )
       described_class.instances

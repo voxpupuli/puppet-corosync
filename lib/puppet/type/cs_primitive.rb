@@ -306,6 +306,6 @@ Puppet::Type.newtype(:cs_primitive) do
   end
 
   autorequire(:service) do
-    %w(corosync pacemaker)
+    %w[corosync pacemaker]
   end
 end
