@@ -95,7 +95,7 @@ Puppet::Type.newtype(:cs_location) do
     %w(corosync pacemaker)
   end
 
-  [:cs_primitive, :cs_clone].each do |type|
+  [:cs_primitive, :cs_clone, :cs_group].each do |type|
     autorequire(type) do
       autos = []
       autos << unmunge_cs_primitive(should(:primitive)) if should(:primitive)
