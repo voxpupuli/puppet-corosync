@@ -1,6 +1,10 @@
 # Puppet module for Corosync & Pacemaker
 
-[![Pupet Forge Release](https://img.shields.io/puppetforge/v/puppet/corosync.svg)](https://forge.puppet.com/puppet/corosync) [![Downloads](https://img.shields.io/puppetforge/dt/puppet/corosync.svg)](https://forge.puppet.com/puppet/corosync) [![Build Status](https://travis-ci.org/voxpupuli/puppet-corosync.png?branch=master)](https://travis-ci.org/voxpupuli/puppet-corosync) [![Endorsement](https://img.shields.io/puppetforge/e/puppet/corosync.svg)](https://forge.puppet.com/approved)
+[![Puppet Forge Release](https://img.shields.io/puppetforge/v/puppet/corosync.svg)](https://forge.puppet.com/puppet/corosync)
+[![Downloads](https://img.shields.io/puppetforge/dt/puppet/corosync.svg)](https://forge.puppet.com/puppet/corosync) 
+[![Build Status](https://travis-ci.org/voxpupuli/puppet-corosync.png?branch=master)](https://travis-ci.org/voxpupuli/puppet-corosync)
+[![Endorsement](https://img.shields.io/puppetforge/e/puppet/corosync.svg)](https://forge.puppet.com/approved)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/533/badge)](https://bestpractices.coreinfrastructure.org/projects/533)
 
 The [clusterlabs][cl] stack incorporates Corosync and Pacemaker in an
 Open-Source, High Availability stack for both small and large deployments.
