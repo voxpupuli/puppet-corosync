@@ -313,10 +313,87 @@ describe 'corosync' do
       end
     end
 
+    context 'when log_timestamp is not set' do
+      it 'does not set timestamp' do
+        is_expected.to contain_file('/etc/corosync/corosync.conf').without_content(
+          %r{timestamp}
+        )
+      end
+    end
+
+    context 'when log_timestamp is false' do
+      before do
+        params.merge!(
+          log_timestamp: false
+        )
+      end
+
+      it 'does not set timestamp' do
+        is_expected.to contain_file('/etc/corosync/corosync.conf').without_content(
+          %r{timestamp}
+        )
+      end
+    end
+
+    context 'when log_timestamp is set' do
+      before do
+        params.merge!(
+          log_timestamp: true
+        )
+      end
+
+      it 'does set timestamp' do
+        is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+          %r{timestamp.*on}
+        )
+      end
+    end
+
     context 'when log_file is not set' do
       it 'does set to_logfile' do
         is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
           %r{to_logfile.*yes}
+        )
+      end
+      it 'does not set logfile' do
+        is_expected.to contain_file('/etc/corosync/corosync.conf').without_content(
+          %r{^\s*logfile}
+        )
+      end
+    end
+
+    context 'when log_file and log_file_name are set' do
+      before do
+        params.merge!(
+          log_file: true,
+          log_file_name: '/var/log/corosync/corosync.log'
+        )
+      end
+
+      it 'does set to_logfile' do
+        is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+          %r{to_logfile.*yes}
+        )
+      end
+      it 'does set logfile' do
+        is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+          %r{logfile.*\/var\/log\/corosync/corosync\.log}
+        )
+      end
+    end
+
+    context 'when log_file_name is not an absolute path' do
+      before do
+        params.merge!(
+          log_file: true,
+          log_file_name: 'corosync.log'
+        )
+      end
+
+      it 'raises error' do
+        is_expected.to raise_error(
+          Puppet::Error,
+          %r{is not an absolute path}
         )
       end
     end
@@ -331,6 +408,11 @@ describe 'corosync' do
       it 'does not set to_logfile' do
         is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
           %r{to_logfile.*no}
+        )
+      end
+      it 'does not set logfile' do
+        is_expected.to contain_file('/etc/corosync/corosync.conf').without_content(
+          %r{^\s*logfile}
         )
       end
     end

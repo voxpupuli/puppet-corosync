@@ -80,6 +80,9 @@ totem {
 
 logging {
   fileline:        off
+<% if @log_timestamp -%>
+  timestamp:       on
+<% end -%>
 <% if @log_stderr -%>
   to_stderr:       yes
 <% else -%>
@@ -87,6 +90,9 @@ logging {
 <% end -%>
 <% if @log_file -%>
   to_logfile:      yes
+<% if @log_file_name -%>
+  logfile:         <%= @log_file_name %>
+<% end -%>
 <% else -%>
   to_logfile:      no
 <% end -%>

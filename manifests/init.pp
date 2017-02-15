@@ -53,10 +53,18 @@
 # [*check_standby*]
 #   True/false parameter specifying whether puppet should return an error log
 #   message if a node is in standby. Useful for monitoring node state.
+
+# [*log_timestamp*]
+#   Boolean parameter specifying whether a timestamp should be placed on all
+#   log messages. Default: false
 #
 # [*log_file*]
 #   Boolean parameter specifying whether Corosync should produce debug
 #   output in a logfile. Default: true.
+#
+# [*log_file_name*]
+#   Absolute path to the logfile Corosync should use when `$log_file` (see
+#   above) is true. Default: not set
 #
 # [*debug*]
 #   True/false parameter specifying whether Corosync should produce debug
@@ -231,7 +239,9 @@ class corosync(
   $unicast_addresses                   = $::corosync::params::unicast_addresses,
   $force_online                        = $::corosync::params::force_online,
   $check_standby                       = $::corosync::params::check_standby,
+  $log_timestamp                       = $::corosync::params::log_timestamp,
   $log_file                            = $::corosync::params::log_file,
+  $log_file_name                       = $::corosync::params::log_file_name,
   $debug                               = $::corosync::params::debug,
   $log_stderr                          = $::corosync::params::log_stderr,
   $syslog_priority                     = $::corosync::params::syslog_priority,
@@ -311,6 +321,10 @@ class corosync(
   validate_bool($force_online)
   validate_bool($check_standby)
   validate_bool($log_file)
+  if getvar('log_file_name') and $log_file == true {
+    validate_absolute_path($log_file_name)
+  }
+  validate_bool($log_timestamp)
   validate_bool($debug)
   validate_bool($log_stderr)
   validate_re($syslog_priority, '^(debug|info|notice|warning|err|emerg)$')
@@ -373,7 +387,9 @@ class corosync(
   # - $unicast_addresses
   # - $multicast_address
   # - $cluster_name
+  # - $log_timestamp
   # - $log_file
+  # - $log_file_name
   # - $debug
   # - $bind_address
   # - $port
