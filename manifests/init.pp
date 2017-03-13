@@ -355,7 +355,6 @@ class corosync(
           owner   => 'root',
           group   => 'root',
           notify  => Service['corosync'],
-          require => Package['corosync'],
         }
         File['/etc/corosync/authkey'] -> File['/etc/corosync/corosync.conf']
       }
@@ -367,7 +366,6 @@ class corosync(
           owner   => 'root',
           group   => 'root',
           notify  => Service['corosync'],
-          require => Package['corosync'],
         }
         File['/etc/corosync/authkey'] -> File['/etc/corosync/corosync.conf']
       }
