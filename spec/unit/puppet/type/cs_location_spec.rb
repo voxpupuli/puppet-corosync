@@ -129,6 +129,30 @@ describe Puppet::Type.type(:cs_location) do
     end
   end
 
+  describe 'establishing autorequires between locations and groups' do
+    let(:apache_group) { create_cs_group_resource('apache_group', ['apache_vip', 'apache_service']) }
+    let(:apache_location) { create_cs_location_resource('apache_group') }
+
+    before do
+      create_catalog(apache_group, apache_location)
+    end
+
+    context 'between a location and its group' do
+      let(:autorequire_relationship) { apache_location.autorequire[0] }
+
+      it 'has exactly one autorequire' do
+        expect(apache_location.autorequire.count).to eq(1)
+      end
+
+      it 'has apache group as source of autorequire' do
+        expect(autorequire_relationship.source).to eq apache_group
+      end
+      it 'has apache location as target of autorequire' do
+        expect(autorequire_relationship.target).to eq apache_location
+      end
+    end
+  end
+
   describe 'establishing autorequires between location and services' do
     let(:pacemaker_service) { create_service_resource('pacemaker') }
     let(:corosync_service) { create_service_resource('corosync') }
