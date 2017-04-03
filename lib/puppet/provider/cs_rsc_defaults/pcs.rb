@@ -78,12 +78,10 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:pcs, parent: PuppetX::Voxpupuli::Co
   # the updates that need to be made.  The temporary file is then used
   # as stdin for the pcs command.
   def flush
-    unless @property_hash.empty?
-      # rubocop:enable Style/GuardClause
-      # clear this on properties, in case it's set from a previous
-      # run of a different corosync type
-      cmd = [command(:pcs), 'resource', 'defaults', "#{@property_hash[:name]}=#{@property_hash[:value]}"]
-      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
-    end
+    return if @property_hash.empty?
+    # clear this on properties, in case it's set from a previous
+    # run of a different corosync type
+    cmd = [command(:pcs), 'resource', 'defaults', "#{@property_hash[:name]}=#{@property_hash[:value]}"]
+    PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
   end
 end
