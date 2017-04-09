@@ -355,7 +355,6 @@ class corosync(
           owner   => 'root',
           group   => 'root',
           notify  => Service['corosync'],
-          require => Package['corosync'],
         }
         File['/etc/corosync/authkey'] -> File['/etc/corosync/corosync.conf']
       }
@@ -367,7 +366,6 @@ class corosync(
           owner   => 'root',
           group   => 'root',
           notify  => Service['corosync'],
-          require => Package['corosync'],
         }
         File['/etc/corosync/authkey'] -> File['/etc/corosync/corosync.conf']
       }
@@ -408,7 +406,6 @@ class corosync(
       group        => 'root',
       content      => template("${module_name}/corosync.conf.erb"),
       validate_cmd => '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t',
-      require      => Package['corosync'],
     }
   } else {
     file { '/etc/corosync/corosync.conf':
@@ -417,7 +414,6 @@ class corosync(
       owner   => 'root',
       group   => 'root',
       content => template("${module_name}/corosync.conf.erb"),
-      require => Package['corosync'],
     }
   }
 
@@ -428,7 +424,6 @@ class corosync(
     group   => 'root',
     recurse => true,
     purge   => true,
-    require => Package['corosync'],
   }
 
   case $::osfamily {
