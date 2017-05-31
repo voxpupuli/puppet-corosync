@@ -275,7 +275,7 @@ class corosync(
   String $port                                                                = $::corosync::params::port,
   String $bind_address                                                        = $::corosync::params::bind_address,
   Optional[String] $multicast_address                                         = $::corosync::params::multicast_address,
-  Optional[Array] $unicast_addresses                                         = $::corosync::params::unicast_addresses,
+  Optional[Array] $unicast_addresses                                          = $::corosync::params::unicast_addresses,
   Boolean $force_online                                                       = $::corosync::params::force_online,
   Boolean $check_standby                                                      = $::corosync::params::check_standby,
   Boolean $log_timestamp                                                      = $::corosync::params::log_timestamp,
@@ -293,10 +293,10 @@ class corosync(
   Boolean $package_crmsh                                                      = $::corosync::params::package_crmsh,
   Boolean $package_pacemaker                                                  = $::corosync::params::package_pacemaker,
   Boolean $package_pcs                                                        = $::corosync::params::package_pcs,
-  Optional[Array] $packageopts_corosync                                      = $::corosync::params::package_install_options,
-  Optional[Array] $packageopts_pacemaker                                     = $::corosync::params::package_install_options,
-  Optional[Array] $packageopts_crmsh                                         = $::corosync::params::package_install_options,
-  Optional[Array] $packageopts_pcs                                           = $::corosync::params::package_install_options,
+  Optional[Array] $packageopts_corosync                                       = $::corosync::params::package_install_options,
+  Optional[Array] $packageopts_pacemaker                                      = $::corosync::params::package_install_options,
+  Optional[Array] $packageopts_crmsh                                          = $::corosync::params::package_install_options,
+  Optional[Array] $packageopts_pcs                                            = $::corosync::params::package_install_options,
   String $version_corosync                                                    = $::corosync::params::version_corosync,
   String $version_crmsh                                                       = $::corosync::params::version_crmsh,
   String $version_pacemaker                                                   = $::corosync::params::version_pacemaker,
@@ -364,38 +364,16 @@ class corosync(
     }
   }
 
-  if ! is_bool($enable_secauth) {
-    validate_re($enable_secauth, '^(on|off)$')
-  }
-  validate_re($authkey_source, '^(file|string)$')
-  validate_bool($force_online)
-  validate_bool($check_standby)
-  validate_bool($log_file)
-  if getvar('log_file_name') and $log_file == true {
-    validate_absolute_path($log_file_name)
-  }
-  validate_bool($log_timestamp)
-  validate_bool($debug)
-  validate_bool($log_stderr)
-  validate_re($syslog_priority, '^(debug|info|notice|warning|err|emerg)$')
-  validate_bool($log_function_name)
-
   # You have to specify at least one of the following parameters:
   # $multicast_address or $unicast_address or $cluster_name
   if $multicast_address == 'UNSET' and $unicast_addresses == 'UNSET' and !$cluster_name {
       fail('You must provide a value for multicast_address, unicast_address or cluster_name.')
   }
 
-  case $enable_secauth {
-    true:    { $enable_secauth_real = 'on' }
-    false:   { $enable_secauth_real = 'off' }
-    default: { $enable_secauth_real = $enable_secauth }
-  }
-
   # Using the Puppet infrastructure's ca as the authkey, this means any node in
   # Puppet can join the cluster.  Totally not ideal, going to come up with
   # something better.
-  if $enable_secauth_real == 'on' {
+  if $enable_secauth == 'on' {
     case $authkey_source {
       'file': {
         file { '/etc/corosync/authkey':
@@ -443,7 +421,7 @@ class corosync(
   # - $debug
   # - $bind_address
   # - $port
-  # - $enable_secauth_real
+  # - $enable_secauth
   # - $threads
   # - $token
   # - $join
