@@ -1,12 +1,12 @@
 class corosync::params {
-  $enable_secauth                      = true
+  $enable_secauth                      = 'on'
   $authkey_source                      = 'file'
   $authkey                             = '/etc/puppet/ssl/certs/ca.pem'
   $threads                             = undef
   $port                                = '5405'
   $bind_address                        = $::ipaddress
-  $multicast_address                   = 'UNSET'
-  $unicast_addresses                   = 'UNSET'
+  $multicast_address                   = undef
+  $unicast_addresses                   = undef
   $force_online                        = false
   $check_standby                       = false
   $log_timestamp                       = false
@@ -18,11 +18,11 @@ class corosync::params {
   $log_function_name                   = false
   $rrp_mode                            = undef
   $netmtu                              = undef
-  $ttl                                 = false
+  $ttl                                 = undef
   $vsftype                             = undef
   $token                               = undef
   $token_retransmits_before_loss_const = undef
-  $votequorum_expected_votes           = false
+  $votequorum_expected_votes           = undef
   $cluster_name                        = undef
   $join                                = undef
   $consensus                           = undef
