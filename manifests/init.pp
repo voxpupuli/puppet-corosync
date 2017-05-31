@@ -188,7 +188,7 @@
 # [*quorum_members_names*]
 #   Array of quorum member names. Persistent names are required when you
 #   define IP addresses in quorum_members.
-#   Defaults to undef
+#   Default: undef
 #
 # [*token*]
 #   Time (in ms) to wait for a token
@@ -308,6 +308,7 @@ class corosync(
   Optional[Integer] $votequorum_expected_votes                                = $::corosync::params::votequorum_expected_votes,
   Array $quorum_members                                                       = ['localhost'],
   Optional[Array] $quorum_members_ids                                         = undef,
+  Optional[Array] $quorum_members_names                                       = undef,
   Optional[Integer] $token                                                    = $::corosync::params::token,
   Optional[Integer] $token_retransmits_before_loss_const                      = $::corosync::params::token_retransmits_before_loss_const,
   Optional[String] $compatibility                                             = $::corosync::params::compatibility,
@@ -366,38 +367,16 @@ class corosync(
     }
   }
 
-  if ! is_bool($enable_secauth) {
-    validate_re($enable_secauth, '^(on|off)$')
-  }
-  validate_re($authkey_source, '^(file|string)$')
-  validate_bool($force_online)
-  validate_bool($check_standby)
-  validate_bool($log_file)
-  if getvar('log_file_name') and $log_file == true {
-    validate_absolute_path($log_file_name)
-  }
-  validate_bool($log_timestamp)
-  validate_bool($debug)
-  validate_bool($log_stderr)
-  validate_re($syslog_priority, '^(debug|info|notice|warning|err|emerg)$')
-  validate_bool($log_function_name)
-
   # You have to specify at least one of the following parameters:
   # $multicast_address or $unicast_address or $cluster_name
   if $multicast_address == 'UNSET' and $unicast_addresses == 'UNSET' and !$cluster_name {
       fail('You must provide a value for multicast_address, unicast_address or cluster_name.')
   }
 
-  case $enable_secauth {
-    true:    { $enable_secauth_real = 'on' }
-    false:   { $enable_secauth_real = 'off' }
-    default: { $enable_secauth_real = $enable_secauth }
-  }
-
   # Using the Puppet infrastructure's ca as the authkey, this means any node in
   # Puppet can join the cluster.  Totally not ideal, going to come up with
   # something better.
-  if $enable_secauth_real == 'on' {
+  if $enable_secauth == 'on' {
     case $authkey_source {
       'file': {
         file { '/etc/corosync/authkey':
@@ -445,7 +424,7 @@ class corosync(
   # - $debug
   # - $bind_address
   # - $port
-  # - $enable_secauth_real
+  # - $enable_secauth
   # - $threads
   # - $token
   # - $join
