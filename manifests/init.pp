@@ -273,7 +273,7 @@ class corosync(
   String $authkey                                                             = $::corosync::params::authkey,
   Optional[Integer] $threads                                                  = $::corosync::params::threads,
   String $port                                                                = $::corosync::params::port,
-  String $bind_address                                                        = $::corosync::params::bind_address,
+  Variant[String, Array] $bind_address                                        = $::corosync::params::bind_address,
   Optional[String] $multicast_address                                         = $::corosync::params::multicast_address,
   Optional[Array] $unicast_addresses                                          = $::corosync::params::unicast_addresses,
   Boolean $force_online                                                       = $::corosync::params::force_online,
