@@ -106,7 +106,7 @@ logging {
 <% end -%>
   debug:           <%= @debug ? 'on' : 'off' %>
 <% [@log_subsystem].each do |subsys| -%>
-  logger subsys {
+  logger_subsys {
     subsys: <%= subsys['name'] %>
 <% if subsys['log_file'] -%>
     to_logfile:      yes
