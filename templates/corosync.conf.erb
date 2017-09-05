@@ -105,6 +105,21 @@ logging {
   function_name:   on
 <% end -%>
   debug:           <%= @debug ? 'on' : 'off' %>
+<% [@log_subsystem].each do |subsys| -%>
+  logger subsys {
+    subsys: <%= subsys['name'] %>
+<% if subsys['log_file'] -%>
+    to_logfile:      yes
+<% if @log_file_name -%>
+    logfile:         <%= @log_file_name %>
+<% end -%>
+<% else -%>
+    to_logfile:      no
+<% end -%>
+    to_syslog:       <%= subsys['syslog'] ? 'on' : 'off' %>
+    debug:           <%= subsys['debug'] ? 'on' : 'off' %>
+  }
+<% end -%>
 }
 
 <% if @set_votequorum -%>

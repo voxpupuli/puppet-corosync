@@ -83,6 +83,10 @@
 #   True/false parameter specifying whether Corosync should log called funcions
 #   names to. Defaults to False.
 #
+# [*log_subsystem*]
+#   Hash parameter that adds specific log configurations based on logging
+#   subsystem. Defaults to nil.
+#
 # [*rrp_mode*]
 #   Mode of redundant ring. May be none, active, or passive.
 #
@@ -246,6 +250,7 @@ class corosync(
   $log_stderr                          = $::corosync::params::log_stderr,
   $syslog_priority                     = $::corosync::params::syslog_priority,
   $log_function_name                   = $::corosync::params::log_function_name,
+  $log_subsystem                       = undef,
   $rrp_mode                            = $::corosync::params::rrp_mode,
   $netmtu                              = $::corosync::params::netmtu,
   $ttl                                 = $::corosync::params::ttl,
@@ -321,14 +326,19 @@ class corosync(
   validate_bool($force_online)
   validate_bool($check_standby)
   validate_bool($log_file)
-  if getvar('log_file_name') and $log_file == true {
-    validate_absolute_path($log_file_name)
-  }
-  validate_bool($log_timestamp)
   validate_bool($debug)
   validate_bool($log_stderr)
   validate_re($syslog_priority, '^(debug|info|notice|warning|err|emerg)$')
   validate_bool($log_function_name)
+  if $log_subsystem {
+    [$log_subsystem].each |Hash $subsystem| {
+      validate_string($subsystem[name])
+      validate_bool($subsystem[debug])
+      validate_bool($subsystem[log_file])
+      validate_bool($subsystem[syslog])
+    }
+  }
+
 
   # You have to specify at least one of the following parameters:
   # $multicast_address or $unicast_address or $cluster_name
