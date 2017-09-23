@@ -52,6 +52,15 @@ class { 'corosync':
 }
 ```
 
+*To disable Corosync and Pacemaker services*
+
+```puppet
+class { 'corosync':
+  enable_corosync_service  => false,
+  enable_pacemaker_service => false,
+}
+```
+
 ### Configure votequorum
 
 *To enable Corosync 2 votequorum and define a nodelist
