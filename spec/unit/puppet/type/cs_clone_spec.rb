@@ -110,7 +110,7 @@ describe Puppet::Type.type(:cs_clone) do
       create_catalog(apache_group, apache_clone)
     end
 
-    let(:autorequire_relationship) { apache_clone.autorequire[0] }
+    let(:autorequire_relationship) { apache_clone.autorequire[0] } # rubocop:disable RSpec/ScatteredLet
 
     it 'has exactly one autorequire' do
       expect(apache_clone.autorequire.count).to eq(1)

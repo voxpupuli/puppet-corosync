@@ -30,7 +30,7 @@ shared_context 'pcs' do
 end
 
 def pcs_load_cib(cib)
-  Puppet::Util::Execution.expects(:execute).with(%w(pcs cluster cib), failonfail: true, combine: true).at_least_once.returns(
+  Puppet::Util::Execution.expects(:execute).with(%w[pcs cluster cib], failonfail: true, combine: true).at_least_once.returns(
     Puppet::Util::Execution::ProcessOutput.new(cib, 0)
   )
 end

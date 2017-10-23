@@ -85,7 +85,7 @@ describe Puppet::Type.type(:cs_group).provider(:pcs) do
       end
 
       it 'has primitives equal to duncan_vip2 and duncan_vip3' do
-        expect(instance.primitives).to eq(%w(duncan_vip2 duncan_vip3))
+        expect(instance.primitives).to eq(%w[duncan_vip2 duncan_vip3])
       end
     end
   end
