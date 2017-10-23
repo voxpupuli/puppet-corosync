@@ -8,7 +8,6 @@ rescue LoadError
 end
 
 Puppet::Type.type(:cs_shadow).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync::Provider::Pcs) do
-  commands crm_shadow: 'crm_shadow'
   commands cibadmin: 'cibadmin'
   # Required for block_until_ready
   commands pcs: 'pcs'

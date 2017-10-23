@@ -1,6 +1,8 @@
 require 'spec_helper_acceptance'
 
 describe 'corosync' do
+  let(:pcs_shadow_cib) { "#{default.puppet['vardir']}/shadow.puppet" }
+
   cert = '-----BEGIN CERTIFICATE-----
 MIIDVzCCAj+gAwIBAgIJAJNCo5ZPmKegMA0GCSqGSIb3DQEBBQUAMEIxCzAJBgNV
 BAYTAlhYMRUwEwYDVQQHDAxEZWZhdWx0IENpdHkxHDAaBgNVBAoME0RlZmF1bHQg
@@ -110,7 +112,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
 
   it 'creates the service resource in the shadow cib' do
     command = if fact('osfamily') == 'RedHat'
-                'CIB_shadow=puppet pcs resource show'
+                "pcs resource show -f #{pcs_shadow_cib}"
               else
                 'CIB_shadow=puppet crm_resource --list'
               end
@@ -121,7 +123,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
 
   it 'creates the vip resource in the shadow cib' do
     command = if fact('osfamily') == 'RedHat'
-                'CIB_shadow=puppet pcs resource show'
+                "pcs resource show -f #{pcs_shadow_cib}"
               else
                 'CIB_shadow=puppet crm_resource --list'
               end
@@ -131,14 +133,56 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'creates the colocation identified by with-rsc="apache_vip" in the shadow cib' do
-    shell('CIB_shadow=puppet cibadmin --query | grep apache_vip_with_service') do |r|
+    command = if fact('osfamily') == 'RedHat'
+                "pcs cluster cib -f #{pcs_shadow_cib} | grep apache_vip_with_service"
+              else
+                'CIB_shadow=puppet cibadmin --query | grep apache_vip_with_service'
+              end
+    shell(command) do |r|
       expect(r.stdout).to match(%r{colocation.*\swith-rsc="apache_vip"})
     end
   end
 
   it 'creates the colocation identified by rsc="apache_service" in the shadow cib' do
-    shell('CIB_shadow=puppet cibadmin --query | grep apache_vip_with_service') do |r|
+    command = if fact('osfamily') == 'RedHat'
+                "pcs cluster cib -f #{pcs_shadow_cib} | grep apache_vip_with_service"
+              else
+                'CIB_shadow=puppet cibadmin --query | grep apache_vip_with_service'
+              end
+    shell(command) do |r|
       expect(r.stdout).to match(%r{colocation.*\srsc="apache_service"})
+    end
+  end
+
+  it 'creates a clone in the shadow CIB' do
+    pp = <<-EOS
+      cs_shadow {
+        'puppet':
+          autocommit => false,
+      }
+      cs_primitive { 'apache3_vip':
+        primitive_class => 'ocf',
+        primitive_type  => 'IPaddr2',
+        provided_by     => 'heartbeat',
+        parameters      => { 'ip' => '172.16.210.102', 'cidr_netmask' => '24' },
+        operations      => { 'monitor' => { 'interval' => '10s' } },
+        cib             => 'puppet',
+      } ->
+      cs_clone { 'apache3_vip_clone_primitive':
+        ensure    => present,
+        primitive => 'apache3_vip',
+        cib       => 'puppet',
+      }
+      EOS
+    apply_manifest(pp, catch_failures: true, debug: false, trace: true)
+    apply_manifest(pp, expect_changes: true, debug: false, trace: true)
+    command = if fact('osfamily') == 'RedHat'
+                "pcs cluster cib -f #{pcs_shadow_cib} | grep apache3_vip_clone_primitive"
+              else
+                'CIB_shadow=puppet cibadmin --query | grep apache3_vip_clone_primitive'
+              end
+    shell(command) do |r|
+      expect(r.stdout).to match(%r{<clone})
     end
   end
 

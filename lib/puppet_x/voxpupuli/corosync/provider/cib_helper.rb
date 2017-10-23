@@ -11,12 +11,7 @@ class PuppetX::Voxpupuli::Corosync::Provider::CibHelper < Puppet::Provider
   # Yep, that's right we are parsing XML...FUN! (It really wasn't that bad)
   require 'rexml/document'
 
-  def self.run_command_in_cib(cmd, cib = nil, failonfail = true)
-    custom_environment = if cib.nil?
-                           { combine: true }
-                         else
-                           { combine: true, custom_environment: { 'CIB_shadow' => cib } }
-                         end
+  def self._run_command_in_cib(cmd, cib = nil, failonfail = true, custom_environment = { combine: true })
     debug("Executing #{cmd} in the CIB") if cib.nil?
     debug("Executing #{cmd} in the shadow CIB \"#{cib}\"") unless cib.nil?
     raw = Puppet::Util::Execution.execute(cmd, { failonfail: failonfail }.merge(custom_environment))
@@ -116,13 +111,7 @@ class PuppetX::Voxpupuli::Corosync::Provider::CibHelper < Puppet::Provider
     rule_parameters
   end
 
-  def self.sync_shadow_cib(cib, failondeletefail = false)
-    run_command_in_cib(['crm_shadow', '--force', '--delete', cib], nil, failondeletefail)
-    run_command_in_cib(['crm_shadow', '--batch', '--create', cib])
-  end
-
-  def self.get_epoch(cib = nil)
-    cmd = [command(:cibadmin), '--query', '--xpath', '/cib', '-l', '-n']
+  def self._get_epoch(cmd, cib = nil)
     raw, status = run_command_in_cib(cmd, cib, false)
     return :absent if status.nonzero?
     doc = REXML::Document.new(raw)

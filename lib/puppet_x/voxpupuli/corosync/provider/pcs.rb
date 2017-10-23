@@ -58,6 +58,11 @@ class PuppetX::Voxpupuli::Corosync::Provider::Pcs < PuppetX::Voxpupuli::Corosync
     end
   end
 
+  def self.get_epoch(cib = nil)
+    cmd = [command(:pcs), 'cluster', 'cib']
+    _get_epoch(cmd, cib)
+  end
+
   def self.prefetch(resources)
     instances.each do |prov|
       # rubocop:disable Lint/AssignmentInCondition
@@ -66,6 +71,27 @@ class PuppetX::Voxpupuli::Corosync::Provider::Pcs < PuppetX::Voxpupuli::Corosync
         res.provider = prov
       end
     end
+  end
+
+  def self.run_command_in_cib(cmd, cib = nil, failonfail = true)
+    custom_environment = { combine: true }
+
+    unless cib.nil?
+      if cmd.first == command(:pcs)
+        cib_path = File.join(Puppet[:vardir], 'shadow.' + cib)
+        cmd.push('-f', cib_path)
+      else
+        custom_environment[:custom_environment] = { 'CIB_shadow_dir' => Puppet[:vardir], 'CIB_shadow' => cib }
+      end
+    end
+
+    _run_command_in_cib(cmd, cib, failonfail, custom_environment)
+  end
+
+  def self.sync_shadow_cib(cib, failondeletefail = false)
+    cib_path = File.join(Puppet[:vardir], 'shadow.' + cib)
+    run_command_in_cib([command(:pcs), 'cluster', 'cib', cib_path], nil, failondeletefail)
+    FileUtils.cp cib_path, cib_path + '.ori'
   end
 
   def exists?
