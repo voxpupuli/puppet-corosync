@@ -35,6 +35,14 @@ RSpec.configure do |c|
 
     hosts.each do |host|
       on host, puppet('module', 'install', 'puppetlabs-stdlib'), acceptable_exit_codes: [0, 1]
+
+      # For Debian 8 "jessie", we need
+      # - pacemaker and crmsh delivered in jessie-backports only
+      # - openhpid post-install may fail (https://bugs.debian.org/785287)
+      if fact('lsbdistcodename') == 'jessie'
+        on host, 'echo deb http://ftp.debian.org/debian jessie-backports main >> /etc/apt/sources.list'
+        on host, 'apt-get update && apt-get install -y openhpid'
+      end
     end
   end
 end
