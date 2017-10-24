@@ -3,66 +3,33 @@
 # https://github.com/puppetlabs/puppetlabs-stdlib
 # (c) 2015-2015 Puppetlabs and puppetlabs-stdlib contributors
 
-require 'puppet'
-require 'puppet/util/package'
 require 'beaker-rspec'
 require 'beaker/puppet_install_helper'
+require 'beaker/module_install_helper'
 
 UNSUPPORTED_PLATFORMS = [].freeze
 
 run_puppet_install_helper
+install_module
+install_module_dependencies
 
 RSpec.configure do |c|
-  # Project root
-  proj_root = File.expand_path(File.join(File.dirname(__FILE__), '..'))
-
   # Readable test descriptions
   c.formatter = :documentation
 
   # Configure all nodes in nodeset
   c.before :suite do
-    if ENV['FUTURE_PARSER'] == 'yes'
-      default[:default_apply_opts] ||= {}
-      default[:default_apply_opts][:parser] = 'future'
-    end
-
-    puppet_version = get_puppet_version
-    if Puppet::Util::Package.versioncmp(puppet_version, '4.0.0') < 0
-      copy_root_module_to(default, source: proj_root, module_name: 'corosync', target_module_path: '/etc/puppet/modules')
-    else
-      copy_root_module_to(default, source: proj_root, module_name: 'corosync')
-    end
-
     hosts.each do |host|
-      on host, puppet('module', 'install', 'puppetlabs-stdlib'), acceptable_exit_codes: [0, 1]
-
       # For Debian 8 "jessie", we need
       # - pacemaker and crmsh delivered in jessie-backports only
       # - openhpid post-install may fail (https://bugs.debian.org/785287)
-      if fact('lsbdistcodename') == 'jessie'
+      if fact('os.family') == 'Debian' && fact('os.release.major') == '8'
         on host, 'echo deb http://ftp.debian.org/debian jessie-backports main >> /etc/apt/sources.list'
-        on host, 'apt-get update && apt-get install -y openhpid'
+        on host, 'apt-get update && apt-get install -y openhpid', acceptable_exit_codes: [0, 1, 100]
       end
     end
   end
 end
-
-def is_future_parser_enabled?
-  # rubocop:disable Style/GuardClause
-  if default[:type] == 'aio'
-    # rubocop:enable Style/GuardClause
-    return true
-  elsif default[:default_apply_opts]
-    return default[:default_apply_opts][:parser] == 'future'
-  end
-  false
-end
-
-# rubocop:disable Style/AccessorMethodName
-def get_puppet_version
-  (on default, puppet('--version')).output.chomp
-end
-# rubocop:enable Style/AccessorMethodName
 
 def cleanup_cs_resources
   pp = <<-EOS
