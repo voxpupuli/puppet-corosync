@@ -45,5 +45,12 @@
       "name": "puppetlabs/stdlib",
       "version_requirement": ">= 4.6.0 < 5.0.0"
     }
+  ],
+  "tags": [
+    "corosync",
+    "pacemaker",
+    "clusterlabs",
+    "ha",
+    "clustering"
   ]
 }

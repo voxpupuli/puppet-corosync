@@ -1,10 +1,13 @@
 # Puppet module for Corosync & Pacemaker
 
-[![Puppet Forge Release](https://img.shields.io/puppetforge/v/puppet/corosync.svg)](https://forge.puppet.com/puppet/corosync)
-[![Downloads](https://img.shields.io/puppetforge/dt/puppet/corosync.svg)](https://forge.puppet.com/puppet/corosync) 
-[![Build Status](https://travis-ci.org/voxpupuli/puppet-corosync.png?branch=master)](https://travis-ci.org/voxpupuli/puppet-corosync)
-[![Endorsement](https://img.shields.io/puppetforge/e/puppet/corosync.svg)](https://forge.puppet.com/approved)
-[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/533/badge)](https://bestpractices.coreinfrastructure.org/projects/533)
+[![License](https://img.shields.io/github/license/voxpupuli/puppet-corosync.svg)](https://github.com/voxpupuli/puppet-corosync/blob/master/LICENSE)
+[![Build Status](https://travis-ci.org/voxpupuli/puppet-corosync.svg?branch=master)](https://travis-ci.org/voxpupuli/puppet-corosync)
+[![Code Coverage](https://coveralls.io/repos/github/voxpupuli/puppet-corosync/badge.svg?branch=master)](https://coveralls.io/github/voxpupuli/puppet-corosync)
+[![Puppet Forge](https://img.shields.io/puppetforge/v/puppet/corosync.svg)](https://forge.puppetlabs.com/puppet/corosync)
+[![Puppet Forge - downloads](https://img.shields.io/puppetforge/dt/puppet/corosync.svg)](https://forge.puppetlabs.com/puppet/corosync)
+[![Puppet Forge - endorsement](https://img.shields.io/puppetforge/e/puppet/corosync.svg)](https://forge.puppetlabs.com/puppet/corosync)
+[![Puppet Forge - scores](https://img.shields.io/puppetforge/f/puppet/corosync.svg)](https://forge.puppetlabs.com/puppet/corosync)
+-[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/533/badge)](https://bestpractices.coreinfrastructure.org/projects/533)
 
 The [clusterlabs][cl] stack incorporates Corosync and Pacemaker in an
 Open-Source, High Availability stack for both small and large deployments.
