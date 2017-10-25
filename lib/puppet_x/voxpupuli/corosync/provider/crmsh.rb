@@ -58,6 +58,11 @@ class PuppetX::Voxpupuli::Corosync::Provider::Crmsh < PuppetX::Voxpupuli::Corosy
     end
   end
 
+  def self.get_epoch(cib = nil)
+    cmd = [command(:cibadmin), '--query', '--xpath', '/cib', '-l', '-n']
+    _get_epoch(cmd, cib)
+  end
+
   def self.prefetch(resources)
     instances.each do |prov|
       # rubocop:disable Lint/AssignmentInCondition
@@ -66,6 +71,20 @@ class PuppetX::Voxpupuli::Corosync::Provider::Crmsh < PuppetX::Voxpupuli::Corosy
         res.provider = prov
       end
     end
+  end
+
+  def self.run_command_in_cib(cmd, cib = nil, failonfail = true)
+    custom_environment = if cib.nil?
+                           { combine: true }
+                         else
+                           { combine: true, custom_environment: { 'CIB_shadow' => cib } }
+                         end
+    _run_command_in_cib(cmd, cib, failonfail, custom_environment)
+  end
+
+  def self.sync_shadow_cib(cib, failondeletefail = false)
+    run_command_in_cib(['crm_shadow', '--force', '--delete', cib], nil, failondeletefail)
+    run_command_in_cib(['crm_shadow', '--batch', '--create', cib])
   end
 
   def exists?

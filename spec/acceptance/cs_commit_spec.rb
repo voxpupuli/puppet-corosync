@@ -1,6 +1,8 @@
 require 'spec_helper_acceptance'
 
 describe 'corosync' do
+  let(:pcs_shadow_cib) { "#{default.puppet['vardir']}/shadow.puppet" }
+
   cert = '-----BEGIN CERTIFICATE-----
 MIIDVzCCAj+gAwIBAgIJAJNCo5ZPmKegMA0GCSqGSIb3DQEBBQUAMEIxCzAJBgNV
 BAYTAlhYMRUwEwYDVQQHDAxEZWZhdWx0IENpdHkxHDAaBgNVBAoME0RlZmF1bHQg
@@ -113,13 +115,18 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'creates the cib and a shadow cib' do
-    shell('cibadmin --query')
-    shell('CIB_shadow=puppet cibadmin --query')
+    if fact('osfamily') == 'RedHat'
+      shell('pcs cluster cib')
+      shell("pcs cluster cib -f #{pcs_shadow_cib}")
+    else
+      shell('cibadmin --query')
+      shell('CIB_shadow=puppet cibadmin --query')
+    end
   end
 
   it 'creates the vip resource in the shadow cib' do
     command = if fact('osfamily') == 'RedHat'
-                'CIB_shadow=puppet pcs resource show'
+                "pcs resource show -f #{pcs_shadow_cib}"
               else
                 'CIB_shadow=puppet crm_resource --list'
               end
@@ -130,7 +137,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
 
   it 'creates the service resource in the shadow cib' do
     command = if fact('osfamily') == 'RedHat'
-                'CIB_shadow=puppet pcs resource show'
+                "pcs resource show -f #{pcs_shadow_cib}"
               else
                 'CIB_shadow=puppet crm_resource --list'
               end
@@ -140,13 +147,23 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'creates the colocation in the shadow cib and apache2_vip is the "with" resource' do
-    shell('CIB_shadow=puppet cibadmin --query | grep apache2_vip_with_service') do |r|
+    command = if fact('osfamily') == 'RedHat'
+                "pcs cluster cib -f #{pcs_shadow_cib} | grep apache2_vip_with_service"
+              else
+                'CIB_shadow=puppet cibadmin --query | grep apache2_vip_with_service'
+              end
+    shell(command) do |r|
       expect(r.stdout).to match(%r{colocation.*\swith-rsc="apache2_vip"})
     end
   end
 
   it 'creates the colocation in the shadow cib and apache2_service is the main resource' do
-    shell('CIB_shadow=puppet cibadmin --query | grep apache2_vip_with_service') do |r|
+    command = if fact('osfamily') == 'RedHat'
+                "pcs cluster cib -f #{pcs_shadow_cib} | grep apache2_vip_with_service"
+              else
+                'CIB_shadow=puppet cibadmin --query | grep apache2_vip_with_service'
+              end
+    shell(command) do |r|
       expect(r.stdout).to match(%r{colocation.*\srsc="apache2_service"})
     end
   end
