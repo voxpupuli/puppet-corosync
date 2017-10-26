@@ -133,6 +133,9 @@ nodelist {
 <% else -%>
     nodeid: <%= [@quorum_members_ids].flatten[i] %>
 <% end -%>
+<% if not @quorum_members_names.nil? -%>
+    name: <%= [@quorum_members_names].flatten[i] %>
+<% end -%>
   }
 <% end -%>
 }

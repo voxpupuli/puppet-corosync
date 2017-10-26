@@ -166,6 +166,11 @@
 #   Should be used only with the quorum_members parameter.
 #   Defaults to undef
 #
+# [*quorum_members_names*]
+#   Array of quorum member names. Persistent names are required when you
+#   define IP addresses in quorum_members.
+#   Defaults to undef
+#
 # [*token*]
 #   Time (in ms) to wait for a token
 #
@@ -266,6 +271,7 @@ class corosync(
   $votequorum_expected_votes           = $::corosync::params::votequorum_expected_votes,
   $quorum_members                      = ['localhost'],
   $quorum_members_ids                  = undef,
+  $quorum_members_names                = undef,
   $token                               = $::corosync::params::token,
   $token_retransmits_before_loss_const = $::corosync::params::token_retransmits_before_loss_const,
   $compatibility                       = $::corosync::params::compatibility,
@@ -280,6 +286,10 @@ class corosync(
 
   if $set_votequorum and !$quorum_members {
     fail('set_votequorum is true, but no quorum_members have been passed.')
+  }
+
+  if $quorum_members_names and !$quorum_members {
+    fail('quorum_members_names may not be used without the quorum_members.')
   }
 
   if $quorum_members_ids and !$quorum_members {

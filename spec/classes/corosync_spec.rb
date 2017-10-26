@@ -50,6 +50,20 @@ describe 'corosync' do
             %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 11}
           )
         end
+
+        it 'supports persistent node names' do
+          params[:quorum_members] = ['192.168.0.1', '192.168.0.2']
+          params[:quorum_members_names] = ['node1.test.org', 'node2.test.org']
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{nodelist}
+          )
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{ring0_addr\: 192\.168\.0\.1\n\s*nodeid: 1\n\s*name: node1\.test\.org}
+          )
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{ring0_addr\: 192\.168\.0\.2\n\s*nodeid: 2\n\s*name: node2\.test\.org}
+          )
+        end
       end
 
       context 'when quorum_members is set to an array with 3 items' do
@@ -199,6 +213,20 @@ describe 'corosync' do
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 11}
+          )
+        end
+
+        it 'supports persistent node names' do
+          params[:quorum_members] = ['192.168.0.1', '192.168.0.2']
+          params[:quorum_members_names] = ['node1.test.org', 'node2.test.org']
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{nodelist}
+          )
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{ring0_addr\: 192\.168\.0\.1\n\s*nodeid: 1\n\s*name: node1\.test\.org}
+          )
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{ring0_addr\: 192\.168\.0\.2\n\s*nodeid: 2\n\s*name: node2\.test\.org}
           )
         end
       end
