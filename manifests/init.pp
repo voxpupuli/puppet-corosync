@@ -177,12 +177,21 @@
 # [*token_retransmits_before_loss_const*]
 #   How many token retransmits before forming a new configuration
 #
+# [*enable_corosync_service*]
+#   Whether the module should enable the corosync service.
+#
+# [*enable_pacemaker_service*]
+#   Whether the module should enable the pacemaker service.
+#
 # [*manage_pacemaker_service*]
 #   Whether the module should try to manage the pacemaker service in
 #   addition to the corosync service.
 #   Defaults to true on RedHat based operating systems version 7 or greater.
 #   Defaults to true on Ubuntu version 14.04 or greater.
 #   Defaults to false on all other operating systems.
+#
+# [*enable_pcsd_service*]
+#   Whether the module should enable the pcsd service.
 #
 # [*manage_pcsd_service*]
 #   Whether the module should try to manage the pcsd service in addition to the
@@ -275,7 +284,10 @@ class corosync(
   $token                               = $::corosync::params::token,
   $token_retransmits_before_loss_const = $::corosync::params::token_retransmits_before_loss_const,
   $compatibility                       = $::corosync::params::compatibility,
+  $enable_corosync_service             = $::corosync::params::enable_corosync_service,
+  $enable_pacemaker_service            = $::corosync::params::enable_pacemaker_service,
   $manage_pacemaker_service            = $::corosync::params::manage_pacemaker_service,
+  $enable_pcsd_service                 = $::corosync::params::enable_pcsd_service,
   $manage_pcsd_service                 = false,
   $cluster_name                        = $::corosync::params::cluster_name,
   $join                                = $::corosync::params::join,
@@ -391,7 +403,7 @@ class corosync(
   if $manage_pcsd_service {
     service { 'pcsd':
       ensure  => running,
-      enable  => true,
+      enable  => $enable_pcsd_service,
       require => Package['pcs'],
     }
   }
@@ -482,7 +494,7 @@ class corosync(
   if $manage_pacemaker_service {
     service { 'pacemaker':
       ensure     => running,
-      enable     => true,
+      enable     => $enable_pacemaker_service,
       hasrestart => true,
       subscribe  => Service['corosync'],
     }
@@ -490,7 +502,7 @@ class corosync(
 
   service { 'corosync':
     ensure    => running,
-    enable    => true,
+    enable    => $enable_corosync_service,
     subscribe => File[ [ '/etc/corosync/corosync.conf', '/etc/corosync/service.d' ] ],
   }
 }

@@ -34,6 +34,9 @@ class corosync::params {
   $version_pacemaker                   = 'present'
   $version_pcs                         = 'present'
   $compatibility                       = undef
+  $enable_corosync_service             = true
+  $enable_pacemaker_service            = true
+  $enable_pcsd_service                 = true
 
   case $::osfamily {
     'RedHat': {
