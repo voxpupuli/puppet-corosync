@@ -502,6 +502,22 @@ describe 'corosync' do
       end
     end
 
+    context 'when set_quorum is true and quorum_members is not set' do
+      before do
+        params.merge!(
+          set_votequorum: true,
+          quorum_members: []
+        )
+      end
+
+      it 'raises error' do
+        is_expected.to raise_error(
+          Puppet::Error,
+          %r{set_votequorum is true, but no quorum_members have been passed.}
+        )
+      end
+    end
+
     context 'when configuring defaults for logging' do
       it 'configures stderr, syslog priority, func names' do
         is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
