@@ -69,8 +69,12 @@ class corosync::params {
           if versioncmp($::operatingsystemrelease, '8') >= 0 {
             $set_votequorum = true
             $manage_pacemaker_service = true
-            $package_install_options = ['-t', 'jessie-backports']
             $test_corosync_config = true
+            if versioncmp($::operatingsystemrelease, '8') == 0 {
+              $package_install_options = ['-t', 'jessie-backports']
+            } else {
+              $package_install_options = undef
+            }
           } else {
             $set_votequorum = false
             $manage_pacemaker_service = false
