@@ -324,15 +324,15 @@ class corosync(
   Boolean $test_corosync_config                                               = $::corosync::params::test_corosync_config,
 ) inherits ::corosync::params {
 
-  if $set_votequorum and !$quorum_members {
+  if $set_votequorum and empty($quorum_members) {
     fail('set_votequorum is true, but no quorum_members have been passed.')
   }
 
-  if $quorum_members_names and !$quorum_members {
+  if $quorum_members_names and empty($quorum_members) {
     fail('quorum_members_names may not be used without the quorum_members.')
   }
 
-  if $quorum_members_ids and !$quorum_members {
+  if $quorum_members_ids and empty($quorum_members) {
     fail('quorum_members_ids may not be used without the quorum_members.')
   }
 
