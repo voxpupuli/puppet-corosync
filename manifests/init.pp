@@ -9,6 +9,7 @@
 #
 # [*enable_secauth*]
 #   Controls corosync's ability to authenticate and encrypt multicast messages.
+#   Default: 'on'
 #
 # [*authkey_source*]
 #   Allows to use either a file or a string as a authkey.
@@ -22,6 +23,7 @@
 #   How many threads you are going to let corosync use to encode and decode
 #   multicast messages.  If you turn off secauth then corosync will ignore
 #   threads.
+#   Default: undef
 #
 # [*bind_address*]
 #   The ip address we are going to bind the corosync daemon too.
@@ -47,124 +49,141 @@
 #   each subarray matches a host IP addresses.
 #
 # [*force_online*]
-#   True/false parameter specifying whether to force nodes that have been put
+#   Boolean parameter specifying whether to force nodes that have been put
 #   in standby back online.
+#   Default: false
 #
 # [*check_standby*]
-#   True/false parameter specifying whether puppet should return an error log
+#   Boolean parameter specifying whether puppet should return an error log
 #   message if a node is in standby. Useful for monitoring node state.
-
+#   Default: false
+#
 # [*log_timestamp*]
 #   Boolean parameter specifying whether a timestamp should be placed on all
-#   log messages. Default: false
+#   log messages.
+#   Default: false
 #
 # [*log_file*]
 #   Boolean parameter specifying whether Corosync should produce debug
-#   output in a logfile. Default: true.
+#   output in a logfile.
+#   Default: true
 #
 # [*log_file_name*]
 #   Absolute path to the logfile Corosync should use when `$log_file` (see
-#   above) is true. Default: not set
+#   above) is true.
+#   Default: undef
 #
 # [*debug*]
-#   True/false parameter specifying whether Corosync should produce debug
+#   Boolean parameter specifying whether Corosync should produce debug
 #   output in its logs.
+#   Default: false
 #
 # [*log_stderr*]
-#   True/false parameter specifying whether Corosync should log errors to
-#   stderr. Defaults to True.
+#   Boolean parameter specifying whether Corosync should log errors to
+#   stderr.
+#   Default: true
 #
 # [*syslog_priority*]
 #   String parameter specifying the minimal log level for Corosync syslog
 #   messages. Allowed values: debug|info|notice|warning|err|emerg.
-#   Defaults to 'info'.
+#   Default: 'info'.
 #
 # [*log_function_name*]
-#   True/false parameter specifying whether Corosync should log called funcions
-#   names to. Defaults to False.
+#   Boolean parameter specifying whether Corosync should log called function
+#   names to.
+#   Default: false
 #
 # [*rrp_mode*]
 #   Mode of redundant ring. May be none, active, or passive.
+#   Default: undef
 #
 # [*netmtu*]
 #   This specifies the network maximum transmit unit.
+#   Default: undef
 #
 # [*ttl*]
 #   Time To Live.
+#   Default: undef
 #
 # [*vsftype*]
-#   Virtual synchrony filter type
+#   Virtual synchrony filter type.
+#   Default: undef
 #
 # [*package_corosync*]
 #   Define if package corosync should be managed.
-#   Defaults to true
+#   Default: true
 #
 # [*package_crmsh*]
-#   Define if package corosync should be managed.
-#   Defaults to true in Debian-based systems, false otherwise
-#
-# [*version_corosync*]
-#   Define what version of corosync should be managed.
-#   Defaults to present
+#   Define if package crmsh should be managed.
+#   Default (Debian based): true
+#   Default (otherwise):    false
 #
 # [*package_pacemaker*]
 #   Define if package pacemaker should be managed.
-#   Defaults to true
+#   Default: true
 #
 # [*package_pcs*]
 #   Define if package pcs should be managed.
-#   Defaults to true on Red-hat based systems, false otherwise
+#   Default (Red Hat based):  true
+#   Default (otherwise):      false
 #
 # [*packageopts_corosync*]
 #   Additional install-options for the corosync package resource.
-#   Defaults to ['-t', 'jessie-backports'] on Jessie, undef otherwise.
+#   Default (Debian Jessie):  ['-t', 'jessie-backports']
+#   Default (otherwise):      undef
 #
 # [*packageopts_crmsh*]
 #   Additional install-options for the crmsh package resource.
-#   Defaults to ['-t', 'jessie-backports'] on Jessie, undef otherwise.
+#   Default (Debian Jessie):  ['-t', 'jessie-backports']
+#   Default (otherwise):      undef
 #
 # [*packageopts_pacemaker*]
 #   Additional install-options for the pacemaker package resource.
-#   Defaults to ['-t', 'jessie-backports'] on Jessie, undef otherwise.
+#   Default (Debian Jessie):  ['-t', 'jessie-backports']
+#   Default (otherwise):      undef
 #
 # [*packageopts_pcs*]
 #   Additional install-options for the pcs package resource.
-#   Defaults to ['-t', 'jessie-backports'] on Jessie, undef otherwise.
+#   Default (Debian Jessie):  ['-t', 'jessie-backports']
+#   Default (otherwise):      undef
 #
 # [*version_corosync*]
 #   Define what version of the corosync package should be installed.
-#   Defaults to present
+#   Default: 'present'
 #
 # [*version_crmsh*]
 #   Define what version of the crmsh package should be installed.
-#   Defaults to present
+#   Default: 'present'
 #
 # [*version_pacemaker*]
 #   Define what version of the pacemaker package should be installed.
-#   Defaults to present
+#   Default: 'present'
 #
 # [*version_pcs*]
 #   Define what version of the pcs package should be installed.
-#   Defaults to present
+#   Default: 'present'
 #
 # [*set_votequorum*]
 #   Set to true if corosync_votequorum should be used as quorum provider.
-#   Defaults to true on RedHat based operating systems.
-#   Defaults to true on Ubuntu version 14.04 or greater.
-#   Defaults to false on all other operating systems.
+#   Default (Red Hat based):    true
+#   Default (Ubuntu >= 14.04):  true
+#   Default (otherwise):        false
+#
+# [*votequorum_expected_votes*]
+#   Default: undef
 #
 # [*quorum_members*]
 #   Array of quorum member hostname. This is required if set_votequorum
 #   is set to true.
 #   You can also have an array of arrays to have multiple rings. In that case,
 #   each subarray matches a member IP addresses.
-#   Defaults to ['localhost']
+#   Default: ['localhost']
 #
 # [*quorum_members_ids*]
 #   Array of quorum member IDs. Persistent IDs are required for the dynamic
 #   config of a corosync cluster and when_set_votequorum is set to true.
 #   Should be used only with the quorum_members parameter.
-#   Defaults to undef
+#   Default: undef
 #
 # [*quorum_members_names*]
 #   Array of quorum member names. Persistent names are required when you
@@ -173,9 +192,14 @@
 #
 # [*token*]
 #   Time (in ms) to wait for a token
+#   Default: undef
 #
 # [*token_retransmits_before_loss_const*]
-#   How many token retransmits before forming a new configuration
+#   How many token retransmits before forming a new configuration.
+#   Default: undef
+#
+# [*compatibility*]
+#   Default: undef
 #
 # [*enable_corosync_service*]
 #   Whether the module should enable the corosync service.
@@ -186,9 +210,9 @@
 # [*manage_pacemaker_service*]
 #   Whether the module should try to manage the pacemaker service in
 #   addition to the corosync service.
-#   Defaults to true on RedHat based operating systems version 7 or greater.
-#   Defaults to true on Ubuntu version 14.04 or greater.
-#   Defaults to false on all other operating systems.
+#   Default (Red Hat based >= 7): true
+#   Default (Ubuntu >= 14.04):    true
+#   Default (otherwise):          false
 #
 # [*enable_pcsd_service*]
 #   Whether the module should enable the pcsd service.
@@ -197,16 +221,17 @@
 #   Whether the module should try to manage the pcsd service in addition to the
 #   corosync service.
 #   pcsd service is the GUI and the remote configuration interface.
-#   Defaults to false
+#   Default: false
 #
 # [*cluster_name*]
 #   This specifies the name of cluster and it's used for automatic
 #   generating of multicast address.
+#   Default: undef
 #
 # [*join*]
 #   This timeout specifies in milliseconds how long to wait for join messages
 #   in the membership protocol.
-#   Default to 50
+#   Default: undef
 #
 # [*consensus*]
 #   This timeout specifies in milliseconds how long to wait for consensus to be
@@ -214,22 +239,22 @@
 #   The minimum value for consensus must be 1.2 * token. This value will be
 #   automatically calculated at 1.2 * token if the user doesn't specify a
 #   consensus value.
-#   Defaults to false,
+#   Default: undef
 #
 # [*max_messages*]
 #   This constant specifies the maximum number of messages that may be sent by
 #   one processor on receipt of the token. The max_messages parameter is limited
 #   to 256000 / netmtu to prevent overflow of the kernel transmit buffers.
-#   Defaults to 17
+#   Default: undef
 #
 # [*test_corosync_config*]
-#   Wheter we should test new configuration files with `corosync -t`.
+#   Whether we should test new configuration files with `corosync -t`.
 #   Defaults to true on OS that allows that (requires corosync 2.3.4).
 #
 # === Examples
 #
 #  class { 'corosync':
-#    enable_secauth    => false,
+#    enable_secauth    => 'off',
 #    bind_address      => '192.168.2.10',
 #    multicast_address => '239.1.1.2',
 #  }
@@ -243,58 +268,58 @@
 # Copyright 2012, Puppet Labs, LLC.
 #
 class corosync(
-  $enable_secauth                      = $::corosync::params::enable_secauth,
-  $authkey_source                      = $::corosync::params::authkey_source,
-  $authkey                             = $::corosync::params::authkey,
-  $threads                             = $::corosync::params::threads,
-  $port                                = $::corosync::params::port,
-  $bind_address                        = $::corosync::params::bind_address,
-  $multicast_address                   = $::corosync::params::multicast_address,
-  $unicast_addresses                   = $::corosync::params::unicast_addresses,
-  $force_online                        = $::corosync::params::force_online,
-  $check_standby                       = $::corosync::params::check_standby,
-  $log_timestamp                       = $::corosync::params::log_timestamp,
-  $log_file                            = $::corosync::params::log_file,
-  $log_file_name                       = $::corosync::params::log_file_name,
-  $debug                               = $::corosync::params::debug,
-  $log_stderr                          = $::corosync::params::log_stderr,
-  $syslog_priority                     = $::corosync::params::syslog_priority,
-  $log_function_name                   = $::corosync::params::log_function_name,
-  $rrp_mode                            = $::corosync::params::rrp_mode,
-  $netmtu                              = $::corosync::params::netmtu,
-  $ttl                                 = $::corosync::params::ttl,
-  $vsftype                             = $::corosync::params::vsftype,
-  $package_corosync                    = $::corosync::params::package_corosync,
-  $package_crmsh                       = $::corosync::params::package_crmsh,
-  $package_pacemaker                   = $::corosync::params::package_pacemaker,
-  $package_pcs                         = $::corosync::params::package_pcs,
-  $packageopts_corosync                = $::corosync::params::package_install_options,
-  $packageopts_pacemaker               = $::corosync::params::package_install_options,
-  $packageopts_crmsh                   = $::corosync::params::package_install_options,
-  $packageopts_pcs                     = $::corosync::params::package_install_options,
-  $version_corosync                    = $::corosync::params::version_corosync,
-  $version_crmsh                       = $::corosync::params::version_crmsh,
-  $version_pacemaker                   = $::corosync::params::version_pacemaker,
-  $version_pcs                         = $::corosync::params::version_pcs,
-  $set_votequorum                      = $::corosync::params::set_votequorum,
-  $votequorum_expected_votes           = $::corosync::params::votequorum_expected_votes,
-  $quorum_members                      = ['localhost'],
-  $quorum_members_ids                  = undef,
-  $quorum_members_names                = undef,
-  $token                               = $::corosync::params::token,
-  $token_retransmits_before_loss_const = $::corosync::params::token_retransmits_before_loss_const,
-  $compatibility                       = $::corosync::params::compatibility,
-  $enable_corosync_service             = $::corosync::params::enable_corosync_service,
-  $enable_pacemaker_service            = $::corosync::params::enable_pacemaker_service,
-  $manage_pacemaker_service            = $::corosync::params::manage_pacemaker_service,
-  $enable_pcsd_service                 = $::corosync::params::enable_pcsd_service,
-  $manage_pcsd_service                 = false,
-  $cluster_name                        = $::corosync::params::cluster_name,
-  $join                                = $::corosync::params::join,
-  $consensus                           = $::corosync::params::consensus,
-  $max_messages                        = $::corosync::params::max_messages,
-  $test_corosync_config                = $::corosync::params::test_corosync_config,
-) inherits ::corosync::params {
+  Enum['on', 'off'] $enable_secauth                       = $corosync::params::enable_secauth,
+  Enum['file', 'string'] $authkey_source                  = $corosync::params::authkey_source,
+  Stdlib::Absolutepath $authkey                           = $corosync::params::authkey,
+  Optional[Integer] $threads                              = undef,
+  Integer[0,65535] $port                                  = $corosync::params::port,
+  Corosync::IpStringIp $bind_address                      = $corosync::params::bind_address,
+  Optional[Stdlib::Compat::Ip_address] $multicast_address = undef,
+  Optional[Corosync::ArrayRing] $unicast_addresses        = undef,
+  Boolean $force_online                                   = $corosync::params::force_online,
+  Boolean $check_standby                                  = $corosync::params::check_standby,
+  Boolean $log_timestamp                                  = $corosync::params::log_timestamp,
+  Boolean $log_file                                       = $corosync::params::log_file,
+  Optional[Stdlib::Absolutepath] $log_file_name           = undef,
+  Boolean $debug                                          = $corosync::params::debug,
+  Boolean $log_stderr                                     = $corosync::params::log_stderr,
+  Corosync::SyslogPriority $syslog_priority               = $corosync::params::syslog_priority,
+  Boolean $log_function_name                              = $corosync::params::log_function_name,
+  Optional[Enum['none', 'active', 'passive']] $rrp_mode   = undef,
+  Optional[Integer] $netmtu                               = undef,
+  Optional[Integer[0,255]] $ttl                           = undef,
+  Optional[Enum['ykd', 'none']] $vsftype                  = undef,
+  Boolean $package_corosync                               = $corosync::params::package_corosync,
+  Boolean $package_crmsh                                  = $corosync::params::package_crmsh,
+  Boolean $package_pacemaker                              = $corosync::params::package_pacemaker,
+  Boolean $package_pcs                                    = $corosync::params::package_pcs,
+  Optional[Array] $packageopts_corosync                   = $corosync::params::package_install_options,
+  Optional[Array] $packageopts_pacemaker                  = $corosync::params::package_install_options,
+  Optional[Array] $packageopts_crmsh                      = $corosync::params::package_install_options,
+  Optional[Array] $packageopts_pcs                        = $corosync::params::package_install_options,
+  String $version_corosync                                = $corosync::params::version_corosync,
+  String $version_crmsh                                   = $corosync::params::version_crmsh,
+  String $version_pacemaker                               = $corosync::params::version_pacemaker,
+  String $version_pcs                                     = $corosync::params::version_pcs,
+  Boolean $set_votequorum                                 = $corosync::params::set_votequorum,
+  Optional[Integer] $votequorum_expected_votes            = undef,
+  Array $quorum_members                                   = ['localhost'],
+  Optional[Array] $quorum_members_ids                     = undef,
+  Optional[Array] $quorum_members_names                   = undef,
+  Optional[Integer] $token                                = undef,
+  Optional[Integer] $token_retransmits_before_loss_const  = undef,
+  Optional[String] $compatibility                         = undef,
+  Boolean $enable_corosync_service                        = $corosync::params::enable_corosync_service,
+  Boolean$enable_pacemaker_service                        = $corosync::params::enable_pacemaker_service,
+  Boolean $manage_pacemaker_service                       = $corosync::params::manage_pacemaker_service,
+  $enable_pcsd_service                                    = $corosync::params::enable_pcsd_service,
+  Boolean $manage_pcsd_service                            = false,
+  Optional[String] $cluster_name                          = undef,
+  Optional[Integer] $join                                 = undef,
+  Optional[Integer] $consensus                            = undef,
+  Optional[Integer] $max_messages                         = undef,
+  Boolean $test_corosync_config                           = $corosync::params::test_corosync_config,
+) inherits corosync::params {
 
   if $set_votequorum and !$quorum_members {
     fail('set_votequorum is true, but no quorum_members have been passed.')
@@ -339,38 +364,16 @@ class corosync(
     }
   }
 
-  if ! is_bool($enable_secauth) {
-    validate_re($enable_secauth, '^(on|off)$')
-  }
-  validate_re($authkey_source, '^(file|string)$')
-  validate_bool($force_online)
-  validate_bool($check_standby)
-  validate_bool($log_file)
-  if getvar('log_file_name') and $log_file == true {
-    validate_absolute_path($log_file_name)
-  }
-  validate_bool($log_timestamp)
-  validate_bool($debug)
-  validate_bool($log_stderr)
-  validate_re($syslog_priority, '^(debug|info|notice|warning|err|emerg)$')
-  validate_bool($log_function_name)
-
   # You have to specify at least one of the following parameters:
   # $multicast_address or $unicast_address or $cluster_name
-  if $multicast_address == 'UNSET' and $unicast_addresses == 'UNSET' and !$cluster_name {
+  if !$multicast_address and !$unicast_addresses and !$cluster_name {
       fail('You must provide a value for multicast_address, unicast_address or cluster_name.')
-  }
-
-  case $enable_secauth {
-    true:    { $enable_secauth_real = 'on' }
-    false:   { $enable_secauth_real = 'off' }
-    default: { $enable_secauth_real = $enable_secauth }
   }
 
   # Using the Puppet infrastructure's ca as the authkey, this means any node in
   # Puppet can join the cluster.  Totally not ideal, going to come up with
   # something better.
-  if $enable_secauth_real == 'on' {
+  if $enable_secauth == 'on' {
     case $authkey_source {
       'file': {
         file { '/etc/corosync/authkey':
@@ -418,7 +421,7 @@ class corosync(
   # - $debug
   # - $bind_address
   # - $port
-  # - $enable_secauth_real
+  # - $enable_secauth
   # - $threads
   # - $token
   # - $join
