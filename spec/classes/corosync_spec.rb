@@ -231,7 +231,7 @@ describe 'corosync' do
         end
       end
 
-      context 'witout secauth' do
+      context 'without secauth' do
         before do
           params.merge!(
             enable_secauth: 'off'
