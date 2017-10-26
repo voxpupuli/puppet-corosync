@@ -33,7 +33,7 @@ class { 'corosync':
   authkey        => '/var/lib/puppet/ssl/certs/ca.pem',
   bind_address   => $::ipaddress,
   cluster_name   => 'mycluster',
-  enable_secauth => true,
+  enable_secauth => 'on',
 }
 ```
 
@@ -382,7 +382,7 @@ bind_address as arrays:
 
 ```puppet
 class { 'corosync':
-  enable_secauth    => true,
+  enable_secauth    => 'on',
   authkey           => '/var/lib/puppet/ssl/certs/ca.pem',
   bind_address      => ['10.0.0.1', '10.0.1.1'],
   unicast_addresses => [
