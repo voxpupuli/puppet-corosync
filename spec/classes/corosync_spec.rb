@@ -175,7 +175,7 @@ describe 'corosync' do
     context 'when unicast is used' do
       before do
         params.merge!(
-          multicast_address: 'UNSET',
+          multicast_address: :undef,
           unicast_addresses: ['192.168.1.1', '192.168.1.2']
         )
       end
@@ -311,7 +311,7 @@ describe 'corosync' do
     context 'when multicast_address, unicast_addresses and cluster_name are not set' do
       before do
         params.merge!(
-          multicast_address: 'UNSET'
+          multicast_address: :undef
         )
       end
 
@@ -326,7 +326,7 @@ describe 'corosync' do
     context 'when only cluster_name is set' do
       before do
         params.merge!(
-          multicast_address: 'UNSET',
+          multicast_address: :undef,
           cluster_name: 'mycluster'
         )
       end
@@ -448,13 +448,11 @@ describe 'corosync' do
     {
       'threads' => 10,
       'rrp_mode' => 'none',
-      'netmtu' => '1500',
+      'netmtu' => 1500,
       'token' => 3000,
       'vsftype' => 'none',
       'token_retransmits_before_loss_const' => 10,
-      'join' => '50',
-      'consensus' => 'false',
-      'max_messages' => 17,
+      'join' => 50,
       'compatibility' => 'whitetank'
     }.each do |optional_parameter, possible_value|
       context "when #{optional_parameter} is not set" do
@@ -523,7 +521,7 @@ describe 'corosync' do
       before do
         params.merge!(
           set_votequorum: true,
-          quorum_members: false
+          quorum_members: []
         )
       end
 

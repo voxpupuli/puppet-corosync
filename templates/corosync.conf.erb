@@ -41,7 +41,7 @@ totem {
 <% unless @threads.nil? -%>
   threads:                             <%= @threads %>
 <% end -%>
-<% if @unicast_addresses != 'UNSET' -%>
+<% unless @unicast_addresses.nil? -%>
   transport:                           udpu
 <% Array(@unicast_addresses.first).each_index do |interface| -%>
   interface {
@@ -63,7 +63,7 @@ totem {
   interface {
     ringnumber:  <%= i %>
     bindnetaddr: <%= [@bind_address].flatten[i] %>
-<% if @multicast_address == 'UNSET' -%>
+<% if @multicast_address.nil? -%>
 <% elsif [@multicast_address].flatten[i] == 'broadcast' -%>
     broadcast:   yes
 <% else -%>
