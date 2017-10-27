@@ -9,34 +9,40 @@
 #
 # [*enable_secauth*]
 #   Controls corosync's ability to authenticate and encrypt multicast messages.
+#   Default: 'on'
 #
 # [*authkey_source*]
 #   Allows to use either a file or a string as a authkey.
-#   Defaults to 'file'. Can be set to 'string'.
+#   Default: 'file'
 #
 # [*authkey*]
 #   Specifies the path to the CA which is used to sign Corosync's certificate if
 #   authkey_source is 'file' or the actual authkey if 'string' is used instead.
+#   Default: '/etc/puppet/ssl/certs/ca.pem'
 #
 # [*threads*]
 #   How many threads you are going to let corosync use to encode and decode
 #   multicast messages.  If you turn off secauth then corosync will ignore
 #   threads.
+#   Default: undef
 #
 # [*bind_address*]
 #   The ip address we are going to bind the corosync daemon too.
 #   Can be specified as an array to have multiple rings.
+#   Default: $::ipaddress
 #
 # [*port*]
-#   The udp port that corosync will use to do its multicast communication.  Be
+#   The UDP port that corosync will use to do its multicast communication. Be
 #   aware that corosync used this defined port plus minus one.
 #   Can be specified as an array to have multiple rings.
+#   Default: '5405'
 #
 # [*multicast_address*]
 #   An IP address that has been reserved for multicast traffic.  This is the
 #   default way that Corosync accomplishes communication across the cluster.
 #   Use 'broadcast' to have broadcast instead
 #   Can be specified as an array to have multiple rings (multicast only).
+#   Default: undef
 #
 # [*unicast_addresses*]
 #   An array of IP addresses that make up the cluster's members.  These are
@@ -45,168 +51,195 @@
 #   make this possible.
 #   You can also have an array of arrays to have multiple rings. In that case,
 #   each subarray matches a host IP addresses.
+#   Default: undef
 #
 # [*force_online*]
-#   True/false parameter specifying whether to force nodes that have been put
+#   Boolean parameter specifying whether to force nodes that have been put
 #   in standby back online.
+#   Default: false
 #
 # [*check_standby*]
-#   True/false parameter specifying whether puppet should return an error log
+#   Boolean parameter specifying whether puppet should return an error log
 #   message if a node is in standby. Useful for monitoring node state.
-
+#   Default: false
+#
 # [*log_timestamp*]
 #   Boolean parameter specifying whether a timestamp should be placed on all
-#   log messages. Default: false
+#   log messages.
+#   Default: false
 #
 # [*log_file*]
 #   Boolean parameter specifying whether Corosync should produce debug
-#   output in a logfile. Default: true.
+#   output in a logfile.
+#   Default: true
 #
 # [*log_file_name*]
 #   Absolute path to the logfile Corosync should use when `$log_file` (see
-#   above) is true. Default: not set
+#   above) is true.
+#   Default: undef
 #
 # [*debug*]
-#   True/false parameter specifying whether Corosync should produce debug
+#   Boolean parameter specifying whether Corosync should produce debug
 #   output in its logs.
+#   Default: false
 #
 # [*log_stderr*]
-#   True/false parameter specifying whether Corosync should log errors to
-#   stderr. Defaults to True.
+#   Boolean parameter specifying whether Corosync should log errors to
+#   stderr.
+#   Default: true
 #
 # [*syslog_priority*]
 #   String parameter specifying the minimal log level for Corosync syslog
 #   messages. Allowed values: debug|info|notice|warning|err|emerg.
-#   Defaults to 'info'.
+#   Default: 'info'.
 #
 # [*log_function_name*]
-#   True/false parameter specifying whether Corosync should log called funcions
-#   names to. Defaults to False.
+#   Boolean parameter specifying whether Corosync should log called function
+#   names to.
+#   Default: false
 #
 # [*rrp_mode*]
 #   Mode of redundant ring. May be none, active, or passive.
+#   Default: undef
 #
 # [*netmtu*]
 #   This specifies the network maximum transmit unit.
+#   Default: undef
 #
 # [*ttl*]
 #   Time To Live.
+#   Default: undef
 #
 # [*vsftype*]
-#   Virtual synchrony filter type
+#   Virtual synchrony filter type.
+#   Default: undef
 #
 # [*package_corosync*]
 #   Define if package corosync should be managed.
-#   Defaults to true
+#   Default: true
 #
 # [*package_crmsh*]
-#   Define if package corosync should be managed.
-#   Defaults to true in Debian-based systems, false otherwise
-#
-# [*version_corosync*]
-#   Define what version of corosync should be managed.
-#   Defaults to present
+#   Define if package crmsh should be managed.
+#   Default (Debian based): true
+#   Default (otherwise):    false
 #
 # [*package_pacemaker*]
 #   Define if package pacemaker should be managed.
-#   Defaults to true
+#   Default: true
 #
 # [*package_pcs*]
 #   Define if package pcs should be managed.
-#   Defaults to true on Red-hat based systems, false otherwise
+#   Default (Red Hat based):  true
+#   Default (otherwise):      false
 #
 # [*packageopts_corosync*]
 #   Additional install-options for the corosync package resource.
-#   Defaults to ['-t', 'jessie-backports'] on Jessie, undef otherwise.
+#   Default (Debian Jessie):  ['-t', 'jessie-backports']
+#   Default (otherwise):      undef
 #
 # [*packageopts_crmsh*]
 #   Additional install-options for the crmsh package resource.
-#   Defaults to ['-t', 'jessie-backports'] on Jessie, undef otherwise.
+#   Default (Debian Jessie):  ['-t', 'jessie-backports']
+#   Default (otherwise):      undef
 #
 # [*packageopts_pacemaker*]
 #   Additional install-options for the pacemaker package resource.
-#   Defaults to ['-t', 'jessie-backports'] on Jessie, undef otherwise.
+#   Default (Debian Jessie):  ['-t', 'jessie-backports']
+#   Default (otherwise):      undef
 #
 # [*packageopts_pcs*]
 #   Additional install-options for the pcs package resource.
-#   Defaults to ['-t', 'jessie-backports'] on Jessie, undef otherwise.
+#   Default (Debian Jessie):  ['-t', 'jessie-backports']
+#   Default (otherwise):      undef
 #
 # [*version_corosync*]
 #   Define what version of the corosync package should be installed.
-#   Defaults to present
+#   Default: 'present'
 #
 # [*version_crmsh*]
 #   Define what version of the crmsh package should be installed.
-#   Defaults to present
+#   Default: 'present'
 #
 # [*version_pacemaker*]
 #   Define what version of the pacemaker package should be installed.
-#   Defaults to present
+#   Default: 'present'
 #
 # [*version_pcs*]
 #   Define what version of the pcs package should be installed.
-#   Defaults to present
+#   Default: 'present'
 #
 # [*set_votequorum*]
 #   Set to true if corosync_votequorum should be used as quorum provider.
-#   Defaults to true on RedHat based operating systems.
-#   Defaults to true on Ubuntu version 14.04 or greater.
-#   Defaults to false on all other operating systems.
+#   Default (Red Hat based):    true
+#   Default (Ubuntu >= 14.04):  true
+#   Default (otherwise):        false
+#
+# [*votequorum_expected_votes*]
+#   Default: undef
 #
 # [*quorum_members*]
 #   Array of quorum member hostname. This is required if set_votequorum
 #   is set to true.
 #   You can also have an array of arrays to have multiple rings. In that case,
 #   each subarray matches a member IP addresses.
-#   Defaults to ['localhost']
+#   Default: ['localhost']
 #
 # [*quorum_members_ids*]
 #   Array of quorum member IDs. Persistent IDs are required for the dynamic
 #   config of a corosync cluster and when_set_votequorum is set to true.
 #   Should be used only with the quorum_members parameter.
-#   Defaults to undef
+#   Default: undef
 #
 # [*quorum_members_names*]
 #   Array of quorum member names. Persistent names are required when you
 #   define IP addresses in quorum_members.
-#   Defaults to undef
+#   Default: undef
 #
 # [*token*]
 #   Time (in ms) to wait for a token
+#   Default: undef
 #
 # [*token_retransmits_before_loss_const*]
-#   How many token retransmits before forming a new configuration
+#   How many token retransmits before forming a new configuration.
+#   Default: undef
+#
+# [*compatibility*]
+#   Default: undef
 #
 # [*enable_corosync_service*]
 #   Whether the module should enable the corosync service.
+#   Default: true
 #
 # [*enable_pacemaker_service*]
 #   Whether the module should enable the pacemaker service.
+#   Default: true
 #
 # [*manage_pacemaker_service*]
 #   Whether the module should try to manage the pacemaker service in
 #   addition to the corosync service.
-#   Defaults to true on RedHat based operating systems version 7 or greater.
-#   Defaults to true on Ubuntu version 14.04 or greater.
-#   Defaults to false on all other operating systems.
+#   Default (Red Hat based >= 7): true
+#   Default (Ubuntu >= 14.04):    true
+#   Default (otherwise):          false
 #
 # [*enable_pcsd_service*]
 #   Whether the module should enable the pcsd service.
+#   Default: true
 #
 # [*manage_pcsd_service*]
 #   Whether the module should try to manage the pcsd service in addition to the
 #   corosync service.
 #   pcsd service is the GUI and the remote configuration interface.
-#   Defaults to false
+#   Default: false
 #
 # [*cluster_name*]
 #   This specifies the name of cluster and it's used for automatic
 #   generating of multicast address.
+#   Default: undef
 #
 # [*join*]
 #   This timeout specifies in milliseconds how long to wait for join messages
 #   in the membership protocol.
-#   Default to 50
+#   Default: undef
 #
 # [*consensus*]
 #   This timeout specifies in milliseconds how long to wait for consensus to be
@@ -214,17 +247,21 @@
 #   The minimum value for consensus must be 1.2 * token. This value will be
 #   automatically calculated at 1.2 * token if the user doesn't specify a
 #   consensus value.
-#   Defaults to false,
+#   Default: undef
 #
 # [*max_messages*]
 #   This constant specifies the maximum number of messages that may be sent by
 #   one processor on receipt of the token. The max_messages parameter is limited
 #   to 256000 / netmtu to prevent overflow of the kernel transmit buffers.
-#   Defaults to 17
+#   Default: undef
 #
 # [*test_corosync_config*]
-#   Wheter we should test new configuration files with `corosync -t`.
-#   Defaults to true on OS that allows that (requires corosync 2.3.4).
+#   Whether we should test new configuration files with `corosync -t`.
+#   (requires corosync 2.3.4)
+#   Default (Red Hat based >= 7): true
+#   Default (Ubuntu >= 16.04):    true
+#   Default (Debian >= 8):        true
+#   Default (otherwise):          false
 #
 # === Examples
 #
