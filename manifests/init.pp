@@ -379,18 +379,6 @@ class corosync(
   if ! is_bool($enable_secauth) {
     validate_re($enable_secauth, '^(on|off)$')
   }
-  validate_re($authkey_source, '^(file|string)$')
-  validate_bool($force_online)
-  validate_bool($check_standby)
-  validate_bool($log_file)
-  if getvar('log_file_name') and $log_file == true {
-    validate_absolute_path($log_file_name)
-  }
-  validate_bool($log_timestamp)
-  validate_bool($debug)
-  validate_bool($log_stderr)
-  validate_re($syslog_priority, '^(debug|info|notice|warning|err|emerg)$')
-  validate_bool($log_function_name)
 
   # You have to specify at least one of the following parameters:
   # $multicast_address or $unicast_address or $cluster_name

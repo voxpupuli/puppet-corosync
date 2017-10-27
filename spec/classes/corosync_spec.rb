@@ -410,22 +410,6 @@ describe 'corosync' do
       end
     end
 
-    context 'when log_file_name is not an absolute path' do
-      before do
-        params.merge!(
-          log_file: true,
-          log_file_name: 'corosync.log'
-        )
-      end
-
-      it 'raises error' do
-        is_expected.to raise_error(
-          Puppet::Error,
-          %r{is not an absolute path}
-        )
-      end
-    end
-
     context 'when log_file is disabled' do
       before do
         params.merge!(
