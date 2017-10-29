@@ -7,41 +7,41 @@ compatibility: <%= @compatibility %>
 <% end -%>
 totem {
   version:                             2
-<% unless @cluster_name.nil? -%>
+<% if @cluster_name -%>
   cluster_name:                        <%= @cluster_name %>
 <% end -%>
-<% unless @token.nil? -%>
+<% if @token -%>
   token:                               <%= @token %>
 <% end -%>
-<% unless @token_retransmits_before_loss_const.nil? -%>
+<% if @token_retransmits_before_loss_const -%>
   token_retransmits_before_loss_const: <%= @token_retransmits_before_loss_const %>
 <% end -%>
-<% unless @join.nil? -%>
+<% if @join -%>
   join:                                <%= @join %>
 <% end -%>
-<% unless @consensus.nil? -%>
+<% if @consensus -%>
   consensus:                           <%= @consensus %>
 <% end -%>
-<% unless @vsftype.nil? -%>
+<% if @vsftype -%>
   vsftype:                             <%= @vsftype %>
 <% end -%>
-<% unless @max_messages.nil? -%>
+<% if @max_messages -%>
   max_messages:                        <%= @max_messages %>
 <% end -%>
-<% unless @clear_node_high_bit.nil? -%>
+<% if @clear_node_high_bit -%>
   clear_node_high_bit:                 <% @clear_node_high_bit %>
 <% end -%>
-<% unless @rrp_mode.nil? -%>
+<% if @rrp_mode -%>
   rrp_mode:                            <%= @rrp_mode %>
 <% end -%>
-<% unless @netmtu.nil? -%>
+<% if @netmtu -%>
   netmtu:                              <%= @netmtu %>
 <% end -%>
   secauth:                             <%= @enable_secauth_real %>
-<% unless @threads.nil? -%>
+<% if @threads -%>
   threads:                             <%= @threads %>
 <% end -%>
-<% unless @unicast_addresses.nil? -%>
+<% if @unicast_addresses -%>
   transport:                           udpu
 <% Array(@unicast_addresses.first).each_index do |interface| -%>
   interface {
