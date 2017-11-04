@@ -9,7 +9,7 @@
 #
 # [*enable_secauth*]
 #   Controls corosync's ability to authenticate and encrypt multicast messages.
-#   Default: 'on'
+#   Default: true
 #
 # [*authkey_source*]
 #   Allows to use either a file or a string as a authkey.
@@ -280,7 +280,7 @@
 # Copyright 2012, Puppet Labs, LLC.
 #
 class corosync(
-  Variant[Boolean, Enum['on', 'off']] $enable_secauth     = $corosync::params::enable_secauth,
+  Boolean $enable_secauth                                 = $corosync::params::enable_secauth,
   Enum['file', 'string'] $authkey_source                  = $corosync::params::authkey_source,
   Stdlib::Absolutepath $authkey                           = $corosync::params::authkey,
   Optional[Integer] $threads                              = undef,
@@ -376,26 +376,16 @@ class corosync(
     }
   }
 
-  if ! is_bool($enable_secauth) {
-    validate_re($enable_secauth, '^(on|off)$')
-  }
-
   # You have to specify at least one of the following parameters:
   # $multicast_address or $unicast_address or $cluster_name
   if !$multicast_address and empty($unicast_addresses) and !$cluster_name {
       fail('You must provide a value for multicast_address, unicast_address or cluster_name.')
   }
 
-  case $enable_secauth {
-    true:    { $enable_secauth_real = 'on' }
-    false:   { $enable_secauth_real = 'off' }
-    default: { $enable_secauth_real = $enable_secauth }
-  }
-
   # Using the Puppet infrastructure's ca as the authkey, this means any node in
   # Puppet can join the cluster.  Totally not ideal, going to come up with
   # something better.
-  if $enable_secauth_real == 'on' {
+  if $enable_secauth {
     case $authkey_source {
       'file': {
         file { '/etc/corosync/authkey':
@@ -443,7 +433,7 @@ class corosync(
   # - $debug
   # - $bind_address
   # - $port
-  # - $enable_secauth_real
+  # - $enable_secauth
   # - $threads
   # - $token
   # - $join

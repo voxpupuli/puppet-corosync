@@ -37,7 +37,7 @@ totem {
 <% if @netmtu -%>
   netmtu:                              <%= @netmtu %>
 <% end -%>
-  secauth:                             <%= @enable_secauth_real %>
+  secauth:                             <%= @enable_secauth ? 'on' : 'off' %>
 <% if @threads -%>
   threads:                             <%= @threads %>
 <% end -%>
