@@ -9,6 +9,24 @@ describe 'corosync' do
   shared_examples_for 'corosync' do
     it { is_expected.to compile.with_all_deps }
 
+    it 'does manage the corosync service' do
+      is_expected.to contain_service('corosync').with(
+        ensure: 'running'
+      )
+    end
+
+    context 'when manage_corosync_service is false' do
+      before do
+        params.merge!(
+          manage_corosync_service: false
+        )
+      end
+
+      it 'is not managing corosync service' do
+        is_expected.not_to compile
+      end
+    end
+
     context 'when set_votequorum is true' do
       before do
         params.merge!(

@@ -19,6 +19,7 @@ class corosync::params {
   $version_pacemaker                   = 'present'
   $version_pcs                         = 'present'
   $enable_corosync_service             = true
+  $manage_corosync_service             = true
   $enable_pacemaker_service            = true
   $enable_pcsd_service                 = true
 
