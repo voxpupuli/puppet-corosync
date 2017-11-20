@@ -308,6 +308,29 @@ describe 'corosync' do
       end
     end
 
+    context 'when authkey is a string' do
+      before do
+        params.merge!(
+          authkey_source: 'string',
+          authkey: 'mysecretkey'
+        )
+      end
+      it 'should deploy authkey file' do
+        is_expected.to contain_file('/etc/corosync/authkey').with_content('mysecretkey')
+      end
+    end
+
+    context 'when authkey is a file' do
+      before do
+        params.merge!(
+          authkey: '/etc/pki/tls/private/corosync.key'
+        )
+      end
+      it 'should deploy authkey file' do
+        is_expected.to contain_file('/etc/corosync/authkey').with_source('/etc/pki/tls/private/corosync.key')
+      end
+    end
+
     context 'when multicast_address, unicast_addresses and cluster_name are not set' do
       before do
         params.merge!(
