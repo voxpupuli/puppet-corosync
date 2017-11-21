@@ -286,7 +286,7 @@
 class corosync(
   Boolean $enable_secauth                                 = $corosync::params::enable_secauth,
   Enum['file', 'string'] $authkey_source                  = $corosync::params::authkey_source,
-  Stdlib::Absolutepath $authkey                           = $corosync::params::authkey,
+  Variant[Stdlib::Absolutepath,String[1]] $authkey        = $corosync::params::authkey,
   Optional[Integer] $threads                              = undef,
   Integer[0,65535] $port                                  = $corosync::params::port,
   Corosync::IpStringIp $bind_address                      = $corosync::params::bind_address,
