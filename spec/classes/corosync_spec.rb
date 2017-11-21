@@ -315,7 +315,7 @@ describe 'corosync' do
           authkey: 'mysecretkey'
         )
       end
-      it 'should deploy authkey file' do
+      it 'deploys authkey file' do
         is_expected.to contain_file('/etc/corosync/authkey').with_content('mysecretkey')
       end
     end
@@ -326,7 +326,7 @@ describe 'corosync' do
           authkey: '/etc/pki/tls/private/corosync.key'
         )
       end
-      it 'should deploy authkey file' do
+      it 'deploys authkey file' do
         is_expected.to contain_file('/etc/corosync/authkey').with_source('/etc/pki/tls/private/corosync.key')
       end
     end
