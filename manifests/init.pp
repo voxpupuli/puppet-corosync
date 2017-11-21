@@ -210,13 +210,17 @@
 #   Whether the module should enable the corosync service.
 #   Default: true
 #
+# [*manage_corosync_service*]
+#   Whether the module should try to manage the corosync service. If set to
+#   false, the service will need to be specified in the catalog elsewhere.
+#   Default: true
+#
 # [*enable_pacemaker_service*]
 #   Whether the module should enable the pacemaker service.
 #   Default: true
 #
 # [*manage_pacemaker_service*]
-#   Whether the module should try to manage the pacemaker service in
-#   addition to the corosync service.
+#   Whether the module should try to manage the pacemaker service.
 #   Default (Red Hat based >= 7): true
 #   Default (Ubuntu >= 14.04):    true
 #   Default (otherwise):          false
@@ -322,6 +326,7 @@ class corosync(
   Optional[Integer] $token_retransmits_before_loss_const  = undef,
   Optional[String] $compatibility                         = undef,
   Boolean $enable_corosync_service                        = $corosync::params::enable_corosync_service,
+  Boolean $manage_corosync_service                        = $corosync::params::manage_corosync_service,
   Boolean $enable_pacemaker_service                       = $corosync::params::enable_pacemaker_service,
   Boolean $manage_pacemaker_service                       = $corosync::params::manage_pacemaker_service,
   Boolean $enable_pcsd_service                            = $corosync::params::enable_pcsd_service,
@@ -515,9 +520,11 @@ class corosync(
     }
   }
 
-  service { 'corosync':
-    ensure    => running,
-    enable    => $enable_corosync_service,
-    subscribe => File[ [ '/etc/corosync/corosync.conf', '/etc/corosync/service.d' ] ],
+  if $manage_corosync_service {
+    service { 'corosync':
+      ensure    => running,
+      enable    => $enable_corosync_service,
+      subscribe => File[ [ '/etc/corosync/corosync.conf', '/etc/corosync/service.d' ] ],
+    }
   }
 }
