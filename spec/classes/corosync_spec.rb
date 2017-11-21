@@ -312,6 +312,15 @@ describe 'corosync' do
       end
     end
 
+    context 'when bind_address is UNSET' do
+      it do
+        params[:bind_address] = 'UNSET'
+        is_expected.to contain_file('/etc/corosync/corosync.conf').without_content(
+          %r{bindnetaddr:}m
+        )
+      end
+    end
+
     context 'when cluster_name is set' do
       before do
         params.merge!(
