@@ -253,6 +253,17 @@
 #   consensus value.
 #   Default: undef
 #
+# [*clear_node_high_bit*]
+#   This configuration option is optional and is only relevant when no nodeid
+#   is specified. Some openais clients require a signed 32 bit nodeid that is
+#   greater than zero however by default openais uses all 32 bits of the IPv4
+#   address space when generating a nodeid. Set this option to yes to force
+#   the high bit to be zero and therefor ensure the nodeid is a positive signed
+#   32 bit integer.
+#   WARNING: The clusters behavior is undefined if this option is enabled on
+#   only a subset of the cluster (for example during a rolling upgrade).
+#   Default: undef
+#
 # [*max_messages*]
 #   This constant specifies the maximum number of messages that may be sent by
 #   one processor on receipt of the token. The max_messages parameter is limited
@@ -334,6 +345,7 @@ class corosync(
   Optional[String] $cluster_name                          = undef,
   Optional[Integer] $join                                 = undef,
   Optional[Integer] $consensus                            = undef,
+  Optional[Enum['yes', 'no']] $clear_node_high_bit        = undef,
   Optional[Integer] $max_messages                         = undef,
   Boolean $test_corosync_config                           = $corosync::params::test_corosync_config,
 ) inherits ::corosync::params {
@@ -443,6 +455,7 @@ class corosync(
   # - $token
   # - $join
   # - $consensus
+  # - $clear_node_high_bit
   # - $max_messages
   if $test_corosync_config {
     # corosync -t is only included since 2.3.4
