@@ -4,7 +4,32 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
-## [v5.1.0](https://github.com/voxpupuli/puppet-corosync/tree/v5.1.0) (2017-10-26)
+## [v6.0.0](https://github.com/voxpupuli/puppet-corosync/tree/v6.0.0) (2017-12-09)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-corosync/compare/v5.1.0...v6.0.0)
+
+**Breaking changes:**
+
+- Move away from the UNSET pattern [\#322](https://github.com/voxpupuli/puppet-corosync/issues/322)
+- \[RFC\] Removing enable\_secauth\_real [\#420](https://github.com/voxpupuli/puppet-corosync/pull/420) ([kBite](https://github.com/kBite))
+- Breaking: Use puppet4 data types [\#419](https://github.com/voxpupuli/puppet-corosync/pull/419) ([kBite](https://github.com/kBite))
+
+**Implemented enhancements:**
+
+- Support Debian 9 [\#404](https://github.com/voxpupuli/puppet-corosync/issues/404)
+- support Debian 9 \(\#404\) [\#416](https://github.com/voxpupuli/puppet-corosync/pull/416) ([wyardley](https://github.com/wyardley))
+
+**Fixed bugs:**
+
+- added class param clear\_node\_high\_bit. This is used in templates/coro… [\#402](https://github.com/voxpupuli/puppet-corosync/pull/402) ([oveaurs](https://github.com/oveaurs))
+
+**Merged pull requests:**
+
+- Fix variable type to allow authkey to be a string [\#427](https://github.com/voxpupuli/puppet-corosync/pull/427) ([cedef](https://github.com/cedef))
+- Added manage corosync feature [\#424](https://github.com/voxpupuli/puppet-corosync/pull/424) ([Nekototori](https://github.com/Nekototori))
+- 5.1.0 release \(last version with Puppet 3.8.x support\) [\#417](https://github.com/voxpupuli/puppet-corosync/pull/417) ([wyardley](https://github.com/wyardley))
+
+## [v5.1.0](https://github.com/voxpupuli/puppet-corosync/tree/v5.1.0) (2017-10-27)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-corosync/compare/v5.0.0...v5.1.0)
 
