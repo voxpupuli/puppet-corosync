@@ -51,7 +51,9 @@ totem {
     }
 <% end -%>
     ringnumber:  <%= interface %>
+<% if @bind_address != 'UNSET' -%>
     bindnetaddr: <%= Array(@bind_address)[interface] %>
+<% end -%>
     mcastport:   <%= Array(@port)[interface] || @port %>
 <% if @ttl -%>
     ttl:         <%= Array(@ttl)[interface] || @ttl %>
@@ -62,7 +64,9 @@ totem {
 <% [@bind_address].flatten.each_index do |i| -%>
   interface {
     ringnumber:  <%= i %>
+<% if @bind_address != 'UNSET' -%>
     bindnetaddr: <%= [@bind_address].flatten[i] %>
+<% end -%>
 <% if @multicast_address.nil? -%>
 <% elsif [@multicast_address].flatten[i] == 'broadcast' -%>
     broadcast:   yes

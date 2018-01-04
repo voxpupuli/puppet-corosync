@@ -28,7 +28,8 @@
 #
 # [*bind_address*]
 #   The ip address we are going to bind the corosync daemon too.
-#   Can be specified as an array to have multiple rings.
+#   Can be specified as an array to have multiple rings or can have the value
+#   'UNSET' in order to remove the `bindnetaddr` corosync directive.
 #   Default: $::ipaddress
 #
 # [*port*]
@@ -300,7 +301,7 @@ class corosync(
   Variant[Stdlib::Absolutepath,String[1]] $authkey        = $corosync::params::authkey,
   Optional[Integer] $threads                              = undef,
   Integer[0,65535] $port                                  = $corosync::params::port,
-  Corosync::IpStringIp $bind_address                      = $corosync::params::bind_address,
+  Variant[Corosync::IpStringIp, Enum['UNSET']] $bind_address  = $corosync::params::bind_address,
   Optional[Stdlib::Compat::Ip_address] $multicast_address = undef,
   Optional[Array] $unicast_addresses                      = undef,
   Boolean $force_online                                   = $corosync::params::force_online,
