@@ -45,13 +45,15 @@ totem {
   transport:                           udpu
 <% Array(@unicast_addresses.first).each_index do |interface| -%>
   interface {
+<% if not @set_votequorum -%>
 <% Array(Array(@unicast_addresses.map{|x| Array(x).flatten}).transpose[interface]).each do |addr| -%>
     member {
       memberaddr: <%= addr %>
     }
 <% end -%>
-    ringnumber:  <%= interface %>
     bindnetaddr: <%= Array(@bind_address)[interface] %>
+<% end -%>
+    ringnumber:  <%= interface %>
     mcastport:   <%= Array(@port)[interface] || @port %>
 <% if @ttl -%>
     ttl:         <%= Array(@ttl)[interface] || @ttl %>

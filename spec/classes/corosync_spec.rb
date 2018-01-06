@@ -275,7 +275,7 @@ describe 'corosync' do
 
         it 'configures the ring properly' do
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{interface.*memberaddr: 10\.0\.0\.1.*memberaddr: 10\.0\.0\.2.*ringnumber:\s+0.*bindnetaddr: 10\.0\.0\.1}m
+            %r{interface.*memberaddr: 10\.0\.0\.1.*memberaddr: 10\.0\.0\.2.*bindnetaddr: 10\.0\.0\.1.*ringnumber:\s+0}m
           )
         end
       end
@@ -298,7 +298,7 @@ describe 'corosync' do
 
         it 'configures the rings properly' do
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{interface.*memberaddr: 10\.0\.0\.1.*memberaddr: 10\.0\.0\.2.*ringnumber:\s+0.*bindnetaddr: 10\.0\.0\.1.*interface.*memberaddr: 10\.0\.1\.1.*memberaddr: 10\.0\.1\.2.*ringnumber:\s+1.*bindnetaddr: 10\.0\.1\.1}m
+            %r{interface.*memberaddr: 10\.0\.0\.1.*memberaddr: 10\.0\.0\.2.*bindnetaddr: 10\.0\.0\.1.*ringnumber:\s+0.*interface.*memberaddr: 10\.0\.1\.1.*memberaddr: 10\.0\.1\.2.*bindnetaddr: 10\.0\.1\.1.*ringnumber:\s+1}m
           )
         end
       end
