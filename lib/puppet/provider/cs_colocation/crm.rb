@@ -104,7 +104,7 @@ Puppet::Type.type(:cs_colocation).provide(:crm, parent: PuppetX::Voxpupuli::Coro
   def destroy
     debug('Removing colocation')
     cmd = [command(:crm), 'configure', 'delete', @resource[:name]]
-    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
+    self.class.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
   end
 
@@ -153,7 +153,7 @@ Puppet::Type.type(:cs_colocation).provide(:crm, parent: PuppetX::Voxpupuli::Coro
     Tempfile.open('puppet_crm_update') do |tmpfile|
       tmpfile.write(updated)
       tmpfile.flush
-      PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(['crm', 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
+      self.class.run_command_in_cib(['crm', 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
     end
   end
 end

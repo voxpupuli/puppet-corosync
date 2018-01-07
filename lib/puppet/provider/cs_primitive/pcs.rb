@@ -87,7 +87,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    raw, = PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd)
+    raw, = self.class.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//primitive') do |e|
@@ -121,7 +121,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing primitive')
-    PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', @resource[:name]], @resource[:cib])
+    self.class.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', @resource[:name]], @resource[:cib])
     @property_hash.clear
   end
 
@@ -131,7 +131,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
       @property_hash[:promotable] = should
     when :false
       @property_hash[:promotable] = should
-      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'delete', "ms_#{@resource[:name]}"], @resource[:cib])
+      self.class.run_command_in_cib([command(:pcs), 'resource', 'delete', "ms_#{@resource[:name]}"], @resource[:cib])
     end
   end
 
@@ -205,8 +205,8 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
       existing_ressource_type << (@property_hash[:existing_primitive_type]).to_s
       if existing_ressource_type != ressource_type
         debug('Removing primitive')
-        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'unclone', (@property_hash[:name]).to_s], @resource[:cib], false)
-        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', (@property_hash[:name]).to_s], @resource[:cib])
+        self.class.run_command_in_cib([command(:pcs), 'resource', 'unclone', (@property_hash[:name]).to_s], @resource[:cib], false)
+        self.class.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', (@property_hash[:name]).to_s], @resource[:cib])
         force_reinstall = :true
       end
     end
@@ -222,7 +222,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
       cmd += operations unless operations.nil?
       cmd += utilization unless utilization.nil?
       cmd += metadatas unless metadatas.nil?
-      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+      self.class.run_command_in_cib(cmd, @resource[:cib])
       # if we are using a master/slave resource, prepend ms_ before its name
       # and declare it as a master/slave resource
       if @property_hash[:promotable] == :true
@@ -233,17 +233,17 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
             cmd << "#{k}=#{v}"
           end
         end
-        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+        self.class.run_command_in_cib(cmd, @resource[:cib])
       end
       # try to remove the default monitor operation
       default_op = { 'monitor' => { 'interval' => '60s' } }
       unless @property_hash[:operations].include?(default_op)
         cmd = [command(:pcs), 'resource', 'op', 'remove', (@property_hash[:name]).to_s, 'monitor', 'interval=60s']
-        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib], false)
+        self.class.run_command_in_cib(cmd, @resource[:cib], false)
       end
     else
       if @property_hash[:promotable] == :false && @property_hash[:existing_promotable] == :true
-        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', "ms_#{@property_hash[:name]}"], @resource[:cib])
+        self.class.run_command_in_cib([command(:pcs), 'resource', 'delete', '--force', "ms_#{@property_hash[:name]}"], @resource[:cib])
       end
       @property_hash[:existing_operations].reject { |op| @property_hash[:operations].include?(op) }.each do |o|
         cmd = [command(:pcs), 'resource', 'op', 'remove', (@property_hash[:name]).to_s]
@@ -251,14 +251,14 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
         o.values.first.each_pair do |k, v|
           cmd << "#{k}=#{v}"
         end
-        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+        self.class.run_command_in_cib(cmd, @resource[:cib])
       end
       cmd = [command(:pcs), 'resource', 'update', (@property_hash[:name]).to_s]
       cmd += parameters unless parameters.nil?
       cmd += operations unless operations.nil?
       cmd += utilization unless utilization.nil?
       cmd += metadatas unless metadatas.nil?
-      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+      self.class.run_command_in_cib(cmd, @resource[:cib])
       if @property_hash[:promotable] == :true
         cmd = [command(:pcs), 'resource', 'update', "ms_#{@property_hash[:name]}", (@property_hash[:name]).to_s]
         unless @property_hash[:ms_metadata].empty? && @property_hash[:existing_ms_metadata].empty?
@@ -270,7 +270,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
             cmd << "#{k}="
           end
         end
-        PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+        self.class.run_command_in_cib(cmd, @resource[:cib])
       end
     end
   end

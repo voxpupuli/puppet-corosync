@@ -20,13 +20,13 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
   def change_clone_id(type, primitive, id, cib)
     xpath = "/cib/configuration/resources/clone[descendant::#{type}[@id='#{primitive}']]"
     cmd = [command(:cibadmin), '--query', '--xpath', xpath]
-    raw, = PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, cib)
+    raw, = self.class.run_command_in_cib(cmd, cib)
     doc = REXML::Document.new(raw)
     return unless doc.root.attributes['id'] != id
 
     doc.root.attributes['id'] = id
     cmd = [command(:cibadmin), '--replace', '--xpath', xpath, '--xml-text', doc.to_s.chop]
-    PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, cib)
+    self.class.run_command_in_cib(cmd, cib)
   end
 
   def self.instances
@@ -35,7 +35,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    raw, = PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd)
+    raw, = self.class.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//resources//clone') do |e|
@@ -89,7 +89,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
   # Unlike create we actually immediately delete the item.
   def destroy
     debug 'Removing clone'
-    PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'unclone', @resource[:name]], @resource[:cib])
+    self.class.run_command_in_cib([command(:pcs), 'resource', 'unclone', @resource[:name]], @resource[:cib])
     @property_hash.clear
   end
 
@@ -116,7 +116,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
       # pcs versions earlier than 0.9.116 do not allow updating a cloned
       # resource. Being conservative, we will unclone then create a new clone
       # with the new parameters.
-      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'resource', 'unclone', @property_hash[:existing_clone_element]], @resource.value(:cib))
+      self.class.run_command_in_cib([command(:pcs), 'resource', 'unclone', @property_hash[:existing_clone_element]], @resource.value(:cib))
     end
     cmd = [command(:pcs), 'resource', 'clone', target.to_s]
     {
@@ -129,7 +129,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
     }.each do |property, clone_property|
       cmd << "#{clone_property}=#{@resource.should(property)}" unless @resource.should(property) == :absent
     end
-    PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource.value(:cib))
+    self.class.run_command_in_cib(cmd, @resource.value(:cib))
     change_clone_id(target_type, target, @resource.value(:name), @resource.value(:cib))
   end
 end
