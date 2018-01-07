@@ -23,7 +23,7 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:pcs, parent: PuppetX::Voxpupuli::Co
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    raw, = self.class.run_command_in_cib(cmd)
+    raw, = self.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//configuration/rsc_defaults/meta_attributes/nvpair') do |e|

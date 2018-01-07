@@ -22,7 +22,7 @@ Puppet::Type.type(:cs_property).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
     instances = []
 
     cmd = [command(:crm), 'configure', 'show', 'xml']
-    raw, = self.class.run_command_in_cib(cmd)
+    raw, = self.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     cluster_property_set = doc.root.elements["configuration/crm_config/cluster_property_set[@id='cib-bootstrap-options']"]

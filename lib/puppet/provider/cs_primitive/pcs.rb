@@ -87,7 +87,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    raw, = self.class.run_command_in_cib(cmd)
+    raw, = self.run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//primitive') do |e|
