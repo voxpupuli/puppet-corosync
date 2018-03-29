@@ -19,7 +19,7 @@ Puppet::Type.type(:cs_shadow).provide(:crm, parent: PuppetX::Voxpupuli::Corosync
 
   # Need this available at the provider level, for types
   def get_epoch(cib = nil)
-    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.get_epoch(cib)
+    self.class.get_epoch(cib)
   end
 
   def epoch
@@ -31,6 +31,6 @@ Puppet::Type.type(:cs_shadow).provide(:crm, parent: PuppetX::Voxpupuli::Corosync
   end
 
   def sync(_cib)
-    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.sync_shadow_cib(@resource[:name])
+    self.class.sync_shadow_cib(@resource[:name])
   end
 end

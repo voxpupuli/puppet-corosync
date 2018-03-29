@@ -23,7 +23,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, parent: PuppetX::Voxpupuli::Coro
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    raw, = PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd)
+    raw, = run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
     resource_set_options = ['sequential', 'require-all', 'action', 'role']
 
@@ -102,7 +102,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, parent: PuppetX::Voxpupuli::Coro
   def destroy
     debug('Removing colocation')
     cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
-    PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+    self.class.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
   end
 
@@ -153,7 +153,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, parent: PuppetX::Voxpupuli::Coro
     if @property_hash[:new] == false
       debug('Removing colocation')
       cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
-      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+      self.class.run_command_in_cib(cmd, @resource[:cib])
     end
     first_item = @property_hash[:primitives].shift
     cmd = [command(:pcs), 'constraint', 'colocation']
@@ -196,6 +196,6 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, parent: PuppetX::Voxpupuli::Coro
       cmd << @property_hash[:score]
       cmd << "id=#{@property_hash[:name]}"
     end
-    PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+    self.class.run_command_in_cib(cmd, @resource[:cib])
   end
 end

@@ -19,11 +19,11 @@ Puppet::Type.type(:cs_commit).provide(:crm, parent: PuppetX::Voxpupuli::Corosync
   end
 
   def commit
-    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(['crm_shadow', '--force', '--commit', @resource[:name]])
+    self.class.run_command_in_cib(['crm_shadow', '--force', '--commit', @resource[:name]])
     # We run the next command in the CIB directly by purpose:
     # We commit the shadow CIB with the admin_epoch it was created.
-    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(['cibadmin', '--modify', '--xml-text', '<cib admin_epoch="admin_epoch++"/>'])
+    self.class.run_command_in_cib(['cibadmin', '--modify', '--xml-text', '<cib admin_epoch="admin_epoch++"/>'])
     # Next line is for indempotency
-    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.sync_shadow_cib(@resource[:name], true)
+    self.class.sync_shadow_cib(@resource[:name], true)
   end
 end

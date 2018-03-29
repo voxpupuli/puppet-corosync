@@ -23,7 +23,7 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:pcs, parent: PuppetX::Voxpupuli::Co
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    raw, = PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd)
+    raw, = run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//configuration/rsc_defaults/meta_attributes/nvpair') do |e|
@@ -55,7 +55,7 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:pcs, parent: PuppetX::Voxpupuli::Co
   def destroy
     debug('Removing resource default')
     cmd = [command(:pcs), 'resource', 'defaults', (@property_hash[:name]).to_s + '=']
-    PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+    self.class.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
   end
 
@@ -82,6 +82,6 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:pcs, parent: PuppetX::Voxpupuli::Co
     # clear this on properties, in case it's set from a previous
     # run of a different corosync type
     cmd = [command(:pcs), 'resource', 'defaults', "#{@property_hash[:name]}=#{@property_hash[:value]}"]
-    PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+    self.class.run_command_in_cib(cmd, @resource[:cib])
   end
 end

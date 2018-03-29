@@ -19,7 +19,7 @@ Puppet::Type.type(:cs_group).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
     instances = []
 
     cmd = [command(:crm), 'configure', 'show', 'xml']
-    raw, = PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd)
+    raw, = run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//group') do |e|
@@ -58,10 +58,10 @@ Puppet::Type.type(:cs_group).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
   def destroy
     debug('Stopping group before removing it')
     cmd = [command(:crm), '-w', 'resource', 'stop', @resource[:name]]
-    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib], false)
+    self.class.run_command_in_cib(cmd, @resource[:cib], false)
     debug('Removing group')
     cmd = [command(:crm), 'configure', 'delete', @resource[:name]]
-    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
+    self.class.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
   end
 
@@ -93,7 +93,7 @@ Puppet::Type.type(:cs_group).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
       tmpfile.write(updated)
       tmpfile.flush
       cmd = [command(:crm), 'configure', 'load', 'update', tmpfile.path.to_s]
-      PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
+      self.class.run_command_in_cib(cmd, @resource[:cib])
     end
   end
 end

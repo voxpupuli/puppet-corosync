@@ -19,11 +19,11 @@ Puppet::Type.type(:cs_commit).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync
 
   def commit
     cib_path = File.join(Puppet[:vardir], 'shadow.' + @resource[:name])
-    PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:pcs), 'cluster', 'cib-push', cib_path, 'diff-against=' + cib_path + '.ori'])
+    self.class.run_command_in_cib([command(:pcs), 'cluster', 'cib-push', cib_path, 'diff-against=' + cib_path + '.ori'])
     # We run the next command in the CIB directly by purpose:
     # We commit the shadow CIB with the admin_epoch it was created.
-    PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib([command(:cibadmin), '--modify', '--xml-text', '<cib admin_epoch="admin_epoch++"/>'])
+    self.class.run_command_in_cib([command(:cibadmin), '--modify', '--xml-text', '<cib admin_epoch="admin_epoch++"/>'])
     # Next line is for indempotency
-    PuppetX::Voxpupuli::Corosync::Provider::Pcs.sync_shadow_cib(@resource[:name], true)
+    self.class.sync_shadow_cib(@resource[:name], true)
   end
 end

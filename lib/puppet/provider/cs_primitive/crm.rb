@@ -75,7 +75,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
     instances = []
 
     cmd = [command(:crm), 'configure', 'show', 'xml']
-    raw, = PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd)
+    raw, = run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     REXML::XPath.each(doc, '//primitive') do |e|
@@ -108,10 +108,10 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
   def destroy
     debug('Stopping primitive before removing it')
     cmd = [command(:crm), 'resource', 'stop', @resource[:name]]
-    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
+    self.class.run_command_in_cib(cmd, @resource[:cib])
     debug('Removing primitive')
     cmd = [command(:crm), 'configure', 'delete', @resource[:name]]
-    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
+    self.class.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
   end
 
@@ -172,9 +172,9 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
     when :false
       @property_hash[:promotable] = should
       cmd = [command(:crm), 'resource', 'stop', "ms_#{@resource[:name]}"]
-      PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
+      self.class.run_command_in_cib(cmd, @resource[:cib])
       cmd = [command(:crm), 'configure', 'delete', "ms_#{@resource[:name]}"]
-      PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
+      self.class.run_command_in_cib(cmd, @resource[:cib])
     end
   end
 
@@ -248,7 +248,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
       tmpfile.write(updated)
       tmpfile.flush
       cmd = ['crm', '-F', 'configure', 'load', 'update', tmpfile.path.to_s]
-      PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd, @resource[:cib])
+      self.class.run_command_in_cib(cmd, @resource[:cib])
     end
   end
 end

@@ -24,7 +24,7 @@ Puppet::Type.type(:cs_order).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
     instances = []
 
     cmd = [command(:crm), 'configure', 'show', 'xml']
-    raw, = PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib(cmd)
+    raw, = run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     doc.root.elements['configuration'].elements['constraints'].each_element('rsc_order') do |e|
@@ -81,7 +81,7 @@ Puppet::Type.type(:cs_order).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing order directive')
-    PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib([command(:crm), 'configure', 'delete', @resource[:name]], @resource[:cib])
+    self.class.run_command_in_cib([command(:crm), 'configure', 'delete', @resource[:name]], @resource[:cib])
     @property_hash.clear
   end
 
@@ -100,7 +100,7 @@ Puppet::Type.type(:cs_order).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
     Tempfile.open('puppet_crm_update') do |tmpfile|
       tmpfile.write(updated)
       tmpfile.flush
-      PuppetX::Voxpupuli::Corosync::Provider::Crmsh.run_command_in_cib([command(:crm), 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
+      self.class.run_command_in_cib([command(:crm), 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
     end
   end
 end

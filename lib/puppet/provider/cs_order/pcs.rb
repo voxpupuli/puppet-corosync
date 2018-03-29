@@ -28,7 +28,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
     instances = []
 
     cmd = [command(:pcs), 'cluster', 'cib']
-    raw, = PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd)
+    raw, = run_command_in_cib(cmd)
     doc = REXML::Document.new(raw)
 
     constraints = doc.root.elements['configuration'].elements['constraints']
@@ -101,7 +101,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
   def destroy
     debug('Removing order directive')
     cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
-    PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+    self.class.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
   end
 
@@ -115,7 +115,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
     if @property_hash[:new] == false
       debug('Removing order directive')
       cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
-      PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+      self.class.run_command_in_cib(cmd, @resource[:cib])
     end
 
     cmd = [command(:pcs), 'constraint', 'order']
@@ -130,6 +130,6 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
     cmd << "kind=#{@property_hash[:kind]}"
     cmd << "id=#{@property_hash[:name]}"
     cmd << "symmetrical=#{@property_hash[:symmetrical]}"
-    PuppetX::Voxpupuli::Corosync::Provider::Pcs.run_command_in_cib(cmd, @resource[:cib])
+    self.class.run_command_in_cib(cmd, @resource[:cib])
   end
 end
