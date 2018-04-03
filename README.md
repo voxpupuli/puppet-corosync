@@ -450,7 +450,7 @@ We do maintain a [roadmap regarding next releases of this module](ROADMAP.md).
 
 ### Operating System support matrix
 
-| OS          | release | Puppet 3.8.7  | Puppet 4.X (PC1) | Puppet 5.X       |
+| OS          | release | Puppet 3.8.7  | Puppet 4 (PC1)   | Puppet 5.X       |
 |-------------|---------|---------------|------------------|------------------|
 | CentOS/RHEL | 5       | Not supported | Not supported    | Not supported    |
 | CentOS/RHEL | 6       | Not supported | Not supported    | Not supported    |
