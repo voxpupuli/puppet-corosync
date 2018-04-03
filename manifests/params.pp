@@ -44,6 +44,20 @@ class corosync::params {
       $package_install_options = undef
     }
 
+    'Suse': {
+      case $facts['os']['name'] {
+        'SLES': {
+          $package_crmsh  = true
+          $package_pcs    = false
+          $package_fence_agents = false
+          $package_install_options = undef
+        }
+        default: {
+          fail("Unsupported flavour of ${facts['os']['family']}: ${facts['os']['name']}")
+        }
+      }
+    }
+
     default: {
       fail("Unsupported operating system: ${facts['os']['name']}")
     }

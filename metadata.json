@@ -31,6 +31,13 @@
       "operatingsystemrelease": [
         "16.04"
       ]
+    },
+    {
+      "operatingsystem": "SLES",
+      "operatingsystemmajrelease": [
+        "12",
+        "15"
+      ]
     }
   ],
   "requirements": [
