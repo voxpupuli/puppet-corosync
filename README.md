@@ -450,15 +450,16 @@ We do maintain a [roadmap regarding next releases of this module](ROADMAP.md).
 
 ### Operating System support matrix
 
-| OS          | release | Puppet 3.8.7    | Puppet 4.X (PC1) |
-|-------------|---------|---------------|------------------|
-| CentOS/RHEL | 5       | Not supported | Not supported    |
-| CentOS/RHEL | 6       | Not supported | Not supported    |
-| CentOS/RHEL | 7       | **Supported** | **Supported**    |
-| Debian      | 8       | Not supported | **Supported[1]** |
-| Ubuntu      | 12.04   | Not supported | Not supported    |
-| Ubuntu      | 14.04   | **Supported** | **Supported**    |
-| Ubuntu      | 16.04   | Not supported | **Supported**    |
+| OS          | release | Puppet 3.8.7  | Puppet 4 (PC1)   | Puppet 5.X       |
+|-------------|---------|---------------|------------------|------------------|
+| CentOS/RHEL | 5       | Not supported | Not supported    | Not supported    |
+| CentOS/RHEL | 6       | Not supported | Not supported    | Not supported    |
+| CentOS/RHEL | 7       | Not supported | **Supported**    | **Supported**    |
+| Debian      | 8       | Not supported | **Supported[1]** | **Supported[1]** |
+| Debian      | 9       | Not supported | **Supported**    | **Supported**    |
+| Ubuntu      | 12.04   | Not supported | Not supported    | Not supported    |
+| Ubuntu      | 14.04   | Not supported | **Supported**    | **Supported**    |
+| Ubuntu      | 16.04   | Not supported | **Supported**    | **Supported**    |
 
 **[1] Debian 8 Support**: In order to have this module working with Debian 8, you
 need to enable the jessie-backport apt repository.
@@ -475,7 +476,7 @@ continue the development of this module.
 
 Copyright © 2012-2014 [Puppet Inc](https://www.puppet.com/)
 
-Copyright © 2012-2016 [Multiple contributors][mc]
+Copyright © 2012-2018 [Multiple contributors][mc]
 
 [mc]:https://github.com/voxpupuli/puppet-corosync/graphs/contributors
 
