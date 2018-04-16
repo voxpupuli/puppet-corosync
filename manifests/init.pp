@@ -280,7 +280,7 @@ class corosync(
   Optional[Integer] $threads                                         = undef,
   Optional[Variant[Stdlib::Port, Array[Stdlib::Port]]] $port         = $corosync::params::port,
   Corosync::IpStringIp $bind_address                                 = $corosync::params::bind_address,
-  Optional[Stdlib::IP::Address] $multicast_address                   = undef,
+  Optional[Corosync::IpStringIp] $multicast_address                  = undef,
   Optional[Array] $unicast_addresses                                 = undef,
   Boolean $force_online                                              = $corosync::params::force_online,
   Boolean $check_standby                                             = $corosync::params::check_standby,
@@ -329,8 +329,8 @@ class corosync(
   Boolean $test_corosync_config                                      = $corosync::params::test_corosync_config,
 ) inherits ::corosync::params {
 
-  if $set_votequorum and empty($quorum_members) {
-    fail('set_votequorum is true, but no quorum_members have been passed.')
+  if $set_votequorum and (empty($quorum_members) and empty($multicast_address)) {
+    fail('set_votequorum is true, but neither quorum_members were passed nor was multicast specified.')
   }
 
   if $quorum_members_names and empty($quorum_members) {
