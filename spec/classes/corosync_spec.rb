@@ -534,11 +534,33 @@ describe 'corosync' do
         )
       end
 
-      it 'raises error' do
-        is_expected.to raise_error(
-          Puppet::Error,
-          %r{set_votequorum is true, but no quorum_members have been passed.}
-        )
+      context 'when multicast_address is set' do
+        before do
+          params.merge!(
+            multicast_address: '10.0.0.1'
+          )
+        end
+
+        it 'does not contain nodelist' do
+          is_expected.not_to contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{nodelist}
+          )
+        end
+      end
+
+      context 'when multicast_address is not set' do
+        before do
+          params.merge!(
+            multicast_address: []
+          )
+        end
+
+        it 'raises error' do
+          is_expected.to raise_error(
+            Puppet::Error,
+            %r{set_votequorum is true, but neither quorum_members were passed nor was multicast specified.}
+          )
+        end
       end
     end
 
