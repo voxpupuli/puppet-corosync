@@ -1,10 +1,10 @@
 ---
 .travis.yml:
   docker_sets:
-    - set: docker/centos-7
-    - set: docker/debian-9
-    - set: docker/ubuntu-14.04
-    - set: docker/ubuntu-16.04
+    - set: centos7-64
+    - set: debian9-64
+    - set: ubuntu1404-64
+    - set: ubuntu1604-64
   secure: "OKYO+/kY1KB9EH0pB30AU6E2c5SZbNql+Klg+sb1/LMi+ADjyNEzcfTP6aUhnYedKJf5m8rfycc81UPuUeKaR/U/mPwR1R5OKh+S1KL1yzrRdxdpmLWMX14nBFbAZYvSTe/bPbxhngjW84uHRF2zkkSxKStsIzyy2DcTYayaWZ0="
 spec/spec_helper.rb:
   spec_overrides:
