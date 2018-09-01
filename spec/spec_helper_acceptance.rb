@@ -4,14 +4,14 @@
 # (c) 2015-2015 Puppetlabs and puppetlabs-stdlib contributors
 
 require 'beaker-rspec'
+require 'beaker-puppet'
 require 'beaker/puppet_install_helper'
 require 'beaker/module_install_helper'
 
-UNSUPPORTED_PLATFORMS = [].freeze
-
-run_puppet_install_helper
-install_module
-install_module_dependencies
+run_puppet_install_helper unless ENV['BEAKER_provision'] == 'no'
+install_ca_certs unless ENV['PUPPET_INSTALL_TYPE'] =~ %r{pe}i
+install_module_on(hosts)
+install_module_dependencies_on(hosts)
 
 RSpec.configure do |c|
   # Readable test descriptions
@@ -20,6 +20,9 @@ RSpec.configure do |c|
   # Configure all nodes in nodeset
   c.before :suite do
     hosts.each do |host|
+      if host[:platform] =~ %r{el-7-x86_64} && host[:hypervisor] =~ %r{docker}
+        on(host, "sed -i '/nodocs/d' /etc/yum.conf")
+      end
       # For Debian 8 "jessie", we need
       # - pacemaker and crmsh delivered in jessie-backports only
       # - openhpid post-install may fail (https://bugs.debian.org/785287)
