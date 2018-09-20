@@ -16,8 +16,20 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
   # Path to the crm binary for interacting with the cluster configuration.
   # Decided to just go with relative.
   commands crm: 'crm'
+  
+  # Path to the pacemakerd binary to check version for resource_discovery feature
+  # Decided to just go with relative.
+  commands pacemakerd: 'pacemakerd'
 
   mk_resource_methods
+
+  # we need to check if we run at least pacemakerd version 1.1.13 before enabling feature discovery
+  # see http://blog.clusterlabs.org/blog/2014/feature-spotlight-controllable-resource-discovery
+  pacemakerd_version_string = pacemakerd('--version')
+  pacemakerd_version = pacemakerd_version_string.scan(%r{\d+\.\d+\.\d+}).first unless pacemakerd_version_string.nil?
+  if Puppet::Util::Package.versioncmp(pacemakerd_version,'1.1.13') >= 0
+    has_feature :discovery
+  end
 
   def self.instances
     block_until_ready
