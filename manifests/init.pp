@@ -278,6 +278,14 @@
 #   Default (Debian >= 8):        true
 #   Default (otherwise):          false
 #
+# [*disable_watchdog*]
+#   This configuration option is optional and is only relevant when you use sbd:
+#   On ubuntu/Debian corosync is compiled with watchdog device support. If
+#   a watchdog device is loaded, corosync will use and block it, so sbd can't
+#   use it anymore. (See https://github.com/ClusterLabs/crmsh/issues/236)
+#   Setting this option to true disables the watchdog use of corosync
+#   Default: false
+#
 # === Examples
 #
 #  class { 'corosync':
@@ -348,6 +356,7 @@ class corosync(
   Optional[Enum['yes', 'no']] $clear_node_high_bit                   = undef,
   Optional[Integer] $max_messages                                    = undef,
   Boolean $test_corosync_config                                      = $corosync::params::test_corosync_config,
+  Boolean $disable_watchdog                                          = $corosync::params::disable_watchdog,
 ) inherits ::corosync::params {
 
   if $set_votequorum and empty($quorum_members) {
@@ -457,6 +466,7 @@ class corosync(
   # - $consensus
   # - $clear_node_high_bit
   # - $max_messages
+  # - $disable_watchdog
   if $test_corosync_config {
     # corosync -t is only included since 2.3.4
     file { '/etc/corosync/corosync.conf':

@@ -22,6 +22,7 @@ class corosync::params {
   $manage_corosync_service             = true
   $enable_pacemaker_service            = true
   $enable_pcsd_service                 = true
+  $disable_watchdog                    = false
 
   case $::osfamily {
     'RedHat': {

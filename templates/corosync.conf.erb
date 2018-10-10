@@ -143,3 +143,9 @@ nodelist {
 }
 <% end -%>
 <% end -%>
+
+<% if @disable_watchdog -%>
+  resources {
+      watchdog_device: off
+  }
+<% end -%>
