@@ -19,7 +19,7 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
   
   # Path to the pacemakerd binary to check version for resource_discovery feature
   # Decided to just go with relative.
-  commands pacemakerd: 'pacemakerd'
+  commands :pacemakerd => 'pacemakerd'
 
   mk_resource_methods
 
