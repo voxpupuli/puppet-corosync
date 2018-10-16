@@ -25,11 +25,16 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
 
   # we need to check if we run at least pacemakerd version 1.1.13 before enabling feature discovery
   # see http://blog.clusterlabs.org/blog/2014/feature-spotlight-controllable-resource-discovery
+  # 
   begin
     pacemakerd_version_string = pacemakerd('--version')
-    pacemakerd_version = pacemakerd_version_string.scan(%r{\d+\.\d+\.\d+}).first unless pacemakerd_version_string.nil?
-    if Puppet::Util::Package.versioncmp(pacemakerd_version,'1.1.13') >= 0
-      has_feature :discovery
+    if pacemakerd_version_string != nil
+      pacemakerd_version = pacemakerd_version_string.scan(%r{\d+\.\d+\.\d+}).first unless pacemakerd_version_string.nil?
+      if pacemakerd_version != nil
+        if Puppet::Util::Package.versioncmp(pacemakerd_version,'1.1.13') >= 0
+          has_feature :discovery
+        end
+      end
     end
   rescue Puppet::MissingCommand
     # on fresh systems pacemaker is not yet installed when facts are gathered, so we do just nothing, when the executable is missing
