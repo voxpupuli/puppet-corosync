@@ -33,7 +33,7 @@ RSpec.configure do |c|
       # On Debian 9 "stretch", service state transitions (restart, stop) hang indefinitely and
       # lead to test timeouts if there is a service unit of Type=notify involved.
       # Use Type=simple as a workaround. See issue 455.
-      if fact('os.family') == 'Debian' && fact('os.release.major') == '9'
+      if host[:hypervisor] =~ %r{docker} && fact('os.family') == 'Debian' && fact('os.release.major') == '9'
         on host, 'mkdir /etc/systemd/system/corosync.service.d'
         on host, 'echo -e "[Service]\nType=simple" > /etc/systemd/system/corosync.service.d/10-type-simple.conf'
       end
