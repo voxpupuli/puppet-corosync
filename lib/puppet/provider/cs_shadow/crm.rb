@@ -8,6 +8,10 @@ rescue LoadError
 end
 
 Puppet::Type.type(:cs_shadow).provide(:crm, parent: PuppetX::Voxpupuli::Corosync::Provider::Crmsh) do
+  desc 'Specific provider for a rather specific type since I currently have no plan to
+        abstract corosync/pacemaker vs. keepalived. This provider initializes a new CIB
+        to begin tracking cluster changes.'
+
   commands crm_shadow: 'crm_shadow'
   commands cibadmin: 'cibadmin'
   commands crm: 'crm'

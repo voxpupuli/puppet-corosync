@@ -1,259 +1,237 @@
-# == Class: corosync
+# @summary Configures the Pacemaker+Corosync stack to provide high-availability.
 #
 # This class will set up corosync for use by the Puppet Enterprise console to
 # facilitate an active/standby configuration for high availability.  It is
 # assumed that this module has been initially ran on a Puppet master with the
 # capabilities of signing certificates to do the initial key generation.
 #
-# === Parameters
-#
-# [*enable_secauth*]
+# @param enable_secauth [Boolean]
 #   Controls corosync's ability to authenticate and encrypt multicast messages.
-#   Default: true
 #
-# [*authkey_source*]
+# @param secauth_parameter_mode [Enum['1.x','2.x']]
+#   Determines whether the crypto_hash and crypto_cipher parameters are
+#   specified. These flags were added in Corosync 2.x so operating systems using
+#   older 1.x packages must continue to use sec_auth instead.
+#
+# @param authkey_source [Enum['file', 'string']]
 #   Allows to use either a file or a string as a authkey.
-#   Default: 'file'
 #
-# [*authkey*]
+# @param authkey [Variant[Stdlib::Absolutepath,Stdlib::Base64]]
 #   Specifies the path to the CA which is used to sign Corosync's certificate if
-#   authkey_source is 'file' or the actual authkey if 'string' is used instead.
-#   Default: '/etc/puppet/ssl/certs/ca.pem'
+#   authkey_source is 'file' or a base64 encoded version of the actual authkey
+#   if 'string' is used instead.
 #
-# [*threads*]
+# @param crypto_hash [Corosync::CryptoHash]
+#   Hashing algorithm used by corosync for intra-cluster communication. Valid
+#   values are none, md5, sha1, sha256, sha384, and sha512
+#
+# @param crypto_cipher [Corosync::CryptoCipher]
+#   Encryption cipher used by corosync for intra-cluster communication. Valid
+#   values are none, aes256, aes192, aes128, and 3des
+#
+# @param threads [Optional[Integer]]
 #   How many threads you are going to let corosync use to encode and decode
 #   multicast messages.  If you turn off secauth then corosync will ignore
 #   threads.
-#   Default: undef
 #
-# [*bind_address*]
+# @param bind_address [Corosync::IpStringIp]
 #   The ip address we are going to bind the corosync daemon too.
 #   Can be specified as an array to have multiple rings.
-#   Default: $::ipaddress
 #
-# [*port*]
+# @param port [Optional[Variant[Integer[0,65535], Array[Integer[0,65535]]]]]
 #   The UDP port that corosync will use to do its multicast communication. Be
 #   aware that corosync used this defined port plus minus one.
 #   Can be specified as an array to have multiple rings.
-#   Default: '5405'
 #
-# [*multicast_address*]
+# @param multicast_address [Optional[Stdlib::Compat::Ip_address]]
 #   An IP address that has been reserved for multicast traffic.  This is the
 #   default way that Corosync accomplishes communication across the cluster.
 #   Use 'broadcast' to have broadcast instead
 #   Can be specified as an array to have multiple rings (multicast only).
-#   Default: undef
 #
-# [*unicast_addresses*]
+# @param unicast_addresses [Optional[Array]]
 #   An array of IP addresses that make up the cluster's members.  These are
 #   use if you are able to use multicast on your network and instead opt for
 #   the udpu transport.  You need a relatively recent version of Corosync to
 #   make this possible.
 #   You can also have an array of arrays to have multiple rings. In that case,
 #   each subarray matches a host IP addresses.
-#   Default: undef
 #
-# [*force_online*]
+# @param force_online [Boolean]
 #   Boolean parameter specifying whether to force nodes that have been put
 #   in standby back online.
-#   Default: false
 #
-# [*check_standby*]
+# @param check_standby [Boolean]
 #   Boolean parameter specifying whether puppet should return an error log
 #   message if a node is in standby. Useful for monitoring node state.
-#   Default: false
 #
-# [*log_timestamp*]
+# @param log_timestamp [Boolean]
 #   Boolean parameter specifying whether a timestamp should be placed on all
 #   log messages.
-#   Default: false
 #
-# [*log_file*]
+# @param log_file [Boolean]
 #   Boolean parameter specifying whether Corosync should produce debug
 #   output in a logfile.
-#   Default: true
 #
-# [*log_file_name*]
+# @param log_file_name [Optional[Stdlib::Absolutepath]]
 #   Absolute path to the logfile Corosync should use when `$log_file` (see
 #   above) is true.
-#   Default: undef
 #
-# [*debug*]
+# @param debug [Boolean]
 #   Boolean parameter specifying whether Corosync should produce debug
 #   output in its logs.
-#   Default: false
 #
-# [*log_stderr*]
+# @param log_stderr [Boolean]
 #   Boolean parameter specifying whether Corosync should log errors to
 #   stderr.
-#   Default: true
 #
-# [*syslog_priority*]
+# @param syslog_priority [Corosync::SyslogPriority]
 #   String parameter specifying the minimal log level for Corosync syslog
 #   messages. Allowed values: debug|info|notice|warning|err|emerg.
-#   Default: 'info'.
 #
-# [*log_function_name*]
+# @param log_function_name [Boolean]
 #   Boolean parameter specifying whether Corosync should log called function
 #   names to.
-#   Default: false
 #
-# [*rrp_mode*]
+# @param rrp_mode [Optional[Enum['none', 'active', 'passive']]]
 #   Mode of redundant ring. May be none, active, or passive.
-#   Default: undef
 #
-# [*netmtu*]
+# @param netmtu [Optional[Integer]]
 #   This specifies the network maximum transmit unit.
-#   Default: undef
 #
-# [*ttl*]
+# @param ttl [Optional[Integer[0,255]]]
 #   Time To Live.
-#   Default: undef
 #
-# [*vsftype*]
+# @param vsftype [Optional[Enum['ykd', 'none']]]
 #   Virtual synchrony filter type.
-#   Default: undef
 #
-# [*package_corosync*]
+# @param package_corosync [Boolean]
 #   Define if package corosync should be managed.
-#   Default: true
 #
-# [*package_crmsh*]
+# @param package_crmsh [Boolean]
 #   Define if package crmsh should be managed.
 #   Default (Debian based): true
 #   Default (otherwise):    false
 #
-# [*package_pacemaker*]
+# @param package_pacemaker [Boolean]
 #   Define if package pacemaker should be managed.
-#   Default: true
 #
-# [*package_pcs*]
+# @param package_pcs [Boolean]
 #   Define if package pcs should be managed.
 #   Default (Red Hat based):  true
 #   Default (otherwise):      false
 #
-# [*packageopts_corosync*]
+# @param packageopts_corosync [Optional[Array]]
 #   Additional install-options for the corosync package resource.
 #   Default (Debian Jessie):  ['-t', 'jessie-backports']
 #   Default (otherwise):      undef
 #
-# [*packageopts_crmsh*]
+# @param packageopts_crmsh [Optional[Array]]
 #   Additional install-options for the crmsh package resource.
 #   Default (Debian Jessie):  ['-t', 'jessie-backports']
 #   Default (otherwise):      undef
 #
-# [*packageopts_pacemaker*]
+# @param packageopts_pacemaker [Optional[Array]]
 #   Additional install-options for the pacemaker package resource.
 #   Default (Debian Jessie):  ['-t', 'jessie-backports']
 #   Default (otherwise):      undef
 #
-# [*packageopts_pcs*]
+# @param packageopts_pcs [Optional[Array]]
 #   Additional install-options for the pcs package resource.
 #   Default (Debian Jessie):  ['-t', 'jessie-backports']
 #   Default (otherwise):      undef
 #
-# [*version_corosync*]
+# @param version_corosync [String]
 #   Define what version of the corosync package should be installed.
 #   Default: 'present'
 #
-# [*version_crmsh*]
+# @param version_crmsh [String]
 #   Define what version of the crmsh package should be installed.
 #   Default: 'present'
 #
-# [*version_pacemaker*]
+# @param version_pacemaker [String]
 #   Define what version of the pacemaker package should be installed.
 #   Default: 'present'
 #
-# [*version_pcs*]
+# @param version_pcs [String]
 #   Define what version of the pcs package should be installed.
 #   Default: 'present'
 #
-# [*set_votequorum*]
+# @param set_votequorum [Boolean]
 #   Set to true if corosync_votequorum should be used as quorum provider.
 #   Default (Red Hat based):    true
 #   Default (Ubuntu >= 14.04):  true
 #   Default (otherwise):        false
 #
-# [*votequorum_expected_votes*]
-#   Default: undef
+# @param votequorum_expected_votes [Optional[Integer]]
+#   Overrides the automatic calculation of expected votes which is normally
+#   derived from the number of nodes.
 #
-# [*quorum_members*]
+# @param quorum_members [Array]
 #   Array of quorum member hostname. This is required if set_votequorum
 #   is set to true.
 #   You can also have an array of arrays to have multiple rings. In that case,
 #   each subarray matches a member IP addresses.
-#   Default: ['localhost']
 #
-# [*quorum_members_ids*]
+# @param quorum_members_ids [Optional[Array]]
 #   Array of quorum member IDs. Persistent IDs are required for the dynamic
 #   config of a corosync cluster and when_set_votequorum is set to true.
 #   Should be used only with the quorum_members parameter.
-#   Default: undef
 #
-# [*quorum_members_names*]
+# @param quorum_members_names [Optional[Array]]
 #   Array of quorum member names. Persistent names are required when you
 #   define IP addresses in quorum_members.
-#   Default: undef
 #
-# [*token*]
+# @param token [Optional[Integer]]
 #   Time (in ms) to wait for a token
-#   Default: undef
 #
-# [*token_retransmits_before_loss_const*]
+# @param token_retransmits_before_loss_const [Optional[Integer]]
 #   How many token retransmits before forming a new configuration.
-#   Default: undef
 #
-# [*compatibility*]
-#   Default: undef
+# @param compatibility [Optional[String]]
+#   Older versions of corosync allowed a config-file directive to indicate
+#   backward compatibility. This sets that.
 #
-# [*enable_corosync_service*]
+# @param enable_corosync_service [Boolean]
 #   Whether the module should enable the corosync service.
-#   Default: true
 #
-# [*manage_corosync_service*]
+# @param manage_corosync_service [Boolean]
 #   Whether the module should try to manage the corosync service. If set to
 #   false, the service will need to be specified in the catalog elsewhere.
-#   Default: true
 #
-# [*enable_pacemaker_service*]
+# @param enable_pacemaker_service [Boolean]
 #   Whether the module should enable the pacemaker service.
-#   Default: true
 #
-# [*manage_pacemaker_service*]
+# @param manage_pacemaker_service [Boolean]
 #   Whether the module should try to manage the pacemaker service.
 #   Default (Red Hat based >= 7): true
 #   Default (Ubuntu >= 14.04):    true
 #   Default (otherwise):          false
 #
-# [*enable_pcsd_service*]
+# @param enable_pcsd_service [Boolean]
 #   Whether the module should enable the pcsd service.
-#   Default: true
 #
-# [*manage_pcsd_service*]
+# @param manage_pcsd_service [Boolean]
 #   Whether the module should try to manage the pcsd service in addition to the
 #   corosync service.
 #   pcsd service is the GUI and the remote configuration interface.
-#   Default: false
 #
-# [*cluster_name*]
+# @param cluster_name [Optional[String]]
 #   This specifies the name of cluster and it's used for automatic
 #   generating of multicast address.
-#   Default: undef
 #
-# [*join*]
+# @param join [Optional[Integer]]
 #   This timeout specifies in milliseconds how long to wait for join messages
 #   in the membership protocol.
-#   Default: undef
 #
-# [*consensus*]
+# @param consensus [Optional[Integer]]
 #   This timeout specifies in milliseconds how long to wait for consensus to be
 #   achieved before starting a new round of membership configuration.
 #   The minimum value for consensus must be 1.2 * token. This value will be
 #   automatically calculated at 1.2 * token if the user doesn't specify a
 #   consensus value.
-#   Default: undef
 #
-# [*clear_node_high_bit*]
+# @param clear_node_high_bit [Optional[Enum['yes', 'no']]]
 #   This configuration option is optional and is only relevant when no nodeid
 #   is specified. Some openais clients require a signed 32 bit nodeid that is
 #   greater than zero however by default openais uses all 32 bits of the IPv4
@@ -262,15 +240,13 @@
 #   32 bit integer.
 #   WARNING: The clusters behavior is undefined if this option is enabled on
 #   only a subset of the cluster (for example during a rolling upgrade).
-#   Default: undef
 #
-# [*max_messages*]
+# @param max_messages [Optional[Integer]]
 #   This constant specifies the maximum number of messages that may be sent by
 #   one processor on receipt of the token. The max_messages parameter is limited
 #   to 256000 / netmtu to prevent overflow of the kernel transmit buffers.
-#   Default: undef
 #
-# [*test_corosync_config*]
+# @param test_corosync_config [Boolean]
 #   Whether we should test new configuration files with `corosync -t`.
 #   (requires corosync 2.3.4)
 #   Default (Red Hat based >= 7): true
@@ -278,7 +254,7 @@
 #   Default (Debian >= 8):        true
 #   Default (otherwise):          false
 #
-# === Examples
+# @example Simple configuration without secauth
 #
 #  class { 'corosync':
 #    enable_secauth    => false,
@@ -296,8 +272,11 @@
 #
 class corosync(
   Boolean $enable_secauth                                            = $corosync::params::enable_secauth,
+  Enum['1.x','2.x'] $secauth_parameter_mode                          = $corosync::params::secauth_parameter_mode,
   Enum['file', 'string'] $authkey_source                             = $corosync::params::authkey_source,
-  Variant[Stdlib::Absolutepath,String[1]] $authkey                   = $corosync::params::authkey,
+  Variant[Stdlib::Absolutepath,Stdlib::Base64] $authkey              = $corosync::params::authkey,
+  Corosync::CryptoHash $crypto_hash                                  = 'sha1',
+  Corosync::CryptoCipher $crypto_cipher                              = 'aes256',
   Optional[Integer] $threads                                         = undef,
   Optional[Variant[Integer[0,65535], Array[Integer[0,65535]]]] $port = $corosync::params::port,
   Corosync::IpStringIp $bind_address                                 = $corosync::params::bind_address,
@@ -419,7 +398,7 @@ class corosync(
       'string': {
         file { '/etc/corosync/authkey':
           ensure  => file,
-          content => $authkey,
+          content => Binary($authkey, '%B'),
           mode    => '0400',
           owner   => 'root',
           group   => 'root',

@@ -37,7 +37,18 @@ totem {
 <% if @netmtu -%>
   netmtu:                              <%= @netmtu %>
 <% end -%>
+<% case @secauth_parameter_mode
+   when '1.x' -%>
   secauth:                             <%= @enable_secauth ? 'on' : 'off' %>
+<% when '2.x' -%>
+<% if @enable_secauth -%>
+  crypto_hash:                         <%= @crypto_hash %>
+  crypto_cipher:                       <%= @crypto_cipher %>
+<% else -%>
+  crypto_hash:                         none
+  crypto_cipher:                       none
+<% end -%>
+<% end -%>
 <% if @threads -%>
   threads:                             <%= @threads %>
 <% end -%>
@@ -131,7 +142,8 @@ nodelist {
     ring<%= ring %>_addr: <%= addr %>
 <% end -%>
 <% if @quorum_members_ids.nil? -%>
-    nodeid: <%= i+1 %>
+<%   next_i = i + 1 -%>
+    nodeid: <%= next_i %>
 <% else -%>
     nodeid: <%= [@quorum_members_ids].flatten[i] %>
 <% end -%>
