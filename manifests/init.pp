@@ -213,8 +213,33 @@
 #
 # @param manage_pcsd_service
 #   Whether the module should try to manage the pcsd service in addition to the
-#   corosync service.
-#   pcsd service is the GUI and the remote configuration interface.
+#   corosync service. pcsd service is the GUI and the remote configuration 
+#   interface.
+#
+# @param manage_pcsd_auth [Boolean]
+#   This only has an effect when $manage_pcsd_service is enabled. If set, an
+#   attempt will be made to authorize pcs on the cluster node determined by
+#   manage_pcsd_auth_node. Note that this determination can only be made when
+#   the entries in quorum_members match the trusted certnames of the nodes in
+#   the environment or the IP addresses of the primary adapters.
+#   $sensitive_hacluster_password is mandatory if this parameter is set.
+#
+# @param manage_pcsd_auth_node [Enum['first','last']]
+#   When managing authorization for PCS this determines which node does the
+#   work. Note that only one node 'should' do the work and nodes are chosen by
+#   matching local facts to the contents of quorum_members. When 
+#   manage_pcsd_auth is disabled this parameter has no effect.
+#
+# @param sensitive_hacluster_password [Sensitive[String]]
+#   When PCS is configured on a RHEL system this directive is used to set the
+#   password for the hacluster user. If both $manage_pcsd_service and
+#   $manage_pcsd_auth are both set to true the cluster will use this credential
+#   to authorize all nodes.
+#
+# @param sensitive_hacluster_hash [Sensitive[String]]
+#   This parameter expects a valid password hash of 
+#   sensitive_hacluster_password. If provided, the hash provided the hash will
+#   be used to set the password for the hacluster user on each node.
 #
 # @param cluster_name
 #   This specifies the name of cluster and it's used for automatic
@@ -321,6 +346,10 @@ class corosync(
   Boolean $manage_pacemaker_service                                  = $corosync::params::manage_pacemaker_service,
   Boolean $enable_pcsd_service                                       = $corosync::params::enable_pcsd_service,
   Boolean $manage_pcsd_service                                       = false,
+  Boolean $manage_pcsd_auth                                          = false,
+  Enum['first','last'] $manage_pcsd_auth_node                        = 'first',
+  Optional[Sensitive[String]] $sensitive_hacluster_password          = undef,
+  Optional[Sensitive[String]] $sensitive_hacluster_hash              = undef,
   Optional[String] $cluster_name                                     = undef,
   Optional[Integer] $join                                            = undef,
   Optional[Integer] $consensus                                       = undef,
@@ -370,6 +399,15 @@ class corosync(
       ensure          => $version_pcs,
       install_options => $packageopts_pcs,
     }
+
+    # Set the password for the hacluster user if it was provided
+    if $sensitive_hacluster_hash != undef {
+      user { 'hacluster':
+        ensure   => 'present',
+        password => $sensitive_hacluster_hash,
+        require  => Package['pcs'],
+      }
+    }
   }
 
   # You have to specify at least one of the following parameters:
@@ -417,6 +455,46 @@ class corosync(
       enable  => $enable_pcsd_service,
       require => Package['pcs'],
     }
+
+    # Determine if this node should perform authorizations
+    case $manage_pcsd_auth_node {
+      'first': { $auth_node = $quorum_members[0] }
+      'last': { $auth_node = $quorum_members[length($quorum_members)-1] }
+      default: {}
+    }
+
+    # If the local data matches auth_node (hostname or primary IP) we can
+    # perform auth processing for subsequent components
+    if $trusted['certname'] == $auth_node or
+        $facts['networking']['ip'] == $auth_node {
+          $is_auth_node = true
+    } else {
+      $is_auth_node = false
+    }
+
+    if $manage_pcsd_auth and $is_auth_node {
+      if ! $sensitive_hacluster_password or ! $sensitive_hacluster_hash {
+        fail('The hacluster password and hash must be provided to authorize nodes via pcsd.')
+      }
+
+      # TODO - verify if this breaks out of the sensitivity
+      $hacluster_password = $sensitive_hacluster_password.unwrap
+      $auth_credential_string = "-u hacluster -p ${hacluster_password}"
+
+      # Attempt to authorize all members. The command will return successfully
+      # if they were already authenticated so it's safe to run every time this
+      # is applied. 
+      # TODO - make it run only once 
+      exec { 'pcs_cluster_auth':
+        command   => "pcs cluster auth ${auth_credential_string}",
+        path      => '/sbin:/bin/:usr/sbin:/usr/bin',
+        subscribe => File['/etc/corosync/corosync.conf'],
+        require   => [
+          Service['pcsd'],
+          User['hacluster'],
+        ],
+      }
+    }
   }
 
   # Template uses:
@@ -430,6 +508,8 @@ class corosync(
   # - $bind_address
   # - $port
   # - $enable_secauth
+  # - $crypto_hash
+  # - $crypto_cipher
   # - $threads
   # - $token
   # - $join

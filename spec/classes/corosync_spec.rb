@@ -748,6 +748,126 @@ describe 'corosync' do
           '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
         )
       end
+
+      it 'installs the pcs package' do
+        is_expected.to contain_package('pcs').with(
+          ensure: 'present',
+          install_options: nil,
+        )
+      end
+
+      # Tests for pcsd_auth management
+      context 'when mananging pcsd authorization' do
+        before do
+          params.merge!(
+            manage_pcsd_service: true,
+            manage_pcsd_auth: true,
+            quorum_members: [
+              'node1.test.org',
+              'node2.test.org',
+              'node3.test.org',
+            ],
+          )
+        end
+        let(:node) { 'node1.test.org' }
+
+        it 'without hacluster_password raises error' do
+          is_expected.to raise_error(
+            Puppet::Error,
+            %r{The hacluster password and hash must be provided to authorize nodes via pcsd},
+          )
+        end
+
+        it 'without hacluster_hash raises error' do
+          params[:sensitive_hacluster_password] = RSpec::Puppet::RawString.new("Sensitive('some-secret-hash')")
+          is_expected.to raise_error(
+            Puppet::Error,
+            %r{The hacluster password and hash must be provided to authorize nodes via pcsd},
+          )
+        end
+
+        context 'and not the first node' do
+          let(:node) { 'node2.test.org' }
+
+          it 'does not perform the auth' do
+            is_expected.not_to contain_exec('pcs_cluster_auth')
+          end
+        end
+
+        context 'with a password hash for hacluster' do
+          before do 
+            params.merge!(
+              sensitive_hacluster_password: RSpec::Puppet::RawString.new("Sensitive('some-secret-sauce')"),  
+              sensitive_hacluster_hash: RSpec::Puppet::RawString.new("Sensitive('some-secret-hash')"),  
+            )
+          end
+
+          it 'configures the hacluster user' do
+            is_expected.to contain_user('hacluster').with(
+              ensure: 'present',
+              password: 'some-secret-hash',
+              require: 'Package[pcs]',
+            )
+          end
+        end
+
+        context 'with a password' do
+          before do 
+            params.merge!(
+              sensitive_hacluster_password: RSpec::Puppet::RawString.new("Sensitive('some-secret-sauce')"),  
+              sensitive_hacluster_hash: RSpec::Puppet::RawString.new("Sensitive('some-secret-hash')"),  
+            )
+          end
+
+          it 'authorizes all nodes' do
+            is_expected.to contain_exec('pcs_cluster_auth').with(
+              command: 'pcs cluster auth -u hacluster -p some-secret-sauce',
+              path: '/sbin:/bin/:usr/sbin:/usr/bin',
+              subscribe: 'File[/etc/corosync/corosync.conf]',
+              require: [
+                'Service[pcsd]',
+                'User[hacluster]',
+              ],
+            )
+          end
+        end
+
+        context 'using an ip baseid node list' do
+          before do 
+            params.merge!(
+              sensitive_hacluster_password: RSpec::Puppet::RawString.new("Sensitive('some-secret-sauce')"),
+              sensitive_hacluster_hash: RSpec::Puppet::RawString.new("Sensitive('some-secret-hash')"),  
+              quorum_members: [
+                '192.168.0.10',
+                '192.168.0.12',
+                '192.168.0.13',
+              ],
+              quorum_members_names: [
+                'node1.test.org',
+                'node2.test.org',
+                'node3.test.org',
+              ],
+            )
+            facts.merge!(
+              networking: {
+                ip: '192.168.0.10',
+              },
+            )
+          end
+
+          it 'should match ip and auth nodes by member names' do
+            is_expected.to contain_exec('pcs_cluster_auth').with(
+              command: 'pcs cluster auth -u hacluster -p some-secret-sauce',
+              path: '/sbin:/bin/:usr/sbin:/usr/bin',
+              subscribe: 'File[/etc/corosync/corosync.conf]',
+              require: [
+                'Service[pcsd]',
+                'User[hacluster]',
+              ],
+            )
+          end
+        end
+      end
     end
   end
 end
