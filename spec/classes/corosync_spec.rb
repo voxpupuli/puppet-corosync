@@ -823,7 +823,6 @@ describe 'corosync' do
             is_expected.to contain_exec('pcs_cluster_auth').with(
               command: 'pcs cluster auth -u hacluster -p some-secret-sauce',
               path: '/sbin:/bin/:usr/sbin:/usr/bin',
-              subscribe: 'File[/etc/corosync/corosync.conf]',
               require: [
                 'Service[pcsd]',
                 'User[hacluster]',
@@ -859,11 +858,169 @@ describe 'corosync' do
             is_expected.to contain_exec('pcs_cluster_auth').with(
               command: 'pcs cluster auth -u hacluster -p some-secret-sauce',
               path: '/sbin:/bin/:usr/sbin:/usr/bin',
-              subscribe: 'File[/etc/corosync/corosync.conf]',
               require: [
                 'Service[pcsd]',
                 'User[hacluster]',
               ],
+            )
+          end
+        end
+      end
+
+      # Corosync qnet device is enabled
+      context 'when quorum device is configured' do
+        before do
+          params.merge!(
+            set_votequorum: true,
+            manage_pcsd_service: true,
+            manage_pcsd_auth: true,
+            sensitive_hacluster_password: RSpec::Puppet::RawString.new("Sensitive('some-secret-sauce')"),
+            sensitive_hacluster_hash: RSpec::Puppet::RawString.new("Sensitive('some-secret-hash')"),
+            quorum_members: [
+              'node1.test.org',
+              'node2.test.org',
+              'node3.test.org',
+            ],
+            manage_quorum_device: true,
+            quorum_device_host: 'quorum1.test.org',
+            quorum_device_algorithm: 'ffsplit',
+            sensitive_quorum_device_password: RSpec::Puppet::RawString.new("Sensitive('quorum-secret-password')"),
+          )
+        end
+        let(:node) { 'node1.test.org' }
+
+        context 'without the proper arguments' do
+          it 'missing quorum_device_host raises error' do
+            params.delete(:quorum_device_host)
+            is_expected.to raise_error(
+              Puppet::Error,
+              %r{The quorum device host must be specified!},
+            )
+          end
+
+          it 'missing quorum device password raises error' do
+            params.delete(:sensitive_quorum_device_password)
+            is_expected.to raise_error(
+              Puppet::Error,
+              %r{The password for the hacluster user on the quorum device node is mandatory!},
+            )
+          end
+        end
+
+        context 'without managing pcsd auth' do
+          before do
+            params.delete(:manage_pcsd_auth)
+          end
+
+          it 'does not contain the quorum device config in corosync.conf' do
+            is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+              %r!quorum {
+  provider: corosync_votequorum
+}$!m,
+            )
+          end
+
+          it 'does not install the pcs quorum device package' do
+            is_expected.not_to contain_package('corosync-qdevice')
+          end
+
+          it 'does not attempt to authorize or configure the quorum node' do
+            is_expected.not_to contain_exec('pcs_cluster_auth_qdevice')
+            is_expected.not_to contain_exec('pcs_cluster_add_qdevice')
+          end
+        end
+
+        context 'and not the first node' do
+          let(:node) { 'node2.test.org' }
+
+          it 'contains the quorum configuration' do
+            is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+              %r!quorum {
+  provider: corosync_votequorum
+  device {
+    model: net
+    votes: 1
+
+    net {
+      algorithm: ffsplit
+      host:      quorum1[.]test[.]org
+    }
+  }
+}!m,
+            )
+          end
+
+          it 'installs the quorum device package' do
+            is_expected.to contain_package('corosync-qdevice').with(
+              ensure: 'installed'
+            )
+          end
+
+          it 'configures the qdevice service' do
+            is_expected.to contain_service('corosync-qdevice').with(
+              ensure: 'running',
+              enable: 'true',
+              require: 'Package[corosync-qdevice]',
+              subscribe: 'Service[corosync]',
+            )
+          end
+
+          it 'does not authorize or add the quorum device' do
+            is_expected.not_to contain_exec('pcs_cluster_auth_qdevice')
+            is_expected.not_to contain_exec('pcs_cluster_add_qdevice')
+          end
+        end
+
+        context 'with all parameters' do
+          it 'installs the quorum device package' do
+            is_expected.to contain_package('corosync-qdevice').with(
+              ensure: 'installed'
+            )
+          end
+
+          it 'configures the qdevice service' do
+            is_expected.to contain_service('corosync-qdevice').with(
+              ensure: 'running',
+              enable: 'true',
+              require: 'Package[corosync-qdevice]',
+              subscribe: 'Service[corosync]',
+            )
+          end
+
+          it 'authorizes and adds the quorum device' do
+            is_expected.to contain_exec('pcs_cluster_auth_qdevice').with(
+              command: 'pcs cluster auth quorum1.test.org -u hacluster -p quorum-secret-password',
+              path: '/sbin:/bin/:usr/sbin:/usr/bin',
+              onlyif: 'test 0 -ne $(grep quorum1.test.org /var/lib/pcsd/tokens >/dev/null 2>&1; echo $?)',
+              require: [
+                'Package[corosync-qdevice]',
+                'Exec[pcs_cluster_auth]',
+              ],
+            )
+            is_expected.to contain_exec('pcs_cluster_add_qdevice').with(
+              command: 'pcs quorum device add model net host=quorum1.test.org algorithm=ffsplit',
+              path: '/sbin:/bin/:usr/sbin:/usr/bin',
+              onlyif: [
+                'test 0 -ne $(pcs quorum status | grep "^Flags:" | grep Qdevice >/dev/null 2>&1; echo $?)',
+              ],
+              require: 'Exec[pcs_cluster_auth_qdevice]',
+            )
+          end
+
+          it 'contains the quorum configuration' do
+            is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+              %r!quorum {
+  provider: corosync_votequorum
+  device {
+    model: net
+    votes: 1
+
+    net {
+      algorithm: ffsplit
+      host:      quorum1[.]test[.]org
+    }
+  }
+}!m,
             )
           end
         end

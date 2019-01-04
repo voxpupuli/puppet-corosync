@@ -132,6 +132,19 @@ quorum {
 <% elsif Array(@quorum_members).count == 2 -%>
   two_node: 1
 <% end -%>
+<% if @manage_quorum_device and @manage_pcsd_auth -%>
+  device {
+    model: net
+<% if @quorum_device_algorithm == 'ffsplit' -%>
+    votes: 1
+<% end -%>
+
+    net {
+      algorithm: <%= @quorum_device_algorithm %>
+      host:      <%= @quorum_device_host %>
+    }
+  }
+<% end -%>
 }
 
 <% if Array(@quorum_members).length > 0 -%>

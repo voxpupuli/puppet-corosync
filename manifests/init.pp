@@ -230,18 +230,44 @@
 #   matching local facts to the contents of quorum_members. When 
 #   manage_pcsd_auth is disabled this parameter has no effect.
 #
-# @param sensitive_hacluster_password [Sensitive[String]]
+# @param sensitive_hacluster_password [Optional[Sensitive[String]]]
 #   When PCS is configured on a RHEL system this directive is used to set the
 #   password for the hacluster user. If both $manage_pcsd_service and
 #   $manage_pcsd_auth are both set to true the cluster will use this credential
 #   to authorize all nodes.
 #
-# @param sensitive_hacluster_hash [Sensitive[String]]
+# @param sensitive_hacluster_hash [Optional[Sensitive[String]]]
 #   This parameter expects a valid password hash of 
 #   sensitive_hacluster_password. If provided, the hash provided the hash will
 #   be used to set the password for the hacluster user on each node.
 #
-# @param cluster_name
+# @param manage_quorum_device [Boolean]
+#   Enable or disable the addition of a quorum device external to the cluster.
+#   This device is used avoid cluster splits typically in conjunction with
+#   fencing by providing an external network vote. Additionally, this allows
+#   symmentric clusters to continue operation in the event that 50% of their
+#   nodes have failed.
+#
+# @param quorum_device_host [Optional[Stdlib::Fqdn]]
+#   The fully qualified hostname of the quorum device. This parameter is
+#   mandatory when manage_quorum_device is true.
+#
+# @param quorum_device_algorithm [Optional[Enum['ffsplit','lms']]]
+#   There are currently two algorithms the quorum device can utilize to
+#   determine how its vote should be allocated; Fifty-fifty split and
+#   last-man-standing. See the 
+#   [corosync-qdevice man page](https://www.systutorials.com/docs/linux/man/8-corosync-qdevice/)
+#   for details.
+#
+# @param package_quorum_device [Optional[String]]
+#   The name of the package providing the quorum device functionality. This
+#   parameter is mandatory if manage_quorum_device is true.
+#
+# @param sensitive_quorum_device_password [Optional[Sensitive[String]]]
+#   The plain text password for the hacluster user on the quorum_device_host.
+#   This parameter is mandatory if manage_quorum_device is true.
+#
+# @param cluster_name [Optional[String]]
 #   This specifies the name of cluster and it's used for automatic
 #   generating of multicast address.
 #
@@ -347,9 +373,14 @@ class corosync(
   Boolean $enable_pcsd_service                                       = $corosync::params::enable_pcsd_service,
   Boolean $manage_pcsd_service                                       = false,
   Boolean $manage_pcsd_auth                                          = false,
-  Enum['first','last'] $manage_pcsd_auth_node                        = 'first',
   Optional[Sensitive[String]] $sensitive_hacluster_password          = undef,
   Optional[Sensitive[String]] $sensitive_hacluster_hash              = undef,
+  Enum['first','last'] $manage_pcsd_auth_node                        = 'first',
+  Boolean $manage_quorum_device                                      = false,
+  Optional[Stdlib::Fqdn] $quorum_device_host                         = undef,
+  Optional[Enum['ffsplit','lms']] $quorum_device_algorithm           = 'ffsplit',
+  Optional[String] $package_quorum_device                            = $corosync::params::package_quorum_device,
+  Optional[Sensitive[String]] $sensitive_quorum_device_password      = undef,
   Optional[String] $cluster_name                                     = undef,
   Optional[Integer] $join                                            = undef,
   Optional[Integer] $consensus                                       = undef,
@@ -472,6 +503,8 @@ class corosync(
       $is_auth_node = false
     }
 
+    $exec_path = '/sbin:/bin/:usr/sbin:/usr/bin'
+
     if $manage_pcsd_auth and $is_auth_node {
       if ! $sensitive_hacluster_password or ! $sensitive_hacluster_hash {
         fail('The hacluster password and hash must be provided to authorize nodes via pcsd.')
@@ -486,13 +519,66 @@ class corosync(
       # is applied. 
       # TODO - make it run only once 
       exec { 'pcs_cluster_auth':
-        command   => "pcs cluster auth ${auth_credential_string}",
-        path      => '/sbin:/bin/:usr/sbin:/usr/bin',
-        subscribe => File['/etc/corosync/corosync.conf'],
-        require   => [
+        command => "pcs cluster auth ${auth_credential_string}",
+        path    => $exec_path,
+        require => [
           Service['pcsd'],
           User['hacluster'],
         ],
+      }
+    }
+
+    if $manage_quorum_device and $manage_pcsd_auth and $set_votequorum {
+      package { $package_quorum_device:
+        ensure => 'installed',
+      }
+      service { 'corosync-qdevice':
+        ensure    => running,
+        enable    => true,
+        require   => Package[$package_quorum_device],
+        subscribe => Service['corosync'],
+      }
+    }
+
+    if $manage_quorum_device and $manage_pcsd_auth and $is_auth_node and $set_votequorum {
+      # Ensure the optional parameters have been provided
+      if ! $quorum_device_host {
+        fail('The quorum device host must be specified!')
+      } elsif ! $sensitive_quorum_device_password {
+        fail('The password for the hacluster user on the quorum device node is mandatory!')
+      }
+
+      # Authorize the quorum device via PCS so we can execute the configuration
+      $token_prefix = 'test 0 -ne $(grep'
+      $token_suffix = '/var/lib/pcsd/tokens >/dev/null 2>&1; echo $?)'
+      $qdevice_token_check = "${token_prefix} ${quorum_device_host} ${token_suffix}"
+
+      $quorum_device_password = $sensitive_quorum_device_password.unwrap
+      exec { 'pcs_cluster_auth_qdevice':
+        command => "pcs cluster auth ${quorum_device_host} -u hacluster -p ${quorum_device_password}",
+        path    => $exec_path,
+        onlyif  => $qdevice_token_check,
+        require => [
+          Package[$package_quorum_device],
+          Exec['pcs_cluster_auth'],
+        ],
+      }
+
+      # Add the quorum device to the cluster
+      $quorum_host = "host=${quorum_device_host}"
+      $quorum_algorithm = "algorithm=${quorum_device_algorithm}"
+      $quorum_setup_cmd =
+        "pcs quorum device add model net ${quorum_host} ${quorum_algorithm}"
+      exec { 'pcs_cluster_add_qdevice':
+        command => $quorum_setup_cmd,
+        path    => $exec_path,
+        onlyif  => [
+          'test 0 -ne $(pcs quorum status | grep "^Flags:" | grep Qdevice >/dev/null 2>&1; echo $?)',
+          # TODO - possibly check output of pcs quorum config
+        ],
+        require => Exec['pcs_cluster_auth_qdevice'],
+        before  => File['/etc/corosync/corosync.conf'],
+        notify  => Service['corosync-qdevice'],
       }
     }
   }
