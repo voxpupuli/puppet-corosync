@@ -3,16 +3,15 @@ require 'spec_helper'
 describe 'corosync::qdevice' do
   let(:params) do
     {
-      sensitive_hacluster_hash: RSpec::Puppet::RawString.new("Sensitive('some-secret-hash')"),
+      sensitive_hacluster_hash: RSpec::Puppet::RawString.new("Sensitive('some-secret-hash')")
     }
   end
-
 
   context 'standard quorum node install' do
     ['pcs', 'corosync-qnetd'].each do |package|
       it "does install #{package}" do
         is_expected.to contain_package(package).with(
-          ensure: 'installed',
+          ensure: 'installed'
         )
       end
     end
@@ -21,7 +20,7 @@ describe 'corosync::qdevice' do
       is_expected.to contain_user('hacluster').with(
         ensure: 'present',
         password: 'some-secret-hash',
-        require: 'Package[pcs]',
+        require: 'Package[pcs]'
       )
     end
 
@@ -31,8 +30,8 @@ describe 'corosync::qdevice' do
         enable: 'true',
         require: [
           'Package[pcs]',
-          'Package[corosync-qnetd]',
-        ],
+          'Package[corosync-qnetd]'
+        ]
       )
     end
 
@@ -40,9 +39,9 @@ describe 'corosync::qdevice' do
       is_expected.to contain_exec('pcs qdevice setup model net --enable --start').with(
         path: '/sbin:/bin/:usr/sbin:/usr/bin',
         onlyif: [
-          'test ! -f /etc/corosync/qnetd/nssdb/qnetd-cacert.crt',
+          'test ! -f /etc/corosync/qnetd/nssdb/qnetd-cacert.crt'
         ],
-        require: 'Service[pcsd]',
+        require: 'Service[pcsd]'
       )
     end
 
@@ -51,12 +50,12 @@ describe 'corosync::qdevice' do
         path: '/sbin:/bin/:usr/sbin:/usr/bin',
         onlyif: [
           'test -f /etc/corosync/qnetd/nssdb/qnetd-cacert.crt',
-          'test 0 -ne $(pcs qdevice status net >/dev/null 2>&1; echo $?)',
+          'test 0 -ne $(pcs qdevice status net >/dev/null 2>&1; echo $?)'
         ],
         require: [
           'Package[pcs]',
-          'Package[corosync-qnetd]',
-        ],
+          'Package[corosync-qnetd]'
+        ]
       )
     end
   end

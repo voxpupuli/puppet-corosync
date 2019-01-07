@@ -752,7 +752,7 @@ describe 'corosync' do
       it 'installs the pcs package' do
         is_expected.to contain_package('pcs').with(
           ensure: 'present',
-          install_options: nil,
+          install_options: nil
         )
       end
 
@@ -765,8 +765,8 @@ describe 'corosync' do
             quorum_members: [
               'node1.test.org',
               'node2.test.org',
-              'node3.test.org',
-            ],
+              'node3.test.org'
+            ]
           )
         end
         let(:node) { 'node1.test.org' }
@@ -774,7 +774,7 @@ describe 'corosync' do
         it 'without hacluster_password raises error' do
           is_expected.to raise_error(
             Puppet::Error,
-            %r{The hacluster password and hash must be provided to authorize nodes via pcsd},
+            %r{The hacluster password and hash must be provided to authorize nodes via pcsd}
           )
         end
 
@@ -782,7 +782,7 @@ describe 'corosync' do
           params[:sensitive_hacluster_password] = RSpec::Puppet::RawString.new("Sensitive('some-secret-hash')")
           is_expected.to raise_error(
             Puppet::Error,
-            %r{The hacluster password and hash must be provided to authorize nodes via pcsd},
+            %r{The hacluster password and hash must be provided to authorize nodes via pcsd}
           )
         end
 
@@ -795,10 +795,10 @@ describe 'corosync' do
         end
 
         context 'with a password hash for hacluster' do
-          before do 
+          before do
             params.merge!(
-              sensitive_hacluster_password: RSpec::Puppet::RawString.new("Sensitive('some-secret-sauce')"),  
-              sensitive_hacluster_hash: RSpec::Puppet::RawString.new("Sensitive('some-secret-hash')"),  
+              sensitive_hacluster_password: RSpec::Puppet::RawString.new("Sensitive('some-secret-sauce')"),
+              sensitive_hacluster_hash: RSpec::Puppet::RawString.new("Sensitive('some-secret-hash')")
             )
           end
 
@@ -806,16 +806,16 @@ describe 'corosync' do
             is_expected.to contain_user('hacluster').with(
               ensure: 'present',
               password: 'some-secret-hash',
-              require: 'Package[pcs]',
+              require: 'Package[pcs]'
             )
           end
         end
 
         context 'with a password' do
-          before do 
+          before do
             params.merge!(
-              sensitive_hacluster_password: RSpec::Puppet::RawString.new("Sensitive('some-secret-sauce')"),  
-              sensitive_hacluster_hash: RSpec::Puppet::RawString.new("Sensitive('some-secret-hash')"),  
+              sensitive_hacluster_password: RSpec::Puppet::RawString.new("Sensitive('some-secret-sauce')"),
+              sensitive_hacluster_hash: RSpec::Puppet::RawString.new("Sensitive('some-secret-hash')")
             )
           end
 
@@ -825,43 +825,43 @@ describe 'corosync' do
               path: '/sbin:/bin/:usr/sbin:/usr/bin',
               require: [
                 'Service[pcsd]',
-                'User[hacluster]',
-              ],
+                'User[hacluster]'
+              ]
             )
           end
         end
 
         context 'using an ip baseid node list' do
-          before do 
+          before do
             params.merge!(
               sensitive_hacluster_password: RSpec::Puppet::RawString.new("Sensitive('some-secret-sauce')"),
-              sensitive_hacluster_hash: RSpec::Puppet::RawString.new("Sensitive('some-secret-hash')"),  
+              sensitive_hacluster_hash: RSpec::Puppet::RawString.new("Sensitive('some-secret-hash')"),
               quorum_members: [
                 '192.168.0.10',
                 '192.168.0.12',
-                '192.168.0.13',
+                '192.168.0.13'
               ],
               quorum_members_names: [
                 'node1.test.org',
                 'node2.test.org',
-                'node3.test.org',
-              ],
+                'node3.test.org'
+              ]
             )
             facts.merge!(
               networking: {
-                ip: '192.168.0.10',
-              },
+                ip: '192.168.0.10'
+              }
             )
           end
 
-          it 'should match ip and auth nodes by member names' do
+          it 'match ip and auth nodes by member names' do
             is_expected.to contain_exec('pcs_cluster_auth').with(
               command: 'pcs cluster auth -u hacluster -p some-secret-sauce',
               path: '/sbin:/bin/:usr/sbin:/usr/bin',
               require: [
                 'Service[pcsd]',
-                'User[hacluster]',
-              ],
+                'User[hacluster]'
+              ]
             )
           end
         end
@@ -879,12 +879,12 @@ describe 'corosync' do
             quorum_members: [
               'node1.test.org',
               'node2.test.org',
-              'node3.test.org',
+              'node3.test.org'
             ],
             manage_quorum_device: true,
             quorum_device_host: 'quorum1.test.org',
             quorum_device_algorithm: 'ffsplit',
-            sensitive_quorum_device_password: RSpec::Puppet::RawString.new("Sensitive('quorum-secret-password')"),
+            sensitive_quorum_device_password: RSpec::Puppet::RawString.new("Sensitive('quorum-secret-password')")
           )
         end
         let(:node) { 'node1.test.org' }
@@ -894,7 +894,7 @@ describe 'corosync' do
             params.delete(:quorum_device_host)
             is_expected.to raise_error(
               Puppet::Error,
-              %r{The quorum device host must be specified!},
+              %r{The quorum device host must be specified!}
             )
           end
 
@@ -902,7 +902,7 @@ describe 'corosync' do
             params.delete(:sensitive_quorum_device_password)
             is_expected.to raise_error(
               Puppet::Error,
-              %r{The password for the hacluster user on the quorum device node is mandatory!},
+              %r{The password for the hacluster user on the quorum device node is mandatory!}
             )
           end
         end
@@ -916,7 +916,7 @@ describe 'corosync' do
             is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
               %r!quorum {
   provider: corosync_votequorum
-}$!m,
+}$!m
             )
           end
 
@@ -946,7 +946,7 @@ describe 'corosync' do
       host:      quorum1[.]test[.]org
     }
   }
-}!m,
+}!m
             )
           end
 
@@ -961,7 +961,7 @@ describe 'corosync' do
               ensure: 'running',
               enable: 'true',
               require: 'Package[corosync-qdevice]',
-              subscribe: 'Service[corosync]',
+              subscribe: 'Service[corosync]'
             )
           end
 
@@ -983,7 +983,7 @@ describe 'corosync' do
               ensure: 'running',
               enable: 'true',
               require: 'Package[corosync-qdevice]',
-              subscribe: 'Service[corosync]',
+              subscribe: 'Service[corosync]'
             )
           end
 
@@ -994,16 +994,16 @@ describe 'corosync' do
               onlyif: 'test 0 -ne $(grep quorum1.test.org /var/lib/pcsd/tokens >/dev/null 2>&1; echo $?)',
               require: [
                 'Package[corosync-qdevice]',
-                'Exec[pcs_cluster_auth]',
-              ],
+                'Exec[pcs_cluster_auth]'
+              ]
             )
             is_expected.to contain_exec('pcs_cluster_add_qdevice').with(
               command: 'pcs quorum device add model net host=quorum1.test.org algorithm=ffsplit',
               path: '/sbin:/bin/:usr/sbin:/usr/bin',
               onlyif: [
-                'test 0 -ne $(pcs quorum status | grep "^Flags:" | grep Qdevice >/dev/null 2>&1; echo $?)',
+                'test 0 -ne $(pcs quorum status | grep "^Flags:" | grep Qdevice >/dev/null 2>&1; echo $?)'
               ],
-              require: 'Exec[pcs_cluster_auth_qdevice]',
+              require: 'Exec[pcs_cluster_auth_qdevice]'
             )
           end
 
@@ -1020,7 +1020,7 @@ describe 'corosync' do
       host:      quorum1[.]test[.]org
     }
   }
-}!m,
+}!m
             )
           end
         end
