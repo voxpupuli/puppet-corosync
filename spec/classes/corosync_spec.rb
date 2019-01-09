@@ -318,7 +318,10 @@ describe 'corosync' do
         )
       end
       it 'deploys authkey file' do
-        is_expected.to contain_file('/etc/corosync/authkey').with_content('bXlzZWNyZXRrZXkK')
+        is_expected.to contain_file('/etc/corosync/authkey').with(
+          content: 'bXlzZWNyZXRrZXkK',
+          before: ['File[/etc/corosync/corosync.conf]']
+        )
       end
     end
 
@@ -329,7 +332,10 @@ describe 'corosync' do
         )
       end
       it 'deploys authkey file' do
-        is_expected.to contain_file('/etc/corosync/authkey').with_source('/etc/pki/tls/private/corosync.key')
+        is_expected.to contain_file('/etc/corosync/authkey').with(
+          source: '/etc/pki/tls/private/corosync.key',
+          before: ['File[/etc/corosync/corosync.conf]']
+        )
       end
     end
 
@@ -821,7 +827,7 @@ describe 'corosync' do
 
           it 'authorizes all nodes' do
             is_expected.to contain_exec('pcs_cluster_auth').with(
-              command: 'pcs cluster auth -u hacluster -p some-secret-sauce',
+              command: 'pcs cluster auth node1.test.org node2.test.org node3.test.org -u hacluster -p some-secret-sauce',
               path: '/sbin:/bin/:usr/sbin:/usr/bin',
               require: [
                 'Service[pcsd]',
@@ -856,7 +862,7 @@ describe 'corosync' do
 
           it 'match ip and auth nodes by member names' do
             is_expected.to contain_exec('pcs_cluster_auth').with(
-              command: 'pcs cluster auth -u hacluster -p some-secret-sauce',
+              command: 'pcs cluster auth 192.168.0.10 192.168.0.12 192.168.0.13 -u hacluster -p some-secret-sauce',
               path: '/sbin:/bin/:usr/sbin:/usr/bin',
               require: [
                 'Service[pcsd]',
@@ -881,6 +887,7 @@ describe 'corosync' do
               'node2.test.org',
               'node3.test.org'
             ],
+            cluster_name: 'cluster_test',
             manage_quorum_device: true,
             quorum_device_host: 'quorum1.test.org',
             quorum_device_algorithm: 'ffsplit',
@@ -903,6 +910,14 @@ describe 'corosync' do
             is_expected.to raise_error(
               Puppet::Error,
               %r{The password for the hacluster user on the quorum device node is mandatory!}
+            )
+          end
+
+          it 'does not specify a cluster name' do
+            params.delete(:cluster_name)
+            is_expected.to raise_error(
+              Puppet::Error,
+              %r{A cluster name must be specified when a quorm device is configured!}
             )
           end
         end
@@ -987,6 +1002,15 @@ describe 'corosync' do
             )
           end
 
+          it 'configures a temporary cluster if corosync.conf is missing' do
+            is_expected.to contain_exec('pcs_cluster_temporary').with(
+              command: 'pcs cluster setup --force --name cluster_test node1.test.org node2.test.org node3.test.org',
+              path: '/sbin:/bin/:usr/sbin:/usr/bin',
+              onlyif: 'test ! -f /etc/corosync/corosync.conf',
+              require: 'Exec[pcs_cluster_auth]'
+            )
+          end
+
           it 'authorizes and adds the quorum device' do
             is_expected.to contain_exec('pcs_cluster_auth_qdevice').with(
               command: 'pcs cluster auth quorum1.test.org -u hacluster -p quorum-secret-password',
@@ -994,14 +1018,15 @@ describe 'corosync' do
               onlyif: 'test 0 -ne $(grep quorum1.test.org /var/lib/pcsd/tokens >/dev/null 2>&1; echo $?)',
               require: [
                 'Package[corosync-qdevice]',
-                'Exec[pcs_cluster_auth]'
+                'Exec[pcs_cluster_auth]',
+                'Exec[pcs_cluster_temporary]'
               ]
             )
             is_expected.to contain_exec('pcs_cluster_add_qdevice').with(
               command: 'pcs quorum device add model net host=quorum1.test.org algorithm=ffsplit',
               path: '/sbin:/bin/:usr/sbin:/usr/bin',
               onlyif: [
-                'test 0 -ne $(pcs quorum status | grep "^Flags:" | grep Qdevice >/dev/null 2>&1; echo $?)'
+                'test 0 -ne $(pcs quorum config | grep "host:" >/dev/null 2>&1; echo $?)'
               ],
               require: 'Exec[pcs_cluster_auth_qdevice]'
             )

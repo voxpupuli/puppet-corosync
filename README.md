@@ -170,6 +170,7 @@ This implementation depends entirely on [PCSD authorization](#pcsd-authorization
 
     ```puppet
     class { 'corosync':
+      cluster_name                     => 'example',
       manage_pcsd_service              => true,
       manage_pcsd_auth                 => true,
       sensitive_hacluster_password     => Sensitive('this-is-the-actual-password'),

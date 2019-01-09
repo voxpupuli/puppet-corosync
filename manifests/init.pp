@@ -514,12 +514,18 @@ class corosync(
       $hacluster_password = $sensitive_hacluster_password.unwrap
       $auth_credential_string = "-u hacluster -p ${hacluster_password}"
 
+      # As the auth can happen before corosync.conf exists we need to explicitly
+      # list the members to join. 
+      # TODO - verify that this is safe when quorum_members is a list of IP
+      # addresses
+      $node_string = join($quorum_members, ' ')
+
       # Attempt to authorize all members. The command will return successfully
       # if they were already authenticated so it's safe to run every time this
       # is applied. 
       # TODO - make it run only once 
       exec { 'pcs_cluster_auth':
-        command => "pcs cluster auth ${auth_credential_string}",
+        command => "pcs cluster auth ${node_string} ${auth_credential_string}",
         path    => $exec_path,
         require => [
           Service['pcsd'],
@@ -546,6 +552,22 @@ class corosync(
         fail('The quorum device host must be specified!')
       } elsif ! $sensitive_quorum_device_password {
         fail('The password for the hacluster user on the quorum device node is mandatory!')
+      } elsif ! $cluster_name {
+        fail('A cluster name must be specified when a quorm device is configured!')
+      }
+
+      # If the cluster hasn't been configured yet, temporarily configure it so
+      # the pcs_cluster_auth_qdevice command doesn't fail. This should generate
+      # a temporary corosync.conf which will then be overwritten
+      exec { 'pcs_cluster_temporary':
+        command => "pcs cluster setup --force --name ${cluster_name} ${node_string}",
+        path    => $exec_path,
+        onlyif  => 'test ! -f /etc/corosync/corosync.conf',
+        require => Exec['pcs_cluster_auth'],
+      }
+      # We need to do this so the temporary cluster doesn't delete our authkey
+      if $enable_secauth {
+        Exec['pcs_cluster_temporary'] -> File['/etc/corosync/authkey']
       }
 
       # Authorize the quorum device via PCS so we can execute the configuration
@@ -561,6 +583,7 @@ class corosync(
         require => [
           Package[$package_quorum_device],
           Exec['pcs_cluster_auth'],
+          Exec['pcs_cluster_temporary'],
         ],
       }
 
@@ -573,8 +596,7 @@ class corosync(
         command => $quorum_setup_cmd,
         path    => $exec_path,
         onlyif  => [
-          'test 0 -ne $(pcs quorum status | grep "^Flags:" | grep Qdevice >/dev/null 2>&1; echo $?)',
-          # TODO - possibly check output of pcs quorum config
+          'test 0 -ne $(pcs quorum config | grep "host:" >/dev/null 2>&1; echo $?)',
         ],
         require => Exec['pcs_cluster_auth_qdevice'],
         before  => File['/etc/corosync/corosync.conf'],
