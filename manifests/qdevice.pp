@@ -9,11 +9,11 @@
 #   is currently a mandatory parameter because pcsd must be used to perform the
 #   quorum node configuration. 
 #
-# @param package_pcs [String]
+# @param package_pcs [String[1]]
 #   Name of the PCS package on this system. This is specified via hiera by
 #   default as 'pcs'.
 #
-# @param package_corosync_qnetd [String]
+# @param package_corosync_qnetd [String[1]]
 #   Name of the corosync qnetd package for this system. The default value of
 #   'corosync-qnetd' will be provided via hiera if left unspecified.
 #
@@ -52,8 +52,8 @@
 #
 # @see https://www.systutorials.com/docs/linux/man/8-corosync-qnetd/
 class corosync::qdevice (
-  String $package_pcs                         = undef,
-  String $package_corosync_qnetd              = undef,
+  String[1] $package_pcs,
+  String[1] $package_corosync_qnetd,
   Sensitive[String] $sensitive_hacluster_hash = undef,
 ) {
   # Install the required packages
