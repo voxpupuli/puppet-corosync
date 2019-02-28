@@ -651,7 +651,7 @@ config file and the name defined inside the file itself.
 
 ##### `version`
 
-Data type: `String`
+Data type: `String[1]`
 
 Version of the protocol used by this service. This is currently unused.
 

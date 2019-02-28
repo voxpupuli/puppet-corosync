@@ -9,7 +9,7 @@
 #   instance.  It is used for a handful of purposes; defining the name of the
 #   config file and the name defined inside the file itself.
 #
-# @param version [String]
+# @param version
 #   Version of the protocol used by this service. This is currently unused.
 #
 #
@@ -27,7 +27,9 @@
 #
 # Copyright 2012 Puppet Labs, LLC.
 #
-define corosync::service($version) {
+define corosync::service(
+  String[1] $version,
+) {
 
   file { "/etc/corosync/service.d/${name}":
     ensure  => file,
