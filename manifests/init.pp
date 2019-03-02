@@ -43,7 +43,7 @@
 #   aware that corosync used this defined port plus minus one.
 #   Can be specified as an array to have multiple rings.
 #
-# @param multicast_address [Optional[Stdlib::Compat::Ip_address]]
+# @param multicast_address
 #   An IP address that has been reserved for multicast traffic.  This is the
 #   default way that Corosync accomplishes communication across the cluster.
 #   Use 'broadcast' to have broadcast instead
@@ -278,9 +278,9 @@ class corosync(
   Corosync::CryptoHash $crypto_hash                                  = 'sha1',
   Corosync::CryptoCipher $crypto_cipher                              = 'aes256',
   Optional[Integer] $threads                                         = undef,
-  Optional[Variant[Integer[0,65535], Array[Integer[0,65535]]]] $port = $corosync::params::port,
+  Optional[Variant[Stdlib::Port, Array[Stdlib::Port]]] $port         = $corosync::params::port,
   Corosync::IpStringIp $bind_address                                 = $corosync::params::bind_address,
-  Optional[Stdlib::Compat::Ip_address] $multicast_address            = undef,
+  Optional[Stdlib::IP::Address] $multicast_address                   = undef,
   Optional[Array] $unicast_addresses                                 = undef,
   Boolean $force_online                                              = $corosync::params::force_online,
   Boolean $check_standby                                             = $corosync::params::check_standby,

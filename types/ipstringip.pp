@@ -1,6 +1,6 @@
 type Corosync::IpStringIp = Variant[
-  Stdlib::Compat::Ip_address,
+  Stdlib::IP::Address,
   Array[
-    Stdlib::Compat::Ip_address
+    Stdlib::IP::Address
   ]
 ]
