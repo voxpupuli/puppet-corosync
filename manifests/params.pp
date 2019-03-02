@@ -1,3 +1,4 @@
+# @summary Configures sane defaults based on the operating system.
 class corosync::params {
   $enable_secauth                      = true
   $authkey_source                      = 'file'
@@ -31,9 +32,11 @@ class corosync::params {
       if versioncmp($::operatingsystemrelease, '7') >= 0 {
         $manage_pacemaker_service = true
         $test_corosync_config = true
+        $secauth_parameter_mode = '2.x'
       } else {
         $manage_pacemaker_service = false
         $test_corosync_config = false
+        $secauth_parameter_mode = '1.x'
       }
       $package_install_options = undef
     }
@@ -46,6 +49,7 @@ class corosync::params {
           if versioncmp($::operatingsystemrelease, '14.04') >= 0 {
             $set_votequorum = true
             $manage_pacemaker_service = true
+            $secauth_parameter_mode = '2.x'
 
             if versioncmp($::operatingsystemrelease, '16.04') >= 0 {
               $test_corosync_config = true
@@ -63,6 +67,7 @@ class corosync::params {
             $set_votequorum = false
             $manage_pacemaker_service = false
             $test_corosync_config = false
+            $secauth_parameter_mode = '1.x'
           }
           $package_install_options = undef
         }
@@ -71,6 +76,7 @@ class corosync::params {
             $set_votequorum = true
             $manage_pacemaker_service = true
             $test_corosync_config = true
+            $secauth_parameter_mode = '2.x'
             if versioncmp($::operatingsystemrelease, '8') == 0 {
               $package_install_options = ['-t', 'jessie-backports']
             } else {
@@ -81,6 +87,7 @@ class corosync::params {
             $manage_pacemaker_service = false
             $package_install_options = undef
             $test_corosync_config = false
+            $secauth_parameter_mode = '1.x'
           }
         }
         default : {
@@ -88,6 +95,7 @@ class corosync::params {
           $manage_pacemaker_service = false
           $package_install_options = undef
           $test_corosync_config = false
+          $secauth_parameter_mode = '1.x'
         }
       }
     }

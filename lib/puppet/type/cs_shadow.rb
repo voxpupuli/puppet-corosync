@@ -5,6 +5,7 @@ Puppet::Type.newtype(:cs_shadow) do
     value have also been applied."
 
   newparam(:cib) do
+    desc 'Name of the CIB to begin tracking changes against.'
     isnamevar
   end
 
@@ -15,6 +16,8 @@ Puppet::Type.newtype(:cs_shadow) do
   end
 
   newproperty(:epoch) do
+    desc 'Implementation detail. DO NOT SET DIRECTLY.'
+
     def sync
       provider.sync(@resource[:cib])
     end
