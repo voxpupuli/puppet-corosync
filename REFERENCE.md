@@ -135,7 +135,7 @@ Default value: $corosync::params::bind_address
 
 ##### `port`
 
-Data type: `Optional[Variant[Integer[0,65535], Array[Integer[0,65535]]]]`
+Data type: `Optional[Variant[Stdlib::Port, Array[Stdlib::Port]]]`
 
 The UDP port that corosync will use to do its multicast communication. Be
 aware that corosync used this defined port plus minus one.
@@ -145,7 +145,7 @@ Default value: $corosync::params::port
 
 ##### `multicast_address`
 
-Data type: `Optional[Stdlib::Compat::Ip_address]`
+Data type: `Optional[Stdlib::IP::Address]`
 
 An IP address that has been reserved for multicast traffic.  This is the
 default way that Corosync accomplishes communication across the cluster.
