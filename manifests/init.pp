@@ -378,7 +378,7 @@ class corosync(
   Enum['first','last'] $manage_pcsd_auth_node                        = 'first',
   Boolean $manage_quorum_device                                      = false,
   Optional[Stdlib::Fqdn] $quorum_device_host                         = undef,
-  Optional[Enum['ffsplit','lms']] $quorum_device_algorithm           = 'ffsplit',
+  Optional[Corosync::QuorumAlgorithm] $quorum_device_algorithm       = 'ffsplit',
   Optional[String] $package_quorum_device                            = $corosync::params::package_quorum_device,
   Optional[Sensitive[String]] $sensitive_quorum_device_password      = undef,
   Optional[String] $cluster_name                                     = undef,
@@ -494,10 +494,24 @@ class corosync(
       default: {}
     }
 
+    # Calculate a full list of IP addresses 
+    unless(empty($facts['networking']['interfaces'])) {
+      $interface_ip_list = $facts['networking']['interfaces'].map |$entry| {
+        if 'ip' in $entry[1] {
+          $entry[1]['ip']
+        } else {
+          'no_address'
+        }
+      }
+    } else {
+      $interface_ip_list = []
+    }
+
     # If the local data matches auth_node (hostname or primary IP) we can
     # perform auth processing for subsequent components
-    if $trusted['certname'] == $auth_node or
-        $facts['networking']['ip'] == $auth_node {
+    if $trusted['certname'] == $auth_node
+      or $auth_node == $facts['networking']['ip']
+      or $auth_node in $interface_ip_list {
           $is_auth_node = true
     } else {
       $is_auth_node = false

@@ -870,6 +870,28 @@ describe 'corosync' do
               ]
             )
           end
+
+          context 'where the auth-node IP is not the default IP' do
+            before(:each) do
+              facts.merge!(
+                networking: {
+                  ip: '10.0.0.48',
+                  interfaces: {
+                    eth0: {
+                      ip: '10.0.0.48',
+                    },
+                    eth1: {
+                      ip: '192.168.0.10',
+                    },
+                  },
+                },
+              )
+            end
+
+            it 'still detects that this is the auth-node' do
+              is_expected.to contain_exec('pcs_cluster_auth')
+            end
+          end
         end
       end
 
