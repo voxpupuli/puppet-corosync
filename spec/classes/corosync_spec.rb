@@ -872,19 +872,19 @@ describe 'corosync' do
           end
 
           context 'where the auth-node IP is not the default IP' do
-            before(:each) do
+            before do
               facts.merge!(
                 networking: {
                   ip: '10.0.0.48',
                   interfaces: {
                     eth0: {
-                      ip: '10.0.0.48',
+                      ip: '10.0.0.48'
                     },
                     eth1: {
-                      ip: '192.168.0.10',
-                    },
-                  },
-                },
+                      ip: '192.168.0.10'
+                    }
+                  }
+                }
               )
             end
 
