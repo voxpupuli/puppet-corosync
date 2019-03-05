@@ -557,11 +557,7 @@ continue the development of this module.
 
 ## Development
 
-<<<<<<< HEAD
-See the [contributing guide](./.github/CONTRIBUTING.md) for details. Additionally, some general guidelines on PR structure can be found [here](https://voxpupuli.org/docs/#reviewing-a-module-pr).
-=======
 See the [contributing guide](CONTRIBUTING.md) for details. Additionally, some general guidelines on PR structure can be found [here](https://voxpupuli.org/docs/#reviewing-a-module-pr).
->>>>>>> Corosync qdevice & qnetd
 
 ## Copyright and License
 

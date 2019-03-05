@@ -432,7 +432,7 @@ class corosync(
     }
 
     # Set the password for the hacluster user if it was provided
-    if $sensitive_hacluster_hash != undef {
+    if $sensitive_hacluster_hash {
       user { 'hacluster':
         ensure   => 'present',
         password => $sensitive_hacluster_hash,
