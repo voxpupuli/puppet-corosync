@@ -216,7 +216,7 @@
 #   corosync service. pcsd service is the GUI and the remote configuration 
 #   interface.
 #
-# @param manage_pcsd_auth [Boolean]
+# @param manage_pcsd_auth
 #   This only has an effect when $manage_pcsd_service is enabled. If set, an
 #   attempt will be made to authorize pcs on the cluster node determined by
 #   manage_pcsd_auth_node. Note that this determination can only be made when
@@ -224,50 +224,50 @@
 #   the environment or the IP addresses of the primary adapters.
 #   $sensitive_hacluster_password is mandatory if this parameter is set.
 #
-# @param manage_pcsd_auth_node [Enum['first','last']]
+# @param manage_pcsd_auth_node
 #   When managing authorization for PCS this determines which node does the
 #   work. Note that only one node 'should' do the work and nodes are chosen by
 #   matching local facts to the contents of quorum_members. When 
 #   manage_pcsd_auth is disabled this parameter has no effect.
 #
-# @param sensitive_hacluster_password [Optional[Sensitive[String]]]
+# @param sensitive_hacluster_password
 #   When PCS is configured on a RHEL system this directive is used to set the
 #   password for the hacluster user. If both $manage_pcsd_service and
 #   $manage_pcsd_auth are both set to true the cluster will use this credential
 #   to authorize all nodes.
 #
-# @param sensitive_hacluster_hash [Optional[Sensitive[String]]]
+# @param sensitive_hacluster_hash
 #   This parameter expects a valid password hash of 
 #   sensitive_hacluster_password. If provided, the hash provided the hash will
 #   be used to set the password for the hacluster user on each node.
 #
-# @param manage_quorum_device [Boolean]
+# @param manage_quorum_device
 #   Enable or disable the addition of a quorum device external to the cluster.
 #   This device is used avoid cluster splits typically in conjunction with
 #   fencing by providing an external network vote. Additionally, this allows
 #   symmentric clusters to continue operation in the event that 50% of their
 #   nodes have failed.
 #
-# @param quorum_device_host [Optional[Stdlib::Fqdn]]
+# @param quorum_device_host
 #   The fully qualified hostname of the quorum device. This parameter is
 #   mandatory when manage_quorum_device is true.
 #
-# @param quorum_device_algorithm [Optional[Enum['ffsplit','lms']]]
+# @param quorum_device_algorithm
 #   There are currently two algorithms the quorum device can utilize to
 #   determine how its vote should be allocated; Fifty-fifty split and
 #   last-man-standing. See the 
 #   [corosync-qdevice man page](https://www.systutorials.com/docs/linux/man/8-corosync-qdevice/)
 #   for details.
 #
-# @param package_quorum_device [Optional[String]]
+# @param package_quorum_device
 #   The name of the package providing the quorum device functionality. This
 #   parameter is mandatory if manage_quorum_device is true.
 #
-# @param sensitive_quorum_device_password [Optional[Sensitive[String]]]
+# @param sensitive_quorum_device_password
 #   The plain text password for the hacluster user on the quorum_device_host.
 #   This parameter is mandatory if manage_quorum_device is true.
 #
-# @param cluster_name [Optional[String]]
+# @param cluster_name
 #   This specifies the name of cluster and it's used for automatic
 #   generating of multicast address.
 #

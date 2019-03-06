@@ -1,3 +1,0 @@
----
-corosync::qdevice::package_pcs: 'pcs'
-corosync::qdevice::package_corosync_qnetd: 'corosync-qnetd'

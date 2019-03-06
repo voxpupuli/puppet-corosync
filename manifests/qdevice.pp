@@ -4,18 +4,16 @@
 # correct firewall ports for both pcs, and the actual quorum device as shown in
 # the included example.
 #
-# @param sensitive_hacluster_hash [Sensitive[String]]
+# @param sensitive_hacluster_hash
 #   The password hash for the hacluster user on this quorum device node. This 
 #   is currently a mandatory parameter because pcsd must be used to perform the
-#   quorum node configuration. 
+#   quorum node configuration.
 #
-# @param package_pcs [String[1]]
-#   Name of the PCS package on this system. This is specified via hiera by
-#   default as 'pcs'.
+# @param package_pcs
+#   Name of the PCS package on this system.
 #
-# @param package_corosync_qnetd [String[1]]
-#   Name of the corosync qnetd package for this system. The default value of
-#   'corosync-qnetd' will be provided via hiera if left unspecified.
+# @param package_corosync_qnetd
+#   Name of the corosync qnetd package for this system.
 #
 # @summary Performs basic initial configuration of the qdevice daemon on a node.
 #
@@ -52,10 +50,11 @@
 #
 # @see https://www.systutorials.com/docs/linux/man/8-corosync-qnetd/
 class corosync::qdevice (
-  String[1] $package_pcs,
-  String[1] $package_corosync_qnetd,
+  String[1] $package_pcs                      = 'pcs',
+  String[1] $package_corosync_qnetd           = 'corosync-qnetd',
   Sensitive[String] $sensitive_hacluster_hash = undef,
 ) {
+
   # Install the required packages
   package { $package_pcs:
     ensure => present,
@@ -68,7 +67,7 @@ class corosync::qdevice (
   user { 'hacluster':
     ensure   => 'present',
     password => $sensitive_hacluster_hash,
-    require  => Package['pcs'],
+    require  => Package[$package_pcs],
   }
 
   # Enable the PCS service
@@ -76,8 +75,8 @@ class corosync::qdevice (
     ensure  => 'running',
     enable  => true,
     require => [
-      Package['pcs'],
-      Package['corosync-qnetd'],
+      Package[$package_pcs],
+      Package[$package_corosync_qnetd],
     ],
   }
 
