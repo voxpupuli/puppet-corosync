@@ -58,10 +58,10 @@ class corosync::qdevice (
 ) {
   # Install the required packages
   package { $package_pcs:
-    ensure => installed,
+    ensure => present,
   }
   package { $package_corosync_qnetd:
-    ensure => installed,
+    ensure => present,
   }
 
   # Cluster admin credentials

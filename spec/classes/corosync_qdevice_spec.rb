@@ -11,7 +11,7 @@ describe 'corosync::qdevice' do
     ['pcs', 'corosync-qnetd'].each do |package|
       it "does install #{package}" do
         is_expected.to contain_package(package).with(
-          ensure: 'installed'
+          ensure: 'present'
         )
       end
     end

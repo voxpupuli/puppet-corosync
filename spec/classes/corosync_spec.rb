@@ -989,7 +989,7 @@ describe 'corosync' do
 
           it 'installs the quorum device package' do
             is_expected.to contain_package('corosync-qdevice').with(
-              ensure: 'installed'
+              ensure: 'present'
             )
           end
 
@@ -1011,7 +1011,7 @@ describe 'corosync' do
         context 'with all parameters' do
           it 'installs the quorum device package' do
             is_expected.to contain_package('corosync-qdevice').with(
-              ensure: 'installed'
+              ensure: 'present'
             )
           end
 

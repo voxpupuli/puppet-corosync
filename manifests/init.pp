@@ -550,7 +550,7 @@ class corosync(
 
     if $manage_quorum_device and $manage_pcsd_auth and $set_votequorum {
       package { $package_quorum_device:
-        ensure => 'installed',
+        ensure => 'present',
       }
       service { 'corosync-qdevice':
         ensure    => running,
