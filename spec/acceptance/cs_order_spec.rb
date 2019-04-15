@@ -54,7 +54,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     EOS
 
     apply_manifest(pp, expect_changes: true, debug: false, trace: true)
-    sleep 10
+    sleep 60
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
   end
 
