@@ -249,22 +249,6 @@ describe 'corosync' do
         end
       end
 
-      context 'without secauth' do
-        before do
-          params.merge!(
-            enable_secauth: false
-          )
-        end
-
-        it { is_expected.to compile.with_all_deps }
-
-        it 'configures secauth correctly' do
-          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{secauth:\s+off}
-          )
-        end
-      end
-
       context 'with one ring' do
         before do
           params.merge!(
@@ -330,11 +314,11 @@ describe 'corosync' do
       before do
         params.merge!(
           authkey_source: 'string',
-          authkey: 'mysecretkey'
+          authkey: 'bXlzZWNyZXRrZXkK' # 'mysecretkey' in base64
         )
       end
       it 'deploys authkey file' do
-        is_expected.to contain_file('/etc/corosync/authkey').with_content('mysecretkey')
+        is_expected.to contain_file('/etc/corosync/authkey').with_content('bXlzZWNyZXRrZXkK')
       end
     end
 
@@ -550,11 +534,33 @@ describe 'corosync' do
         )
       end
 
-      it 'raises error' do
-        is_expected.to raise_error(
-          Puppet::Error,
-          %r{set_votequorum is true, but no quorum_members have been passed.}
-        )
+      context 'when multicast_address is set' do
+        before do
+          params.merge!(
+            multicast_address: '10.0.0.1'
+          )
+        end
+
+        it 'does not contain nodelist' do
+          is_expected.not_to contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{nodelist}
+          )
+        end
+      end
+
+      context 'when multicast_address is not set' do
+        before do
+          params.merge!(
+            multicast_address: []
+          )
+        end
+
+        it 'raises error' do
+          is_expected.to raise_error(
+            Puppet::Error,
+            %r{set_votequorum is true, but neither quorum_members were passed nor was multicast specified.}
+          )
+        end
       end
     end
 
@@ -590,6 +596,44 @@ describe 'corosync' do
       )
     end
 
+    context 'without secauth' do
+      before do
+        params.merge!(
+          enable_secauth: false
+        )
+      end
+
+      it { is_expected.to compile.with_all_deps }
+
+      it 'disables secauth with corsync 2.x syntax' do
+        is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+          %r{crypto_hash:\s+none}
+        )
+        is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+          %r{crypto_cipher:\s+none}
+        )
+      end
+    end
+
+    context 'with secauth' do
+      before do
+        params.merge!(
+          enable_secauth: true
+        )
+      end
+
+      it { is_expected.to compile.with_all_deps }
+
+      it 'enables secauth with corsync 2.x syntax' do
+        is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+          %r{crypto_hash:\s+sha1}
+        )
+        is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+          %r{crypto_cipher:\s+aes256}
+        )
+      end
+    end
+
     it_configures 'corosync'
   end
 
@@ -606,6 +650,38 @@ describe 'corosync' do
       end
 
       it_configures 'corosync'
+
+      context 'without secauth' do
+        before do
+          params.merge!(
+            enable_secauth: false
+          )
+        end
+
+        it { is_expected.to compile.with_all_deps }
+
+        it 'disables secauth with corsync 1.x syntax' do
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{secauth:\s+off}
+          )
+        end
+      end
+
+      context 'with secauth' do
+        before do
+          params.merge!(
+            enable_secauth: true
+          )
+        end
+
+        it { is_expected.to compile.with_all_deps }
+
+        it 'enables secauth with corsync 1.x syntax' do
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{secauth:\s+on}
+          )
+        end
+      end
 
       it 'does not manage the pacemaker service' do
         is_expected.not_to contain_service('pacemaker')
@@ -627,6 +703,44 @@ describe 'corosync' do
         is_expected.to contain_service('pacemaker').with(
           ensure: 'running'
         )
+      end
+
+      context 'without secauth' do
+        before do
+          params.merge!(
+            enable_secauth: false
+          )
+        end
+
+        it { is_expected.to compile.with_all_deps }
+
+        it 'disables secauth with corsync 2.x syntax' do
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{crypto_hash:\s+none}
+          )
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{crypto_cipher:\s+none}
+          )
+        end
+      end
+
+      context 'with secauth' do
+        before do
+          params.merge!(
+            enable_secauth: true
+          )
+        end
+
+        it { is_expected.to compile.with_all_deps }
+
+        it 'enables secauth with corsync 2.x syntax' do
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{crypto_hash:\s+sha1}
+          )
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{crypto_cipher:\s+aes256}
+          )
+        end
       end
 
       it 'validates the corosync configuration' do

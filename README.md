@@ -64,6 +64,35 @@ class { 'corosync':
 }
 ```
 
+### Configure Corosync Secure Authentication
+
+By default the built-in Puppet CA will be used to perform this authentication,
+however, generating a dedicated key is a better approach.
+
+1. Generate a new key on a machine with Corosync installed and convert it to Base64.
+
+    ```bash
+    # Generate the key
+    corosync-keygen -k /tmp/authkey
+    ```
+2. Convert the key file to a Base64 string so it can be used in your manifest.
+
+    ```bash
+    # Convert it to a Base64 string
+    base64 -w 0 /tmp/authkey > /tmp/authkey_base64
+    ```
+3. Declare the corosync module using this string.
+
+    ```puppet
+    class { 'corosync':
+      enable_secauth => true,
+      authkey_source => 'string',
+      authkey        => 'MxjvpEztT3Mi+QagUO2cefhLDrP2BSFYKS3g1WXTUj2eCgGDPcSNf3uCKgzJKhoWTgJm2nYDHJv8KiFqMoW3ATuVr/9fLb/lgUVfoz0GnP10S7r77aqaIsERhJcGVQhcteHVlZl6zOo6VQz4ekH7VPmMlKJX0iQPuJTh9o6qhjg=',
+    }
+    ```
+
+If the authkey is included directly in config, consider storing the value in hiera and encrypting it via [hiera-eyaml](https://github.com/voxpupuli/hiera-eyaml).
+
 ### Configure votequorum
 
 *To enable Corosync 2 votequorum and define a nodelist
@@ -439,8 +468,7 @@ to function.
 ## Notes
 
 ### Upstream documentation
-
-We suggest you at least go read the [Clusters from Scratch](http://clusterlabs.org/doc/) document
+We suggest you at least go read the [Clusters from Scratch](http://clusterlabs.org/pacemaker/doc/) document
 from Cluster Labs.  It will help you out a lot when understanding how all the pieces
 fall together a point you in the right direction when Corosync/Pacemaker fails unexpectedly.
 
@@ -471,6 +499,10 @@ need to enable the jessie-backport apt repository.
 Special thanks to [Puppet, Inc](http://puppet.com) for initial development and
 [Vox Pupuli](https://voxpupuli.org) to provide a platform that allows us to
 continue the development of this module.
+
+## Development
+
+See the [contributing guide](./.github/CONTRIBUTING.md) for details. Additionally, some general guidelines on PR structure can be found [here](https://voxpupuli.org/docs/#reviewing-a-module-pr).
 
 ## Copyright and License
 
