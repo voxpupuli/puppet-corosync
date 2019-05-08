@@ -21,7 +21,7 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
 
   # we need to check if we run at least pacemakerd version 1.1.13 before enabling feature discovery
   # see http://blog.clusterlabs.org/blog/2014/feature-spotlight-controllable-resource-discovery
-  if !Facter.value('pacemakerd_version').nil?
+  unless Facter.value('pacemakerd_version').nil?
     if Puppet::Util::Package.versioncmp(Facter.value('pacemakerd_version'), '1.1.13') >= 0
       has_feature :discovery
     end
