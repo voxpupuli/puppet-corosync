@@ -11,16 +11,23 @@ describe 'corosync::qdevice' do
     ['pcs', 'corosync-qnetd'].each do |package|
       it "does install #{package}" do
         is_expected.to contain_package(package).with(
-          ensure: 'present'
+          ensure: 'present',
+          before: 'Group[haclient]'
         )
       end
+    end
+
+    it 'creates the cluster group' do
+      is_expected.to contain_group('haclient').with(
+        ensure: 'present'
+      )
     end
 
     it 'sets the hacluster password' do
       is_expected.to contain_user('hacluster').with(
         ensure: 'present',
         password: 'some-secret-hash',
-        require: 'Package[pcs]'
+        gid: 'haclient'
       )
     end
 

@@ -808,11 +808,12 @@ describe 'corosync' do
             )
           end
 
-          it 'configures the hacluster user' do
+          it 'configures the hacluster user and haclient group' do
+            is_expected.to contain_group('haclient').that_requires('Package[pcs]')
             is_expected.to contain_user('hacluster').with(
               ensure: 'present',
-              password: 'some-secret-hash',
-              require: 'Package[pcs]'
+              gid: 'haclient',
+              password: 'some-secret-hash'
             )
           end
         end

@@ -433,10 +433,15 @@ class corosync(
 
     # Set the password for the hacluster user if it was provided
     if $sensitive_hacluster_hash {
+      group { 'haclient':
+        ensure  => 'present',
+        require => Package['pcs'],
+      }
+
       user { 'hacluster':
         ensure   => 'present',
+        gid      => 'haclient',
         password => $sensitive_hacluster_hash,
-        require  => Package['pcs'],
       }
     }
   }

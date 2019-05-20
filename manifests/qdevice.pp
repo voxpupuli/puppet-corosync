@@ -54,20 +54,27 @@ class corosync::qdevice (
   String[1] $package_corosync_qnetd           = 'corosync-qnetd',
   Sensitive[String] $sensitive_hacluster_hash = undef,
 ) {
+  $cluster_group = 'haclient'
+  $cluster_user = 'hacluster'
 
   # Install the required packages
-  package { $package_pcs:
-    ensure => present,
+  [ $package_pcs, $package_corosync_qnetd ].each |$package| {
+    package { $package:
+      ensure => present,
+      before => Group[$cluster_group],
+    }
   }
-  package { $package_corosync_qnetd:
-    ensure => present,
+
+  # Cluster control group
+  group { $cluster_group:
+    ensure  => 'present',
   }
 
   # Cluster admin credentials
-  user { 'hacluster':
+  user { $cluster_user:
     ensure   => 'present',
     password => $sensitive_hacluster_hash,
-    require  => Package[$package_pcs],
+    gid      => $cluster_group,
   }
 
   # Enable the PCS service
