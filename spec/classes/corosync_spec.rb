@@ -1072,6 +1072,23 @@ describe 'corosync' do
             )
           end
         end
+
+        context 'with two nodes' do
+          before do
+            params.merge!(
+              quorum_members: [
+                'node1.test.org',
+                'node2.test.org'
+              ]
+            )
+          end
+
+          it 'does not configure two node' do
+            is_expected.not_to contain_file('/etc/corosync/corosync.conf').with_content(
+              %r{two_node: 1\n}
+            )
+          end
+        end
       end
     end
   end
