@@ -945,6 +945,21 @@ describe 'corosync' do
           end
         end
 
+        context 'and a cluster member is specified as the quorum device' do
+          before do
+            params.merge!(
+              quorum_device_host: 'node3.test.org'
+            )
+          end
+
+          it 'fails to delpoy' do
+            is_expected.to raise_error(
+              Puppet::Error,
+              %r{Quorum device host cannot also be a member of the cluster!}
+            )
+          end
+        end
+
         context 'without managing pcsd auth' do
           before do
             params.delete(:manage_pcsd_auth)

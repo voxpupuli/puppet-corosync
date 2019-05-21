@@ -492,6 +492,27 @@ class corosync(
       require => Package['pcs'],
     }
 
+    # Validate the pcs auth / qdevice parameters when both are enabled
+    if $manage_pcsd_auth and $manage_quorum_device {
+      # Ensure the optional parameters have been provided
+      if ! $quorum_device_host {
+        fail('The quorum device host must be specified!')
+      }
+
+      if ! $sensitive_quorum_device_password {
+        fail('The password for the hacluster user on the quorum device node is mandatory!')
+      }
+
+      if ! $cluster_name {
+        fail('A cluster name must be specified when a quorm device is configured!')
+      }
+
+      # The quorum device cannot be a member of the cluster!
+      if $quorum_device_host in $quorum_members {
+        fail('Quorum device host cannot also be a member of the cluster!')
+      }
+    }
+
     # Determine if this node should perform authorizations
     case $manage_pcsd_auth_node {
       'first': { $auth_node = $quorum_members[0] }
@@ -566,15 +587,6 @@ class corosync(
     }
 
     if $manage_quorum_device and $manage_pcsd_auth and $is_auth_node and $set_votequorum {
-      # Ensure the optional parameters have been provided
-      if ! $quorum_device_host {
-        fail('The quorum device host must be specified!')
-      } elsif ! $sensitive_quorum_device_password {
-        fail('The password for the hacluster user on the quorum device node is mandatory!')
-      } elsif ! $cluster_name {
-        fail('A cluster name must be specified when a quorm device is configured!')
-      }
-
       # If the cluster hasn't been configured yet, temporarily configure it so
       # the pcs_cluster_auth_qdevice command doesn't fail. This should generate
       # a temporary corosync.conf which will then be overwritten
