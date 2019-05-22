@@ -511,6 +511,10 @@ class corosync(
       if $quorum_device_host in $quorum_members {
         fail('Quorum device host cannot also be a member of the cluster!')
       }
+    } elsif $manage_pcsd_auth {
+      if ! $sensitive_hacluster_password or ! $sensitive_hacluster_hash {
+        fail('The hacluster password and hash must be provided to authorize nodes via pcsd.')
+      }
     }
 
     # Determine if this node should perform authorizations
@@ -546,10 +550,6 @@ class corosync(
     $exec_path = '/sbin:/bin/:usr/sbin:/usr/bin'
 
     if $manage_pcsd_auth and $is_auth_node {
-      if ! $sensitive_hacluster_password or ! $sensitive_hacluster_hash {
-        fail('The hacluster password and hash must be provided to authorize nodes via pcsd.')
-      }
-
       # TODO - verify if this breaks out of the sensitivity
       $hacluster_password = $sensitive_hacluster_password.unwrap
       $auth_credential_string = "-u hacluster -p ${hacluster_password}"

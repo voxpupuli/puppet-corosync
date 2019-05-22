@@ -768,6 +768,8 @@ describe 'corosync' do
           params.merge!(
             manage_pcsd_service: true,
             manage_pcsd_auth: true,
+            sensitive_hacluster_hash: RSpec::Puppet::RawString.new("Sensitive('some-secret-hash')"),
+            sensitive_hacluster_password: RSpec::Puppet::RawString.new("Sensitive('some-secret-password')"),
             quorum_members: [
               'node1.test.org',
               'node2.test.org',
@@ -778,6 +780,7 @@ describe 'corosync' do
         let(:node) { 'node1.test.org' }
 
         it 'without hacluster_password raises error' do
+          params.delete(:sensitive_hacluster_password)
           is_expected.to raise_error(
             Puppet::Error,
             %r{The hacluster password and hash must be provided to authorize nodes via pcsd}
@@ -785,7 +788,7 @@ describe 'corosync' do
         end
 
         it 'without hacluster_hash raises error' do
-          params[:sensitive_hacluster_password] = RSpec::Puppet::RawString.new("Sensitive('some-secret-hash')")
+          params.delete(:sensitive_hacluster_hash)
           is_expected.to raise_error(
             Puppet::Error,
             %r{The hacluster password and hash must be provided to authorize nodes via pcsd}
@@ -800,22 +803,13 @@ describe 'corosync' do
           end
         end
 
-        context 'with a password hash for hacluster' do
-          before do
-            params.merge!(
-              sensitive_hacluster_password: RSpec::Puppet::RawString.new("Sensitive('some-secret-sauce')"),
-              sensitive_hacluster_hash: RSpec::Puppet::RawString.new("Sensitive('some-secret-hash')")
-            )
-          end
-
-          it 'configures the hacluster user and haclient group' do
-            is_expected.to contain_group('haclient').that_requires('Package[pcs]')
-            is_expected.to contain_user('hacluster').with(
-              ensure: 'present',
-              gid: 'haclient',
-              password: 'some-secret-hash'
-            )
-          end
+        it 'configures the hacluster user and haclient group' do
+          is_expected.to contain_group('haclient').that_requires('Package[pcs]')
+          is_expected.to contain_user('hacluster').with(
+            ensure: 'present',
+            gid: 'haclient',
+            password: 'some-secret-hash'
+          )
         end
 
         context 'with a password' do
