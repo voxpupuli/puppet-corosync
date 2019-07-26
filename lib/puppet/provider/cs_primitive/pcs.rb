@@ -277,7 +277,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
       cmd += metadatas unless metadatas.nil?
       self.class.run_command_in_cib(cmd, @resource[:cib])
       if @property_hash[:promotable] == :true
-        cmd = [command(:pcs), pcs_subcommand, 'update', "ms_#{@property_hash[:name]}", (@property_hash[:name]).to_s]
+        cmd = [command(:pcs), pcs_subcommand, 'update', "ms_#{@property_hash[:name]}"]
         unless @property_hash[:ms_metadata].empty? && @property_hash[:existing_ms_metadata].empty?
           cmd << 'meta'
           @property_hash[:ms_metadata].each_pair do |k, v|
