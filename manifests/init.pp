@@ -227,7 +227,7 @@
 #
 # @param manage_pcsd_service
 #   Whether the module should try to manage the pcsd service in addition to the
-#   corosync service. pcsd service is the GUI and the remote configuration 
+#   corosync service. pcsd service is the GUI and the remote configuration
 #   interface.
 #
 # @param manage_pcsd_auth
@@ -241,7 +241,7 @@
 # @param manage_pcsd_auth_node
 #   When managing authorization for PCS this determines which node does the
 #   work. Note that only one node 'should' do the work and nodes are chosen by
-#   matching local facts to the contents of quorum_members. When 
+#   matching local facts to the contents of quorum_members. When
 #   manage_pcsd_auth is disabled this parameter has no effect.
 #
 # @param sensitive_hacluster_password
@@ -251,7 +251,7 @@
 #   to authorize all nodes.
 #
 # @param sensitive_hacluster_hash
-#   This parameter expects a valid password hash of 
+#   This parameter expects a valid password hash of
 #   sensitive_hacluster_password. If provided, the hash provided the hash will
 #   be used to set the password for the hacluster user on each node.
 #
@@ -269,7 +269,7 @@
 # @param quorum_device_algorithm
 #   There are currently two algorithms the quorum device can utilize to
 #   determine how its vote should be allocated; Fifty-fifty split and
-#   last-man-standing. See the 
+#   last-man-standing. See the
 #   [corosync-qdevice man page](https://www.systutorials.com/docs/linux/man/8-corosync-qdevice/)
 #   for details.
 #
@@ -398,7 +398,7 @@ class corosync(
   Optional[Corosync::QuorumAlgorithm] $quorum_device_algorithm       = 'ffsplit',
   Optional[String] $package_quorum_device                            = $corosync::params::package_quorum_device,
   Optional[Sensitive[String]] $sensitive_quorum_device_password      = undef,
-  Optional[String] $cluster_name                                     = undef,
+  Optional[String[1]] $cluster_name                                  = undef,
   Optional[Integer] $join                                            = undef,
   Optional[Integer] $consensus                                       = undef,
   Optional[Enum['yes', 'no']] $clear_node_high_bit                   = undef,
@@ -406,8 +406,8 @@ class corosync(
   Boolean $test_corosync_config                                      = $corosync::params::test_corosync_config,
 ) inherits ::corosync::params {
 
-  if $set_votequorum and (empty($quorum_members) and empty($multicast_address)) {
-    fail('set_votequorum is true, but neither quorum_members were passed nor was multicast specified.')
+  if $set_votequorum and (empty($quorum_members) and empty($multicast_address) and !$cluster_name) {
+    fail('set_votequorum is true, so you must set either quorum_members, or one of multicast_address or cluster_name.')
   }
 
   if $quorum_members_names and empty($quorum_members) {
@@ -548,7 +548,7 @@ class corosync(
       default: {}
     }
 
-    # Calculate a full list of IP addresses 
+    # Calculate a full list of IP addresses
     unless(empty($facts['networking']['interfaces'])) {
       $interface_ip_list = $facts['networking']['interfaces'].map |$entry| {
         if 'ip' in $entry[1] {
@@ -579,15 +579,15 @@ class corosync(
       $auth_credential_string = "-u hacluster -p ${hacluster_password}"
 
       # As the auth can happen before corosync.conf exists we need to explicitly
-      # list the members to join. 
+      # list the members to join.
       # TODO - verify that this is safe when quorum_members is a list of IP
       # addresses
       $node_string = join($quorum_members, ' ')
 
       # Attempt to authorize all members. The command will return successfully
       # if they were already authenticated so it's safe to run every time this
-      # is applied. 
-      # TODO - make it run only once 
+      # is applied.
+      # TODO - make it run only once
       exec { 'pcs_cluster_auth':
         command => "pcs cluster auth ${node_string} ${auth_credential_string}",
         path    => $exec_path,
