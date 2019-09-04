@@ -94,4 +94,43 @@ can use `BEAKER_DESTROY=no` and `BEAKER_PROVISION=no`. On the first run you will
 at least need `BEAKER_PROVISION` set to yes (the default). The Vagrantfile
 for the created virtual machines will be in `.vagrant/beaker_vagrant_fies`.
 
+### Vagrant
+
+If you are using vagrant instead of docker for local testing you will need to
+ensure that the beaker-vagrant is installed.
+
+1. Add `gem "beaker-vagrant,                     :require => false"` to the Gemfile.
+1. Re-run `bundle install` to add all relevant packages.
+
+Once this is in-place, you can execute a test on an CentOS 7 VM with puppet5 as follows:
+
+```bash
+BEAKER_PUPPET_COLLECTION=puppet5 bundle exec rake beaker:centos-7-x64 SPEC=spec/acceptance/cs_primitive_spec.rb
+```
+
+When troubleshooting adding `BEAKER_destroy=no` will ensure that the VM is left
+after the test completes (or fails). To connect via ssh, perform the following:
+
+1. Determine the vagrant ID of your test node
+
+    ```bash
+    vagrant global-status
+    ```
+    Something similar to the following should print:
+
+    ```bash
+    id       name         provider   state   directory                                                                                                            
+    -------------------------------------------------------------------------------------------------------------------------------
+    e86d327  centos-7-x64 virtualbox running /home/me/puppet-corosync/.vagrant/beaker_vagrant_files/centos-7-x64.ym
+    ```
+1. Connect to the ID
+
+    ```bash
+    vagrant ssh e86d327
+    ```
+
+From there you should be able to become root via `sudo -i` without a password and do whatever. 
+Likely, you'll try running `puppet apply --verbose --trace --detailed-exitcodes /tmp/apply_manifest.pp.<some_garbage>`
+to see why your code isn't working.
+
 # vim: syntax=markdown
