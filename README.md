@@ -207,6 +207,33 @@ cs_primitive { 'pgsql_service':
 }
 ```
 
+### Configuring STONITH Resources
+
+Special primitives can be configured to support [STONITH (Shoot The Other Node In The Head)](https://clusterlabs.org/pacemaker/doc/en-US/Pacemaker/1.1/html-single/Pacemaker_Explained/index.html#_what_is_stonith) fencing. This is critical for clusters which include shared resources (shared disk typically) or are vulnerable to cluster splits. The STONITH resource is responsible for providing a mechanism to restart or simply halt a rouge resource, often via power fencing.
+
+The following example performs this configuration via the *fence_vmware_soap* STONITH agent.
+
+```puppet
+cs_primitive { 'vmfence':
+  primitive_class => 'stonith',
+  primitive_type  => 'fence_vmware_soap',
+  operations      => {
+    'monitor'     => { 'interval' => '60s'},
+  },
+  parameters      => {
+    'ipaddr'          => 'vcenter.example.org',
+    'login'           => 'service-fence@vsphere.local'
+    'passwd'          => 'some plaintext secret',
+    'ssl'             => '1',
+    'ssl_insecure'    => '1',
+    'pcmk_host_map'   => 'host0.example.org:host0;host1.example.org:host1',
+    'pcmk_delay_max'  => '10s',
+  },
+}
+```
+
+Note that currently this implementation only handles STONITH for RHEL/CentOS based clusters which utilize `pcs`.
+
 ### Configuring locations
 
 Locations determine on which nodes primitive resources run.
