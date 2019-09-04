@@ -121,6 +121,11 @@
 #   Default (Red Hat based):  true
 #   Default (otherwise):      false
 #
+# @param package_fence_agents
+#   Define if package fence-agents should be managed.
+#   Default (Red Hat based):  true
+#   Default (otherwise):      false
+#
 # @param packageopts_corosync
 #   Additional install-options for the corosync package resource.
 #   Default (Debian Jessie):  ['-t', 'jessie-backports']
@@ -141,6 +146,11 @@
 #   Default (Debian Jessie):  ['-t', 'jessie-backports']
 #   Default (otherwise):      undef
 #
+# @param packageopts_fence_agents
+#   Additional install-options for the pcs package resource.
+#   Default (Debian Jessie):  ['-t', 'jessie-backports']
+#   Default (otherwise):      undef
+#
 # @param version_corosync
 #   Define what version of the corosync package should be installed.
 #   Default: 'present'
@@ -155,6 +165,10 @@
 #
 # @param version_pcs
 #   Define what version of the pcs package should be installed.
+#   Default: 'present'
+#
+# @param version_fence_agents
+#   Define what version of the fence-agents-all package should be installed.
 #   Default: 'present'
 #
 # @param set_votequorum
@@ -299,14 +313,17 @@ class corosync(
   Boolean $package_crmsh                                             = $corosync::params::package_crmsh,
   Boolean $package_pacemaker                                         = $corosync::params::package_pacemaker,
   Boolean $package_pcs                                               = $corosync::params::package_pcs,
+  Boolean $package_fence_agents                                      = $corosync::params::package_fence_agents,
   Optional[Array] $packageopts_corosync                              = $corosync::params::package_install_options,
   Optional[Array] $packageopts_pacemaker                             = $corosync::params::package_install_options,
   Optional[Array] $packageopts_crmsh                                 = $corosync::params::package_install_options,
   Optional[Array] $packageopts_pcs                                   = $corosync::params::package_install_options,
+  Optional[Array] $packageopts_fence_agents                          = $corosync::params::package_install_options,
   String $version_corosync                                           = $corosync::params::version_corosync,
   String $version_crmsh                                              = $corosync::params::version_crmsh,
   String $version_pacemaker                                          = $corosync::params::version_pacemaker,
   String $version_pcs                                                = $corosync::params::version_pcs,
+  String $version_fence_agents                                       = $corosync::params::version_fence_agents,
   Boolean $set_votequorum                                            = $corosync::params::set_votequorum,
   Optional[Integer] $votequorum_expected_votes                       = undef,
   Array $quorum_members                                              = ['localhost'],
@@ -369,6 +386,13 @@ class corosync(
     package { 'pcs':
       ensure          => $version_pcs,
       install_options => $packageopts_pcs,
+    }
+  }
+
+  if $package_fence_agents {
+    package { 'fence-agents-all':
+      ensure          => $version_fence_agents,
+      install_options => $packageopts_fence_agents,
     }
   }
 

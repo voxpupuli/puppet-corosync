@@ -145,7 +145,7 @@ Default value: $corosync::params::port
 
 ##### `multicast_address`
 
-Data type: `Optional[Stdlib::IP::Address]`
+Data type: `Optional[Corosync::IpStringIp]`
 
 An IP address that has been reserved for multicast traffic.  This is the
 default way that Corosync accomplishes communication across the cluster.
@@ -316,6 +316,16 @@ Default (otherwise):      false
 
 Default value: $corosync::params::package_pcs
 
+##### `package_fence_agents`
+
+Data type: `Boolean`
+
+Define if package fence-agents should be managed.
+Default (Red Hat based):  true
+Default (otherwise):      false
+
+Default value: $corosync::params::package_fence_agents
+
 ##### `packageopts_corosync`
 
 Data type: `Optional[Array]`
@@ -347,6 +357,16 @@ Default (otherwise):      undef
 Default value: $corosync::params::package_install_options
 
 ##### `packageopts_pcs`
+
+Data type: `Optional[Array]`
+
+Additional install-options for the pcs package resource.
+Default (Debian Jessie):  ['-t', 'jessie-backports']
+Default (otherwise):      undef
+
+Default value: $corosync::params::package_install_options
+
+##### `packageopts_fence_agents`
 
 Data type: `Optional[Array]`
 
@@ -391,6 +411,15 @@ Define what version of the pcs package should be installed.
 Default: 'present'
 
 Default value: $corosync::params::version_pcs
+
+##### `version_fence_agents`
+
+Data type: `String`
+
+Define what version of the fence-agents-all package should be installed.
+Default: 'present'
+
+Default value: $corosync::params::version_fence_agents
 
 ##### `set_votequorum`
 

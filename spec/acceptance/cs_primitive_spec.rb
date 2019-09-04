@@ -230,6 +230,36 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
   # rubocop:enable RSpec/RepeatedExample
 
+  context 'on RedHat derivitives' do
+    it 'applies stonith resources without error' do
+      pp = <<-EOS
+          cs_primitive { 'vmfence':
+            primitive_class => 'stonith',
+            primitive_type  => 'fence_vmware_soap',
+            operations      => {
+              'monitor'     => { 'interval' => '60s'},
+            },
+            parameters      => {
+              'ipaddr'          => 'vcenter.example.org',
+              'login'           => 'service-fence@vsphere.local',
+              'passwd'          => 'some plaintext secret',
+              'ssl'             => '1',
+              'ssl_insecure'    => '1',
+              'pcmk_host_map'   => 'host0.example.org:host0;host1.example.org:host1',
+              'pcmk_delay_max'  => '10s',
+            },
+          }
+      EOS
+      if fact('osfamily') == 'RedHat'
+        apply_manifest(pp, catch_failures: true, debug: false, trace: true)
+        apply_manifest(pp, catch_changes: true, debug: false, trace: true)
+        shell('pcs stonith show') do |r|
+          expect(r.stdout).to match(%r{vmfence.*stonith:fence_vmware_soap})
+        end
+      end
+    end
+  end
+
   after :all do
     cleanup_cs_resources
   end
