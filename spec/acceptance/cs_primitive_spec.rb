@@ -101,7 +101,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           primitive_class => 'ocf',
           primitive_type  => 'IPaddr2',
           provided_by     => 'heartbeat',
-          parameters      => { 'ip' => '172.16.210.142', 'cidr_netmask' => '24' },
+          parameters      => { 'ip' => '172.16.210.140', 'cidr_netmask' => '24' },
           operations      => { 'monitor' => { 'interval' => '10s' } },
         }
     EOS
@@ -152,7 +152,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           primitive_class => 'ocf',
           primitive_type  => 'IPaddr2',
           provided_by     => 'heartbeat',
-          parameters      => { 'ip' => '172.16.210.142', 'cidr_netmask' => '24' },
+          parameters      => { 'ip' => '172.16.210.141', 'cidr_netmask' => '24' },
           operations      => { 'monitor' => { 'interval' => '10s' } },
           metadata        => {'is-managed' => 'false', 'target-role' => 'stopped'}
         }
@@ -180,7 +180,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           primitive_class    => 'ocf',
           primitive_type     => 'IPaddr2',
           provided_by        => 'heartbeat',
-          parameters         => { 'ip' => '172.16.210.142', 'cidr_netmask' => '24' },
+          parameters         => { 'ip' => '172.16.210.141', 'cidr_netmask' => '24' },
           operations         => { 'monitor' => { 'interval' => '10s' } },
           unmanaged_metadata => ['target-role', 'is-managed'],
         }
@@ -207,7 +207,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           primitive_class    => 'ocf',
           primitive_type     => 'IPaddr2',
           provided_by        => 'heartbeat',
-          parameters         => { 'ip' => '172.16.210.142', 'cidr_netmask' => '24' },
+          parameters         => { 'ip' => '172.16.210.141', 'cidr_netmask' => '24' },
           operations         => { 'monitor' => { 'interval' => '10s' } },
           unmanaged_metadata => ['target-role'],
         }

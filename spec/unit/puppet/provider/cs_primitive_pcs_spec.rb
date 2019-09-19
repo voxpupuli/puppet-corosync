@@ -356,7 +356,7 @@ h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat"
       vmfence_instance.primitive_type = 'fence_vmware_rest'
       expect_commands([
                         %r{^pcs stonith delete --force vmfence$},
-                        %r{^pcs stonith create --force vmfence fence_vmware_rest},
+                        %r{^pcs stonith create --force vmfence fence_vmware_rest}
                       ])
       vmfence_instance.flush
     end
@@ -366,7 +366,7 @@ h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat"
       vmfence_instance.primitive_type = 'fence_vmware_rest'
       expect_commands([
                         %r{^pcs stonith delete --force vmfence$},
-                        %r{^pcs stonith create --force vmfence fence_vmware_rest},
+                        %r{^pcs stonith create --force vmfence fence_vmware_rest}
                       ])
       vmfence_instance.flush
     end
@@ -375,7 +375,7 @@ h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat"
       vmfence_instance.metadata = { 'target-role' => 'Started' }
       expect_commands([
                         %r{^pcs stonith delete --force vmfence$},
-                        %r{^pcs stonith create --force vmfence fence_vmware_soap ipaddr=.* op monitor interval=60s meta target-role=Started},
+                        %r{^pcs stonith create --force vmfence fence_vmware_soap ipaddr=.* op monitor interval=60s meta target-role=Started}
                       ])
       vmfence_instance.flush
     end
@@ -384,7 +384,7 @@ h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat"
       vmfence_instance.operations = [{ 'monitor' => { 'interval' => '20s' } }]
       expect_commands([
                         %r{^pcs stonith delete --force vmfence$},
-                        %r{^pcs stonith create --force vmfence fence_vmware_soap ipaddr=.* op monitor interval=20s$},
+                        %r{^pcs stonith create --force vmfence fence_vmware_soap ipaddr=.* op monitor interval=20s$}
                       ])
       vmfence_instance.flush
     end

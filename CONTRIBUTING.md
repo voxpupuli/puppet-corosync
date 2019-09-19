@@ -49,8 +49,13 @@ The test suite will run [Puppet Lint](http://puppet-lint.com/) and
 [Puppet Syntax](https://github.com/gds-operations/puppet-syntax) to
 check various syntax and style things. You can run these locally with:
 
+    ```bash
+    # Ensure the correct version of puppet is selected
+    export PUPPET_VERSION="~> 5.0"
     bundle exec rake lint
     bundle exec rake validate
+    bundle exec rake rubocop 
+    ```
 
 ## Running the unit tests
 
@@ -108,8 +113,8 @@ Once this is in-place, you can execute a test on an CentOS 7 VM with puppet5 as 
 BEAKER_PUPPET_COLLECTION=puppet5 bundle exec rake beaker:centos-7-x64 SPEC=spec/acceptance/cs_primitive_spec.rb
 ```
 
-When troubleshooting adding `BEAKER_destroy=no` will ensure that the VM is left
-after the test completes (or fails). To connect via ssh, perform the following:
+When troubleshooting adding `BEAKER_destroy=no` will ensure that the VM is not
+removed after the test completes. To connect via ssh, perform the following:
 
 1. Determine the vagrant ID of your test node
 
@@ -129,8 +134,16 @@ after the test completes (or fails). To connect via ssh, perform the following:
     vagrant ssh e86d327
     ```
 
-From there you should be able to become root via `sudo -i` without a password and do whatever. 
-Likely, you'll try running `puppet apply --verbose --trace --detailed-exitcodes /tmp/apply_manifest.pp.<some_garbage>`
-to see why your code isn't working.
+From there you should be able to become root via `sudo -i` without a password
+and do whatever. Likely, you'll try running a puppet apply similar to the
+example below to troubleshoot your code.
+```bash
+puppet apply --verbose --trace --detailed-exitcodes /tmp/apply_manifest.pp.<some_garbage>`
+```
+
+It might also be necessary to specify **PUPPET_VERSION** explicitly via
+something like `PUPPET_VERSION=5.5.16` for some versions of beaker-puppet.
+This can come up if you see package manager errors which attempt to use
+`~>5.0` as the version of the package.
 
 # vim: syntax=markdown

@@ -168,15 +168,15 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
       e_ops = @property_hash[:existing_operations]
 
       # Test whether we need to force reinstall
-      if existing_resource_type != resource_type
-        force_reinstall = :true
-      elsif !((e_ops - ops) + (ops - e_ops)).empty?
-        force_reinstall = :true
-      elsif !(meta == e_meta)
-        force_reinstall = :true
-      else
-        force_reinstall = :false
-      end
+      force_reinstall = if existing_resource_type != resource_type
+                          :true
+                        elsif !((e_ops - ops) + (ops - e_ops)).empty?
+                          :true
+                        elsif meta != e_meta
+                          :true
+                        else
+                          :false
+                        end
 
       if force_reinstall == :true
         debug('Removing stonith')
