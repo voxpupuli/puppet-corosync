@@ -101,7 +101,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           primitive_class => 'ocf',
           primitive_type  => 'IPaddr2',
           provided_by     => 'heartbeat',
-          parameters      => { 'ip' => '172.16.210.142', 'cidr_netmask' => '24' },
+          parameters      => { 'ip' => '172.16.210.140', 'cidr_netmask' => '24' },
           operations      => { 'monitor' => { 'interval' => '10s' } },
         }
     EOS
@@ -152,7 +152,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           primitive_class => 'ocf',
           primitive_type  => 'IPaddr2',
           provided_by     => 'heartbeat',
-          parameters      => { 'ip' => '172.16.210.142', 'cidr_netmask' => '24' },
+          parameters      => { 'ip' => '172.16.210.141', 'cidr_netmask' => '24' },
           operations      => { 'monitor' => { 'interval' => '10s' } },
           metadata        => {'is-managed' => 'false', 'target-role' => 'stopped'}
         }
@@ -180,7 +180,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           primitive_class    => 'ocf',
           primitive_type     => 'IPaddr2',
           provided_by        => 'heartbeat',
-          parameters         => { 'ip' => '172.16.210.142', 'cidr_netmask' => '24' },
+          parameters         => { 'ip' => '172.16.210.141', 'cidr_netmask' => '24' },
           operations         => { 'monitor' => { 'interval' => '10s' } },
           unmanaged_metadata => ['target-role', 'is-managed'],
         }
@@ -207,7 +207,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           primitive_class    => 'ocf',
           primitive_type     => 'IPaddr2',
           provided_by        => 'heartbeat',
-          parameters         => { 'ip' => '172.16.210.142', 'cidr_netmask' => '24' },
+          parameters         => { 'ip' => '172.16.210.141', 'cidr_netmask' => '24' },
           operations         => { 'monitor' => { 'interval' => '10s' } },
           unmanaged_metadata => ['target-role'],
         }
@@ -229,6 +229,36 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
   end
   # rubocop:enable RSpec/RepeatedExample
+
+  context 'on RedHat derivitives' do
+    it 'applies stonith resources without error' do
+      pp = <<-EOS
+          cs_primitive { 'vmfence':
+            primitive_class => 'stonith',
+            primitive_type  => 'fence_vmware_soap',
+            operations      => {
+              'monitor'     => { 'interval' => '60s'},
+            },
+            parameters      => {
+              'ipaddr'          => 'vcenter.example.org',
+              'login'           => 'service-fence@vsphere.local',
+              'passwd'          => 'some plaintext secret',
+              'ssl'             => '1',
+              'ssl_insecure'    => '1',
+              'pcmk_host_map'   => 'host0.example.org:host0;host1.example.org:host1',
+              'pcmk_delay_max'  => '10s',
+            },
+          }
+      EOS
+      if fact('osfamily') == 'RedHat'
+        apply_manifest(pp, catch_failures: true, debug: false, trace: true)
+        apply_manifest(pp, catch_changes: true, debug: false, trace: true)
+        shell('pcs stonith show') do |r|
+          expect(r.stdout).to match(%r{vmfence.*stonith:fence_vmware_soap})
+        end
+      end
+    end
+  end
 
   after :all do
     cleanup_cs_resources

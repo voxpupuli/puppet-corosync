@@ -19,6 +19,7 @@ class corosync::params {
   $version_crmsh                       = 'present'
   $version_pacemaker                   = 'present'
   $version_pcs                         = 'present'
+  $version_fence_agents                = 'present'
   $enable_corosync_service             = true
   $manage_corosync_service             = true
   $enable_pacemaker_service            = true
@@ -28,6 +29,7 @@ class corosync::params {
     'RedHat': {
       $package_crmsh  = false
       $package_pcs    = true
+      $package_fence_agents = true
       $set_votequorum = true
       if versioncmp($::operatingsystemrelease, '7') >= 0 {
         $manage_pacemaker_service = true
@@ -44,6 +46,7 @@ class corosync::params {
     'Debian': {
       $package_crmsh  = true
       $package_pcs    = false
+      $package_fence_agents = false
       case $::operatingsystem {
         'Ubuntu': {
           if versioncmp($::operatingsystemrelease, '14.04') >= 0 {

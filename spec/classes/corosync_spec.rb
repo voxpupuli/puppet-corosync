@@ -651,6 +651,14 @@ describe 'corosync' do
 
       it_configures 'corosync'
 
+      context 'installs default packages' do
+        ['pcs', 'fence-agents-all'].each do |package|
+          it "installs #{package}" do
+            is_expected.to contain_package(package)
+          end
+        end
+      end
+
       context 'without secauth' do
         before do
           params.merge!(
@@ -698,6 +706,14 @@ describe 'corosync' do
       end
 
       it_configures 'corosync'
+
+      context 'installs default packages' do
+        ['pcs', 'fence-agents-all'].each do |package|
+          it "installs #{package}" do
+            is_expected.to contain_package(package)
+          end
+        end
+      end
 
       it 'does manage the pacemaker service' do
         is_expected.to contain_service('pacemaker').with(
