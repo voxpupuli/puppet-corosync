@@ -24,6 +24,7 @@ class corosync::params {
   $manage_corosync_service             = true
   $enable_pacemaker_service            = true
   $enable_pcsd_service                 = true
+  $package_quorum_device               = 'corosync-qdevice'
 
   case $::osfamily {
     'RedHat': {

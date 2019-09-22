@@ -126,11 +126,24 @@ quorum {
 <% if @votequorum_expected_votes -%>
   expected_votes: <%= @votequorum_expected_votes %>
 <%-# .to_i is needed for Puppet 3 -%>
-<% if @votequorum_expected_votes.to_i == 2 -%>
+<% if @votequorum_expected_votes.to_i == 2 && !@manage_quorum_device -%>
   two_node: 1
 <% end -%>
-<% elsif Array(@quorum_members).count == 2 -%>
+<% elsif Array(@quorum_members).count == 2 && !@manage_quorum_device -%>
   two_node: 1
+<% end -%>
+<% if @manage_quorum_device and @manage_pcsd_auth -%>
+  device {
+    model: net
+<% if @quorum_device_algorithm == 'ffsplit' -%>
+    votes: 1
+<% end -%>
+
+    net {
+      algorithm: <%= @quorum_device_algorithm %>
+      host:      <%= @quorum_device_host %>
+    }
+  }
 <% end -%>
 }
 

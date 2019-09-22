@@ -7,6 +7,7 @@
 
 * [`corosync`](#corosync): Configures the Pacemaker+Corosync stack to provide high-availability.
 * [`corosync::params`](#corosyncparams): Configures sane defaults based on the operating system.
+* [`corosync::qdevice`](#corosyncqdevice): Performs basic initial configuration of the qdevice daemon on a node.
 * [`corosync::reprobe`](#corosyncreprobe): Triggers re-probe for changes any of the native cs_* types.
 
 **Defined types**
@@ -545,10 +546,106 @@ Default value: $corosync::params::enable_pcsd_service
 Data type: `Boolean`
 
 Whether the module should try to manage the pcsd service in addition to the
-corosync service.
-pcsd service is the GUI and the remote configuration interface.
+corosync service. pcsd service is the GUI and the remote configuration
+interface.
 
 Default value: `false`
+
+##### `manage_pcsd_auth`
+
+Data type: `Boolean`
+
+This only has an effect when $manage_pcsd_service is enabled. If set, an
+attempt will be made to authorize pcs on the cluster node determined by
+manage_pcsd_auth_node. Note that this determination can only be made when
+the entries in quorum_members match the trusted certnames of the nodes in
+the environment or the IP addresses of the primary adapters.
+$sensitive_hacluster_password is mandatory if this parameter is set.
+
+Default value: `false`
+
+##### `manage_pcsd_auth_node`
+
+Data type: `Enum['first','last']`
+
+When managing authorization for PCS this determines which node does the
+work. Note that only one node 'should' do the work and nodes are chosen by
+matching local facts to the contents of quorum_members. When
+manage_pcsd_auth is disabled this parameter has no effect.
+
+Default value: 'first'
+
+##### `sensitive_hacluster_password`
+
+Data type: `Optional[Sensitive[String]]`
+
+When PCS is configured on a RHEL system this directive is used to set the
+password for the hacluster user. If both $manage_pcsd_service and
+$manage_pcsd_auth are both set to true the cluster will use this credential
+to authorize all nodes.
+
+Default value: `undef`
+
+##### `sensitive_hacluster_hash`
+
+Data type: `Optional[Sensitive[String]]`
+
+This parameter expects a valid password hash of
+sensitive_hacluster_password. If provided, the hash provided the hash will
+be used to set the password for the hacluster user on each node.
+
+Default value: `undef`
+
+##### `manage_quorum_device`
+
+Data type: `Boolean`
+
+Enable or disable the addition of a quorum device external to the cluster.
+This device is used avoid cluster splits typically in conjunction with
+fencing by providing an external network vote. Additionally, this allows
+symmentric clusters to continue operation in the event that 50% of their
+nodes have failed.
+
+Default value: `false`
+
+##### `quorum_device_host`
+
+Data type: `Optional[Stdlib::Fqdn]`
+
+The fully qualified hostname of the quorum device. This parameter is
+mandatory when manage_quorum_device is true.
+
+Default value: `undef`
+
+##### `quorum_device_algorithm`
+
+Data type: `Optional[Corosync::QuorumAlgorithm]`
+
+There are currently two algorithms the quorum device can utilize to
+determine how its vote should be allocated; Fifty-fifty split and
+last-man-standing. See the
+[corosync-qdevice man page](https://www.systutorials.com/docs/linux/man/8-corosync-qdevice/)
+for details.
+
+Default value: 'ffsplit'
+
+##### `package_quorum_device`
+
+Data type: `Optional[String]`
+
+The name of the package providing the quorum device functionality. This
+parameter is mandatory if manage_quorum_device is true.
+
+Default value: $corosync::params::package_quorum_device
+
+##### `sensitive_quorum_device_password`
+
+Data type: `Optional[Sensitive[String]]`
+
+The plain text password for the hacluster user on the quorum_device_host.
+This parameter is mandatory if manage_quorum_device is true.
+
+Default value: `undef`
 
 ##### `cluster_name`
 
@@ -621,6 +718,83 @@ Default value: $corosync::params::test_corosync_config
 ### corosync::params
 
 Configures sane defaults based on the operating system.
+
+### corosync::qdevice
+
+This class performs the configuration of the qdevice daemon on a target node.
+Note that this requires corosync 2.x and must never be deployed on a node
+which is actually part of a cluster. Additionally, you will need to open the
+correct firewall ports for both pcs, and the actual quorum device as shown in
+the included example.
+
+* **See also**
+https://www.systutorials.com/docs/linux/man/8-corosync-qnetd/
+
+#### Examples
+
+##### Quorum node with default password & configuring the firewall
+
+```puppet
+include firewalld
+
+class { 'corosync::qdevice':
+  sensitive_hacluster_hash => $sensitive_hacluster_hash,
+}
+contain 'corosync::qdevice'
+
+# Open the corosync-qnetd port
+firewalld::custom_service { 'corosync-qdevice-net':
+  description => 'Corosync Quorum Net Device Port',
+  port        => [
+    {
+      port     => '5403',
+      protocol => 'tcp',
+    },
+  ],
+}
+firewalld_service { 'corosync-qdevice-net':
+  ensure  => 'present',
+  service => 'corosync-qdevice-net',
+  zone    => 'public',
+}
+
+# Configure general PCS firewall rules
+firewalld_service { 'high-availability':
+  ensure  => 'present',
+  service => 'high-availability',
+  zone    => 'public',
+}
+```
+
+#### Parameters
+
+The following parameters are available in the `corosync::qdevice` class.
+
+##### `sensitive_hacluster_hash`
+
+Data type: `Sensitive[String]`
+
+The password hash for the hacluster user on this quorum device node. This
+is currently a mandatory parameter because pcsd must be used to perform the
+quorum node configuration.
+
+Default value: `undef`
+
+##### `package_pcs`
+
+Data type: `String[1]`
+
+Name of the PCS package on this system.
+
+Default value: 'pcs'
+
+##### `package_corosync_qnetd`
+
+Data type: `String[1]`
+
+Name of the corosync qnetd package for this system.
+
+Default value: 'corosync-qnetd'
 
 ### corosync::reprobe
 
