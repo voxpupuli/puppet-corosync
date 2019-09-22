@@ -532,7 +532,7 @@ describe 'corosync' do
       end
     end
 
-    context 'when set_quorum is true and quorum_members is not set' do
+    context 'when set_votequorum is true and quorum_members is not set' do
       before do
         params.merge!(
           set_votequorum: true,
@@ -543,7 +543,8 @@ describe 'corosync' do
       context 'when multicast_address is set' do
         before do
           params.merge!(
-            multicast_address: '10.0.0.1'
+            multicast_address: '10.0.0.1',
+            cluster_name: :undef
           )
         end
 
@@ -554,17 +555,33 @@ describe 'corosync' do
         end
       end
 
-      context 'when multicast_address is not set' do
+      context 'when cluster_name is set' do
         before do
           params.merge!(
-            multicast_address: []
+            multicast_address: [],
+            cluster_name: 'mycluster'
+          )
+        end
+
+        it 'does not contain nodelist' do
+          is_expected.not_to contain_file('/etc/corosync/corosync.conf').with_content(
+            %r{nodelist}
+          )
+        end
+      end
+
+      context 'when multicast_address and cluster_name are not set' do
+        before do
+          params.merge!(
+            multicast_address: [],
+            cluster_name: :undef
           )
         end
 
         it 'raises error' do
           is_expected.to raise_error(
             Puppet::Error,
-            %r{set_votequorum is true, but neither quorum_members were passed nor was multicast specified.}
+            %r{set_votequorum is true, so you must set either quorum_members, or one of multicast_address or cluster_name.}
           )
         end
       end
