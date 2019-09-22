@@ -473,7 +473,7 @@ class corosync(
   # You have to specify at least one of the following parameters:
   # $multicast_address or $unicast_address or $cluster_name
   if !$multicast_address and empty($unicast_addresses) and !$cluster_name {
-      fail('You must provide a value for multicast_address, unicast_address or cluster_name.')
+    fail('You must provide a value for multicast_address, unicast_address or cluster_name.')
   }
 
   # Using the Puppet infrastructure's ca as the authkey, this means any node in
