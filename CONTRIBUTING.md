@@ -104,7 +104,7 @@ for the created virtual machines will be in `.vagrant/beaker_vagrant_fies`.
 If you are using vagrant instead of docker for local testing you will need to
 ensure that the beaker-vagrant is installed.
 
-1. Add `gem "beaker-vagrant,                     :require => false"` to the Gemfile.
+1. Add `gem 'beaker-vagrant',                     :require => false` to the Gemfile.
 1. Re-run `bundle install` to add all relevant packages.
 
 Once this is in-place, you can execute a test on an CentOS 7 VM with puppet5 as follows:
