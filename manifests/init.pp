@@ -571,7 +571,7 @@ class corosync(
       $is_auth_node = false
     }
 
-    $exec_path = '/sbin:/bin/:usr/sbin:/usr/bin'
+    $exec_path = '/sbin:/bin:/usr/sbin:/usr/bin'
 
     if $manage_pcsd_auth and $is_auth_node {
       # TODO - verify if this breaks out of the sensitivity

@@ -44,7 +44,7 @@ describe 'corosync::qdevice' do
 
     it 'configures the net quorum device' do
       is_expected.to contain_exec('pcs qdevice setup model net --enable --start').with(
-        path: '/sbin:/bin/:usr/sbin:/usr/bin',
+        path: '/sbin:/bin:/usr/sbin:/usr/bin',
         onlyif: [
           'test ! -f /etc/corosync/qnetd/nssdb/qnetd-cacert.crt'
         ],
@@ -54,7 +54,7 @@ describe 'corosync::qdevice' do
 
     it 'makes sure the net quorum device is started' do
       is_expected.to contain_exec('pcs qdevice start net').with(
-        path: '/sbin:/bin/:usr/sbin:/usr/bin',
+        path: '/sbin:/bin:/usr/sbin:/usr/bin',
         onlyif: [
           'test -f /etc/corosync/qnetd/nssdb/qnetd-cacert.crt',
           'test 0 -ne $(pcs qdevice status net >/dev/null 2>&1; echo $?)'
