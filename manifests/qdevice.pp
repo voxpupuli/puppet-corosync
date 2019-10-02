@@ -5,7 +5,7 @@
 # the included example.
 #
 # @param sensitive_hacluster_hash
-#   The password hash for the hacluster user on this quorum device node. This 
+#   The password hash for the hacluster user on this quorum device node. This
 #   is currently a mandatory parameter because pcsd must be used to perform the
 #   quorum node configuration.
 #
@@ -24,7 +24,7 @@
 #     sensitive_hacluster_hash => $sensitive_hacluster_hash,
 #   }
 #   contain 'corosync::qdevice'
-# 
+#
 #   # Open the corosync-qnetd port
 #   firewalld::custom_service { 'corosync-qdevice-net':
 #     description => 'Corosync Quorum Net Device Port',
@@ -87,7 +87,7 @@ class corosync::qdevice (
     ],
   }
 
-  $exec_path = '/sbin:/bin/:usr/sbin:/usr/bin'
+  $exec_path = '/sbin:/bin:/usr/sbin:/usr/bin'
 
   # Configure the quorum device
   exec { 'pcs qdevice setup model net --enable --start':

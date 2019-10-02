@@ -856,7 +856,7 @@ describe 'corosync' do
           it 'authorizes all nodes' do
             is_expected.to contain_exec('pcs_cluster_auth').with(
               command: 'pcs cluster auth node1.test.org node2.test.org node3.test.org -u hacluster -p some-secret-sauce',
-              path: '/sbin:/bin/:usr/sbin:/usr/bin',
+              path: '/sbin:/bin:/usr/sbin:/usr/bin',
               require: [
                 'Service[pcsd]',
                 'User[hacluster]'
@@ -891,7 +891,7 @@ describe 'corosync' do
           it 'match ip and auth nodes by member names' do
             is_expected.to contain_exec('pcs_cluster_auth').with(
               command: 'pcs cluster auth 192.168.0.10 192.168.0.12 192.168.0.13 -u hacluster -p some-secret-sauce',
-              path: '/sbin:/bin/:usr/sbin:/usr/bin',
+              path: '/sbin:/bin:/usr/sbin:/usr/bin',
               require: [
                 'Service[pcsd]',
                 'User[hacluster]'
@@ -1070,7 +1070,7 @@ describe 'corosync' do
           it 'configures a temporary cluster if corosync.conf is missing' do
             is_expected.to contain_exec('pcs_cluster_temporary').with(
               command: 'pcs cluster setup --force --name cluster_test node1.test.org node2.test.org node3.test.org',
-              path: '/sbin:/bin/:usr/sbin:/usr/bin',
+              path: '/sbin:/bin:/usr/sbin:/usr/bin',
               onlyif: 'test ! -f /etc/corosync/corosync.conf',
               require: 'Exec[pcs_cluster_auth]'
             )
@@ -1079,7 +1079,7 @@ describe 'corosync' do
           it 'authorizes and adds the quorum device' do
             is_expected.to contain_exec('pcs_cluster_auth_qdevice').with(
               command: 'pcs cluster auth quorum1.test.org -u hacluster -p quorum-secret-password',
-              path: '/sbin:/bin/:usr/sbin:/usr/bin',
+              path: '/sbin:/bin:/usr/sbin:/usr/bin',
               onlyif: 'test 0 -ne $(grep quorum1.test.org /var/lib/pcsd/tokens >/dev/null 2>&1; echo $?)',
               require: [
                 'Package[corosync-qdevice]',
@@ -1089,7 +1089,7 @@ describe 'corosync' do
             )
             is_expected.to contain_exec('pcs_cluster_add_qdevice').with(
               command: 'pcs quorum device add model net host=quorum1.test.org algorithm=ffsplit',
-              path: '/sbin:/bin/:usr/sbin:/usr/bin',
+              path: '/sbin:/bin:/usr/sbin:/usr/bin',
               onlyif: [
                 'test 0 -ne $(pcs quorum config | grep "host:" >/dev/null 2>&1; echo $?)'
               ],
