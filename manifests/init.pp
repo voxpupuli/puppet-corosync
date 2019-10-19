@@ -564,6 +564,7 @@ class corosync(
     # If the local data matches auth_node (hostname or primary IP) we can
     # perform auth processing for subsequent components
     if $trusted['certname'] == $auth_node
+      or $trusted['hostname'] == $auth_node
       or $auth_node == $facts['networking']['ip']
       or $auth_node in $interface_ip_list {
           $is_auth_node = true
