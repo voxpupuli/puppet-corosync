@@ -296,6 +296,16 @@
 #   automatically calculated at 1.2 * token if the user doesn't specify a
 #   consensus value.
 #
+# @param ip_version
+#   This specifies version of IP to ask DNS resolver for.  The value can be 
+#   one of ipv4 (look only for an IPv4 address) , ipv6 (check only IPv6 address),
+#   ipv4-6 (look for all address families and use first IPv4 address found in the
+#   list if there is such address, otherwise use first IPv6 address) and 
+#   ipv6-4 (look for all address families and use first IPv6 address found in the
+#   list if there is such address, otherwise use first IPv4 address).
+#
+#   Default (if unspecified) is ipv6-4 for knet and udpu transports and ipv4 for udp.
+#
 # @param clear_node_high_bit
 #   This configuration option is optional and is only relevant when no nodeid
 #   is specified. Some openais clients require a signed 32 bit nodeid that is
@@ -401,6 +411,7 @@ class corosync(
   Optional[String[1]] $cluster_name                                  = undef,
   Optional[Integer] $join                                            = undef,
   Optional[Integer] $consensus                                       = undef,
+  Optional[String[1]] $ip_version                                    = undef,
   Optional[Enum['yes', 'no']] $clear_node_high_bit                   = undef,
   Optional[Integer] $max_messages                                    = undef,
   Boolean $test_corosync_config                                      = $corosync::params::test_corosync_config,
@@ -678,6 +689,7 @@ class corosync(
   # - $token
   # - $join
   # - $consensus
+  # - $ip_version
   # - $clear_node_high_bit
   # - $max_messages
   if $test_corosync_config {
