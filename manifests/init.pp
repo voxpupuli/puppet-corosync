@@ -400,6 +400,7 @@ class corosync (
   Optional[Enum['yes', 'no']] $clear_node_high_bit                   = undef,
   Optional[Integer] $max_messages                                    = undef,
   Boolean $test_corosync_config                                      = $corosync::params::test_corosync_config,
+  String[1] $test_corosync_config_cmd                                = $corosync::params::test_corosync_config_cmd,
 ) inherits corosync::params {
   if $set_votequorum and (empty($quorum_members) and empty($multicast_address) and !$cluster_name) {
     fail('set_votequorum is true, so you must set either quorum_members, or one of multicast_address or cluster_name.')
@@ -678,11 +679,10 @@ class corosync (
   # - $max_messages
   if $test_corosync_config {
     # corosync -t is only included since 2.3.4
-    $config_validate_cmd = '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
+    $config_validate_cmd = $test_corosync_config_cmd
   } else {
     $config_validate_cmd = undef
   }
-
   file { '/etc/corosync/corosync.conf':
     ensure       => file,
     mode         => '0644',

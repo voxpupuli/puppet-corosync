@@ -15,12 +15,6 @@ describe 'corosync' do
       )
     end
 
-    it 'validates the corosync configuration' do
-      is_expected.to contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
-        '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
-      )
-    end
-
     context 'when manage_corosync_service is false' do
       let(:params) do
         super().merge(
@@ -640,6 +634,11 @@ describe 'corosync' do
             %r{crypto_cipher:\s+none}
           )
         end
+
+        it 'validates the corosync configuration' do
+          validate_cmd = facts[:os]['release']['major'].to_i == 8 ? '/usr/sbin/corosync -c % -t' : '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_validate_cmd(validate_cmd)
+        end
       end
 
       context 'with secauth' do
@@ -669,9 +668,10 @@ describe 'corosync' do
         end
 
         it 'installs the pcs package' do
+          install_options = os_facts[:os]['release']['major'].to_i == 8 ? ['--enablerepo=ha'] : nil
           is_expected.to contain_package('pcs').with(
             ensure: 'present',
-            install_options: nil
+            install_options: install_options
           )
         end
 

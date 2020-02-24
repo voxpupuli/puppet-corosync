@@ -29,19 +29,28 @@ class corosync::params {
   $manage_pacemaker_service            = true
   $test_corosync_config                = true
 
+  $package_install_options = $facts['os']['release']['major'] ? {
+    '8'     => ['--enablerepo=ha'],
+    default => undef,
+  }
+
   case $facts['os']['family'] {
     'RedHat': {
       $package_crmsh  = false
       $package_pcs    = true
       $package_fence_agents = true
-      $package_install_options = undef
+      if versioncmp($facts['os']['release']['major'], '8') >= 0 {
+        $test_corosync_config_cmd = '/usr/sbin/corosync -c % -t'
+      } else {
+        $test_corosync_config_cmd = '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
+      }
     }
 
     'Debian': {
       $package_crmsh  = true
       $package_pcs    = false
       $package_fence_agents = false
-      $package_install_options = undef
+      $test_corosync_config_cmd = '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
     }
 
     'Suse': {
@@ -50,7 +59,7 @@ class corosync::params {
           $package_crmsh  = true
           $package_pcs    = false
           $package_fence_agents = false
-          $package_install_options = undef
+          $test_corosync_config_cmd = '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
         }
         default: {
           fail("Unsupported flavour of ${facts['os']['family']}: ${facts['os']['name']}")
