@@ -694,24 +694,19 @@ class corosync(
   # - $max_messages
   if $test_corosync_config {
     # corosync -t is only included since 2.3.4
-    file { '/etc/corosync/corosync.conf':
-      ensure       => file,
-      mode         => '0644',
-      owner        => 'root',
-      group        => 'root',
-      content      => template("${module_name}/corosync.conf.erb"),
-      validate_cmd => '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t',
-      require      => $corosync_package_require,
-    }
+    $config_validate_cmd = '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
   } else {
-    file { '/etc/corosync/corosync.conf':
-      ensure  => file,
-      mode    => '0644',
-      owner   => 'root',
-      group   => 'root',
-      content => template("${module_name}/corosync.conf.erb"),
-      require => $corosync_package_require,
-    }
+    $config_validate_cmd = undef
+  }
+
+  file { '/etc/corosync/corosync.conf':
+    ensure       => file,
+    mode         => '0644',
+    owner        => 'root',
+    group        => 'root',
+    content      => template("${module_name}/corosync.conf.erb"),
+    validate_cmd => $config_validate_cmd,
+    require      => $corosync_package_require,
   }
 
   file { '/etc/corosync/service.d':
