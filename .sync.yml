@@ -6,6 +6,7 @@
     - set: ubuntu1604-64
   secure: "OKYO+/kY1KB9EH0pB30AU6E2c5SZbNql+Klg+sb1/LMi+ADjyNEzcfTP6aUhnYedKJf5m8rfycc81UPuUeKaR/U/mPwR1R5OKh+S1KL1yzrRdxdpmLWMX14nBFbAZYvSTe/bPbxhngjW84uHRF2zkkSxKStsIzyy2DcTYayaWZ0="
 spec/spec_helper.rb:
+  mock_with: :mocha
   spec_overrides:
     - "require 'spec_helper_corosync'"
     - "require 'spec_helper_methods'"
