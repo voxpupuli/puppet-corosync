@@ -27,6 +27,15 @@
 * [`cs_rsc_defaults`](#cs_rsc_defaults): Type for manipulating corosync/pacemaker global defaults for resource options. The type is pretty simple interface for setting key/value pair
 * [`cs_shadow`](#cs_shadow): cs_shadow resources represent a Corosync shadow CIB. Any corosync resources defined with 'cib' set to the title of a cs_shadow resource will 
 
+**Data types**
+
+* [`Corosync::ArrayRing`](#corosyncarrayring): 
+* [`Corosync::CryptoCipher`](#corosynccryptocipher): Defines the allowed cipher types for secure corosync communication
+* [`Corosync::CryptoHash`](#corosynccryptohash): 
+* [`Corosync::IpStringIp`](#corosyncipstringip): 
+* [`Corosync::QuorumAlgorithm`](#corosyncquorumalgorithm): 
+* [`Corosync::Syslogpriority`](#corosyncsyslogpriority): 
+
 ## Classes
 
 ### corosync
@@ -68,16 +77,6 @@ Data type: `Boolean`
 Controls corosync's ability to authenticate and encrypt multicast messages.
 
 Default value: $corosync::params::enable_secauth
-
-##### `secauth_parameter_mode`
-
-Data type: `Enum['1.x','2.x']`
-
-Determines whether the crypto_hash and crypto_cipher parameters are
-specified. These flags were added in Corosync 2.x so operating systems using
-older 1.x packages must continue to use sec_auth instead.
-
-Default value: $corosync::params::secauth_parameter_mode
 
 ##### `authkey_source`
 
@@ -329,7 +328,7 @@ Default value: $corosync::params::package_fence_agents
 
 ##### `packageopts_corosync`
 
-Data type: `Optional[Array]`
+Data type: `Optional[Array[String[1]]]`
 
 Additional install-options for the corosync package resource.
 Default (Debian Jessie):  ['-t', 'jessie-backports']
@@ -339,7 +338,7 @@ Default value: $corosync::params::package_install_options
 
 ##### `packageopts_crmsh`
 
-Data type: `Optional[Array]`
+Data type: `Optional[Array[String[1]]]`
 
 Additional install-options for the crmsh package resource.
 Default (Debian Jessie):  ['-t', 'jessie-backports']
@@ -349,7 +348,7 @@ Default value: $corosync::params::package_install_options
 
 ##### `packageopts_pacemaker`
 
-Data type: `Optional[Array]`
+Data type: `Optional[Array[String[1]]]`
 
 Additional install-options for the pacemaker package resource.
 Default (Debian Jessie):  ['-t', 'jessie-backports']
@@ -359,7 +358,7 @@ Default value: $corosync::params::package_install_options
 
 ##### `packageopts_pcs`
 
-Data type: `Optional[Array]`
+Data type: `Optional[Array[String[1]]]`
 
 Additional install-options for the pcs package resource.
 Default (Debian Jessie):  ['-t', 'jessie-backports']
@@ -369,7 +368,7 @@ Default value: $corosync::params::package_install_options
 
 ##### `packageopts_fence_agents`
 
-Data type: `Optional[Array]`
+Data type: `Optional[Array[String[1]]]`
 
 Additional install-options for the pcs package resource.
 Default (Debian Jessie):  ['-t', 'jessie-backports']
@@ -379,7 +378,7 @@ Default value: $corosync::params::package_install_options
 
 ##### `version_corosync`
 
-Data type: `String`
+Data type: `String[1]`
 
 Define what version of the corosync package should be installed.
 Default: 'present'
@@ -388,7 +387,7 @@ Default value: $corosync::params::version_corosync
 
 ##### `version_crmsh`
 
-Data type: `String`
+Data type: `String[1]`
 
 Define what version of the crmsh package should be installed.
 Default: 'present'
@@ -397,7 +396,7 @@ Default value: $corosync::params::version_crmsh
 
 ##### `version_pacemaker`
 
-Data type: `String`
+Data type: `String[1]`
 
 Define what version of the pacemaker package should be installed.
 Default: 'present'
@@ -406,7 +405,7 @@ Default value: $corosync::params::version_pacemaker
 
 ##### `version_pcs`
 
-Data type: `String`
+Data type: `String[1]`
 
 Define what version of the pcs package should be installed.
 Default: 'present'
@@ -415,7 +414,7 @@ Default value: $corosync::params::version_pcs
 
 ##### `version_fence_agents`
 
-Data type: `String`
+Data type: `String[1]`
 
 Define what version of the fence-agents-all package should be installed.
 Default: 'present'
@@ -649,7 +648,7 @@ Default value: `undef`
 
 ##### `cluster_name`
 
-Data type: `Optional[String]`
+Data type: `Optional[String[1]]`
 
 This specifies the name of cluster and it's used for automatic
 generating of multicast address.
@@ -674,6 +673,21 @@ achieved before starting a new round of membership configuration.
 The minimum value for consensus must be 1.2 * token. This value will be
 automatically calculated at 1.2 * token if the user doesn't specify a
 consensus value.
+
+Default value: `undef`
+
+##### `ip_version`
+
+Data type: `Optional[String[1]]`
+
+This specifies version of IP to ask DNS resolver for.  The value can be
+one of ipv4 (look only for an IPv4 address) , ipv6 (check only IPv6 address),
+ipv4-6 (look for all address families and use first IPv4 address found in the
+list if there is such address, otherwise use first IPv6 address) and
+ipv6-4 (look for all address families and use first IPv6 address found in the
+list if there is such address, otherwise use first IPv4 address).
+
+Default (if unspecified) is ipv6-4 for knet and udpu transports and ipv4 for udp.
 
 Default value: `undef`
 
@@ -708,10 +722,6 @@ Data type: `Boolean`
 
 Whether we should test new configuration files with `corosync -t`.
 (requires corosync 2.3.4)
-Default (Red Hat based >= 7): true
-Default (Ubuntu >= 16.04):    true
-Default (Debian >= 8):        true
-Default (otherwise):          false
 
 Default value: $corosync::params::test_corosync_config
 
@@ -1610,4 +1620,46 @@ Whether to generate a cs_commit or not. Can be used to create shadow
 CIB without committing them.
 
 Default value: `true`
+
+## Data types
+
+### Corosync::ArrayRing
+
+The Corosync::ArrayRing data type.
+
+Alias of `Variant[Array[Stdlib::IP::Address], Array[
+    Array[Stdlib::IP::Address]
+  ]]`
+
+### Corosync::CryptoCipher
+
+Defines the allowed cipher types for secure corosync communication
+
+Alias of `Enum['aes256', 'aes192', 'aes128', '3des']`
+
+### Corosync::CryptoHash
+
+The Corosync::CryptoHash data type.
+
+Alias of `Enum['md5', 'sha1', 'sha256', 'sha384', 'sha512']`
+
+### Corosync::IpStringIp
+
+The Corosync::IpStringIp data type.
+
+Alias of `Variant[Stdlib::IP::Address, Array[
+    Stdlib::IP::Address
+  ]]`
+
+### Corosync::QuorumAlgorithm
+
+The Corosync::QuorumAlgorithm data type.
+
+Alias of `Enum['ffsplit', 'lms']`
+
+### Corosync::Syslogpriority
+
+The Corosync::Syslogpriority data type.
+
+Alias of `Enum['debug', 'info', 'notice', 'warning', 'err', 'alert', 'emerg', 'crit']`
 

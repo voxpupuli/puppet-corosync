@@ -15,6 +15,12 @@ describe 'corosync' do
       )
     end
 
+    it 'validates the corosync configuration' do
+      is_expected.to contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
+        '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
+      )
+    end
+
     context 'when manage_corosync_service is false' do
       before do
         params.merge!(
@@ -613,12 +619,6 @@ describe 'corosync' do
       }
     end
 
-    it 'validates the corosync configuration' do
-      is_expected.to contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
-        '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
-      )
-    end
-
     context 'without secauth' do
       before do
         params.merge!(
@@ -665,62 +665,6 @@ describe 'corosync' do
       { osfamily:       'RedHat',
         processorcount: '3',
         ipaddress:      '127.0.0.1' }
-    end
-
-    context 'major version is 6' do
-      before do
-        facts.merge!(operatingsystemrelease: '6.12')
-      end
-
-      it_configures 'corosync'
-
-      context 'installs default packages' do
-        ['pcs', 'fence-agents-all'].each do |package|
-          it "installs #{package}" do
-            is_expected.to contain_package(package)
-          end
-        end
-      end
-
-      context 'without secauth' do
-        before do
-          params.merge!(
-            enable_secauth: false
-          )
-        end
-
-        it { is_expected.to compile.with_all_deps }
-
-        it 'disables secauth with corsync 1.x syntax' do
-          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{secauth:\s+off}
-          )
-        end
-      end
-
-      context 'with secauth' do
-        before do
-          params.merge!(
-            enable_secauth: true
-          )
-        end
-
-        it { is_expected.to compile.with_all_deps }
-
-        it 'enables secauth with corsync 1.x syntax' do
-          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{secauth:\s+on}
-          )
-        end
-      end
-
-      it 'does not manage the pacemaker service' do
-        is_expected.not_to contain_service('pacemaker')
-      end
-
-      it 'does not validate the corosync configuration' do
-        is_expected.to contain_file('/etc/corosync/corosync.conf').without_validate_cmd
-      end
     end
 
     context 'major version is 7' do
@@ -780,12 +724,6 @@ describe 'corosync' do
             %r{crypto_cipher:\s+aes256}
           )
         end
-      end
-
-      it 'validates the corosync configuration' do
-        is_expected.to contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
-          '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
-        )
       end
 
       it 'installs the pcs package' do
