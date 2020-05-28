@@ -4,7 +4,7 @@ class corosync::params {
   $authkey_source                      = 'file'
   $authkey                             = '/etc/puppet/ssl/certs/ca.pem'
   $port                                = 5405
-  $bind_address                        = $::ipaddress
+  $bind_address                        = $facts['networking']['ip']
   $force_online                        = false
   $check_standby                       = false
   $log_timestamp                       = false
@@ -29,7 +29,7 @@ class corosync::params {
   $manage_pacemaker_service            = true
   $test_corosync_config                = true
 
-  case $::osfamily {
+  case $facts['os']['family'] {
     'RedHat': {
       $package_crmsh  = false
       $package_pcs    = true
@@ -42,9 +42,9 @@ class corosync::params {
       $package_pcs    = false
       $package_fence_agents = false
 
-      case $::operatingsystem {
+      case $facts['os']['name'] {
         'Debian': {
-          if versioncmp($::operatingsystemrelease, '8') == 0 {
+          if versioncmp($facts['os']['release']['full'], '8') == 0 {
             $package_install_options = ['-t', 'jessie-backports']
           } else {
             $package_install_options = undef
@@ -57,7 +57,7 @@ class corosync::params {
     }
 
     default: {
-      fail("Unsupported operating system: ${::operatingsystem}")
+      fail("Unsupported operating system: ${facts['os']['name']}")
     }
   }
 

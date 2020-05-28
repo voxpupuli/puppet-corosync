@@ -709,7 +709,7 @@ class corosync(
     require => $corosync_package_require,
   }
 
-  case $::osfamily {
+  case $facts['os']['family'] {
     'Debian': {
       augeas { 'enable corosync':
         lens    => 'Shellvars.lns',
@@ -730,7 +730,7 @@ class corosync(
     exec { 'check_standby node':
       command => 'echo "Node appears to be on standby" && false',
       path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
-      onlyif  => "crm node status|grep ${::hostname}-standby|grep 'value=\"on\"'",
+      onlyif  => "crm node status|grep ${facts['networking']['hostname']}-standby|grep 'value=\"on\"'",
       require => Service['corosync'],
     }
   }
@@ -739,7 +739,7 @@ class corosync(
     exec { 'force_online node':
       command => 'crm node online',
       path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
-      onlyif  => "crm node status|grep ${::hostname}-standby|grep 'value=\"on\"'",
+      onlyif  => "crm node status|grep ${facts['networking']['hostname']}-standby|grep 'value=\"on\"'",
       require => Service['corosync'],
     }
   }
