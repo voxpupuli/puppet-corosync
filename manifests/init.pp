@@ -339,7 +339,7 @@
 class corosync(
   Boolean $enable_secauth                                            = $corosync::params::enable_secauth,
   Enum['file', 'string'] $authkey_source                             = $corosync::params::authkey_source,
-  Variant[Stdlib::Absolutepath,Stdlib::Base64] $authkey              = $corosync::params::authkey,
+  Variant[Stdlib::Filesource,Stdlib::Base64] $authkey                = $corosync::params::authkey,
   Corosync::CryptoHash $crypto_hash                                  = 'sha1',
   Corosync::CryptoCipher $crypto_cipher                              = 'aes256',
   Optional[Integer] $threads                                         = undef,
