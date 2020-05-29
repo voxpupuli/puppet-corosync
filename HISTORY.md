@@ -80,7 +80,7 @@ of this module. In v6.0.0, this module could be rebranded to a better name.
   means that you wait 60 seconds for nothing, but when adding a node to the
   cluster, it means that we join the cluster before operating it with this
   puppet module. If you are using Cs\_shadow and all your resources depend on
-  that one, then instead of a non-null (non `0.0`) epoch, we wait for a non 
+  that one, then instead of a non-null (non `0.0`) epoch, we wait for a non
   `0.*` epoch, because the Cs\_shadow and Cs\_commit couple will update the
   epoch anyway. (#314)
 

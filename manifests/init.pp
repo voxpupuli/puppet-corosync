@@ -8,11 +8,6 @@
 # @param enable_secauth
 #   Controls corosync's ability to authenticate and encrypt multicast messages.
 #
-# @param secauth_parameter_mode
-#   Determines whether the crypto_hash and crypto_cipher parameters are
-#   specified. These flags were added in Corosync 2.x so operating systems using
-#   older 1.x packages must continue to use sec_auth instead.
-#
 # @param authkey_source
 #   Allows to use either a file or a string as a authkey.
 #
@@ -324,10 +319,6 @@
 # @param test_corosync_config
 #   Whether we should test new configuration files with `corosync -t`.
 #   (requires corosync 2.3.4)
-#   Default (Red Hat based >= 7): true
-#   Default (Ubuntu >= 16.04):    true
-#   Default (Debian >= 8):        true
-#   Default (otherwise):          false
 #
 # @example Simple configuration without secauth
 #
@@ -347,7 +338,6 @@
 #
 class corosync(
   Boolean $enable_secauth                                            = $corosync::params::enable_secauth,
-  Enum['1.x','2.x'] $secauth_parameter_mode                          = $corosync::params::secauth_parameter_mode,
   Enum['file', 'string'] $authkey_source                             = $corosync::params::authkey_source,
   Variant[Stdlib::Absolutepath,Stdlib::Base64] $authkey              = $corosync::params::authkey,
   Corosync::CryptoHash $crypto_hash                                  = 'sha1',
@@ -694,24 +684,19 @@ class corosync(
   # - $max_messages
   if $test_corosync_config {
     # corosync -t is only included since 2.3.4
-    file { '/etc/corosync/corosync.conf':
-      ensure       => file,
-      mode         => '0644',
-      owner        => 'root',
-      group        => 'root',
-      content      => template("${module_name}/corosync.conf.erb"),
-      validate_cmd => '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t',
-      require      => $corosync_package_require,
-    }
+    $config_validate_cmd = '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
   } else {
-    file { '/etc/corosync/corosync.conf':
-      ensure  => file,
-      mode    => '0644',
-      owner   => 'root',
-      group   => 'root',
-      content => template("${module_name}/corosync.conf.erb"),
-      require => $corosync_package_require,
-    }
+    $config_validate_cmd = undef
+  }
+
+  file { '/etc/corosync/corosync.conf':
+    ensure       => file,
+    mode         => '0644',
+    owner        => 'root',
+    group        => 'root',
+    content      => template("${module_name}/corosync.conf.erb"),
+    validate_cmd => $config_validate_cmd,
+    require      => $corosync_package_require,
   }
 
   file { '/etc/corosync/service.d':
@@ -724,7 +709,7 @@ class corosync(
     require => $corosync_package_require,
   }
 
-  case $::osfamily {
+  case $facts['os']['family'] {
     'Debian': {
       augeas { 'enable corosync':
         lens    => 'Shellvars.lns',
@@ -745,7 +730,7 @@ class corosync(
     exec { 'check_standby node':
       command => 'echo "Node appears to be on standby" && false',
       path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
-      onlyif  => "crm node status|grep ${::hostname}-standby|grep 'value=\"on\"'",
+      onlyif  => "crm node status|grep ${facts['networking']['hostname']}-standby|grep 'value=\"on\"'",
       require => Service['corosync'],
     }
   }
@@ -754,7 +739,7 @@ class corosync(
     exec { 'force_online node':
       command => 'crm node online',
       path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
-      onlyif  => "crm node status|grep ${::hostname}-standby|grep 'value=\"on\"'",
+      onlyif  => "crm node status|grep ${facts['networking']['hostname']}-standby|grep 'value=\"on\"'",
       require => Service['corosync'],
     }
   }

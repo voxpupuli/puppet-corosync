@@ -4,7 +4,7 @@ class corosync::params {
   $authkey_source                      = 'file'
   $authkey                             = '/etc/puppet/ssl/certs/ca.pem'
   $port                                = 5405
-  $bind_address                        = $::ipaddress
+  $bind_address                        = $facts['networking']['ip']
   $force_online                        = false
   $check_standby                       = false
   $log_timestamp                       = false
@@ -25,22 +25,15 @@ class corosync::params {
   $enable_pacemaker_service            = true
   $enable_pcsd_service                 = true
   $package_quorum_device               = 'corosync-qdevice'
+  $set_votequorum                      = true
+  $manage_pacemaker_service            = true
+  $test_corosync_config                = true
 
-  case $::osfamily {
+  case $facts['os']['family'] {
     'RedHat': {
       $package_crmsh  = false
       $package_pcs    = true
       $package_fence_agents = true
-      $set_votequorum = true
-      if versioncmp($::operatingsystemrelease, '7') >= 0 {
-        $manage_pacemaker_service = true
-        $test_corosync_config = true
-        $secauth_parameter_mode = '2.x'
-      } else {
-        $manage_pacemaker_service = false
-        $test_corosync_config = false
-        $secauth_parameter_mode = '1.x'
-      }
       $package_install_options = undef
     }
 
@@ -48,64 +41,23 @@ class corosync::params {
       $package_crmsh  = true
       $package_pcs    = false
       $package_fence_agents = false
-      case $::operatingsystem {
-        'Ubuntu': {
-          if versioncmp($::operatingsystemrelease, '14.04') >= 0 {
-            $set_votequorum = true
-            $manage_pacemaker_service = true
-            $secauth_parameter_mode = '2.x'
 
-            if versioncmp($::operatingsystemrelease, '16.04') >= 0 {
-              $test_corosync_config = true
-            } else {
-
-              #FIXME should be moved in another place
-              file {'/etc/default/cman':
-                ensure  => present,
-                content => template('corosync/cman.erb'),
-              }
-
-              $test_corosync_config = false
-            }
-          } else {
-            $set_votequorum = false
-            $manage_pacemaker_service = false
-            $test_corosync_config = false
-            $secauth_parameter_mode = '1.x'
-          }
-          $package_install_options = undef
-        }
+      case $facts['os']['name'] {
         'Debian': {
-          if versioncmp($::operatingsystemrelease, '8') >= 0 {
-            $set_votequorum = true
-            $manage_pacemaker_service = true
-            $test_corosync_config = true
-            $secauth_parameter_mode = '2.x'
-            if versioncmp($::operatingsystemrelease, '8') == 0 {
-              $package_install_options = ['-t', 'jessie-backports']
-            } else {
-              $package_install_options = undef
-            }
+          if versioncmp($facts['os']['release']['full'], '8') == 0 {
+            $package_install_options = ['-t', 'jessie-backports']
           } else {
-            $set_votequorum = false
-            $manage_pacemaker_service = false
             $package_install_options = undef
-            $test_corosync_config = false
-            $secauth_parameter_mode = '1.x'
           }
         }
         default : {
-          $set_votequorum = false
-          $manage_pacemaker_service = false
           $package_install_options = undef
-          $test_corosync_config = false
-          $secauth_parameter_mode = '1.x'
         }
       }
     }
 
     default: {
-      fail("Unsupported operating system: ${::operatingsystem}")
+      fail("Unsupported operating system: ${facts['os']['name']}")
     }
   }
 
