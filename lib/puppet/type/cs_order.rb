@@ -54,16 +54,6 @@ Puppet::Type.newtype(:cs_order) do
       also be added to your manifest."
   end
 
-  newproperty(:score) do
-    desc "The priority of the this ordered grouping.  Primitives can be a part
-      of multiple order groups and so there is a way to control which
-      primitives get priority when forcing the order of state changes on
-      other primitives.  This value can be an integer but is often defined
-      as the string INFINITY."
-
-    defaultto 'INFINITY'
-  end
-
   newproperty(:kind, required_features: :kindness) do
     desc "How to enforce the constraint.
 
