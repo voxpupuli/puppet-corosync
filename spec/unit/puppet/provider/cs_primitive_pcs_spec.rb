@@ -108,6 +108,21 @@ h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat"
                 <nvpair id="example_vip-instance_attributes-ip" name="ip" value="172.31.110.68"/>
               </instance_attributes>
             </primitive>
+            <primitive class="stonith" id="vmfence" type="fence_vmware_soap">
+              <instance_attributes id="vmfence-instance_attributes">
+                <nvpair id="vmfence-instance_attributes-ipaddr" name="ipaddr" value="vcenter00.example.org"/>
+                <nvpair id="vmfence-instance_attributes-login" name="login" value="service-fence_vmware_soap@vsphere.local"/>
+                <nvpair id="vmfence-instance_attributes-passwd" name="passwd" value="some-secret"/>
+                <nvpair id="vmfence-instance_attributes-pcmk_host_map" name="pcmk_host_map" value="nfs00.example.org:nfs00;nfs01.example.org:nfs01"/>
+                <nvpair id="vmfence-instance_attributes-ssl" name="ssl" value="1"/>
+                <nvpair id="vmfence-instance_attributes-ssl_insecure" name="ssl_insecure" value="1"/>
+                <nvpair id="vmfence-instance_attributes-pcmk_delay_max" name="pcmk_delay_max" value="15"/>
+              </instance_attributes>
+              <operations>
+                <op id="vmfence-monitor-interval-60s" interval="60s" name="monitor"/>
+              </operations>
+              <meta_attributes id="vmfence-meta_attributes"/>
+            </primitive>
           </resources>
         </configuration>
       EOS
@@ -131,10 +146,26 @@ h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat"
       )
     end
 
+    let :stonith_resource do
+      Puppet::Type.type(:cs_primitive).new(
+        name: 'testStonith',
+        provider: :pcs,
+        primitive_class: 'stonith',
+        operations: { 'monitor' => { 'interval' => '60s' } },
+        primitive_type: 'fence_lpar'
+      )
+    end
+
     let :instance do
       instance = described_class.new(resource)
       instance.create
       instance
+    end
+
+    let :stonith_instance do
+      stonith_instance = described_class.new(stonith_resource)
+      stonith_instance.create
+      stonith_instance
     end
 
     let :simple_instance do
@@ -147,6 +178,10 @@ h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat"
 
     let :vip_op_instance do
       instances[2]
+    end
+
+    let :vmfence_instance do
+      instances[3]
     end
 
     it 'can flush without changes' do
@@ -206,11 +241,11 @@ h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat"
     end
 
     it "sets a primitive_class parameter corresponding to the <primitive>'s class attribute" do
-      vip_instance.primitive_class = 'stonith'
+      vip_instance.primitive_class = 'systemd'
       expect_commands([
                         %r{^pcs resource unclone example_vip$},
                         %r{^pcs resource delete --force example_vip$},
-                        %r{^pcs resource create --force example_vip stonith:heartbeat:IPaddr2},
+                        %r{^pcs resource create --force example_vip systemd:heartbeat:IPaddr2},
                         %r{^pcs resource op remove example_vip monitor interval=60s$}
                       ])
       vip_instance.flush
@@ -260,6 +295,98 @@ h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat"
                         %r{^pcs resource op remove example_vip monitor interval=60s$}
                       ])
       vip_instance.flush
+    end
+
+    it 'sets stonith operations' do
+      stonith_instance.operations = [{ 'monitor' => { 'interval' => '20s' } }]
+      expect_commands(%r{^pcs stonith create --force testStonith fence_lpar op monitor interval=20s$})
+      stonith_instance.flush
+    end
+
+    it 'does not remove default stonith operations if explicitely set' do
+      stonith_instance.operations = [{ 'monitor' => { 'interval' => '60s' } }]
+      expect_commands(%r{^pcs stonith create --force testStonith fence_lpar op monitor interval=60s$})
+      stonith_instance.flush
+    end
+
+    it 'sets stonith parameters' do
+      stonith_instance.parameters = {
+        'ipaddr' => 'hmc00.example.org',
+        'login' => 'service-fence',
+        'managed' => 'power-cec0',
+        'pcmk_delay_max' => '10s',
+        'pcmk_host_map' => 'app01.example.org:app01'
+      }
+      expect_commands(%r{^pcs stonith create --force testStonith fence_lpar ipaddr=hmc00[.]example[.]org login=service-fence managed=power-cec0 pcmk_delay_max=10s pcmk_host_map=app01[.]example[.]org:app01 op.*})
+      stonith_instance.flush
+    end
+
+    it 'sets stonith metadata' do
+      stonith_instance.metadata = { 'target-role' => 'Started' }
+      expect_commands(%r{^pcs stonith create --force testStonith fence_lpar op .* meta target-role=Started$})
+      stonith_instance.flush
+    end
+
+    it 'sets the stonith primitive name and type' do
+      expect_commands(%r{^pcs stonith create --force testStonith fence_lpar})
+      stonith_instance.flush
+    end
+
+    it 'ignores the provided_by parameter for stonith resources' do
+      vmfence_instance.provided_by = 'voxpupuli'
+      expect_commands(%r{^pcs stonith update vmfence ipaddr.*$})
+      vmfence_instance.flush
+    end
+
+    it 'updates existing stonith parameters' do
+      vmfence_instance.parameters = {
+        'ipaddr' => 'vcenter01.example.org',
+        'login' => 'service-fence_vmware_soap@vsphere.local',
+        'passwd' => 'some-secret',
+        'ssl' => '1',
+        'ssl_insecure' => '1',
+        'pcmk_host_map' => 'nfs00.example.org:nfs00;nfs01.example.org:nfs01',
+        'pcmk_delay_max' => '10s'
+      }
+      expect_commands(%r{^pcs stonith update vmfence ipaddr=vcenter01[.]example[.]org login=service-fence_vmware_soap@vsphere[.]local passwd=some-secret ssl=1 ssl_insecure=1 pcmk_host_map=nfs00[.]example[.]org:nfs00;nfs01[.]example[.]org:nfs01 pcmk_delay_max=10s$})
+      vmfence_instance.flush
+    end
+
+    it "sets the stonith primitive_type parameter corresponding to the <primitive>'s type attribute" do
+      vmfence_instance.primitive_type = 'fence_vmware_rest'
+      expect_commands([
+                        %r{^pcs stonith delete --force vmfence$},
+                        %r{^pcs stonith create --force vmfence fence_vmware_rest}
+                      ])
+      vmfence_instance.flush
+    end
+
+    it 'creates a stonith primitive without provided_by parameter' do
+      vmfence_instance.provided_by = nil
+      vmfence_instance.primitive_type = 'fence_vmware_rest'
+      expect_commands([
+                        %r{^pcs stonith delete --force vmfence$},
+                        %r{^pcs stonith create --force vmfence fence_vmware_rest}
+                      ])
+      vmfence_instance.flush
+    end
+
+    it 'updates stonith metadata attributes via recreation' do
+      vmfence_instance.metadata = { 'target-role' => 'Started' }
+      expect_commands([
+                        %r{^pcs stonith delete --force vmfence$},
+                        %r{^pcs stonith create --force vmfence fence_vmware_soap ipaddr=.* op monitor interval=60s meta target-role=Started}
+                      ])
+      vmfence_instance.flush
+    end
+
+    it 'updates stonith operations via recreation' do
+      vmfence_instance.operations = [{ 'monitor' => { 'interval' => '20s' } }]
+      expect_commands([
+                        %r{^pcs stonith delete --force vmfence$},
+                        %r{^pcs stonith create --force vmfence fence_vmware_soap ipaddr=.* op monitor interval=20s$}
+                      ])
+      vmfence_instance.flush
     end
   end
 end

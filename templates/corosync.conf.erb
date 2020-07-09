@@ -22,6 +22,9 @@ totem {
 <% if @consensus -%>
   consensus:                           <%= @consensus %>
 <% end -%>
+<% if @ip_version -%>
+  ip_version:                           <%= @ip_version %>
+<% end -%>
 <% if @vsftype -%>
   vsftype:                             <%= @vsftype %>
 <% end -%>
@@ -37,17 +40,12 @@ totem {
 <% if @netmtu -%>
   netmtu:                              <%= @netmtu %>
 <% end -%>
-<% case @secauth_parameter_mode
-   when '1.x' -%>
-  secauth:                             <%= @enable_secauth ? 'on' : 'off' %>
-<% when '2.x' -%>
 <% if @enable_secauth -%>
   crypto_hash:                         <%= @crypto_hash %>
   crypto_cipher:                       <%= @crypto_cipher %>
 <% else -%>
   crypto_hash:                         none
   crypto_cipher:                       none
-<% end -%>
 <% end -%>
 <% if @threads -%>
   threads:                             <%= @threads %>
@@ -126,11 +124,24 @@ quorum {
 <% if @votequorum_expected_votes -%>
   expected_votes: <%= @votequorum_expected_votes %>
 <%-# .to_i is needed for Puppet 3 -%>
-<% if @votequorum_expected_votes.to_i == 2 -%>
+<% if @votequorum_expected_votes.to_i == 2 && !@manage_quorum_device -%>
   two_node: 1
 <% end -%>
-<% elsif Array(@quorum_members).count == 2 -%>
+<% elsif Array(@quorum_members).count == 2 && !@manage_quorum_device -%>
   two_node: 1
+<% end -%>
+<% if @manage_quorum_device and @manage_pcsd_auth -%>
+  device {
+    model: net
+<% if @quorum_device_algorithm == 'ffsplit' -%>
+    votes: 1
+<% end -%>
+
+    net {
+      algorithm: <%= @quorum_device_algorithm %>
+      host:      <%= @quorum_device_host %>
+    }
+  }
 <% end -%>
 }
 

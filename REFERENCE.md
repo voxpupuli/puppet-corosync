@@ -7,6 +7,7 @@
 
 * [`corosync`](#corosync): Configures the Pacemaker+Corosync stack to provide high-availability.
 * [`corosync::params`](#corosyncparams): Configures sane defaults based on the operating system.
+* [`corosync::qdevice`](#corosyncqdevice): Performs basic initial configuration of the qdevice daemon on a node.
 * [`corosync::reprobe`](#corosyncreprobe): Triggers re-probe for changes any of the native cs_* types.
 
 **Defined types**
@@ -25,6 +26,15 @@
 * [`cs_property`](#cs_property): Type for manipulating corosync/pacemaker configuration properties. Besides the configuration file that is managed by the module the contains 
 * [`cs_rsc_defaults`](#cs_rsc_defaults): Type for manipulating corosync/pacemaker global defaults for resource options. The type is pretty simple interface for setting key/value pair
 * [`cs_shadow`](#cs_shadow): cs_shadow resources represent a Corosync shadow CIB. Any corosync resources defined with 'cib' set to the title of a cs_shadow resource will 
+
+**Data types**
+
+* [`Corosync::ArrayRing`](#corosyncarrayring): 
+* [`Corosync::CryptoCipher`](#corosynccryptocipher): Defines the allowed cipher types for secure corosync communication
+* [`Corosync::CryptoHash`](#corosynccryptohash): 
+* [`Corosync::IpStringIp`](#corosyncipstringip): 
+* [`Corosync::QuorumAlgorithm`](#corosyncquorumalgorithm): 
+* [`Corosync::Syslogpriority`](#corosyncsyslogpriority): 
 
 ## Classes
 
@@ -67,16 +77,6 @@ Data type: `Boolean`
 Controls corosync's ability to authenticate and encrypt multicast messages.
 
 Default value: $corosync::params::enable_secauth
-
-##### `secauth_parameter_mode`
-
-Data type: `Enum['1.x','2.x']`
-
-Determines whether the crypto_hash and crypto_cipher parameters are
-specified. These flags were added in Corosync 2.x so operating systems using
-older 1.x packages must continue to use sec_auth instead.
-
-Default value: $corosync::params::secauth_parameter_mode
 
 ##### `authkey_source`
 
@@ -145,7 +145,7 @@ Default value: $corosync::params::port
 
 ##### `multicast_address`
 
-Data type: `Optional[Stdlib::IP::Address]`
+Data type: `Optional[Corosync::IpStringIp]`
 
 An IP address that has been reserved for multicast traffic.  This is the
 default way that Corosync accomplishes communication across the cluster.
@@ -316,9 +316,19 @@ Default (otherwise):      false
 
 Default value: $corosync::params::package_pcs
 
+##### `package_fence_agents`
+
+Data type: `Boolean`
+
+Define if package fence-agents should be managed.
+Default (Red Hat based):  true
+Default (otherwise):      false
+
+Default value: $corosync::params::package_fence_agents
+
 ##### `packageopts_corosync`
 
-Data type: `Optional[Array]`
+Data type: `Optional[Array[String[1]]]`
 
 Additional install-options for the corosync package resource.
 Default (Debian Jessie):  ['-t', 'jessie-backports']
@@ -328,7 +338,7 @@ Default value: $corosync::params::package_install_options
 
 ##### `packageopts_crmsh`
 
-Data type: `Optional[Array]`
+Data type: `Optional[Array[String[1]]]`
 
 Additional install-options for the crmsh package resource.
 Default (Debian Jessie):  ['-t', 'jessie-backports']
@@ -338,7 +348,7 @@ Default value: $corosync::params::package_install_options
 
 ##### `packageopts_pacemaker`
 
-Data type: `Optional[Array]`
+Data type: `Optional[Array[String[1]]]`
 
 Additional install-options for the pacemaker package resource.
 Default (Debian Jessie):  ['-t', 'jessie-backports']
@@ -348,7 +358,17 @@ Default value: $corosync::params::package_install_options
 
 ##### `packageopts_pcs`
 
-Data type: `Optional[Array]`
+Data type: `Optional[Array[String[1]]]`
+
+Additional install-options for the pcs package resource.
+Default (Debian Jessie):  ['-t', 'jessie-backports']
+Default (otherwise):      undef
+
+Default value: $corosync::params::package_install_options
+
+##### `packageopts_fence_agents`
+
+Data type: `Optional[Array[String[1]]]`
 
 Additional install-options for the pcs package resource.
 Default (Debian Jessie):  ['-t', 'jessie-backports']
@@ -358,7 +378,7 @@ Default value: $corosync::params::package_install_options
 
 ##### `version_corosync`
 
-Data type: `String`
+Data type: `String[1]`
 
 Define what version of the corosync package should be installed.
 Default: 'present'
@@ -367,7 +387,7 @@ Default value: $corosync::params::version_corosync
 
 ##### `version_crmsh`
 
-Data type: `String`
+Data type: `String[1]`
 
 Define what version of the crmsh package should be installed.
 Default: 'present'
@@ -376,7 +396,7 @@ Default value: $corosync::params::version_crmsh
 
 ##### `version_pacemaker`
 
-Data type: `String`
+Data type: `String[1]`
 
 Define what version of the pacemaker package should be installed.
 Default: 'present'
@@ -385,12 +405,21 @@ Default value: $corosync::params::version_pacemaker
 
 ##### `version_pcs`
 
-Data type: `String`
+Data type: `String[1]`
 
 Define what version of the pcs package should be installed.
 Default: 'present'
 
 Default value: $corosync::params::version_pcs
+
+##### `version_fence_agents`
+
+Data type: `String[1]`
+
+Define what version of the fence-agents-all package should be installed.
+Default: 'present'
+
+Default value: $corosync::params::version_fence_agents
 
 ##### `set_votequorum`
 
@@ -516,14 +545,110 @@ Default value: $corosync::params::enable_pcsd_service
 Data type: `Boolean`
 
 Whether the module should try to manage the pcsd service in addition to the
-corosync service.
-pcsd service is the GUI and the remote configuration interface.
+corosync service. pcsd service is the GUI and the remote configuration
+interface.
 
 Default value: `false`
 
-##### `cluster_name`
+##### `manage_pcsd_auth`
+
+Data type: `Boolean`
+
+This only has an effect when $manage_pcsd_service is enabled. If set, an
+attempt will be made to authorize pcs on the cluster node determined by
+manage_pcsd_auth_node. Note that this determination can only be made when
+the entries in quorum_members match the trusted certnames of the nodes in
+the environment or the IP addresses of the primary adapters.
+$sensitive_hacluster_password is mandatory if this parameter is set.
+
+Default value: `false`
+
+##### `manage_pcsd_auth_node`
+
+Data type: `Enum['first','last']`
+
+When managing authorization for PCS this determines which node does the
+work. Note that only one node 'should' do the work and nodes are chosen by
+matching local facts to the contents of quorum_members. When
+manage_pcsd_auth is disabled this parameter has no effect.
+
+Default value: 'first'
+
+##### `sensitive_hacluster_password`
+
+Data type: `Optional[Sensitive[String]]`
+
+When PCS is configured on a RHEL system this directive is used to set the
+password for the hacluster user. If both $manage_pcsd_service and
+$manage_pcsd_auth are both set to true the cluster will use this credential
+to authorize all nodes.
+
+Default value: `undef`
+
+##### `sensitive_hacluster_hash`
+
+Data type: `Optional[Sensitive[String]]`
+
+This parameter expects a valid password hash of
+sensitive_hacluster_password. If provided, the hash provided the hash will
+be used to set the password for the hacluster user on each node.
+
+Default value: `undef`
+
+##### `manage_quorum_device`
+
+Data type: `Boolean`
+
+Enable or disable the addition of a quorum device external to the cluster.
+This device is used avoid cluster splits typically in conjunction with
+fencing by providing an external network vote. Additionally, this allows
+symmentric clusters to continue operation in the event that 50% of their
+nodes have failed.
+
+Default value: `false`
+
+##### `quorum_device_host`
+
+Data type: `Optional[Stdlib::Fqdn]`
+
+The fully qualified hostname of the quorum device. This parameter is
+mandatory when manage_quorum_device is true.
+
+Default value: `undef`
+
+##### `quorum_device_algorithm`
+
+Data type: `Optional[Corosync::QuorumAlgorithm]`
+
+There are currently two algorithms the quorum device can utilize to
+determine how its vote should be allocated; Fifty-fifty split and
+last-man-standing. See the
+[corosync-qdevice man page](https://www.systutorials.com/docs/linux/man/8-corosync-qdevice/)
+for details.
+
+Default value: 'ffsplit'
+
+##### `package_quorum_device`
 
 Data type: `Optional[String]`
+
+The name of the package providing the quorum device functionality. This
+parameter is mandatory if manage_quorum_device is true.
+
+Default value: $corosync::params::package_quorum_device
+
+##### `sensitive_quorum_device_password`
+
+Data type: `Optional[Sensitive[String]]`
+
+The plain text password for the hacluster user on the quorum_device_host.
+This parameter is mandatory if manage_quorum_device is true.
+
+Default value: `undef`
+
+##### `cluster_name`
+
+Data type: `Optional[String[1]]`
 
 This specifies the name of cluster and it's used for automatic
 generating of multicast address.
@@ -548,6 +673,21 @@ achieved before starting a new round of membership configuration.
 The minimum value for consensus must be 1.2 * token. This value will be
 automatically calculated at 1.2 * token if the user doesn't specify a
 consensus value.
+
+Default value: `undef`
+
+##### `ip_version`
+
+Data type: `Optional[String[1]]`
+
+This specifies version of IP to ask DNS resolver for.  The value can be
+one of ipv4 (look only for an IPv4 address) , ipv6 (check only IPv6 address),
+ipv4-6 (look for all address families and use first IPv4 address found in the
+list if there is such address, otherwise use first IPv6 address) and
+ipv6-4 (look for all address families and use first IPv6 address found in the
+list if there is such address, otherwise use first IPv4 address).
+
+Default (if unspecified) is ipv6-4 for knet and udpu transports and ipv4 for udp.
 
 Default value: `undef`
 
@@ -582,16 +722,89 @@ Data type: `Boolean`
 
 Whether we should test new configuration files with `corosync -t`.
 (requires corosync 2.3.4)
-Default (Red Hat based >= 7): true
-Default (Ubuntu >= 16.04):    true
-Default (Debian >= 8):        true
-Default (otherwise):          false
 
 Default value: $corosync::params::test_corosync_config
 
 ### corosync::params
 
 Configures sane defaults based on the operating system.
+
+### corosync::qdevice
+
+This class performs the configuration of the qdevice daemon on a target node.
+Note that this requires corosync 2.x and must never be deployed on a node
+which is actually part of a cluster. Additionally, you will need to open the
+correct firewall ports for both pcs, and the actual quorum device as shown in
+the included example.
+
+* **See also**
+https://www.systutorials.com/docs/linux/man/8-corosync-qnetd/
+
+#### Examples
+
+##### Quorum node with default password & configuring the firewall
+
+```puppet
+include firewalld
+
+class { 'corosync::qdevice':
+  sensitive_hacluster_hash => $sensitive_hacluster_hash,
+}
+contain 'corosync::qdevice'
+
+# Open the corosync-qnetd port
+firewalld::custom_service { 'corosync-qdevice-net':
+  description => 'Corosync Quorum Net Device Port',
+  port        => [
+    {
+      port     => '5403',
+      protocol => 'tcp',
+    },
+  ],
+}
+firewalld_service { 'corosync-qdevice-net':
+  ensure  => 'present',
+  service => 'corosync-qdevice-net',
+  zone    => 'public',
+}
+
+# Configure general PCS firewall rules
+firewalld_service { 'high-availability':
+  ensure  => 'present',
+  service => 'high-availability',
+  zone    => 'public',
+}
+```
+
+#### Parameters
+
+The following parameters are available in the `corosync::qdevice` class.
+
+##### `sensitive_hacluster_hash`
+
+Data type: `Sensitive[String]`
+
+The password hash for the hacluster user on this quorum device node. This
+is currently a mandatory parameter because pcsd must be used to perform the
+quorum node configuration.
+
+Default value: `undef`
+
+##### `package_pcs`
+
+Data type: `String[1]`
+
+Name of the PCS package on this system.
+
+Default value: 'pcs'
+
+##### `package_corosync_qnetd`
+
+Data type: `String[1]`
+
+Name of the corosync qnetd package for this system.
+
+Default value: 'corosync-qnetd'
 
 ### corosync::reprobe
 
@@ -1407,4 +1620,46 @@ Whether to generate a cs_commit or not. Can be used to create shadow
 CIB without committing them.
 
 Default value: `true`
+
+## Data types
+
+### Corosync::ArrayRing
+
+The Corosync::ArrayRing data type.
+
+Alias of `Variant[Array[Stdlib::IP::Address], Array[
+    Array[Stdlib::IP::Address]
+  ]]`
+
+### Corosync::CryptoCipher
+
+Defines the allowed cipher types for secure corosync communication
+
+Alias of `Enum['aes256', 'aes192', 'aes128', '3des']`
+
+### Corosync::CryptoHash
+
+The Corosync::CryptoHash data type.
+
+Alias of `Enum['md5', 'sha1', 'sha256', 'sha384', 'sha512']`
+
+### Corosync::IpStringIp
+
+The Corosync::IpStringIp data type.
+
+Alias of `Variant[Stdlib::IP::Address, Array[
+    Stdlib::IP::Address
+  ]]`
+
+### Corosync::QuorumAlgorithm
+
+The Corosync::QuorumAlgorithm data type.
+
+Alias of `Enum['ffsplit', 'lms']`
+
+### Corosync::Syslogpriority
+
+The Corosync::Syslogpriority data type.
+
+Alias of `Enum['debug', 'info', 'notice', 'warning', 'err', 'alert', 'emerg', 'crit']`
 

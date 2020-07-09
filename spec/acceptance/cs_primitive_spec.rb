@@ -72,6 +72,31 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
   end
 
+  it 'updates master/slave primitive parameters' do
+    pp_master_update = <<-EOS
+      cs_primitive { 'pgsql':
+        primitive_class => 'ocf',
+        primitive_type => 'pgsql',
+        promotable => true,
+        provided_by => 'heartbeat',
+        parameters => { 'pgctl' => '/bin/pg_ctl', 'psql' => '/bin/psql', 'pgdata' => '/var/lib/pgsql/data/', 'rep_mode' => 'sync', 'restore_command' => 'cp /var/lib/pgsql/pg_archive/%f %p', 'primary_conninfo_opt' => 'keepalives_idle=60 keepalives_interval=1 keepalives_count=5', 'restart_on_promote' => 'true' },
+        operations => [
+          { 'start' => { 'interval' => '0s', 'timeout' => '60s', 'on-fail' => 'restart' } },
+          { 'monitor' => { 'interval' => '4s', 'timeout' => '60s', 'on-fail' => 'restart' } },
+          { 'monitor' => { 'interval' => '3s', 'timeout' => '60s', 'on-fail' => 'restart', 'role' => 'Master' } },
+          { 'promote' => { 'interval' => '0s', 'timeout' => '60s', 'on-fail' => 'restart' } },
+          { 'demote' => { 'interval' => '1s', 'timeout' => '30s', 'on-fail' => 'stop' } },
+          { 'stop' => { 'interval' => '0s', 'timeout' => '60s', 'on-fail' => 'block' } },
+          { 'notify' => { 'interval' => '0s', 'timeout' => '60s' } },
+        ],
+        ms_metadata => { 'master-max' => '1', 'master-node-max' => '1', 'clone-max' => '2', 'clone-node-max' => '1', 'notify' => 'true' },
+      }
+    EOS
+
+    apply_manifest(pp_master_update, expect_changes: true, debug: false, trace: true)
+    apply_manifest(pp_master_update, catch_changes: true, debug: false, trace: true)
+  end
+
   it 'creates a haproxy_vip resources' do
     pp = <<-EOS
     cs_primitive { 'haproxy_vip':
@@ -101,7 +126,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           primitive_class => 'ocf',
           primitive_type  => 'IPaddr2',
           provided_by     => 'heartbeat',
-          parameters      => { 'ip' => '172.16.210.142', 'cidr_netmask' => '24' },
+          parameters      => { 'ip' => '172.16.210.140', 'cidr_netmask' => '24' },
           operations      => { 'monitor' => { 'interval' => '10s' } },
         }
     EOS
@@ -152,7 +177,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           primitive_class => 'ocf',
           primitive_type  => 'IPaddr2',
           provided_by     => 'heartbeat',
-          parameters      => { 'ip' => '172.16.210.142', 'cidr_netmask' => '24' },
+          parameters      => { 'ip' => '172.16.210.141', 'cidr_netmask' => '24' },
           operations      => { 'monitor' => { 'interval' => '10s' } },
           metadata        => {'is-managed' => 'false', 'target-role' => 'stopped'}
         }
@@ -180,7 +205,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           primitive_class    => 'ocf',
           primitive_type     => 'IPaddr2',
           provided_by        => 'heartbeat',
-          parameters         => { 'ip' => '172.16.210.142', 'cidr_netmask' => '24' },
+          parameters         => { 'ip' => '172.16.210.141', 'cidr_netmask' => '24' },
           operations         => { 'monitor' => { 'interval' => '10s' } },
           unmanaged_metadata => ['target-role', 'is-managed'],
         }
@@ -207,7 +232,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           primitive_class    => 'ocf',
           primitive_type     => 'IPaddr2',
           provided_by        => 'heartbeat',
-          parameters         => { 'ip' => '172.16.210.142', 'cidr_netmask' => '24' },
+          parameters         => { 'ip' => '172.16.210.141', 'cidr_netmask' => '24' },
           operations         => { 'monitor' => { 'interval' => '10s' } },
           unmanaged_metadata => ['target-role'],
         }
@@ -229,6 +254,36 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
   end
   # rubocop:enable RSpec/RepeatedExample
+
+  context 'on RedHat derivitives' do
+    it 'applies stonith resources without error' do
+      pp = <<-EOS
+          cs_primitive { 'vmfence':
+            primitive_class => 'stonith',
+            primitive_type  => 'fence_vmware_soap',
+            operations      => {
+              'monitor'     => { 'interval' => '60s'},
+            },
+            parameters      => {
+              'ipaddr'          => 'vcenter.example.org',
+              'login'           => 'service-fence@vsphere.local',
+              'passwd'          => 'some plaintext secret',
+              'ssl'             => '1',
+              'ssl_insecure'    => '1',
+              'pcmk_host_map'   => 'host0.example.org:host0;host1.example.org:host1',
+              'pcmk_delay_max'  => '10s',
+            },
+          }
+      EOS
+      if fact('osfamily') == 'RedHat'
+        apply_manifest(pp, catch_failures: true, debug: false, trace: true)
+        apply_manifest(pp, catch_changes: true, debug: false, trace: true)
+        shell('pcs stonith show') do |r|
+          expect(r.stdout).to match(%r{vmfence.*stonith:fence_vmware_soap})
+        end
+      end
+    end
+  end
 
   after :all do
     cleanup_cs_resources

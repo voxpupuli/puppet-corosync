@@ -93,6 +93,23 @@ however, generating a dedicated key is a better approach.
 
 If the authkey is included directly in config, consider storing the value in hiera and encrypting it via [hiera-eyaml](https://github.com/voxpupuli/hiera-eyaml).
 
+### PCSD Authorization
+
+The pacemaker/corosync configuration system (pcs) includes a daemon (pcsd) which can be configured to perform distributed communication across the cluster. This is accomplished by establishing token-based authorization of each cluster node via the `pcs auth` command.
+
+On systems which support it, management of PCS authorization can be configured and deployed via this module as shown in the following example:
+
+```puppet
+class { 'corosync':
+  manage_pcsd_service          => true,
+  manage_pcsd_auth             => true,
+  sensitive_hacluster_password => Sensitive('this-is-the-actual-password'),
+  sensitive_hacluster_hash     => Sensitive('a-hash-of-the-passwd-for-the-user-resource'),
+}
+```
+
+Note that as this must only be executed on one node and by default the 'first' node in the cluster list is used. There may be timing issues if the configuration has not yet been applied on the other nodes as a successful execution requires the password for hacluster to be appropriately set on each system.
+
 ### Configure votequorum
 
 *To enable Corosync 2 votequorum and define a nodelist
@@ -131,6 +148,44 @@ class { 'corosync':
 
 When `quorum_members` is an array of arrays, each sub array represents one
 host IP addresses.
+
+#### Configure a Quorum Device (corosync-qdevice)
+
+Recent versions of corosync include support for a network based quorum device that is external to the cluster. This provides tiebreaker functionality to clusters with even node counts allowing 2-node or higher clusters which can operate with exactly half of their nodes to function. There are two components to quorum device configuration:
+
+* A node which is not a member of any Corosync cluster will host the corosync-qnet daemon. This node should be outside of the network containing the cluster nodes.
+* Each member of the cluster will be authorized to communicate with the quorum node and have the corosync-qdevice service scheduled and operating.
+
+This implementation depends entirely on [PCSD authorization](#pcsd-authorization) and will only execute with that enabled.
+
+1. Configure the qdevice class on the quorum node. Note that the same quorum node can be used for multiple clusters. Additionally, this node **cannot be a normal cluster member**!
+
+    ```puppet
+    # In this example, the node's name is quorum1.test.org
+    class { 'corosync::qdevice':
+      sensitive_hacluster_hash => Sensitive('hash-of-haclusters-password-on-the-qdevice-node')
+    }
+    ```
+2. Configure and enable qdevice settings on the cluster members via the corosync main class.
+
+    ```puppet
+    class { 'corosync':
+      cluster_name                     => 'example',
+      manage_pcsd_service              => true,
+      manage_pcsd_auth                 => true,
+      sensitive_hacluster_password     => Sensitive('this-is-the-actual-password'),
+      sensitive_hacluster_hash         => Sensitive('a-hash-of-the-passwd-for-the-user-resource'),
+      manage_quorum_device             => true,
+      quorum_device_host               => 'quorum1.test.org',
+      quorum_device_algorithm          => 'ffsplit',
+      sensitive_quorum_device_password => Sensitive('Actual password for hacluster on quorum1.test.org'),
+    }
+    ```
+
+For more information see the following:
+
+* [RedHat High Availability Add-On - 10.5 Quorum Devices](https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/7/html/high_availability_add-on_reference/s1-quorumdev-haar)
+* [corosync-qdevice Man Page](https://www.systutorials.com/docs/linux/man/8-corosync-qdevice/)
 
 ### Configuring primitives
 
@@ -206,6 +261,33 @@ cs_primitive { 'pgsql_service':
   unmanaged_metadata => ['target-role'],
 }
 ```
+
+### Configuring STONITH Resources
+
+Special primitives can be configured to support [STONITH (Shoot The Other Node In The Head)](https://clusterlabs.org/pacemaker/doc/en-US/Pacemaker/1.1/html-single/Pacemaker_Explained/index.html#_what_is_stonith) fencing. This is critical for clusters which include shared resources (shared disk typically) or are vulnerable to cluster splits. The STONITH resource is responsible for providing a mechanism to restart or simply halt a rouge resource, often via power fencing.
+
+The following example performs this configuration via the *fence_vmware_soap* STONITH agent.
+
+```puppet
+cs_primitive { 'vmfence':
+  primitive_class => 'stonith',
+  primitive_type  => 'fence_vmware_soap',
+  operations      => {
+    'monitor'     => { 'interval' => '60s'},
+  },
+  parameters      => {
+    'ipaddr'          => 'vcenter.example.org',
+    'login'           => 'service-fence@vsphere.local'
+    'passwd'          => 'some plaintext secret',
+    'ssl'             => '1',
+    'ssl_insecure'    => '1',
+    'pcmk_host_map'   => 'host0.example.org:host0;host1.example.org:host1',
+    'pcmk_delay_max'  => '10s',
+  },
+}
+```
+
+Note that currently this implementation only handles STONITH for RHEL/CentOS based clusters which utilize `pcs`.
 
 ### Configuring locations
 
@@ -480,17 +562,9 @@ We do maintain a [roadmap regarding next releases of this module](ROADMAP.md).
 
 | OS          | release | Puppet 3.8.7  | Puppet 4 (PC1)   | Puppet 5.X       |
 |-------------|---------|---------------|------------------|------------------|
-| CentOS/RHEL | 5       | Not supported | Not supported    | Not supported    |
-| CentOS/RHEL | 6       | Not supported | Not supported    | Not supported    |
 | CentOS/RHEL | 7       | Not supported | **Supported**    | **Supported**    |
-| Debian      | 8       | Not supported | **Supported[1]** | **Supported[1]** |
 | Debian      | 9       | Not supported | **Supported**    | **Supported**    |
-| Ubuntu      | 12.04   | Not supported | Not supported    | Not supported    |
-| Ubuntu      | 14.04   | Not supported | **Supported**    | **Supported**    |
 | Ubuntu      | 16.04   | Not supported | **Supported**    | **Supported**    |
-
-**[1] Debian 8 Support**: In order to have this module working with Debian 8, you
-need to enable the jessie-backport apt repository.
 
 ## Contributors
 
@@ -502,7 +576,7 @@ continue the development of this module.
 
 ## Development
 
-See the [contributing guide](./.github/CONTRIBUTING.md) for details. Additionally, some general guidelines on PR structure can be found [here](https://voxpupuli.org/docs/#reviewing-a-module-pr).
+See the [contributing guide](CONTRIBUTING.md) for details. Additionally, some general guidelines on PR structure can be found [here](https://voxpupuli.org/docs/#reviewing-a-module-pr).
 
 ## Copyright and License
 
