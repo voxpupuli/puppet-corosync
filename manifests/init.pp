@@ -1,259 +1,307 @@
-# == Class: corosync
+# @summary Configures the Pacemaker+Corosync stack to provide high-availability.
 #
 # This class will set up corosync for use by the Puppet Enterprise console to
 # facilitate an active/standby configuration for high availability.  It is
 # assumed that this module has been initially ran on a Puppet master with the
 # capabilities of signing certificates to do the initial key generation.
 #
-# === Parameters
-#
-# [*enable_secauth*]
+# @param enable_secauth
 #   Controls corosync's ability to authenticate and encrypt multicast messages.
-#   Default: true
 #
-# [*authkey_source*]
+# @param authkey_source
 #   Allows to use either a file or a string as a authkey.
-#   Default: 'file'
 #
-# [*authkey*]
+# @param authkey
 #   Specifies the path to the CA which is used to sign Corosync's certificate if
-#   authkey_source is 'file' or the actual authkey if 'string' is used instead.
-#   Default: '/etc/puppet/ssl/certs/ca.pem'
+#   authkey_source is 'file' or a base64 encoded version of the actual authkey
+#   if 'string' is used instead.
 #
-# [*threads*]
+# @param crypto_hash
+#   Hashing algorithm used by corosync for intra-cluster communication. Valid
+#   values are none, md5, sha1, sha256, sha384, and sha512
+#
+# @param crypto_cipher
+#   Encryption cipher used by corosync for intra-cluster communication. Valid
+#   values are none, aes256, aes192, aes128, and 3des
+#
+# @param threads
 #   How many threads you are going to let corosync use to encode and decode
 #   multicast messages.  If you turn off secauth then corosync will ignore
 #   threads.
-#   Default: undef
 #
-# [*bind_address*]
+# @param bind_address
 #   The ip address we are going to bind the corosync daemon too.
 #   Can be specified as an array to have multiple rings.
-#   Default: $::ipaddress
 #
-# [*port*]
+# @param port
 #   The UDP port that corosync will use to do its multicast communication. Be
 #   aware that corosync used this defined port plus minus one.
 #   Can be specified as an array to have multiple rings.
-#   Default: '5405'
 #
-# [*multicast_address*]
+# @param multicast_address
 #   An IP address that has been reserved for multicast traffic.  This is the
 #   default way that Corosync accomplishes communication across the cluster.
 #   Use 'broadcast' to have broadcast instead
 #   Can be specified as an array to have multiple rings (multicast only).
-#   Default: undef
 #
-# [*unicast_addresses*]
+# @param unicast_addresses
 #   An array of IP addresses that make up the cluster's members.  These are
 #   use if you are able to use multicast on your network and instead opt for
 #   the udpu transport.  You need a relatively recent version of Corosync to
 #   make this possible.
 #   You can also have an array of arrays to have multiple rings. In that case,
 #   each subarray matches a host IP addresses.
-#   Default: undef
 #
-# [*force_online*]
+# @param force_online
 #   Boolean parameter specifying whether to force nodes that have been put
 #   in standby back online.
-#   Default: false
 #
-# [*check_standby*]
+# @param check_standby
 #   Boolean parameter specifying whether puppet should return an error log
 #   message if a node is in standby. Useful for monitoring node state.
-#   Default: false
 #
-# [*log_timestamp*]
+# @param log_timestamp
 #   Boolean parameter specifying whether a timestamp should be placed on all
 #   log messages.
-#   Default: false
 #
-# [*log_file*]
+# @param log_file
 #   Boolean parameter specifying whether Corosync should produce debug
 #   output in a logfile.
-#   Default: true
 #
-# [*log_file_name*]
+# @param log_file_name
 #   Absolute path to the logfile Corosync should use when `$log_file` (see
 #   above) is true.
-#   Default: undef
 #
-# [*debug*]
+# @param debug
 #   Boolean parameter specifying whether Corosync should produce debug
 #   output in its logs.
-#   Default: false
 #
-# [*log_stderr*]
+# @param log_stderr
 #   Boolean parameter specifying whether Corosync should log errors to
 #   stderr.
-#   Default: true
 #
-# [*syslog_priority*]
+# @param syslog_priority
 #   String parameter specifying the minimal log level for Corosync syslog
 #   messages. Allowed values: debug|info|notice|warning|err|emerg.
-#   Default: 'info'.
 #
-# [*log_function_name*]
+# @param log_function_name
 #   Boolean parameter specifying whether Corosync should log called function
 #   names to.
-#   Default: false
 #
-# [*rrp_mode*]
+# @param rrp_mode
 #   Mode of redundant ring. May be none, active, or passive.
-#   Default: undef
 #
-# [*netmtu*]
+# @param netmtu
 #   This specifies the network maximum transmit unit.
-#   Default: undef
 #
-# [*ttl*]
+# @param ttl
 #   Time To Live.
-#   Default: undef
 #
-# [*vsftype*]
+# @param vsftype
 #   Virtual synchrony filter type.
-#   Default: undef
 #
-# [*package_corosync*]
+# @param package_corosync
 #   Define if package corosync should be managed.
-#   Default: true
 #
-# [*package_crmsh*]
+# @param package_crmsh
 #   Define if package crmsh should be managed.
 #   Default (Debian based): true
 #   Default (otherwise):    false
 #
-# [*package_pacemaker*]
+# @param package_pacemaker
 #   Define if package pacemaker should be managed.
-#   Default: true
 #
-# [*package_pcs*]
+# @param package_pcs
 #   Define if package pcs should be managed.
 #   Default (Red Hat based):  true
 #   Default (otherwise):      false
 #
-# [*packageopts_corosync*]
+# @param package_fence_agents
+#   Define if package fence-agents should be managed.
+#   Default (Red Hat based):  true
+#   Default (otherwise):      false
+#
+# @param packageopts_corosync
 #   Additional install-options for the corosync package resource.
 #   Default (Debian Jessie):  ['-t', 'jessie-backports']
 #   Default (otherwise):      undef
 #
-# [*packageopts_crmsh*]
+# @param packageopts_crmsh
 #   Additional install-options for the crmsh package resource.
 #   Default (Debian Jessie):  ['-t', 'jessie-backports']
 #   Default (otherwise):      undef
 #
-# [*packageopts_pacemaker*]
+# @param packageopts_pacemaker
 #   Additional install-options for the pacemaker package resource.
 #   Default (Debian Jessie):  ['-t', 'jessie-backports']
 #   Default (otherwise):      undef
 #
-# [*packageopts_pcs*]
+# @param packageopts_pcs
 #   Additional install-options for the pcs package resource.
 #   Default (Debian Jessie):  ['-t', 'jessie-backports']
 #   Default (otherwise):      undef
 #
-# [*version_corosync*]
+# @param packageopts_fence_agents
+#   Additional install-options for the pcs package resource.
+#   Default (Debian Jessie):  ['-t', 'jessie-backports']
+#   Default (otherwise):      undef
+#
+# @param version_corosync
 #   Define what version of the corosync package should be installed.
 #   Default: 'present'
 #
-# [*version_crmsh*]
+# @param version_crmsh
 #   Define what version of the crmsh package should be installed.
 #   Default: 'present'
 #
-# [*version_pacemaker*]
+# @param version_pacemaker
 #   Define what version of the pacemaker package should be installed.
 #   Default: 'present'
 #
-# [*version_pcs*]
+# @param version_pcs
 #   Define what version of the pcs package should be installed.
 #   Default: 'present'
 #
-# [*set_votequorum*]
+# @param version_fence_agents
+#   Define what version of the fence-agents-all package should be installed.
+#   Default: 'present'
+#
+# @param set_votequorum
 #   Set to true if corosync_votequorum should be used as quorum provider.
 #   Default (Red Hat based):    true
 #   Default (Ubuntu >= 14.04):  true
 #   Default (otherwise):        false
 #
-# [*votequorum_expected_votes*]
-#   Default: undef
+# @param votequorum_expected_votes
+#   Overrides the automatic calculation of expected votes which is normally
+#   derived from the number of nodes.
 #
-# [*quorum_members*]
+# @param quorum_members
 #   Array of quorum member hostname. This is required if set_votequorum
 #   is set to true.
 #   You can also have an array of arrays to have multiple rings. In that case,
 #   each subarray matches a member IP addresses.
-#   Default: ['localhost']
 #
-# [*quorum_members_ids*]
+# @param quorum_members_ids
 #   Array of quorum member IDs. Persistent IDs are required for the dynamic
 #   config of a corosync cluster and when_set_votequorum is set to true.
 #   Should be used only with the quorum_members parameter.
-#   Default: undef
 #
-# [*quorum_members_names*]
+# @param quorum_members_names
 #   Array of quorum member names. Persistent names are required when you
 #   define IP addresses in quorum_members.
-#   Default: undef
 #
-# [*token*]
+# @param token
 #   Time (in ms) to wait for a token
-#   Default: undef
 #
-# [*token_retransmits_before_loss_const*]
+# @param token_retransmits_before_loss_const
 #   How many token retransmits before forming a new configuration.
-#   Default: undef
 #
-# [*compatibility*]
-#   Default: undef
+# @param compatibility
+#   Older versions of corosync allowed a config-file directive to indicate
+#   backward compatibility. This sets that.
 #
-# [*enable_corosync_service*]
+# @param enable_corosync_service
 #   Whether the module should enable the corosync service.
-#   Default: true
 #
-# [*manage_corosync_service*]
+# @param manage_corosync_service
 #   Whether the module should try to manage the corosync service. If set to
 #   false, the service will need to be specified in the catalog elsewhere.
-#   Default: true
 #
-# [*enable_pacemaker_service*]
+# @param enable_pacemaker_service
 #   Whether the module should enable the pacemaker service.
-#   Default: true
 #
-# [*manage_pacemaker_service*]
+# @param manage_pacemaker_service
 #   Whether the module should try to manage the pacemaker service.
 #   Default (Red Hat based >= 7): true
 #   Default (Ubuntu >= 14.04):    true
 #   Default (otherwise):          false
 #
-# [*enable_pcsd_service*]
+# @param enable_pcsd_service
 #   Whether the module should enable the pcsd service.
-#   Default: true
 #
-# [*manage_pcsd_service*]
+# @param manage_pcsd_service
 #   Whether the module should try to manage the pcsd service in addition to the
-#   corosync service.
-#   pcsd service is the GUI and the remote configuration interface.
-#   Default: false
+#   corosync service. pcsd service is the GUI and the remote configuration
+#   interface.
 #
-# [*cluster_name*]
+# @param manage_pcsd_auth
+#   This only has an effect when $manage_pcsd_service is enabled. If set, an
+#   attempt will be made to authorize pcs on the cluster node determined by
+#   manage_pcsd_auth_node. Note that this determination can only be made when
+#   the entries in quorum_members match the trusted certnames of the nodes in
+#   the environment or the IP addresses of the primary adapters.
+#   $sensitive_hacluster_password is mandatory if this parameter is set.
+#
+# @param manage_pcsd_auth_node
+#   When managing authorization for PCS this determines which node does the
+#   work. Note that only one node 'should' do the work and nodes are chosen by
+#   matching local facts to the contents of quorum_members. When
+#   manage_pcsd_auth is disabled this parameter has no effect.
+#
+# @param sensitive_hacluster_password
+#   When PCS is configured on a RHEL system this directive is used to set the
+#   password for the hacluster user. If both $manage_pcsd_service and
+#   $manage_pcsd_auth are both set to true the cluster will use this credential
+#   to authorize all nodes.
+#
+# @param sensitive_hacluster_hash
+#   This parameter expects a valid password hash of
+#   sensitive_hacluster_password. If provided, the hash provided the hash will
+#   be used to set the password for the hacluster user on each node.
+#
+# @param manage_quorum_device
+#   Enable or disable the addition of a quorum device external to the cluster.
+#   This device is used avoid cluster splits typically in conjunction with
+#   fencing by providing an external network vote. Additionally, this allows
+#   symmentric clusters to continue operation in the event that 50% of their
+#   nodes have failed.
+#
+# @param quorum_device_host
+#   The fully qualified hostname of the quorum device. This parameter is
+#   mandatory when manage_quorum_device is true.
+#
+# @param quorum_device_algorithm
+#   There are currently two algorithms the quorum device can utilize to
+#   determine how its vote should be allocated; Fifty-fifty split and
+#   last-man-standing. See the
+#   [corosync-qdevice man page](https://www.systutorials.com/docs/linux/man/8-corosync-qdevice/)
+#   for details.
+#
+# @param package_quorum_device
+#   The name of the package providing the quorum device functionality. This
+#   parameter is mandatory if manage_quorum_device is true.
+#
+# @param sensitive_quorum_device_password
+#   The plain text password for the hacluster user on the quorum_device_host.
+#   This parameter is mandatory if manage_quorum_device is true.
+#
+# @param cluster_name
 #   This specifies the name of cluster and it's used for automatic
 #   generating of multicast address.
-#   Default: undef
 #
-# [*join*]
+# @param join
 #   This timeout specifies in milliseconds how long to wait for join messages
 #   in the membership protocol.
-#   Default: undef
 #
-# [*consensus*]
+# @param consensus
 #   This timeout specifies in milliseconds how long to wait for consensus to be
 #   achieved before starting a new round of membership configuration.
 #   The minimum value for consensus must be 1.2 * token. This value will be
 #   automatically calculated at 1.2 * token if the user doesn't specify a
 #   consensus value.
-#   Default: undef
 #
-# [*clear_node_high_bit*]
+# @param ip_version
+#   This specifies version of IP to ask DNS resolver for.  The value can be 
+#   one of ipv4 (look only for an IPv4 address) , ipv6 (check only IPv6 address),
+#   ipv4-6 (look for all address families and use first IPv4 address found in the
+#   list if there is such address, otherwise use first IPv6 address) and 
+#   ipv6-4 (look for all address families and use first IPv6 address found in the
+#   list if there is such address, otherwise use first IPv4 address).
+#
+#   Default (if unspecified) is ipv6-4 for knet and udpu transports and ipv4 for udp.
+#
+# @param clear_node_high_bit
 #   This configuration option is optional and is only relevant when no nodeid
 #   is specified. Some openais clients require a signed 32 bit nodeid that is
 #   greater than zero however by default openais uses all 32 bits of the IPv4
@@ -262,23 +310,17 @@
 #   32 bit integer.
 #   WARNING: The clusters behavior is undefined if this option is enabled on
 #   only a subset of the cluster (for example during a rolling upgrade).
-#   Default: undef
 #
-# [*max_messages*]
+# @param max_messages
 #   This constant specifies the maximum number of messages that may be sent by
 #   one processor on receipt of the token. The max_messages parameter is limited
 #   to 256000 / netmtu to prevent overflow of the kernel transmit buffers.
-#   Default: undef
 #
-# [*test_corosync_config*]
+# @param test_corosync_config
 #   Whether we should test new configuration files with `corosync -t`.
 #   (requires corosync 2.3.4)
-#   Default (Red Hat based >= 7): true
-#   Default (Ubuntu >= 16.04):    true
-#   Default (Debian >= 8):        true
-#   Default (otherwise):          false
 #
-# === Examples
+# @example Simple configuration without secauth
 #
 #  class { 'corosync':
 #    enable_secauth    => false,
@@ -297,11 +339,13 @@
 class corosync(
   Boolean $enable_secauth                                            = $corosync::params::enable_secauth,
   Enum['file', 'string'] $authkey_source                             = $corosync::params::authkey_source,
-  Variant[Stdlib::Absolutepath,String[1]] $authkey                   = $corosync::params::authkey,
+  Variant[Stdlib::Filesource,Stdlib::Base64] $authkey                = $corosync::params::authkey,
+  Corosync::CryptoHash $crypto_hash                                  = 'sha1',
+  Corosync::CryptoCipher $crypto_cipher                              = 'aes256',
   Optional[Integer] $threads                                         = undef,
-  Optional[Variant[Integer[0,65535], Array[Integer[0,65535]]]] $port = $corosync::params::port,
+  Optional[Variant[Stdlib::Port, Array[Stdlib::Port]]] $port         = $corosync::params::port,
   Corosync::IpStringIp $bind_address                                 = $corosync::params::bind_address,
-  Optional[Stdlib::Compat::Ip_address] $multicast_address            = undef,
+  Optional[Corosync::IpStringIp] $multicast_address                  = undef,
   Optional[Array] $unicast_addresses                                 = undef,
   Boolean $force_online                                              = $corosync::params::force_online,
   Boolean $check_standby                                             = $corosync::params::check_standby,
@@ -320,14 +364,17 @@ class corosync(
   Boolean $package_crmsh                                             = $corosync::params::package_crmsh,
   Boolean $package_pacemaker                                         = $corosync::params::package_pacemaker,
   Boolean $package_pcs                                               = $corosync::params::package_pcs,
-  Optional[Array] $packageopts_corosync                              = $corosync::params::package_install_options,
-  Optional[Array] $packageopts_pacemaker                             = $corosync::params::package_install_options,
-  Optional[Array] $packageopts_crmsh                                 = $corosync::params::package_install_options,
-  Optional[Array] $packageopts_pcs                                   = $corosync::params::package_install_options,
-  String $version_corosync                                           = $corosync::params::version_corosync,
-  String $version_crmsh                                              = $corosync::params::version_crmsh,
-  String $version_pacemaker                                          = $corosync::params::version_pacemaker,
-  String $version_pcs                                                = $corosync::params::version_pcs,
+  Boolean $package_fence_agents                                      = $corosync::params::package_fence_agents,
+  Optional[Array[String[1]]] $packageopts_corosync                   = $corosync::params::package_install_options,
+  Optional[Array[String[1]]] $packageopts_pacemaker                  = $corosync::params::package_install_options,
+  Optional[Array[String[1]]] $packageopts_crmsh                      = $corosync::params::package_install_options,
+  Optional[Array[String[1]]] $packageopts_pcs                        = $corosync::params::package_install_options,
+  Optional[Array[String[1]]] $packageopts_fence_agents               = $corosync::params::package_install_options,
+  String[1] $version_corosync                                        = $corosync::params::version_corosync,
+  String[1] $version_crmsh                                           = $corosync::params::version_crmsh,
+  String[1] $version_pacemaker                                       = $corosync::params::version_pacemaker,
+  String[1] $version_pcs                                             = $corosync::params::version_pcs,
+  String[1] $version_fence_agents                                    = $corosync::params::version_fence_agents,
   Boolean $set_votequorum                                            = $corosync::params::set_votequorum,
   Optional[Integer] $votequorum_expected_votes                       = undef,
   Array $quorum_members                                              = ['localhost'],
@@ -342,16 +389,26 @@ class corosync(
   Boolean $manage_pacemaker_service                                  = $corosync::params::manage_pacemaker_service,
   Boolean $enable_pcsd_service                                       = $corosync::params::enable_pcsd_service,
   Boolean $manage_pcsd_service                                       = false,
-  Optional[String] $cluster_name                                     = undef,
+  Boolean $manage_pcsd_auth                                          = false,
+  Optional[Sensitive[String]] $sensitive_hacluster_password          = undef,
+  Optional[Sensitive[String]] $sensitive_hacluster_hash              = undef,
+  Enum['first','last'] $manage_pcsd_auth_node                        = 'first',
+  Boolean $manage_quorum_device                                      = false,
+  Optional[Stdlib::Fqdn] $quorum_device_host                         = undef,
+  Optional[Corosync::QuorumAlgorithm] $quorum_device_algorithm       = 'ffsplit',
+  Optional[String] $package_quorum_device                            = $corosync::params::package_quorum_device,
+  Optional[Sensitive[String]] $sensitive_quorum_device_password      = undef,
+  Optional[String[1]] $cluster_name                                  = undef,
   Optional[Integer] $join                                            = undef,
   Optional[Integer] $consensus                                       = undef,
+  Optional[String[1]] $ip_version                                    = undef,
   Optional[Enum['yes', 'no']] $clear_node_high_bit                   = undef,
   Optional[Integer] $max_messages                                    = undef,
   Boolean $test_corosync_config                                      = $corosync::params::test_corosync_config,
 ) inherits ::corosync::params {
 
-  if $set_votequorum and empty($quorum_members) {
-    fail('set_votequorum is true, but no quorum_members have been passed.')
+  if $set_votequorum and (empty($quorum_members) and empty($multicast_address) and !$cluster_name) {
+    fail('set_votequorum is true, so you must set either quorum_members, or one of multicast_address or cluster_name.')
   }
 
   if $quorum_members_names and empty($quorum_members) {
@@ -391,12 +448,33 @@ class corosync(
       ensure          => $version_pcs,
       install_options => $packageopts_pcs,
     }
+
+    # Set the password for the hacluster user if it was provided
+    if $sensitive_hacluster_hash {
+      group { 'haclient':
+        ensure  => 'present',
+        require => Package['pcs'],
+      }
+
+      user { 'hacluster':
+        ensure   => 'present',
+        gid      => 'haclient',
+        password => $sensitive_hacluster_hash,
+      }
+    }
+  }
+
+  if $package_fence_agents {
+    package { 'fence-agents-all':
+      ensure          => $version_fence_agents,
+      install_options => $packageopts_fence_agents,
+    }
   }
 
   # You have to specify at least one of the following parameters:
   # $multicast_address or $unicast_address or $cluster_name
   if !$multicast_address and empty($unicast_addresses) and !$cluster_name {
-      fail('You must provide a value for multicast_address, unicast_address or cluster_name.')
+    fail('You must provide a value for multicast_address, unicast_address or cluster_name.')
   }
 
   # Using the Puppet infrastructure's ca as the authkey, this means any node in
@@ -419,7 +497,7 @@ class corosync(
       'string': {
         file { '/etc/corosync/authkey':
           ensure  => file,
-          content => $authkey,
+          content => Binary($authkey, '%B'),
           mode    => '0400',
           owner   => 'root',
           group   => 'root',
@@ -438,6 +516,150 @@ class corosync(
       enable  => $enable_pcsd_service,
       require => Package['pcs'],
     }
+
+    # Validate the pcs auth / qdevice parameters when both are enabled
+    if $manage_pcsd_auth and $manage_quorum_device {
+      # Ensure the optional parameters have been provided
+      if ! $quorum_device_host {
+        fail('The quorum device host must be specified!')
+      }
+
+      if ! $sensitive_quorum_device_password {
+        fail('The password for the hacluster user on the quorum device node is mandatory!')
+      }
+
+      if ! $cluster_name {
+        fail('A cluster name must be specified when a quorm device is configured!')
+      }
+
+      # The quorum device cannot be a member of the cluster!
+      if $quorum_device_host in $quorum_members {
+        fail('Quorum device host cannot also be a member of the cluster!')
+      }
+    } elsif $manage_pcsd_auth {
+      if ! $sensitive_hacluster_password or ! $sensitive_hacluster_hash {
+        fail('The hacluster password and hash must be provided to authorize nodes via pcsd.')
+      }
+    }
+
+    # Determine if this node should perform authorizations
+    case $manage_pcsd_auth_node {
+      'first': { $auth_node = $quorum_members[0] }
+      'last': { $auth_node = $quorum_members[length($quorum_members)-1] }
+      default: {}
+    }
+
+    # Calculate a full list of IP addresses
+    unless(empty($facts['networking']['interfaces'])) {
+      $interface_ip_list = $facts['networking']['interfaces'].map |$entry| {
+        if 'ip' in $entry[1] {
+          $entry[1]['ip']
+        } else {
+          'no_address'
+        }
+      }
+    } else {
+      $interface_ip_list = []
+    }
+
+    # If the local data matches auth_node (hostname or primary IP) we can
+    # perform auth processing for subsequent components
+    if $trusted['certname'] == $auth_node
+      or $trusted['hostname'] == $auth_node
+      or $auth_node == $facts['networking']['ip']
+      or $auth_node in $interface_ip_list {
+          $is_auth_node = true
+    } else {
+      $is_auth_node = false
+    }
+
+    $exec_path = '/sbin:/bin:/usr/sbin:/usr/bin'
+
+    if $manage_pcsd_auth and $is_auth_node {
+      # TODO - verify if this breaks out of the sensitivity
+      $hacluster_password = $sensitive_hacluster_password.unwrap
+      $auth_credential_string = "-u hacluster -p ${hacluster_password}"
+
+      # As the auth can happen before corosync.conf exists we need to explicitly
+      # list the members to join.
+      # TODO - verify that this is safe when quorum_members is a list of IP
+      # addresses
+      $node_string = join($quorum_members, ' ')
+
+      # Attempt to authorize all members. The command will return successfully
+      # if they were already authenticated so it's safe to run every time this
+      # is applied.
+      # TODO - make it run only once
+      exec { 'pcs_cluster_auth':
+        command => "pcs cluster auth ${node_string} ${auth_credential_string}",
+        path    => $exec_path,
+        require => [
+          Service['pcsd'],
+          User['hacluster'],
+        ],
+      }
+    }
+
+    if $manage_quorum_device and $manage_pcsd_auth and $set_votequorum {
+      package { $package_quorum_device:
+        ensure => 'present',
+      }
+      service { 'corosync-qdevice':
+        ensure    => running,
+        enable    => true,
+        require   => Package[$package_quorum_device],
+        subscribe => Service['corosync'],
+      }
+    }
+
+    if $manage_quorum_device and $manage_pcsd_auth and $is_auth_node and $set_votequorum {
+      # If the cluster hasn't been configured yet, temporarily configure it so
+      # the pcs_cluster_auth_qdevice command doesn't fail. This should generate
+      # a temporary corosync.conf which will then be overwritten
+      exec { 'pcs_cluster_temporary':
+        command => "pcs cluster setup --force --name ${cluster_name} ${node_string}",
+        path    => $exec_path,
+        onlyif  => 'test ! -f /etc/corosync/corosync.conf',
+        require => Exec['pcs_cluster_auth'],
+      }
+      # We need to do this so the temporary cluster doesn't delete our authkey
+      if $enable_secauth {
+        Exec['pcs_cluster_temporary'] -> File['/etc/corosync/authkey']
+      }
+
+      # Authorize the quorum device via PCS so we can execute the configuration
+      $token_prefix = 'test 0 -ne $(grep'
+      $token_suffix = '/var/lib/pcsd/tokens >/dev/null 2>&1; echo $?)'
+      $qdevice_token_check = "${token_prefix} ${quorum_device_host} ${token_suffix}"
+
+      $quorum_device_password = $sensitive_quorum_device_password.unwrap
+      exec { 'pcs_cluster_auth_qdevice':
+        command => "pcs cluster auth ${quorum_device_host} -u hacluster -p ${quorum_device_password}",
+        path    => $exec_path,
+        onlyif  => $qdevice_token_check,
+        require => [
+          Package[$package_quorum_device],
+          Exec['pcs_cluster_auth'],
+          Exec['pcs_cluster_temporary'],
+        ],
+      }
+
+      # Add the quorum device to the cluster
+      $quorum_host = "host=${quorum_device_host}"
+      $quorum_algorithm = "algorithm=${quorum_device_algorithm}"
+      $quorum_setup_cmd =
+        "pcs quorum device add model net ${quorum_host} ${quorum_algorithm}"
+      exec { 'pcs_cluster_add_qdevice':
+        command => $quorum_setup_cmd,
+        path    => $exec_path,
+        onlyif  => [
+          'test 0 -ne $(pcs quorum config | grep "host:" >/dev/null 2>&1; echo $?)',
+        ],
+        require => Exec['pcs_cluster_auth_qdevice'],
+        before  => File['/etc/corosync/corosync.conf'],
+        notify  => Service['corosync-qdevice'],
+      }
+    }
   }
 
   # Template uses:
@@ -451,32 +673,30 @@ class corosync(
   # - $bind_address
   # - $port
   # - $enable_secauth
+  # - $crypto_hash
+  # - $crypto_cipher
   # - $threads
   # - $token
   # - $join
   # - $consensus
+  # - $ip_version
   # - $clear_node_high_bit
   # - $max_messages
   if $test_corosync_config {
     # corosync -t is only included since 2.3.4
-    file { '/etc/corosync/corosync.conf':
-      ensure       => file,
-      mode         => '0644',
-      owner        => 'root',
-      group        => 'root',
-      content      => template("${module_name}/corosync.conf.erb"),
-      validate_cmd => '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t',
-      require      => $corosync_package_require,
-    }
+    $config_validate_cmd = '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
   } else {
-    file { '/etc/corosync/corosync.conf':
-      ensure  => file,
-      mode    => '0644',
-      owner   => 'root',
-      group   => 'root',
-      content => template("${module_name}/corosync.conf.erb"),
-      require => $corosync_package_require,
-    }
+    $config_validate_cmd = undef
+  }
+
+  file { '/etc/corosync/corosync.conf':
+    ensure       => file,
+    mode         => '0644',
+    owner        => 'root',
+    group        => 'root',
+    content      => template("${module_name}/corosync.conf.erb"),
+    validate_cmd => $config_validate_cmd,
+    require      => $corosync_package_require,
   }
 
   file { '/etc/corosync/service.d':
@@ -489,7 +709,7 @@ class corosync(
     require => $corosync_package_require,
   }
 
-  case $::osfamily {
+  case $facts['os']['family'] {
     'Debian': {
       augeas { 'enable corosync':
         lens    => 'Shellvars.lns',
@@ -510,7 +730,7 @@ class corosync(
     exec { 'check_standby node':
       command => 'echo "Node appears to be on standby" && false',
       path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
-      onlyif  => "crm node status|grep ${::hostname}-standby|grep 'value=\"on\"'",
+      onlyif  => "crm node status|grep ${facts['networking']['hostname']}-standby|grep 'value=\"on\"'",
       require => Service['corosync'],
     }
   }
@@ -519,7 +739,7 @@ class corosync(
     exec { 'force_online node':
       command => 'crm node online',
       path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
-      onlyif  => "crm node status|grep ${::hostname}-standby|grep 'value=\"on\"'",
+      onlyif  => "crm node status|grep ${facts['networking']['hostname']}-standby|grep 'value=\"on\"'",
       require => Service['corosync'],
     }
   }

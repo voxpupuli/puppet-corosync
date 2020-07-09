@@ -2,7 +2,7 @@ begin
   require 'puppet_x/voxpupuli/corosync/provider'
 rescue LoadError
   require 'pathname' # WORKAROUND #14073, #7788 and SERVER-973
-  corosync = Puppet::Module.find('corosync', Puppet[:environment].to_s)
+  corosync = Puppet::Module.find('corosync')
   raise(LoadError, "Unable to find corosync module in modulepath #{Puppet[:basemodulepath] || Puppet[:modulepath]}") unless corosync
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider'
 end
