@@ -93,9 +93,15 @@ Puppet::Type.type(:cs_order).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
     return if @property_hash.empty?
 
     updated = 'order '
-    updated << "#{@property_hash[:name]} #{@property_hash[:score]}: "
+    updated << "#{@property_hash[:name]} "
+    if @property_hash[:score]
+      updated << "#{@property_hash[:score]}: " unless @property_hash[:score].nil?
+    else
+      if feature? :kindness
+        updated << "#{@property_hash[:kind]}: " unless @property_hash[:kind].nil?
+      end
+    end
     updated << "#{@property_hash[:first]} #{@property_hash[:second]} symmetrical=#{@property_hash[:symmetrical]}"
-    updated << " kind=#{@property_hash[:kind]}" if feature? :kindness
     debug("Loading update: #{updated}")
     Tempfile.open('puppet_crm_update') do |tmpfile|
       tmpfile.write(updated)
