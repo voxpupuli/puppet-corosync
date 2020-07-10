@@ -42,6 +42,12 @@ Puppet::Type.type(:cs_order).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
                  items['then']
                end
 
+      kind = if items['kind']
+               items['kind']
+             else
+               'Mandatory'
+             end
+
       symmetrical = if items['symmetrical']
                       (items['symmetrical'] == 'true')
                     else
@@ -55,6 +61,7 @@ Puppet::Type.type(:cs_order).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
         first:       first,
         second:      second,
         score:       items['score'],
+        kind:        kind,
         symmetrical: symmetrical,
         provider:    name
       }
@@ -95,9 +102,9 @@ Puppet::Type.type(:cs_order).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
     updated = 'order '
     updated << "#{@property_hash[:name]} "
     if @property_hash[:score]
-      updated << "#{@property_hash[:score]}: " unless @property_hash[:score].nil?
+      updated << "#{@property_hash[:score]}: "
     elsif feature? :kindness
-      updated << "#{@property_hash[:kind]}: " unless @property_hash[:kind].nil?
+      updated << "#{@property_hash[:kind]}: "
     end
     updated << "#{@property_hash[:first]} #{@property_hash[:second]} symmetrical=#{@property_hash[:symmetrical]}"
     debug("Loading update: #{updated}")
