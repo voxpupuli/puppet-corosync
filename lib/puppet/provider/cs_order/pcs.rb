@@ -47,11 +47,6 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
                  else
                    items['then']
                  end
-        score = if items['score']
-                  items['score']
-                else
-                  'INFINITY'
-                end
         kind = if items['kind']
                  items['kind']
                else
@@ -70,7 +65,6 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
           ensure:      :present,
           first:       first,
           second:      second,
-          score:       score,
           kind:        kind,
           symmetrical: symmetrical,
           provider:    name,
@@ -90,7 +84,6 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
       ensure:      :present,
       first:       @resource[:first],
       second:      @resource[:second],
-      score:       @resource[:score],
       kind:        @resource[:kind],
       symmetrical: @resource[:symmetrical],
       new:         true
@@ -126,7 +119,6 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
     items = @property_hash[:second].split(':')
     cmd << items[1]
     cmd << items[0]
-    cmd << @property_hash[:score]
     cmd << "kind=#{@property_hash[:kind]}"
     cmd << "id=#{@property_hash[:name]}"
     cmd << "symmetrical=#{@property_hash[:symmetrical]}"

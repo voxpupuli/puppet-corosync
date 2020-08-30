@@ -17,7 +17,28 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
   # Decided to just go with relative.
   commands crm: 'crm'
 
+  # Path to the pacemakerd binary to check version for resource_discovery feature
+  # Decided to just go with relative.
+  commands pacemakerd: 'pacemakerd'
+
   mk_resource_methods
+
+  # we need to check if we run at least pacemakerd version 1.1.13 before enabling feature discovery
+  # see http://blog.clusterlabs.org/blog/2014/feature-spotlight-controllable-resource-discovery
+  begin
+    pacemakerd_version_string = pacemakerd('--version')
+    if pacemakerd_version_string
+      pacemakerd_version = pacemakerd_version_string.scan(%r{\d+\.\d+\.\d+}).first
+      if pacemakerd_version
+        if Puppet::Util::Package.versioncmp(pacemakerd_version, '1.1.13') >= 0
+          has_feature :discovery
+        end
+      end
+    end
+  rescue Puppet::MissingCommand
+    # on fresh systems pacemaker is not yet installed when pacemakerd command is executed, so we do just nothing, when the executable is missing
+    debug('pacemakerd binary not installed. Version is not checked to find out, if discovery feature for cs_location can be used or not, so discovery feature is not set.')
+  end
 
   def self.instances
     block_until_ready
@@ -81,7 +102,7 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
     updated = "location #{@property_hash[:name]} #{@property_hash[:primitive]}"
 
     if feature?(:discovery)
-      updated << " resource-discovery=#{@property_hash[:resource_discovery]}"
+      updated << " resource-discovery=#{@property_hash[:resource_discovery]}" unless @property_hash[:resource_discovery].nil?
     end
 
     unless @property_hash[:node_name].nil?

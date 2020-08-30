@@ -57,8 +57,8 @@ describe Puppet::Type.type(:cs_order).provider(:crm) do
         expect(instance.second).to eq('nul-interface-2:start')
       end
 
-      it 'has kind equal to absent' do
-        expect(instance.kind).to eq(:absent)
+      it 'has kind equal to Mandatory' do
+        expect(instance.kind).to eq('Mandatory')
       end
 
       it 'has symmetrical set to true' do
@@ -79,8 +79,8 @@ describe Puppet::Type.type(:cs_order).provider(:crm) do
         expect(instance.second).to eq('nul-interface-2b:start')
       end
 
-      it 'has kind equal to absent' do
-        expect(instance.kind).to eq(:absent)
+      it 'has kind equal to Optional' do
+        expect(instance.kind).to eq('Optional')
       end
 
       it 'has symmetrical set to false' do

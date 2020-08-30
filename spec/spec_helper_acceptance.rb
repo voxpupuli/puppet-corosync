@@ -15,6 +15,12 @@ configure_beaker do |host|
     on host, 'mkdir /etc/systemd/system/corosync.service.d'
     on host, 'echo -e "[Service]\nType=simple" > /etc/systemd/system/corosync.service.d/10-type-simple.conf'
   end
+  # Issue 455: On Centos-based there are recurring problems with the pacemaker systemd service
+  # refusing to stop its crmd subprocess leading to test timeouts. Force a fast SigKill here.
+  if host[:hypervisor] =~ %r{docker} && fact_on(host, 'os.family') == 'RedHat' && fact_on(host, 'os.release.major') == '7'
+    on host, 'mkdir /etc/systemd/system/pacemaker.service.d'
+    on host, 'echo -e "[Service]\nSendSIGKILL=yes\nTimeoutStopSec=60s" > /etc/systemd/system/pacemaker.service.d/10-timeout.conf'
+  end
 end
 
 def cleanup_cs_resources

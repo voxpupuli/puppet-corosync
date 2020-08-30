@@ -59,9 +59,9 @@ Puppet::Type.newtype(:cs_order) do
       of multiple order groups and so there is a way to control which
       primitives get priority when forcing the order of state changes on
       other primitives.  This value can be an integer but is often defined
-      as the string INFINITY."
-
-    defaultto 'INFINITY'
+      as the string INFINITY.
+      When using pcs as provider this value is not used.
+      It is generally preferred to use the `kind` parameter."
   end
 
   newproperty(:kind, required_features: :kindness) do

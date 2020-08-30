@@ -98,19 +98,10 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
   end
 
-  if fact('osfamily') == 'RedHat'
-    it 'creates a location with resource-discovery=exclusive on EL-based systems' do
-      shell('cibadmin --query | grep duncan_vip_there') do |r|
-        expect(r.stdout).to match(%r{resource-discovery="exclusive"})
-      end
-    end
-  end
-
-  if fact('osfamily') != 'RedHat'
-    it 'creates a location without resource-discovery=exclusive on non-RH systems' do
-      shell('cibadmin --query | grep duncan_vip_there') do |r|
-        expect(r.stdout).not_to match(%r{resource-discovery="exclusive"})
-      end
+  # this requires pacemaker >= 1.1.13. All tested distributions have higher versions than 1.1.13
+  it 'creates a location with resource-discovery=exclusive' do
+    shell('cibadmin --query | grep duncan_vip_there') do |r|
+      expect(r.stdout).to match(%r{resource-discovery="exclusive"})
     end
   end
 
