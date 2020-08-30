@@ -60,5 +60,4 @@ class corosync::params {
       fail("Unsupported operating system: ${facts['os']['name']}")
     }
   }
-
 }

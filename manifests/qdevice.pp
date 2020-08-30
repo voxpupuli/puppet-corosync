@@ -58,7 +58,7 @@ class corosync::qdevice (
   $cluster_user = 'hacluster'
 
   # Install the required packages
-  [ $package_pcs, $package_corosync_qnetd ].each |$package| {
+  [$package_pcs, $package_corosync_qnetd].each |$package| {
     package { $package:
       ensure => present,
       before => Group[$cluster_group],

@@ -336,7 +336,7 @@
 #
 # Copyright 2012, Puppet Labs, LLC.
 #
-class corosync(
+class corosync (
   Boolean $enable_secauth                                            = $corosync::params::enable_secauth,
   Enum['file', 'string'] $authkey_source                             = $corosync::params::authkey_source,
   Variant[Stdlib::Filesource,Stdlib::Base64] $authkey                = $corosync::params::authkey,
@@ -406,7 +406,6 @@ class corosync(
   Optional[Integer] $max_messages                                    = undef,
   Boolean $test_corosync_config                                      = $corosync::params::test_corosync_config,
 ) inherits ::corosync::params {
-
   if $set_votequorum and (empty($quorum_members) and empty($multicast_address) and !$cluster_name) {
     fail('set_votequorum is true, so you must set either quorum_members, or one of multicast_address or cluster_name.')
   }
@@ -565,10 +564,10 @@ class corosync(
     # If the local data matches auth_node (hostname or primary IP) we can
     # perform auth processing for subsequent components
     if $trusted['certname'] == $auth_node
-      or $trusted['hostname'] == $auth_node
-      or $auth_node == $facts['networking']['ip']
-      or $auth_node in $interface_ip_list {
-          $is_auth_node = true
+    or $trusted['hostname'] == $auth_node
+    or $auth_node == $facts['networking']['ip']
+    or $auth_node in $interface_ip_list {
+      $is_auth_node = true
     } else {
       $is_auth_node = false
     }
@@ -729,7 +728,7 @@ class corosync(
     # Throws a puppet error if node is on standby
     exec { 'check_standby node':
       command => 'echo "Node appears to be on standby" && false',
-      path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
+      path    => ['/bin', '/usr/bin', '/sbin', '/usr/sbin'],
       onlyif  => "crm node status|grep ${facts['networking']['hostname']}-standby|grep 'value=\"on\"'",
       require => Service['corosync'],
     }
@@ -738,7 +737,7 @@ class corosync(
   if $force_online {
     exec { 'force_online node':
       command => 'crm node online',
-      path    => [ '/bin', '/usr/bin', '/sbin', '/usr/sbin' ],
+      path    => ['/bin', '/usr/bin', '/sbin', '/usr/sbin'],
       onlyif  => "crm node status|grep ${facts['networking']['hostname']}-standby|grep 'value=\"on\"'",
       require => Service['corosync'],
     }
@@ -757,7 +756,7 @@ class corosync(
     service { 'corosync':
       ensure    => running,
       enable    => $enable_corosync_service,
-      subscribe => File[ [ '/etc/corosync/corosync.conf', '/etc/corosync/service.d' ] ],
+      subscribe => File[['/etc/corosync/corosync.conf', '/etc/corosync/service.d']],
     }
   }
 }
