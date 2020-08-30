@@ -19,7 +19,7 @@ describe Puppet::Type.type(:cs_primitive) do
 
     [:name, :primitive_class, :primitive_type, :provided_by, :cib].each do |param|
       it "should have a #{param} parameter" do
-        expect(subject.validparameter?(param)).to be_truthy
+        expect(subject).to be_validparameter(param)
       end
 
       it "should have documentation for its #{param} parameter" do
@@ -29,7 +29,7 @@ describe Puppet::Type.type(:cs_primitive) do
 
     [:parameters, :operations, :metadata, :ms_metadata, :promotable].each do |property|
       it "should have a #{property} property" do
-        expect(subject.validproperty?(property)).to be_truthy
+        expect(subject).to be_validproperty(property)
       end
 
       it "should have documentation for its #{property} property" do
