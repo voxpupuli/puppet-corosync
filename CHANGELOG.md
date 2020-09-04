@@ -4,6 +4,57 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v7.0.0](https://github.com/voxpupuli/puppet-corosync/tree/v7.0.0) (2020-08-30)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-corosync/compare/v6.0.1...v7.0.0)
+
+**Breaking changes:**
+
+- Drop unsupported code 1.x support [\#486](https://github.com/voxpupuli/puppet-corosync/pull/486) ([ekohl](https://github.com/ekohl))
+- \[ci skip\] Drop Puppet 4, allow Puppet 6 [\#466](https://github.com/voxpupuli/puppet-corosync/pull/466) ([bastelfreak](https://github.com/bastelfreak))
+- Update the support matrix [\#438](https://github.com/voxpupuli/puppet-corosync/pull/438) ([btravouillon](https://github.com/btravouillon))
+
+**Implemented enhancements:**
+
+- add parameter ip\_version [\#482](https://github.com/voxpupuli/puppet-corosync/pull/482) ([antondollmaier](https://github.com/antondollmaier))
+- allow auth\_node to be declared whith short name [\#478](https://github.com/voxpupuli/puppet-corosync/pull/478) ([aop-dw](https://github.com/aop-dw))
+- Feat: Add pcs STONITH Resource Support [\#475](https://github.com/voxpupuli/puppet-corosync/pull/475) ([pdemonaco](https://github.com/pdemonaco))
+- Puppet Strings Reference & Corosync Crypto [\#460](https://github.com/voxpupuli/puppet-corosync/pull/460) ([pdemonaco](https://github.com/pdemonaco))
+- Corosync-qdevice and PCSD Auth [\#458](https://github.com/voxpupuli/puppet-corosync/pull/458) ([pdemonaco](https://github.com/pdemonaco))
+- Add support for multiple values in port parameter [\#440](https://github.com/voxpupuli/puppet-corosync/pull/440) ([lowar](https://github.com/lowar))
+
+**Fixed bugs:**
+
+- fix: missing / in path [\#477](https://github.com/voxpupuli/puppet-corosync/pull/477) ([aop-dw](https://github.com/aop-dw))
+- fix: cs\_primitive pcs resource update for Master/Slave primitive correction [\#476](https://github.com/voxpupuli/puppet-corosync/pull/476) ([pdemonaco](https://github.com/pdemonaco))
+- Don't fail when set\_votequorum=true and cluster\_name is set [\#473](https://github.com/voxpupuli/puppet-corosync/pull/473) ([antaflos](https://github.com/antaflos))
+- Do not explicitly request current environment [\#442](https://github.com/voxpupuli/puppet-corosync/pull/442) ([towo](https://github.com/towo))
+- Multicast parameter fixes [\#439](https://github.com/voxpupuli/puppet-corosync/pull/439) ([towo](https://github.com/towo))
+
+**Closed issues:**
+
+- Allow puppet uri for authkey [\#480](https://github.com/voxpupuli/puppet-corosync/issues/480)
+- Catalog compilation should not fail when set\_votequorum=true and cluster\_name is set \(but quorum\_members and multicast\_address are not\) [\#472](https://github.com/voxpupuli/puppet-corosync/issues/472)
+- Provider pcs for cs\_primitive generates a syntax error when updating a Master/Slave Resource  [\#459](https://github.com/voxpupuli/puppet-corosync/issues/459)
+- Add crypt\_hash and crypt\_cipher as secauth = deprecated [\#453](https://github.com/voxpupuli/puppet-corosync/issues/453)
+- Provider crm for cs\_location type does not set feature resource\_discovery [\#447](https://github.com/voxpupuli/puppet-corosync/issues/447)
+- Could not autoload puppet/provider/cs\_property/pcs: [\#403](https://github.com/voxpupuli/puppet-corosync/issues/403)
+- Replace PuppetX::Voxpupuli::Corosync::Provider::Pcs by self.class [\#376](https://github.com/voxpupuli/puppet-corosync/issues/376)
+
+**Merged pull requests:**
+
+- modulesync 3.0.0 & puppet-lint autofix & rubocop autofix [\#489](https://github.com/voxpupuli/puppet-corosync/pull/489) ([bastelfreak](https://github.com/bastelfreak))
+- Fix authkey type: allow same type as file source [\#481](https://github.com/voxpupuli/puppet-corosync/pull/481) ([Elbandi](https://github.com/Elbandi))
+- Update stdlib dependency [\#474](https://github.com/voxpupuli/puppet-corosync/pull/474) ([jake2184](https://github.com/jake2184))
+- Fix indentation [\#471](https://github.com/voxpupuli/puppet-corosync/pull/471) ([usev6](https://github.com/usev6))
+- drop EOL Ubuntu 14.04 [\#467](https://github.com/voxpupuli/puppet-corosync/pull/467) ([bastelfreak](https://github.com/bastelfreak))
+- Use newer stdlib types; require stdlib 4.25.0 instead of 4.13.1 [\#461](https://github.com/voxpupuli/puppet-corosync/pull/461) ([alexjfisher](https://github.com/alexjfisher))
+- Use debian9 beaker test with Type=simple corosync override [\#456](https://github.com/voxpupuli/puppet-corosync/pull/456) ([dlucredativ](https://github.com/dlucredativ))
+- Fix for Issue 447 [\#450](https://github.com/voxpupuli/puppet-corosync/pull/450) ([timdeluxe](https://github.com/timdeluxe))
+- modulesync 1.9.6; allow puppetlabs/stdlib 5.x [\#444](https://github.com/voxpupuli/puppet-corosync/pull/444) ([bastelfreak](https://github.com/bastelfreak))
+- Rely on beaker-hostgenerator for docker nodesets [\#441](https://github.com/voxpupuli/puppet-corosync/pull/441) ([ekohl](https://github.com/ekohl))
+- Replace PuppetX::Voxpupuli::Corosync::Provider:: by self.class [\#431](https://github.com/voxpupuli/puppet-corosync/pull/431) ([btravouillon](https://github.com/btravouillon))
+
 ## [v6.0.1](https://github.com/voxpupuli/puppet-corosync/tree/v6.0.1) (2018-03-28)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-corosync/compare/v6.0.0...v6.0.1)
@@ -12,12 +63,11 @@ These should not affect the functionality of the module.
 
 - Cannot avoid the `bindnetaddr` to be set into `/etc/corosync/corosync.conf` file [\#421](https://github.com/voxpupuli/puppet-corosync/issues/421)
 - fix output of clear\_node\_high\_bit variable in config [\#433](https://github.com/voxpupuli/puppet-corosync/pull/433) ([oveaurs](https://github.com/oveaurs))
-- member section is deprecated in favor of nodelist [\#430](https://github.com/voxpupuli/puppet-corosync/pull/430) ([actatux](https://github.com/actatux))
+- member section is deprecated in favor of nodelist [\#430](https://github.com/voxpupuli/puppet-corosync/pull/430) ([btravouillon](https://github.com/btravouillon))
 
 **Closed issues:**
 
 - Warning in generated corosync.conf [\#422](https://github.com/voxpupuli/puppet-corosync/issues/422)
-- Could not autoload puppet/provider/cs\_property/pcs: [\#403](https://github.com/voxpupuli/puppet-corosync/issues/403)
 
 **Merged pull requests:**
 
@@ -50,34 +100,47 @@ These should not affect the functionality of the module.
 
 ## [v5.1.0](https://github.com/voxpupuli/puppet-corosync/tree/v5.1.0) (2017-10-27)
 
-[Full Changelog](https://github.com/voxpupuli/puppet-corosync/compare/v5.0.0...v5.1.0)
+[Full Changelog](https://github.com/voxpupuli/puppet-corosync/compare/test-tag...v5.1.0)
 
 **Implemented enhancements:**
 
-- Define the names of the quorum members [\#407](https://github.com/voxpupuli/puppet-corosync/pull/407) ([actatux](https://github.com/actatux))
-- Add tunables to enable the services [\#406](https://github.com/voxpupuli/puppet-corosync/pull/406) ([actatux](https://github.com/actatux))
-- Add pcs provider for cs\_rsc\_defaults type [\#399](https://github.com/voxpupuli/puppet-corosync/pull/399) ([spacedog](https://github.com/spacedog))
+- Define the names of the quorum members [\#407](https://github.com/voxpupuli/puppet-corosync/pull/407) ([btravouillon](https://github.com/btravouillon))
+- Add tunables to enable the services [\#406](https://github.com/voxpupuli/puppet-corosync/pull/406) ([btravouillon](https://github.com/btravouillon))
 
 **Fixed bugs:**
 
 - CentOS 7 issues w/ pcs / CIB shadow [\#409](https://github.com/voxpupuli/puppet-corosync/issues/409)
 - openhpid dependency issue [\#408](https://github.com/voxpupuli/puppet-corosync/issues/408)
-- Change usage of CIB shadow for pcs [\#410](https://github.com/voxpupuli/puppet-corosync/pull/410) ([actatux](https://github.com/actatux))
+- Change usage of CIB shadow for pcs [\#410](https://github.com/voxpupuli/puppet-corosync/pull/410) ([btravouillon](https://github.com/btravouillon))
 
 **Closed issues:**
 
 - Parameter 'log\_file\_name' is not processed [\#400](https://github.com/voxpupuli/puppet-corosync/issues/400)
+
+**Merged pull requests:**
+
+- Simplify acceptance, allow hack for Debian 8 to return 1 or 100 [\#413](https://github.com/voxpupuli/puppet-corosync/pull/413) ([wyardley](https://github.com/wyardley))
+- update badges and add tags to metadata [\#412](https://github.com/voxpupuli/puppet-corosync/pull/412) ([wyardley](https://github.com/wyardley))
+- Configure debian 8 systems for acceptance tests [\#411](https://github.com/voxpupuli/puppet-corosync/pull/411) ([btravouillon](https://github.com/btravouillon))
+- Bump min version\_requirement for Puppet + dep [\#393](https://github.com/voxpupuli/puppet-corosync/pull/393) ([juniorsysadmin](https://github.com/juniorsysadmin))
+
+## [test-tag](https://github.com/voxpupuli/puppet-corosync/tree/test-tag) (2017-04-09)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-corosync/compare/v5.0.0...test-tag)
+
+**Implemented enhancements:**
+
+- Add pcs provider for cs\_rsc\_defaults type [\#399](https://github.com/voxpupuli/puppet-corosync/pull/399) ([spacedog](https://github.com/spacedog))
+
+**Closed issues:**
+
 - Cannot apply a cs\_location to a group of resources [\#396](https://github.com/voxpupuli/puppet-corosync/issues/396)
 - cs\_group expecting more than 1 member [\#375](https://github.com/voxpupuli/puppet-corosync/issues/375)
 - Vox Pupuli First Elections [\#355](https://github.com/voxpupuli/puppet-corosync/issues/355)
 
 **Merged pull requests:**
 
-- Simplify acceptance, allow hack for Debian 8 to return 1 or 100 [\#413](https://github.com/voxpupuli/puppet-corosync/pull/413) ([wyardley](https://github.com/wyardley))
-- update badges and add tags to metadata [\#412](https://github.com/voxpupuli/puppet-corosync/pull/412) ([wyardley](https://github.com/wyardley))
-- Configure debian 8 systems for acceptance tests [\#411](https://github.com/voxpupuli/puppet-corosync/pull/411) ([actatux](https://github.com/actatux))
 - cs\_location should require cs\_group [\#397](https://github.com/voxpupuli/puppet-corosync/pull/397) ([roidelapluie](https://github.com/roidelapluie))
-- Bump min version\_requirement for Puppet + dep [\#393](https://github.com/voxpupuli/puppet-corosync/pull/393) ([juniorsysadmin](https://github.com/juniorsysadmin))
 - Support timestamp and logfile config options [\#389](https://github.com/voxpupuli/puppet-corosync/pull/389) ([antaflos](https://github.com/antaflos))
 - Add CII badge [\#387](https://github.com/voxpupuli/puppet-corosync/pull/387) ([roidelapluie](https://github.com/roidelapluie))
 - rubocop: fix RSpec/ImplicitExpect [\#386](https://github.com/voxpupuli/puppet-corosync/pull/386) ([alexjfisher](https://github.com/alexjfisher))
@@ -391,4 +454,4 @@ name, this replacement allows cs_location to work correctly.
 - Generally tried to get on top of this thing.
 
 
-\* *This Changelog was automatically generated by [github_changelog_generator](https://github.com/skywinder/Github-Changelog-Generator)*
+\* *This Changelog was automatically generated by [github_changelog_generator](https://github.com/github-changelog-generator/github-changelog-generator)*
