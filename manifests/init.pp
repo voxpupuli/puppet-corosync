@@ -405,7 +405,7 @@ class corosync (
   Optional[Enum['yes', 'no']] $clear_node_high_bit                   = undef,
   Optional[Integer] $max_messages                                    = undef,
   Boolean $test_corosync_config                                      = $corosync::params::test_corosync_config,
-) inherits ::corosync::params {
+) inherits corosync::params {
   if $set_votequorum and (empty($quorum_members) and empty($multicast_address) and !$cluster_name) {
     fail('set_votequorum is true, so you must set either quorum_members, or one of multicast_address or cluster_name.')
   }
