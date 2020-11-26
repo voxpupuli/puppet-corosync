@@ -35,6 +35,7 @@ class corosync::params {
       $package_pcs    = true
       $package_fence_agents = true
       $package_install_options = undef
+      $major_version_corosync_detect_by_distr = '2'
     }
 
     'Debian': {
@@ -44,20 +45,56 @@ class corosync::params {
 
       case $facts['os']['name'] {
         'Debian': {
+          if versioncmp($facts['os']['release']['full'], '9') == 0 {
+            $package_install_options = undef
+            $major_version_corosync_detect_by_distr = '2'
+          }
+
+          if versioncmp($facts['os']['release']['full'], '10') >= 0 {
+            $package_install_options = undef
+            $major_version_corosync_detect_by_distr = '3'
+          }
+
           if versioncmp($facts['os']['release']['full'], '8') == 0 {
             $package_install_options = ['-t', 'jessie-backports']
+            $major_version_corosync_detect_by_distr = '1'
           } else {
             $package_install_options = undef
+            $major_version_corosync_detect_by_distr = '2'
+          }
+        }
+        'Ubuntu': {
+          $package_install_options = undef
+          if versioncmp($facts['os']['release']['full'], '19.10') >= 0 {
+            $major_version_corosync_detect_by_distr = '3'
+          } else {
+            $major_version_corosync_detect_by_distr = '2'
           }
         }
         default : {
           $package_install_options = undef
+          $major_version_corosync_detect_by_distr = '2'
         }
       }
     }
 
     default: {
       fail("Unsupported operating system: ${facts['os']['name']}")
+    }
+  }
+
+  case $version_corosync {
+    /^1.*/: {
+      $major_version_corosync = '1'
+    }
+    /^2.*/: {
+      $major_version_corosync = '2'
+    }
+    /^3.*/: {
+      $major_version_corosync = '3'
+    }
+    default: {
+      $major_version_corosync = $major_version_corosync_detect_by_distr
     }
   }
 }

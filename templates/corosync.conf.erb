@@ -51,7 +51,11 @@ totem {
   threads:                             <%= @threads %>
 <% end -%>
 <% if @unicast_addresses -%>
+  <%- if @enable_secauth and @major_version_corosync == '3' -%>
+  knet_transport:                      udp
+  <%- else -%>
   transport:                           udpu
+  <%- end -%>
 <% Array(@unicast_addresses.first).each_index do |interface| -%>
   interface {
 <% if not @set_votequorum -%>

@@ -292,10 +292,10 @@
 #   consensus value.
 #
 # @param ip_version
-#   This specifies version of IP to ask DNS resolver for.  The value can be 
+#   This specifies version of IP to ask DNS resolver for.  The value can be
 #   one of ipv4 (look only for an IPv4 address) , ipv6 (check only IPv6 address),
 #   ipv4-6 (look for all address families and use first IPv4 address found in the
-#   list if there is such address, otherwise use first IPv6 address) and 
+#   list if there is such address, otherwise use first IPv6 address) and
 #   ipv6-4 (look for all address families and use first IPv6 address found in the
 #   list if there is such address, otherwise use first IPv4 address).
 #
@@ -319,6 +319,12 @@
 # @param test_corosync_config
 #   Whether we should test new configuration files with `corosync -t`.
 #   (requires corosync 2.3.4)
+#
+# @param major_version_corosync
+#  Can be equal to '1' or '2' or '3'. By default, it is determined automatically depending
+#  on the os distribution or the specified version in version_corosync parameter.
+#  Configuration files may differ depending on the major version.
+#
 #
 # @example Simple configuration without secauth
 #
@@ -405,6 +411,7 @@ class corosync (
   Optional[Enum['yes', 'no']] $clear_node_high_bit                   = undef,
   Optional[Integer] $max_messages                                    = undef,
   Boolean $test_corosync_config                                      = $corosync::params::test_corosync_config,
+  Enum['3', '2', '1'] $major_version_corosync                        = $corosync::params::major_version_corosync
 ) inherits corosync::params {
   if $set_votequorum and (empty($quorum_members) and empty($multicast_address) and !$cluster_name) {
     fail('set_votequorum is true, so you must set either quorum_members, or one of multicast_address or cluster_name.')
