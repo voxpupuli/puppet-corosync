@@ -51,9 +51,9 @@
 #
 # @see https://www.systutorials.com/docs/linux/man/8-corosync-qnetd/
 class corosync::qdevice (
-  String[1] $package_pcs                      = 'pcs',
-  String[1] $package_corosync_qnetd           = 'corosync-qnetd',
-  Sensitive[String] $sensitive_hacluster_hash = undef,
+  String[1] $package_pcs                                = 'pcs',
+  String[1] $package_corosync_qnetd                     = 'corosync-qnetd',
+  Optional[Sensitive[String]] $sensitive_hacluster_hash = undef,
 ) {
   $cluster_group = 'haclient'
   $cluster_user = 'hacluster'
