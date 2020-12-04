@@ -62,7 +62,6 @@ class corosync::qdevice (
   [$package_pcs, $package_corosync_qnetd].each |$package| {
     package { $package:
       ensure => present,
-      before => Group[$cluster_group],
     }
   }
 
@@ -70,6 +69,7 @@ class corosync::qdevice (
     # Cluster control group
     group { $cluster_group:
       ensure  => 'present',
+      require => Package[$package_pcs, $package_corosync_qnetd],
     }
 
     # Cluster admin credentials
