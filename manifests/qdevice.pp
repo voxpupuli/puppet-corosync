@@ -5,8 +5,9 @@
 # the included example.
 #
 # @param sensitive_hacluster_hash
-#   The password hash for the hacluster user on this quorum device node. This
-#   is currently a mandatory parameter because pcsd must be used to perform the
+#   The password hash for the hacluster user on this quorum device node. If
+#   omitted, you must create the hacluster user and haclient group yourself.
+#   This user is required  because pcsd must be used to perform the
 #   quorum node configuration.
 #
 # @param package_pcs
@@ -65,16 +66,18 @@ class corosync::qdevice (
     }
   }
 
-  # Cluster control group
-  group { $cluster_group:
-    ensure  => 'present',
-  }
+  if $sensitive_hacluster_hash {
+    # Cluster control group
+    group { $cluster_group:
+      ensure  => 'present',
+    }
 
-  # Cluster admin credentials
-  user { $cluster_user:
-    ensure   => 'present',
-    password => $sensitive_hacluster_hash.unwrap,
-    gid      => $cluster_group,
+    # Cluster admin credentials
+    user { $cluster_user:
+      ensure   => 'present',
+      password => $sensitive_hacluster_hash.unwrap,
+      gid      => $cluster_group,
+    }
   }
 
   # Enable the PCS service
