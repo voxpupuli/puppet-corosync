@@ -8,7 +8,6 @@ describe 'corosync::qdevice' do
   end
 
   context 'standard quorum node install' do
-    sensitive_value_redacted_message = '#<Sensitive [value redacted]>'
     ['pcs', 'corosync-qnetd'].each do |package|
       it "does install #{package}" do
         is_expected.to contain_package(package).with(
@@ -18,19 +17,13 @@ describe 'corosync::qdevice' do
     end
 
     it 'creates the cluster group' do
-      is_expected.to contain_group('haclient').with(
-        ensure: 'present',
-        require: [
-          'Package[pcs]',
-          'Package[corosync-qnetd]'
-        ]
-      )
+      is_expected.to contain_group('haclient').that_requires('Package[pcs]')
     end
 
     it 'sets the hacluster password' do
       is_expected.to contain_user('hacluster').with(
         ensure: 'present',
-        password: sensitive_value_redacted_message,
+        password: 'some-secret-hash',
         gid: 'haclient'
       )
     end
