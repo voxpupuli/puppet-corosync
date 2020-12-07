@@ -30,7 +30,7 @@ describe 'corosync::qdevice' do
     it 'sets the hacluster password' do
       is_expected.to contain_user('hacluster').with(
         ensure: 'present',
-        password: /#{Regexp.escape(sensitive_value_redacted_message)}/,
+        password: sensitive_value_redacted_message,
         gid: 'haclient'
       )
     end
