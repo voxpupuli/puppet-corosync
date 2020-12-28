@@ -73,7 +73,7 @@ class corosync::qdevice (
   # Cluster admin credentials
   user { $cluster_user:
     ensure   => 'present',
-    password => $sensitive_hacluster_hash,
+    password => $sensitive_hacluster_hash.unwrap,
     gid      => $cluster_group,
   }
 

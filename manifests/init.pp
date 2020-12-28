@@ -453,7 +453,7 @@ class corosync (
       user { 'hacluster':
         ensure   => 'present',
         gid      => 'haclient',
-        password => $sensitive_hacluster_hash,
+        password => $sensitive_hacluster_hash.unwrap,
       }
     }
   }
