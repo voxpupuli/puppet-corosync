@@ -23,18 +23,18 @@
 * [`cs_location`](#cs_location): Type for manipulating corosync/pacemaker resource location. More information on Corosync/Pacemaker colocation can be found here:  * http://ww
 * [`cs_order`](#cs_order): Type for manipulating Corosync/Pacemkaer ordering entries.  Order entries are another type of constraint that can be put on sets of primitive
 * [`cs_primitive`](#cs_primitive): Type for manipulating Corosync/Pacemaker primitives.  Primitives are probably the most important building block when creating highly availabl
-* [`cs_property`](#cs_property): Type for manipulating corosync/pacemaker configuration properties. Besides the configuration file that is managed by the module the contains 
+* [`cs_property`](#cs_property): Type for manipulating corosync/pacemaker configuration properties. Besides the configuration file that is managed by the module the contains
 * [`cs_rsc_defaults`](#cs_rsc_defaults): Type for manipulating corosync/pacemaker global defaults for resource options. The type is pretty simple interface for setting key/value pair
-* [`cs_shadow`](#cs_shadow): cs_shadow resources represent a Corosync shadow CIB. Any corosync resources defined with 'cib' set to the title of a cs_shadow resource will 
+* [`cs_shadow`](#cs_shadow): cs_shadow resources represent a Corosync shadow CIB. Any corosync resources defined with 'cib' set to the title of a cs_shadow resource will
 
 **Data types**
 
-* [`Corosync::ArrayRing`](#corosyncarrayring): 
+* [`Corosync::ArrayRing`](#corosyncarrayring):
 * [`Corosync::CryptoCipher`](#corosynccryptocipher): Defines the allowed cipher types for secure corosync communication
-* [`Corosync::CryptoHash`](#corosynccryptohash): 
-* [`Corosync::IpStringIp`](#corosyncipstringip): 
-* [`Corosync::QuorumAlgorithm`](#corosyncquorumalgorithm): 
-* [`Corosync::Syslogpriority`](#corosyncsyslogpriority): 
+* [`Corosync::CryptoHash`](#corosynccryptohash):
+* [`Corosync::IpStringIp`](#corosyncipstringip):
+* [`Corosync::QuorumAlgorithm`](#corosyncquorumalgorithm):
+* [`Corosync::Syslogpriority`](#corosyncsyslogpriority):
 
 ## Classes
 
@@ -293,8 +293,8 @@ Default value: $corosync::params::package_corosync
 Data type: `Boolean`
 
 Define if package crmsh should be managed.
-Default (Debian based): true
-Default (otherwise):    false
+Default (Debian): true
+Default:          false
 
 Default value: $corosync::params::package_crmsh
 
@@ -331,8 +331,7 @@ Default value: $corosync::params::package_fence_agents
 Data type: `Optional[Array[String[1]]]`
 
 Additional install-options for the corosync package resource.
-Default (Debian Jessie):  ['-t', 'jessie-backports']
-Default (otherwise):      undef
+Default:      undef
 
 Default value: $corosync::params::package_install_options
 
@@ -341,8 +340,7 @@ Default value: $corosync::params::package_install_options
 Data type: `Optional[Array[String[1]]]`
 
 Additional install-options for the crmsh package resource.
-Default (Debian Jessie):  ['-t', 'jessie-backports']
-Default (otherwise):      undef
+Default:      undef
 
 Default value: $corosync::params::package_install_options
 
@@ -351,8 +349,7 @@ Default value: $corosync::params::package_install_options
 Data type: `Optional[Array[String[1]]]`
 
 Additional install-options for the pacemaker package resource.
-Default (Debian Jessie):  ['-t', 'jessie-backports']
-Default (otherwise):      undef
+Default:      undef
 
 Default value: $corosync::params::package_install_options
 
@@ -361,8 +358,7 @@ Default value: $corosync::params::package_install_options
 Data type: `Optional[Array[String[1]]]`
 
 Additional install-options for the pcs package resource.
-Default (Debian Jessie):  ['-t', 'jessie-backports']
-Default (otherwise):      undef
+Default:      undef
 
 Default value: $corosync::params::package_install_options
 
@@ -371,8 +367,7 @@ Default value: $corosync::params::package_install_options
 Data type: `Optional[Array[String[1]]]`
 
 Additional install-options for the pcs package resource.
-Default (Debian Jessie):  ['-t', 'jessie-backports']
-Default (otherwise):      undef
+Default:      undef
 
 Default value: $corosync::params::package_install_options
 
