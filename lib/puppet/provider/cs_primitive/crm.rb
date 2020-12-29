@@ -35,7 +35,6 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
       metadata:          nvpairs_to_hash(e.elements['meta_attributes']),
       existing_metadata: nvpairs_to_hash(e.elements['meta_attributes']),
       ms_metadata:       {},
-      promotable:        :false
     }
 
     operations = e.elements['operations']
@@ -55,15 +54,6 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
         end
         hash[:operations] << operation
       end
-    end
-    if e.parent.name == 'master'
-      hash[:promotable] = :true
-      unless e.parent.elements['meta_attributes'].nil?
-        e.parent.elements['meta_attributes'].each_element do |m|
-          hash[:ms_metadata][m.attributes['name']] = m.attributes['value']
-        end
-      end
-      hash[:existing_ms_metadata] = hash[:ms_metadata].dup
     end
 
     hash
@@ -93,13 +83,11 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
       primitive_class: @resource[:primitive_class],
       provided_by:     @resource[:provided_by],
       primitive_type:  @resource[:primitive_type],
-      promotable:      @resource[:promotable]
     }
     @property_hash[:parameters] = @resource[:parameters] unless @resource[:parameters].nil?
     @property_hash[:operations] = @resource[:operations] unless @resource[:operations].nil?
     @property_hash[:utilization] = @resource[:utilization] unless @resource[:utilization].nil?
     @property_hash[:metadata] = @resource[:metadata] unless @resource[:metadata].nil?
-    @property_hash[:ms_metadata] = @resource[:ms_metadata] unless @resource[:ms_metadata].nil?
     @property_hash[:cib] = @resource[:cib] unless @resource[:cib].nil?
   end
 
@@ -134,14 +122,6 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
     @property_hash[:metadata]
   end
 
-  def ms_metadata
-    @property_hash[:ms_metadata]
-  end
-
-  def promotable
-    @property_hash[:promotable]
-  end
-
   # Our setters for parameters and operations.  Setters are used when the
   # resource already exists so we just update the current value in the
   # property_hash and doing this marks it to be flushed.
@@ -159,23 +139,6 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
 
   def metadata=(should)
     @property_hash[:metadata] = should
-  end
-
-  def ms_metadata=(should)
-    @property_hash[:ms_metadata] = should
-  end
-
-  def promotable=(should)
-    case should
-    when :true
-      @property_hash[:promotable] = should
-    when :false
-      @property_hash[:promotable] = should
-      cmd = [command(:crm), 'resource', 'stop', "ms_#{@resource[:name]}"]
-      self.class.run_command_in_cib(cmd, @resource[:cib])
-      cmd = [command(:crm), 'configure', 'delete', "ms_#{@resource[:name]}"]
-      self.class.run_command_in_cib(cmd, @resource[:cib])
-    end
   end
 
   # Flush is triggered on anything that has been detected as being
@@ -201,9 +164,6 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
       @resource[:unmanaged_metadata].each do |parameter_name|
         if @property_hash[:existing_metadata] && @property_hash[:existing_metadata][parameter_name]
           @property_hash[:metadata][parameter_name] = @property_hash[:existing_metadata]['target-role']
-        end
-        if @property_hash[:existing_ms_metadata] && @property_hash[:existing_ms_metadata][parameter_name]
-          @property_hash[:ms_metadata][parameter_name] = @property_hash[:existing_ms_metadata]['target-role']
         end
       end
     end
@@ -233,16 +193,6 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
     updated << "#{parameters} " unless parameters.nil?
     updated << "#{utilization} " unless utilization.nil?
     updated << "#{metadatas} " unless metadatas.nil?
-    if @property_hash[:promotable] == :true
-      updated << "\n"
-      updated << "ms ms_#{@property_hash[:name]} #{@property_hash[:name]} "
-      unless @property_hash[:ms_metadata].empty?
-        updated << 'meta '
-        @property_hash[:ms_metadata].each_pair do |k, v|
-          updated << "#{k}=#{v} "
-        end
-      end
-    end
     debug("Loading update: #{updated}")
     Tempfile.open('puppet_crm_update') do |tmpfile|
       tmpfile.write(updated)

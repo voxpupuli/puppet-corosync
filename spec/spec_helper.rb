@@ -23,3 +23,31 @@ end
 require 'spec_helper_corosync'
 
 require 'spec_helper_methods'
+
+# add_custom_fact :corosync_stack, lambda { |os, facts|
+#  case facts[:os]['family']
+#  when 'RedHat'
+#    'pcs'
+#  when 'Debian'
+#    case facts[:os]['name']
+#    when 'Debian'
+#      if facts[:os]['release']['major'].to_i > 9
+#        'pcs'
+#      else
+#        'crm'
+#      end
+#    when 'Ubuntu'
+#      if facts[:os]['release']['major'].to_i > 18
+#        'pcs'
+#      elsif facts[:os]['release']['major'].to_i > 16
+#        'pcs'
+#      else
+#        'crm'
+#      end
+#    end
+#  when 'Suse'
+#    'crm'
+#  else
+#    'crm'
+#  end
+# }

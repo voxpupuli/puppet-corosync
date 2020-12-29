@@ -16,6 +16,9 @@
 # @param package_corosync_qnetd
 #   Name of the corosync qnetd package for this system.
 #
+# @param provider
+#   What command line utility provides corosync configuration capabilities.
+#
 # @summary Performs basic initial configuration of the qdevice daemon on a node.
 #
 # @example Quorum node with default password & configuring the firewall
@@ -51,66 +54,74 @@
 #
 # @see https://www.systutorials.com/docs/linux/man/8-corosync-qnetd/
 class corosync::qdevice (
+  String $provider,
   String[1] $package_pcs                                = 'pcs',
   String[1] $package_corosync_qnetd                     = 'corosync-qnetd',
   Optional[Sensitive[String]] $sensitive_hacluster_hash = undef,
 ) {
-  $cluster_group = 'haclient'
-  $cluster_user = 'hacluster'
+  case $provider {
+    'pcs': {
+      $cluster_group = 'haclient'
+      $cluster_user = 'hacluster'
 
-  # Install the required packages
-  [$package_pcs, $package_corosync_qnetd].each |$package| {
-    package { $package:
-      ensure => present,
+      # Install the required packages
+      [$package_pcs, $package_corosync_qnetd].each |$package| {
+        package { $package:
+          ensure => present,
+        }
+      }
+
+      if $sensitive_hacluster_hash {
+        # Cluster control group
+        group { $cluster_group:
+          ensure  => 'present',
+          require => Package[$package_pcs, $package_corosync_qnetd],
+        }
+
+        # Cluster admin credentials
+        user { $cluster_user:
+          ensure   => 'present',
+          password => $sensitive_hacluster_hash.unwrap,
+          gid      => $cluster_group,
+        }
+      }
+
+      # Enable the PCS service
+      service { 'pcsd':
+        ensure  => 'running',
+        enable  => true,
+        require => [
+          Package[$package_pcs],
+          Package[$package_corosync_qnetd],
+        ],
+      }
+
+      $exec_path = '/sbin:/bin:/usr/sbin:/usr/bin'
+
+      # Configure the quorum device
+      exec { 'pcs qdevice setup model net --enable --start':
+        path    => $exec_path,
+        onlyif  => [
+          'test ! -f /etc/corosync/qnetd/nssdb/qnetd-cacert.crt',
+        ],
+        require => Service['pcsd'],
+      }
+
+      # Ensure the net device is running
+      exec { 'pcs qdevice start net':
+        path    => $exec_path,
+        onlyif  => [
+          'test -f /etc/corosync/qnetd/nssdb/qnetd-cacert.crt',
+          'test 0 -ne $(pcs qdevice status net >/dev/null 2>&1; echo $?)',
+        ],
+        require => [
+          Package['pcs'],
+          Package['corosync-qnetd'],
+        ],
+      }
     }
-  }
-
-  if $sensitive_hacluster_hash {
-    # Cluster control group
-    group { $cluster_group:
-      ensure  => 'present',
-      require => Package[$package_pcs, $package_corosync_qnetd],
+    default: {
+      fail("qdevice not supported by this module with provider ${provider}")
     }
-
-    # Cluster admin credentials
-    user { $cluster_user:
-      ensure   => 'present',
-      password => $sensitive_hacluster_hash.unwrap,
-      gid      => $cluster_group,
-    }
-  }
-
-  # Enable the PCS service
-  service { 'pcsd':
-    ensure  => 'running',
-    enable  => true,
-    require => [
-      Package[$package_pcs],
-      Package[$package_corosync_qnetd],
-    ],
-  }
-
-  $exec_path = '/sbin:/bin:/usr/sbin:/usr/bin'
-
-  # Configure the quorum device
-  exec { 'pcs qdevice setup model net --enable --start':
-    path    => $exec_path,
-    onlyif  => [
-      'test ! -f /etc/corosync/qnetd/nssdb/qnetd-cacert.crt',
-    ],
-    require => Service['pcsd'],
-  }
-
-  # Ensure the net device is running
-  exec { 'pcs qdevice start net':
-    path    => $exec_path,
-    onlyif  => [
-      'test -f /etc/corosync/qnetd/nssdb/qnetd-cacert.crt',
-      'test 0 -ne $(pcs qdevice status net >/dev/null 2>&1; echo $?)',
-    ],
-    require => [
-      Package['pcs'],
-      Package['corosync-qnetd'],
-    ],
   }
 }

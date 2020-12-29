@@ -77,8 +77,12 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'does not create the service resource in the cib' do
-    command = if fact('osfamily') == 'RedHat'
-                'pcs resource show'
+    command = if fact('default_provider') == 'pcs'
+                if Gem::Version.new(fact('pcs_version')) < Gem::Version.new('0.10.0')
+                  'pcs resource show'
+                else
+                  'pcs resource status'
+                end
               else
                 'crm_resource --list'
               end
@@ -88,8 +92,12 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'does not create the vip resource in the cib' do
-    command = if fact('osfamily') == 'RedHat'
-                'pcs resource show'
+    command = if fact('default_provider') == 'pcs'
+                if Gem::Version.new(fact('pcs_version')) < Gem::Version.new('0.10.0')
+                  'pcs resource show'
+                else
+                  'pcs resource status'
+                end
               else
                 'crm_resource --list'
               end
@@ -111,8 +119,12 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'creates the service resource in the shadow cib' do
-    command = if fact('osfamily') == 'RedHat'
-                "pcs resource show -f #{pcs_shadow_cib}"
+    command = if fact('default_provider') == 'pcs'
+                if Gem::Version.new(fact('pcs_version')) < Gem::Version.new('0.10.0')
+                  "pcs resource show -f #{pcs_shadow_cib}"
+                else
+                  "pcs resource status -f #{pcs_shadow_cib}"
+                end
               else
                 'CIB_shadow=puppet crm_resource --list'
               end
@@ -122,8 +134,12 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'creates the vip resource in the shadow cib' do
-    command = if fact('osfamily') == 'RedHat'
-                "pcs resource show -f #{pcs_shadow_cib}"
+    command = if fact('default_provider') == 'pcs'
+                if Gem::Version.new(fact('pcs_version')) < Gem::Version.new('0.10.0')
+                  "pcs resource show -f #{pcs_shadow_cib}"
+                else
+                  "pcs resource status -f #{pcs_shadow_cib}"
+                end
               else
                 'CIB_shadow=puppet crm_resource --list'
               end
@@ -133,7 +149,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'creates the colocation identified by with-rsc="apache_vip" in the shadow cib' do
-    command = if fact('osfamily') == 'RedHat'
+    command = if fact('default_provider') == 'pcs'
                 "pcs cluster cib -f #{pcs_shadow_cib} | grep apache_vip_with_service"
               else
                 'CIB_shadow=puppet cibadmin --query | grep apache_vip_with_service'
@@ -144,7 +160,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'creates the colocation identified by rsc="apache_service" in the shadow cib' do
-    command = if fact('osfamily') == 'RedHat'
+    command = if fact('default_provider') == 'pcs'
                 "pcs cluster cib -f #{pcs_shadow_cib} | grep apache_vip_with_service"
               else
                 'CIB_shadow=puppet cibadmin --query | grep apache_vip_with_service'
@@ -176,7 +192,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       EOS
     apply_manifest(pp, catch_failures: true, debug: false, trace: true)
     apply_manifest(pp, expect_changes: true, debug: false, trace: true)
-    command = if fact('osfamily') == 'RedHat'
+    command = if fact('default_provider') == 'pcs'
                 "pcs cluster cib -f #{pcs_shadow_cib} | grep apache3_vip_clone_primitive"
               else
                 'CIB_shadow=puppet cibadmin --query | grep apache3_vip_clone_primitive'

@@ -1387,19 +1387,6 @@ A hash of metadata for the master/slave primitive state.
 
 Default value: Hash.new
 
-##### `promotable`
-
-Valid values: `true`, `false`
-
-Designates if the primitive is capable of being managed in a master/slave
-state.  This will create a new ms resource in your Corosync config and add
-this primitive to it.  Concequently Corosync will be helpful and update all
-your colocation and order resources too but Puppet won't.  Currenlty we unmunge
-configuraiton entries that start with ms_ so that you don't have to account for
-name change in all our manifests.
-
-Default value: false
-
 #### Parameters
 
 The following parameters are available in the `cs_primitive` type.

@@ -1,6 +1,45 @@
 require 'voxpupuli/acceptance/spec_helper_acceptance'
 
 configure_beaker do |host|
+  case fact_on(host, 'os.family')
+  when 'RedHat'
+    default_provider = 'pcs'
+    pcs_version = if fact_on(host, 'os.release.major').to_i > 7
+                    '0.10.0'
+                  else
+                    '0.9.0'
+                  end
+  when 'Debian'
+    case fact_on(host, 'os.name')
+    when 'Debian'
+      if fact_on(host, 'os.release.major').to_i > 9
+        default_provider = 'pcs'
+        pcs_version = '0.10.0'
+      else
+        default_provider = 'crm'
+        pcs_version = ''
+      end
+    when 'Ubuntu'
+      if fact_on(host, 'os.release.major').to_i > 18
+        default_provider = 'pcs'
+        pcs_version = '0.10.0'
+      elsif fact_on(host, 'os.release.major').to_i > 16
+        default_provider = 'pcs'
+        pcs_version = '0.9.0'
+      else
+        default_provider = 'crm'
+        pcs_version = ''
+      end
+    end
+  when 'Suse'
+    default_provider = 'crm'
+    pcs_version = ''
+  else
+    default_provider = 'crm'
+    pcs_version = ''
+  end
+  on host, "echo default_provider=#{default_provider} > /opt/puppetlabs/facter/facts.d/pacemaker-provider.txt"
+  on host, "echo pcs_version=#{pcs_version} >> /opt/puppetlabs/facter/facts.d/pacemaker-provider.txt"
   # On Debian-based, service state transitions (restart, stop) hang indefinitely and
   # lead to test timeouts if there is a service unit of Type=notify involved.
   # Use Type=simple as a workaround. See issue 455.

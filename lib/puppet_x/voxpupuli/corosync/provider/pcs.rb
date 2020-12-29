@@ -99,4 +99,17 @@ class PuppetX::Voxpupuli::Corosync::Provider::Pcs < PuppetX::Voxpupuli::Corosync
     debug(@property_hash.inspect)
     !(@property_hash[:ensure] == :absent || @property_hash.empty?)
   end
+
+  def self.version
+    cmd = [command(:pcs), '--version']
+    Puppet::Util::Execution.execute(cmd, { failonfail: true })
+  end
+
+  def self.syntax_010(old, new)
+    if Puppet::Util::Package.versioncmp(version, '0.10.0') >= 0
+      new
+    else
+      old
+    end
+  end
 end

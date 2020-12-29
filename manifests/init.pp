@@ -46,7 +46,7 @@
 #
 # @param unicast_addresses
 #   An array of IP addresses that make up the cluster's members.  These are
-#   used if you are not able to use multicast on your network and instead opt 
+#   used if you are not able to use multicast on your network and instead opt
 #   for the udpu transport. You need a relatively recent version of Corosync to
 #   make this possible.
 #   You can also have an array of arrays to have multiple rings. In that case,
@@ -104,18 +104,8 @@
 # @param package_corosync
 #   Define if package corosync should be managed.
 #
-# @param package_crmsh
-#   Define if package crmsh should be managed.
-#   Default (Debian): true
-#   Default:         false
-#
 # @param package_pacemaker
 #   Define if package pacemaker should be managed.
-#
-# @param package_pcs
-#   Define if package pcs should be managed.
-#   Default (Debian): false
-#   Default:          true
 #
 # @param package_fence_agents
 #   Define if package fence-agents should be managed.
@@ -142,23 +132,23 @@
 #   Additional install-options for the pcs package resource.
 #   Default:      undef
 #
-# @param version_corosync
+# @param ensure_corosync
 #   Define what version of the corosync package should be installed.
 #   Default: 'present'
 #
-# @param version_crmsh
+# @param ensure_crmsh
 #   Define what version of the crmsh package should be installed.
 #   Default: 'present'
 #
-# @param version_pacemaker
+# @param ensure_pacemaker
 #   Define what version of the pacemaker package should be installed.
 #   Default: 'present'
 #
-# @param version_pcs
+# @param ensure_pcs
 #   Define what version of the pcs package should be installed.
 #   Default: 'present'
 #
-# @param version_fence_agents
+# @param ensure_fence_agents
 #   Define what version of the fence-agents-all package should be installed.
 #   Default: 'present'
 #
@@ -323,6 +313,9 @@
 #   Watchdog device to use, for example '/dev/watchdog' or 'off'.
 #   Its presence (or lack thereof) shifted with corosync versions.
 #
+# @param provider
+#   What command line utility provides corosync configuration capabilities.
+#
 # @example Simple configuration without secauth
 #
 #  class { 'corosync':
@@ -364,20 +357,18 @@ class corosync (
   Optional[Integer[0,255]] $ttl                                         = undef,
   Optional[Enum['ykd', 'none']] $vsftype                                = undef,
   Boolean $package_corosync                                             = $corosync::params::package_corosync,
-  Boolean $package_crmsh                                                = $corosync::params::package_crmsh,
   Boolean $package_pacemaker                                            = $corosync::params::package_pacemaker,
-  Boolean $package_pcs                                                  = $corosync::params::package_pcs,
-  Boolean $package_fence_agents                                         = $corosync::params::package_fence_agents,
+  Boolean $package_fence_agents                                         = false,
   Optional[Array[String[1]]] $packageopts_corosync                      = $corosync::params::package_install_options,
   Optional[Array[String[1]]] $packageopts_pacemaker                     = $corosync::params::package_install_options,
   Optional[Array[String[1]]] $packageopts_crmsh                         = $corosync::params::package_install_options,
   Optional[Array[String[1]]] $packageopts_pcs                           = $corosync::params::package_install_options,
   Optional[Array[String[1]]] $packageopts_fence_agents                  = $corosync::params::package_install_options,
-  String[1] $version_corosync                                           = $corosync::params::version_corosync,
-  String[1] $version_crmsh                                              = $corosync::params::version_crmsh,
-  String[1] $version_pacemaker                                          = $corosync::params::version_pacemaker,
-  String[1] $version_pcs                                                = $corosync::params::version_pcs,
-  String[1] $version_fence_agents                                       = $corosync::params::version_fence_agents,
+  String[1] $ensure_corosync                                            = $corosync::params::ensure_corosync,
+  String[1] $ensure_crmsh                                               = $corosync::params::ensure_crmsh,
+  String[1] $ensure_pacemaker                                           = $corosync::params::ensure_pacemaker,
+  String[1] $ensure_pcs                                                 = $corosync::params::ensure_pcs,
+  String[1] $ensure_fence_agents                                        = $corosync::params::ensure_fence_agents,
   Boolean $set_votequorum                                               = $corosync::params::set_votequorum,
   Optional[Integer] $votequorum_expected_votes                          = undef,
   Array $quorum_members                                                 = ['localhost'],
@@ -410,6 +401,8 @@ class corosync (
   String[1] $config_validate_cmd                                        = '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t',
   Boolean $test_corosync_config                                         = $corosync::params::test_corosync_config,
   Optional[Variant[Stdlib::Absolutepath, Enum['off']]] $watchdog_device = undef,
+  Enum['pcs', 'crm'] $provider                                          = 'pcs',
+  String $pcs_version                                                   = '',
 ) inherits corosync::params {
   if $set_votequorum and (empty($quorum_members) and empty($multicast_address) and !$cluster_name) {
     fail('set_votequorum is true, so you must set either quorum_members, or one of multicast_address or cluster_name.')
@@ -425,7 +418,7 @@ class corosync (
 
   if $package_corosync {
     package { 'corosync':
-      ensure          => $version_corosync,
+      ensure          => $ensure_corosync,
       install_options => $packageopts_corosync,
     }
     $corosync_package_require = Package['corosync']
@@ -441,42 +434,44 @@ class corosync (
 
   if $package_pacemaker {
     package { 'pacemaker':
-      ensure          => $version_pacemaker,
+      ensure          => $ensure_pacemaker,
       install_options => $packageopts_pacemaker,
     }
   }
 
-  if $package_crmsh {
-    package { 'crmsh':
-      ensure          => $version_crmsh,
-      install_options => $packageopts_crmsh,
-    }
-  }
-
-  if $package_pcs {
-    package { 'pcs':
-      ensure          => $version_pcs,
-      install_options => $packageopts_pcs,
-    }
-
-    # Set the password for the hacluster user if it was provided
-    if $sensitive_hacluster_hash {
-      group { 'haclient':
-        ensure  => 'present',
-        require => Package['pcs'],
+  case $provider {
+    'crm': {
+      package { 'crmsh':
+        ensure          => $ensure_crmsh,
+        install_options => $packageopts_crmsh,
       }
-
-      user { 'hacluster':
-        ensure   => 'present',
-        gid      => 'haclient',
-        password => $sensitive_hacluster_hash.unwrap,
+    }
+    'pcs': {
+      package { 'pcs':
+        ensure          => $ensure_pcs,
+        install_options => $packageopts_pcs,
       }
+      if $sensitive_hacluster_hash {
+        group { 'haclient':
+          ensure  => 'present',
+          require => Package['pcs'],
+        }
+
+        user { 'hacluster':
+          ensure   => 'present',
+          gid      => 'haclient',
+          password => $sensitive_hacluster_hash.unwrap,
+        }
+      }
+    }
+    default: {
+      fail("Unknown corosync provider ${provider}")
     }
   }
 
   if $package_fence_agents {
     package { 'fence-agents-all':
-      ensure          => $version_fence_agents,
+      ensure          => $ensure_fence_agents,
       install_options => $packageopts_fence_agents,
     }
   }
@@ -596,12 +591,18 @@ class corosync (
       # addresses
       $node_string = join($quorum_members, ' ')
 
+      # Define the pcs host command, this changed with 0.10.0 as per #513
+      $pcs_auth_command = versioncmp($pcs_version, '0.10.0') ? {
+        -1      => 'pcs cluster auth',
+        default => 'pcs host auth',
+      }
+
       # Attempt to authorize all members. The command will return successfully
       # if they were already authenticated so it's safe to run every time this
       # is applied.
       # TODO - make it run only once
-      exec { 'pcs_cluster_auth':
-        command => "pcs cluster auth ${node_string} ${auth_credential_string}",
+      exec { 'authorize_members':
+        command => "${pcs_auth_command} ${node_string} ${auth_credential_string}",
         path    => $exec_path,
         require => [
           Service['pcsd'],
@@ -624,14 +625,18 @@ class corosync (
     }
 
     if $manage_quorum_device and $manage_pcsd_auth and $is_auth_node and $set_votequorum {
+      $pcs_cluster_setup_namearg = versioncmp($pcs_version, '0.10.0') ? {
+        -1      => '--name',
+        default => '',
+      }
       # If the cluster hasn't been configured yet, temporarily configure it so
-      # the pcs_cluster_auth_qdevice command doesn't fail. This should generate
+      # the Authorize qdevice command doesn't fail. This should generate
       # a temporary corosync.conf which will then be overwritten
       exec { 'pcs_cluster_temporary':
-        command => "pcs cluster setup --force --name ${cluster_name} ${node_string}",
+        command => "pcs cluster setup --force ${pcs_cluster_setup_namearg} ${cluster_name} ${node_string}",
         path    => $exec_path,
         onlyif  => 'test ! -f /etc/corosync/corosync.conf',
-        require => Exec['pcs_cluster_auth'],
+        require => Exec['authorize_members'],
       }
       # We need to do this so the temporary cluster doesn't delete our authkey
       if $enable_secauth {
@@ -644,13 +649,13 @@ class corosync (
       $qdevice_token_check = "${token_prefix} ${quorum_device_host} ${token_suffix}"
 
       $quorum_device_password = $sensitive_quorum_device_password.unwrap
-      exec { 'pcs_cluster_auth_qdevice':
-        command => "pcs cluster auth ${quorum_device_host} -u hacluster -p ${quorum_device_password}",
+      exec { 'authorize_qdevice':
+        command => "${pcs_auth_command} ${quorum_device_host} -u hacluster -p ${quorum_device_password}",
         path    => $exec_path,
         onlyif  => $qdevice_token_check,
         require => [
           Package[$package_quorum_device],
-          Exec['pcs_cluster_auth'],
+          Exec['authorize_members'],
           Exec['pcs_cluster_temporary'],
         ],
       }
@@ -666,7 +671,7 @@ class corosync (
         onlyif  => [
           'test 0 -ne $(pcs quorum config | grep "host:" >/dev/null 2>&1; echo $?)',
         ],
-        require => Exec['pcs_cluster_auth_qdevice'],
+        require => Exec['authorize_qdevice'],
         before  => File['/etc/corosync/corosync.conf'],
         notify  => Service['corosync-qdevice'],
       }
