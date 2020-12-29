@@ -105,16 +105,16 @@
 #
 # @param package_crmsh
 #   Define if package crmsh should be managed.
-#   Default (Debian based): true
-#   Default (otherwise):    false
+#   Default (Debian): true
+#   Default:         false
 #
 # @param package_pacemaker
 #   Define if package pacemaker should be managed.
 #
 # @param package_pcs
 #   Define if package pcs should be managed.
-#   Default (Red Hat based):  true
-#   Default (otherwise):      false
+#   Default (Debian): false
+#   Default:          true
 #
 # @param package_fence_agents
 #   Define if package fence-agents should be managed.
@@ -123,28 +123,23 @@
 #
 # @param packageopts_corosync
 #   Additional install-options for the corosync package resource.
-#   Default (Debian Jessie):  ['-t', 'jessie-backports']
-#   Default (otherwise):      undef
+#   Default:      undef
 #
 # @param packageopts_crmsh
 #   Additional install-options for the crmsh package resource.
-#   Default (Debian Jessie):  ['-t', 'jessie-backports']
-#   Default (otherwise):      undef
+#   Default:      undef
 #
 # @param packageopts_pacemaker
 #   Additional install-options for the pacemaker package resource.
-#   Default (Debian Jessie):  ['-t', 'jessie-backports']
-#   Default (otherwise):      undef
+#   Default:      undef
 #
 # @param packageopts_pcs
 #   Additional install-options for the pcs package resource.
-#   Default (Debian Jessie):  ['-t', 'jessie-backports']
-#   Default (otherwise):      undef
+#   Default:      undef
 #
 # @param packageopts_fence_agents
 #   Additional install-options for the pcs package resource.
-#   Default (Debian Jessie):  ['-t', 'jessie-backports']
-#   Default (otherwise):      undef
+#   Default:      undef
 #
 # @param version_corosync
 #   Define what version of the corosync package should be installed.
@@ -292,10 +287,10 @@
 #   consensus value.
 #
 # @param ip_version
-#   This specifies version of IP to ask DNS resolver for.  The value can be 
+#   This specifies version of IP to ask DNS resolver for.  The value can be
 #   one of ipv4 (look only for an IPv4 address) , ipv6 (check only IPv6 address),
 #   ipv4-6 (look for all address families and use first IPv4 address found in the
-#   list if there is such address, otherwise use first IPv6 address) and 
+#   list if there is such address, otherwise use first IPv6 address) and
 #   ipv6-4 (look for all address families and use first IPv6 address found in the
 #   list if there is such address, otherwise use first IPv4 address).
 #
@@ -458,7 +453,7 @@ class corosync (
       user { 'hacluster':
         ensure   => 'present',
         gid      => 'haclient',
-        password => $sensitive_hacluster_hash,
+        password => $sensitive_hacluster_hash.unwrap,
       }
     }
   }

@@ -542,11 +542,6 @@ In Puppet < 4.0, you also need the resources to notify their `cs_commit`:
 Cs_primitive['pgsql_service'] ~> Cs_commit['puppet']
 ```
 
-### Dependencies
-
-Tested and built on Debian 6 using backports so version 1.4.2 of Corosync is validated
-to function.
-
 ## Notes
 
 ### Upstream documentation
@@ -576,7 +571,7 @@ continue the development of this module.
 
 ## Development
 
-See the [contributing guide](CONTRIBUTING.md) for details. Additionally, some general guidelines on PR structure can be found [here](https://voxpupuli.org/docs/#reviewing-a-module-pr).
+See the [contributing guide](.github/CONTRIBUTING.md) for details. Additionally, some general guidelines on PR structure can be found [here](https://voxpupuli.org/docs/#reviewing-a-module-pr).
 
 ## Copyright and License
 

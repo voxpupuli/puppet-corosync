@@ -41,19 +41,7 @@ class corosync::params {
       $package_crmsh  = true
       $package_pcs    = false
       $package_fence_agents = false
-
-      case $facts['os']['name'] {
-        'Debian': {
-          if versioncmp($facts['os']['release']['full'], '8') == 0 {
-            $package_install_options = ['-t', 'jessie-backports']
-          } else {
-            $package_install_options = undef
-          }
-        }
-        default : {
-          $package_install_options = undef
-        }
-      }
+      $package_install_options = undef
     }
 
     default: {
