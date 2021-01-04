@@ -5,8 +5,9 @@
 # the included example.
 #
 # @param sensitive_hacluster_hash
-#   The password hash for the hacluster user on this quorum device node. This
-#   is currently a mandatory parameter because pcsd must be used to perform the
+#   The password hash for the hacluster user on this quorum device node. If
+#   omitted, you must create the hacluster user and haclient group yourself.
+#   This user is required  because pcsd must be used to perform the
 #   quorum node configuration.
 #
 # @param package_pcs
@@ -50,9 +51,9 @@
 #
 # @see https://www.systutorials.com/docs/linux/man/8-corosync-qnetd/
 class corosync::qdevice (
-  String[1] $package_pcs                      = 'pcs',
-  String[1] $package_corosync_qnetd           = 'corosync-qnetd',
-  Sensitive[String] $sensitive_hacluster_hash = undef,
+  String[1] $package_pcs                                = 'pcs',
+  String[1] $package_corosync_qnetd                     = 'corosync-qnetd',
+  Optional[Sensitive[String]] $sensitive_hacluster_hash = undef,
 ) {
   $cluster_group = 'haclient'
   $cluster_user = 'hacluster'
@@ -61,20 +62,22 @@ class corosync::qdevice (
   [$package_pcs, $package_corosync_qnetd].each |$package| {
     package { $package:
       ensure => present,
-      before => Group[$cluster_group],
     }
   }
 
-  # Cluster control group
-  group { $cluster_group:
-    ensure  => 'present',
-  }
+  if $sensitive_hacluster_hash {
+    # Cluster control group
+    group { $cluster_group:
+      ensure  => 'present',
+      require => Package[$package_pcs, $package_corosync_qnetd],
+    }
 
-  # Cluster admin credentials
-  user { $cluster_user:
-    ensure   => 'present',
-    password => $sensitive_hacluster_hash.unwrap,
-    gid      => $cluster_group,
+    # Cluster admin credentials
+    user { $cluster_user:
+      ensure   => 'present',
+      password => $sensitive_hacluster_hash.unwrap,
+      gid      => $cluster_group,
+    }
   }
 
   # Enable the PCS service
