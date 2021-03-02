@@ -442,6 +442,24 @@ describe 'corosync' do
       end
     end
 
+    context 'with undefined watchdog_device' do
+      it 'does not configure watchdog_device resource' do
+        is_expected.to contain_file('/etc/corosync/corosync.conf').without_content(
+          %r{watchdog_device:}
+        )
+      end
+    end
+
+    context 'with defined watchdog_device' do
+      let(:params) { super().merge(watchdog_device: 'off') }
+
+      it 'configures watchdog_device resource' do
+        is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+          %r{watchdog_device: off}
+        )
+      end
+    end
+
     context 'when log_file and log_file_name are set' do
       let(:params) do
         super().merge(

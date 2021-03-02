@@ -166,3 +166,9 @@ nodelist {
 }
 <% end -%>
 <% end -%>
+<% unless @watchdog_device.nil? -%>
+
+resources {
+  watchdog_device: <%= @watchdog_device %>
+}
+<% end -%>
