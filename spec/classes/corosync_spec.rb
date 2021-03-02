@@ -451,11 +451,7 @@ describe 'corosync' do
     end
 
     context 'with defined watchdog_device' do
-      before do
-        params.merge!(
-          watchdog_device: 'off'
-        )
-      end
+      let(:params) { super().merge(watchdog_device: 'off') }
 
       it 'configures watchdog_device resource' do
         is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(

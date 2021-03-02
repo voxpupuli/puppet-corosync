@@ -318,7 +318,6 @@
 # @param watchdog_device
 #   Watchdog device to use, for example '/dev/watchdog' or 'off'.
 #   Its presence (or lack thereof) shifted with corosync versions.
-#   Default: undef
 #
 # @example Simple configuration without secauth
 #
