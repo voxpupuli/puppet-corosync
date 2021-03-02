@@ -334,12 +334,9 @@ describe 'corosync' do
         )
       end
 
-      # Binary() behaves different in Puppet 5 and 6
-      let(:expected_content) { facts[:puppetversion].to_i >= 6 ? "mysecretkey\n" : 'bXlzZWNyZXRrZXkK' }
-
       it 'deploys authkey file' do
         is_expected.to contain_file('/etc/corosync/authkey').with(
-          content: expected_content,
+          content: "mysecretkey\n",
           before: ['File[/etc/corosync/corosync.conf]']
         )
       end

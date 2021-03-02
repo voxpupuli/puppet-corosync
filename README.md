@@ -537,10 +537,6 @@ cs_commit {
     'puppet':
 }
 ```
-In Puppet < 4.0, you also need the resources to notify their `cs_commit`:
-```puppet
-Cs_primitive['pgsql_service'] ~> Cs_commit['puppet']
-```
 
 ## Notes
 
