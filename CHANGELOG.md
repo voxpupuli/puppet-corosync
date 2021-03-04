@@ -4,7 +4,32 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
-## [v7.0.0](https://github.com/voxpupuli/puppet-corosync/tree/v7.0.0) (2020-08-30)
+## [v8.0.0](https://github.com/voxpupuli/puppet-corosync/tree/v8.0.0) (2021-03-05)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-corosync/compare/v7.0.0...v8.0.0)
+
+**Breaking changes:**
+
+- Drop Puppet 5 support; require Puppet 6.1.0 [\#501](https://github.com/voxpupuli/puppet-corosync/pull/501) ([bastelfreak](https://github.com/bastelfreak))
+- Remove Debian jessie [\#497](https://github.com/voxpupuli/puppet-corosync/pull/497) ([towo](https://github.com/towo))
+
+**Implemented enhancements:**
+
+- Enable Puppet 7 support [\#502](https://github.com/voxpupuli/puppet-corosync/pull/502) ([bastelfreak](https://github.com/bastelfreak))
+- Add SLES 12/15 Support [\#462](https://github.com/voxpupuli/puppet-corosync/pull/462) ([towo](https://github.com/towo))
+- Add possibility to define watchdog\_device resource [\#454](https://github.com/voxpupuli/puppet-corosync/pull/454) ([dlucredativ](https://github.com/dlucredativ))
+
+**Fixed bugs:**
+
+- Match user creation in qdevice to the one in init, solves \#494 [\#495](https://github.com/voxpupuli/puppet-corosync/pull/495) ([joernott](https://github.com/joernott))
+
+**Closed issues:**
+
+- Make hacluster/user group creation optional on qdevice [\#494](https://github.com/voxpupuli/puppet-corosync/issues/494)
+- cs\_order fails with pcs provider because of score parameter [\#485](https://github.com/voxpupuli/puppet-corosync/issues/485)
+- Constantly failing beaker tests [\#455](https://github.com/voxpupuli/puppet-corosync/issues/455)
+
+## [v7.0.0](https://github.com/voxpupuli/puppet-corosync/tree/v7.0.0) (2020-09-04)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-corosync/compare/v6.0.1...v7.0.0)
 
