@@ -577,7 +577,7 @@ class corosync (
     if $manage_pcsd_auth and $is_auth_node {
       # TODO - verify if this breaks out of the sensitivity
       $hacluster_password = $sensitive_hacluster_password.unwrap
-      $auth_credential_string = "-u hacluster -p ${hacluster_password}"
+      $auth_credential_string = "-u hacluster -p \'${hacluster_password}\'"
 
       # As the auth can happen before corosync.conf exists we need to explicitly
       # list the members to join.
