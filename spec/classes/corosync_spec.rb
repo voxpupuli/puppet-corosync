@@ -29,7 +29,7 @@ describe 'corosync' do
       end
 
       it 'is not managing corosync service' do
-        is_expected.not_to compile
+        is_expected.to compile
       end
     end
 

@@ -428,6 +428,12 @@ class corosync (
     $corosync_package_require = undef
   }
 
+  if $manage_corosync_service {
+    $corosync_service_dependency = Service['corosync']
+  } else {
+    $corosync_service_dependency = undef
+  }
+
   if $package_pacemaker {
     package { 'pacemaker':
       ensure          => $version_pacemaker,
@@ -488,7 +494,7 @@ class corosync (
           mode    => '0400',
           owner   => 'root',
           group   => 'root',
-          notify  => Service['corosync'],
+          notify  => $corosync_service_dependency,
           require => $corosync_package_require,
         }
         File['/etc/corosync/authkey'] -> File['/etc/corosync/corosync.conf']
@@ -500,7 +506,7 @@ class corosync (
           mode    => '0400',
           owner   => 'root',
           group   => 'root',
-          notify  => Service['corosync'],
+          notify  => $corosync_service_dependency,
           require => $corosync_package_require,
         }
         File['/etc/corosync/authkey'] -> File['/etc/corosync/corosync.conf']
@@ -608,7 +614,7 @@ class corosync (
         ensure    => running,
         enable    => true,
         require   => Package[$package_quorum_device],
-        subscribe => Service['corosync'],
+        subscribe => $corosync_service_dependency,
       }
     }
 
@@ -719,7 +725,7 @@ class corosync (
           'set START "yes"',
         ],
         require => $corosync_package_require,
-        before  => Service['corosync'],
+        before  => $corosync_service_dependency,
       }
     }
     default: {}
@@ -731,7 +737,7 @@ class corosync (
       command => 'echo "Node appears to be on standby" && false',
       path    => ['/bin', '/usr/bin', '/sbin', '/usr/sbin'],
       onlyif  => "crm node status|grep ${facts['networking']['hostname']}-standby|grep 'value=\"on\"'",
-      require => Service['corosync'],
+      require => $corosync_service_dependency,
     }
   }
 
@@ -740,7 +746,7 @@ class corosync (
       command => 'crm node online',
       path    => ['/bin', '/usr/bin', '/sbin', '/usr/sbin'],
       onlyif  => "crm node status|grep ${facts['networking']['hostname']}-standby|grep 'value=\"on\"'",
-      require => Service['corosync'],
+      require => $corosync_service_dependency,
     }
   }
 
@@ -749,7 +755,7 @@ class corosync (
       ensure     => running,
       enable     => $enable_pacemaker_service,
       hasrestart => true,
-      subscribe  => Service['corosync'],
+      subscribe  => $corosync_service_dependency,
     }
   }
 
