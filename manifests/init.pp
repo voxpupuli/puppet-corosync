@@ -46,11 +46,12 @@
 #
 # @param unicast_addresses
 #   An array of IP addresses that make up the cluster's members.  These are
-#   use if you are able to use multicast on your network and instead opt for
-#   the udpu transport.  You need a relatively recent version of Corosync to
+#   used if you are not able to use multicast on your network and instead opt 
+#   for the udpu transport. You need a relatively recent version of Corosync to
 #   make this possible.
 #   You can also have an array of arrays to have multiple rings. In that case,
 #   each subarray matches a host IP addresses.
+#   As of Corosync 3 knet is the new default which also not uses multicast.
 #
 # @param force_online
 #   Boolean parameter specifying whether to force nodes that have been put
