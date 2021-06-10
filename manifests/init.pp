@@ -51,7 +51,7 @@
 #   make this possible.
 #   You can also have an array of arrays to have multiple rings. In that case,
 #   each subarray matches a host IP addresses.
-#   As of Corosync 3 knet is the new default which also not uses multicast.
+#   As of Corosync 3 knet is the new default which also does not use multicast.
 #
 # @param force_online
 #   Boolean parameter specifying whether to force nodes that have been put
