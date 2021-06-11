@@ -24,13 +24,13 @@ describe 'corosync' do
     context 'validates the corosncy configuration when test_corosync_config_cmd is set' do
       let (:params) do
         super().merge(
-          test_corosync_config_cmd = '/usr/sbin/corosync -t -c %'
+          test_corosync_config_cmd = '/usr/sbin/corosync -t -c'
         )
       end
 
       it 'validates with test_corosync_config_cmd' do
         is_expected.to contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
-          '/usr/sbin/corosync -t -c %'
+          '/usr/sbin/corosync -t -c'
         )
       end
     end
