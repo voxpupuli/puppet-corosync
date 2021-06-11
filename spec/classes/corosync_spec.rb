@@ -20,7 +20,7 @@ describe 'corosync' do
         '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
       )
     end
-    
+
     context 'validates the corosncy configuration when test_corosync_config_cmd is set' do
       let (:params) do
         super().merge(
@@ -33,6 +33,7 @@ describe 'corosync' do
           '/usr/sbin/corosync -t -c %'
         )
       end
+    end
 
     context 'when manage_corosync_service is false' do
       let(:params) do
