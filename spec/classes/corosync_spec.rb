@@ -21,10 +21,10 @@ describe 'corosync' do
       )
     end
 
-    context 'validates the corosncy configuration when test_corosync_config_cmd is set' do
+    context 'validates the corosncy configuration when config_validate_cmd is set' do
       let(:params) do
         super().merge(
-          test_corosync_config_cmd: '/usr/sbin/corosync -t -c'
+          config_validate_cmd: '/usr/sbin/corosync -t -c'
         )
       end
 
