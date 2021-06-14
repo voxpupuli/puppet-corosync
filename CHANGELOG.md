@@ -4,6 +4,28 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v8.1.0](https://github.com/voxpupuli/puppet-corosync/tree/v8.1.0) (2021-06-14)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-corosync/compare/v8.0.0...v8.1.0)
+
+**Implemented enhancements:**
+
+- expose the config\_validate\_cmd [\#509](https://github.com/voxpupuli/puppet-corosync/pull/509) ([AndreasPfaffeneder](https://github.com/AndreasPfaffeneder))
+
+**Fixed bugs:**
+
+- Dependency problem when enabling secauth and disabling service management [\#452](https://github.com/voxpupuli/puppet-corosync/issues/452)
+- Only notify, subscribe, require corosync service if it shall be managed. [\#505](https://github.com/voxpupuli/puppet-corosync/pull/505) ([timdeluxe](https://github.com/timdeluxe))
+
+**Closed issues:**
+
+- test\_corosync\_config fails for pacemaker 3.x [\#508](https://github.com/voxpupuli/puppet-corosync/issues/508)
+- Information on udpu seems not totally clear and doc is missing any mention of Knet [\#506](https://github.com/voxpupuli/puppet-corosync/issues/506)
+
+**Merged pull requests:**
+
+- Make statement on udpu a bit more correct. Add information about knet [\#507](https://github.com/voxpupuli/puppet-corosync/pull/507) ([AndreasPfaffeneder](https://github.com/AndreasPfaffeneder))
+
 ## [v8.0.0](https://github.com/voxpupuli/puppet-corosync/tree/v8.0.0) (2021-03-05)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-corosync/compare/v7.0.0...v8.0.0)
