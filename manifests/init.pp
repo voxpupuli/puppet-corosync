@@ -316,6 +316,9 @@
 #   Whether we should test new configuration files with `corosync -t`.
 #   (requires corosync 2.3.4)
 #
+# @param test_corosync_config_cmd
+#   Override the standard config_validate_cmd which only works for corosync 2.x.
+#
 # @param watchdog_device
 #   Watchdog device to use, for example '/dev/watchdog' or 'off'.
 #   Its presence (or lack thereof) shifted with corosync versions.
@@ -404,6 +407,7 @@ class corosync (
   Optional[String[1]] $ip_version                                       = undef,
   Optional[Enum['yes', 'no']] $clear_node_high_bit                      = undef,
   Optional[Integer] $max_messages                                       = undef,
+  String[1] $config_validate_cmd                                        = '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t',
   Boolean $test_corosync_config                                         = $corosync::params::test_corosync_config,
   Optional[Variant[Stdlib::Absolutepath, Enum['off']]] $watchdog_device = undef,
 ) inherits corosync::params {
@@ -684,10 +688,9 @@ class corosync (
   # - $clear_node_high_bit
   # - $max_messages
   if $test_corosync_config {
-    # corosync -t is only included since 2.3.4
-    $config_validate_cmd = '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
+    $_config_validate_cmd = $config_validate_cmd
   } else {
-    $config_validate_cmd = undef
+    $_config_validate_cmd = undef
   }
 
   file { '/etc/corosync/corosync.conf':
@@ -696,7 +699,7 @@ class corosync (
     owner        => 'root',
     group        => 'root',
     content      => template("${module_name}/corosync.conf.erb"),
-    validate_cmd => $config_validate_cmd,
+    validate_cmd => $_config_validate_cmd,
     require      => $corosync_package_require,
   }
 
