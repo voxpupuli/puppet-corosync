@@ -688,14 +688,9 @@ class corosync (
   # - $clear_node_high_bit
   # - $max_messages
   if $test_corosync_config {
-    if $test_corosync_config_cmd {
-      $config_validate_cmd = $test_corosync_config_cmd
-    } else {
-      # corosync -t is only included since 2.3.4
-      $config_validate_cmd = '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
-    }
+    $_config_validate_cmd = $config_validate_cmd
   } else {
-    $config_validate_cmd = undef
+    $_config_validate_cmd = undef
   }
 
   file { '/etc/corosync/corosync.conf':
@@ -704,7 +699,7 @@ class corosync (
     owner        => 'root',
     group        => 'root',
     content      => template("${module_name}/corosync.conf.erb"),
-    validate_cmd => $config_validate_cmd,
+    validate_cmd => $_config_validate_cmd,
     require      => $corosync_package_require,
   }
 
