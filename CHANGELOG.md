@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v8.2.0](https://github.com/voxpupuli/puppet-corosync/tree/v8.2.0) (2021-06-15)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-corosync/compare/v8.1.0...v8.2.0)
+
+**Implemented enhancements:**
+
+- puppetlabs/stdlib: Allow 7.x [\#514](https://github.com/voxpupuli/puppet-corosync/pull/514) ([bastelfreak](https://github.com/bastelfreak))
+
 ## [v8.1.0](https://github.com/voxpupuli/puppet-corosync/tree/v8.1.0) (2021-06-14)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-corosync/compare/v8.0.0...v8.1.0)
