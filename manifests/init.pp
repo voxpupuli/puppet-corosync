@@ -601,7 +601,7 @@ class corosync (
       # is applied.
       # TODO - make it run only once
       exec { 'pcs_cluster_auth':
-        command => "pcs cluster auth ${node_string} ${auth_credential_string}",
+        command => "pcs host auth ${node_string} ${auth_credential_string}",
         path    => $exec_path,
         require => [
           Service['pcsd'],
@@ -628,7 +628,7 @@ class corosync (
       # the pcs_cluster_auth_qdevice command doesn't fail. This should generate
       # a temporary corosync.conf which will then be overwritten
       exec { 'pcs_cluster_temporary':
-        command => "pcs cluster setup --force --name ${cluster_name} ${node_string}",
+        command => "pcs cluster setup --force ${cluster_name} ${node_string}",
         path    => $exec_path,
         onlyif  => 'test ! -f /etc/corosync/corosync.conf',
         require => Exec['pcs_cluster_auth'],
@@ -645,7 +645,7 @@ class corosync (
 
       $quorum_device_password = $sensitive_quorum_device_password.unwrap
       exec { 'pcs_cluster_auth_qdevice':
-        command => "pcs cluster auth ${quorum_device_host} -u hacluster -p ${quorum_device_password}",
+        command => "pcs host auth ${quorum_device_host} -u hacluster -p ${quorum_device_password}",
         path    => $exec_path,
         onlyif  => $qdevice_token_check,
         require => [
