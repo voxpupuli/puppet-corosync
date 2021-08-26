@@ -398,7 +398,7 @@ class corosync (
   Enum['first','last'] $manage_pcsd_auth_node                           = 'first',
   Boolean $manage_quorum_device                                         = false,
   Optional[Stdlib::Fqdn] $quorum_device_host                            = undef,
-  Optional[Corosync::QuorumAlgorithm] $quorum_device_algorithm          = 'ffsplit',
+  Corosync::QuorumAlgorithm $quorum_device_algorithm                    = 'ffsplit',
   Optional[String] $package_quorum_device                               = $corosync::params::package_quorum_device,
   Optional[Sensitive[String]] $sensitive_quorum_device_password         = undef,
   Optional[String[1]] $cluster_name                                     = undef,
