@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 # This file contains helpers that are specific to this module
 
 def corosync_stack(facts)

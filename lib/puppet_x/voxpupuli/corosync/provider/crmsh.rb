@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 begin
   require 'puppet_x/voxpupuli/corosync/provider'
   require 'puppet_x/voxpupuli/corosync/provider/cib_helper'

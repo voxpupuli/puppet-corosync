@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 require 'puppet/property/boolean'
 
 Puppet::Type.newtype(:cs_order) do

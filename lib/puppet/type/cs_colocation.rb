@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 Puppet::Type.newtype(:cs_colocation) do
   @doc = "Type for manipulating corosync/pacemaker colocation.  Colocation
     is the grouping together of a set of primitives so that they travel

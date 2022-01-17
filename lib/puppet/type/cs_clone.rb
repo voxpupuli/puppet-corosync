@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 Puppet::Type.newtype(:cs_clone) do
   @doc = "Type for manipulating corosync/pacemaker resource clone.
     More information on Corosync/Pacemaker colocation can be found here:
