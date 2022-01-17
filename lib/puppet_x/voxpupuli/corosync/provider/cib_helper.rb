@@ -75,7 +75,7 @@ class PuppetX::Voxpupuli::Corosync::Provider::CibHelper < Puppet::Provider
     raise Puppet::Error, "boolean-op must be 'and' or 'or' in rule #{rulename}" if boolean_op != 'and' && boolean_op != 'or'
 
     expressions.each do |expr|
-      rule_parameters << boolean_op if count > 0
+      rule_parameters << boolean_op if count.positive?
       count += 1
 
       raise Puppet::Error, "attribute must be defined for expression #{count} in rule #{rulename}" if expr['attribute'].nil?

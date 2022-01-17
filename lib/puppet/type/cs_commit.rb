@@ -37,7 +37,7 @@ Puppet::Type.newtype(:cs_commit) do
     autos
   end
 
-  if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '4.0') < 0
+  if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '4.0').negative?
     autorequire(:cs_primitive) do
       resources_with_cib :cs_primitive
     end
