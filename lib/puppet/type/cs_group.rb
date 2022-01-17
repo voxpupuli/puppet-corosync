@@ -56,11 +56,9 @@ Puppet::Type.newtype(:cs_group) do
 
   autorequire(:cs_primitive) do
     autos = []
-    if should(:primitives)
-      should(:primitives).each do |val|
+    should(:primitives)&.each do |val|
         autos << unmunge_cs_primitive(val)
       end
-    end
 
     autos
   end

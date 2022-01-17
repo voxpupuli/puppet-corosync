@@ -104,8 +104,7 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
 
     updated << " #{@property_hash[:score]}: #{@property_hash[:node_name]}" unless @property_hash[:node_name].nil?
 
-    unless @property_hash[:rules].nil?
-      @property_hash[:rules].each do |rule_item|
+    @property_hash[:rules]&.each do |rule_item|
         name = rule_item.keys.first
         rule = rule_item[name]
 
@@ -118,7 +117,6 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
         updated << " $role=\"#{rule['role']}\"" unless rule['role'].nil?
         updated << " #{score}: #{expression.join(' ')}"
       end
-    end
 
     debug("Loading update: #{updated}")
     Tempfile.open('puppet_crm_update') do |tmpfile|

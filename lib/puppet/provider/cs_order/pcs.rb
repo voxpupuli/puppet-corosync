@@ -35,8 +35,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
     doc = REXML::Document.new(raw)
 
     constraints = doc.root.elements['configuration'].elements['constraints']
-    unless constraints.nil?
-      constraints.each_element('rsc_order') do |e|
+    constraints&.each_element('rsc_order') do |e|
         items = e.attributes
 
         first = if items['first-action']
@@ -71,7 +70,6 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
         }
         instances << new(order_instance)
       end
-    end
     instances
   end
 

@@ -29,8 +29,7 @@ Puppet::Type.type(:cs_property).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
     doc = REXML::Document.new(raw)
 
     cluster_property_set = doc.root.elements["configuration/crm_config/cluster_property_set[@id='cib-bootstrap-options']"]
-    unless cluster_property_set.nil?
-      cluster_property_set.each_element do |e|
+    cluster_property_set&.each_element do |e|
         items = e.attributes
         property = { name: items['name'], value: items['value'] }
 
@@ -42,7 +41,6 @@ Puppet::Type.type(:cs_property).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
         }
         instances << new(property_instance)
       end
-    end
     instances
   end
 

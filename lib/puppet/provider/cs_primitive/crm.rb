@@ -41,8 +41,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
     }
 
     operations = e.elements['operations']
-    unless operations.nil?
-      operations.each_element do |o|
+    operations&.each_element do |o|
         valids = o.attributes.reject { |k, _v| k == 'id' }
         name = valids['name'].to_s
         operation = {}
@@ -50,14 +49,11 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
         valids.each do |k, v|
           operation[name][k] = v.to_s if k != 'name'
         end
-        unless o.elements['instance_attributes'].nil?
-          o.elements['instance_attributes'].each_element do |i|
+        o.elements['instance_attributes']&.each_element do |i|
             operation[name][i.attributes['name']] = i.attributes['value']
           end
-        end
         hash[:operations] << operation
       end
-    end
 
     hash
   end
@@ -163,7 +159,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
         end
       end
     end
-    if @resource && @resource.instance_of?(:cs_primitive) && @resource[:unmanaged_metadata]
+    if @resource&.instance_of?(:cs_primitive) && @resource[:unmanaged_metadata]
       @resource[:unmanaged_metadata].each do |parameter_name|
         @property_hash[:metadata][parameter_name] = @property_hash[:existing_metadata]['target-role'] if @property_hash[:existing_metadata] && @property_hash[:existing_metadata][parameter_name]
       end

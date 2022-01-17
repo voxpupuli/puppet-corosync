@@ -31,8 +31,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, parent: PuppetX::Voxpupuli::Coro
     resource_set_options = %w[sequential require-all action role]
 
     constraints = doc.root.elements['configuration'].elements['constraints']
-    unless constraints.nil?
-      constraints.each_element('rsc_colocation') do |e|
+    constraints&.each_element('rsc_colocation') do |e|
         items = e.attributes
 
         if e.has_elements?
@@ -85,7 +84,6 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, parent: PuppetX::Voxpupuli::Coro
         end
         instances << new(colocation_instance)
       end
-    end
     instances
   end
 
