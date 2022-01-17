@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 Puppet::Type.newtype(:cs_commit) do
   @doc = 'Final commit statement which triggers the synchronous application of
           all primitive changes which reference this CIB. Do not generate more

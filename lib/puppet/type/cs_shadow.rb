@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 Puppet::Type.newtype(:cs_shadow) do
   @doc = "cs_shadow resources represent a Corosync shadow CIB. Any corosync
     resources defined with 'cib' set to the title of a cs_shadow resource

@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 Puppet::Type.newtype(:cs_location) do
   @doc = "Type for manipulating corosync/pacemaker resource location.
     More information on Corosync/Pacemaker colocation can be found here:

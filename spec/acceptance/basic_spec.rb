@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 require 'spec_helper_acceptance'
 
 # These tests are designed to ensure that the module, when ran with defaults,
