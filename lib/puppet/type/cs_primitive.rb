@@ -223,9 +223,7 @@ Puppet::Type.newtype(:cs_primitive) do
       super(is.reject { |k| @resource[:unmanaged_metadata].include?(k) })
     end
 
-    # rubocop:disable Style/PredicateName
-    def is_to_s(is)
-      # rubocop:enable Style/PredicateName
+    def is_to_s(is) # rubocop:disable Naming/PredicateName
       super(is.reject { |k| @resource[:unmanaged_metadata].include?(k) })
     end
 
