@@ -36,7 +36,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
 
     constraints = doc.root.elements['configuration'].elements['constraints']
     constraints&.each_element('rsc_order') do |e|
-        items = e.attributes
+      items = e.attributes
 
         first = if items['first-action']
                   "#{items['first']}:#{items['first-action']}"

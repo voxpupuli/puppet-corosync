@@ -38,7 +38,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
         # The expression key is handled differently because the result must
         # not contain the id of the XML node. The crm command can not set the
         # expression id so Puppet would try to update the rule at every run.
-        id, items = node2hash(e, ['expression']).first
+      id, items = node2hash(e, ['expression']).first
 
         location_instance = {
           name: id,

@@ -32,7 +32,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, parent: PuppetX::Voxpupuli::Coro
 
     constraints = doc.root.elements['configuration'].elements['constraints']
     constraints&.each_element('rsc_colocation') do |e|
-        items = e.attributes
+      items = e.attributes
 
         if e.has_elements?
           resource_sets = []

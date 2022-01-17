@@ -105,7 +105,7 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
     updated << " #{@property_hash[:score]}: #{@property_hash[:node_name]}" unless @property_hash[:node_name].nil?
 
     @property_hash[:rules]&.each do |rule_item|
-        name = rule_item.keys.first
+      name = rule_item.keys.first
         rule = rule_item[name]
 
         score = rule['score-attribute'] || rule['score']
