@@ -4,6 +4,7 @@ rescue LoadError
   require 'pathname' # WORKAROUND #14073, #7788 and SERVER-973
   corosync = Puppet::Module.find('corosync')
   raise(LoadError, "Unable to find corosync module in modulepath #{Puppet[:basemodulepath] || Puppet[:modulepath]}") unless corosync
+
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider/pcs'
 end
 
@@ -12,7 +13,7 @@ Puppet::Type.type(:cs_property).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
         abstract corosync/pacemaker vs. keepalived. This provider will check the state
         of Corosync cluster configuration properties.'
 
-  defaultfor operatingsystem: [:fedora, :centos, :redhat]
+  defaultfor operatingsystem: %i[fedora centos redhat]
 
   # Path to the pcs binary for interacting with the cluster configuration.
   commands pcs: 'pcs'
@@ -33,10 +34,10 @@ Puppet::Type.type(:cs_property).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
         property = { name: items['name'], value: items['value'] }
 
         property_instance = {
-          name:       property[:name],
-          ensure:     :present,
-          value:      property[:value],
-          provider:   name
+          name: property[:name],
+          ensure: :present,
+          value: property[:value],
+          provider: name
         }
         instances << new(property_instance)
       end
@@ -48,9 +49,9 @@ Puppet::Type.type(:cs_property).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
   # of actually doing the work.
   def create
     @property_hash = {
-      name:   @resource[:name],
+      name: @resource[:name],
       ensure: :present,
-      value:  @resource[:value]
+      value: @resource[:value]
     }
   end
 

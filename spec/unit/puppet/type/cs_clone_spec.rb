@@ -17,41 +17,41 @@ describe Puppet::Type.type(:cs_clone) do
       expect(subject.new(name: 'mock_clone', primitive: 'mock_primitive')).not_to be_nil
     end
 
-    [:name, :cib].each do |param|
-      it "should have a #{param} parameter" do
+    %i[name cib].each do |param|
+      it "has a #{param} parameter" do
         expect(subject).to be_validparameter(param)
       end
 
-      it "should have documentation for its #{param} parameter" do
+      it "has documentation for its #{param} parameter" do
         expect(subject.paramclass(param).doc).to be_instance_of(String)
       end
     end
 
-    [:primitive, :clone_max, :clone_node_max, :notify_clones, :globally_unique,
-     :ordered, :interleave].each do |property|
-      it "should have a #{property} property" do
+    %i[primitive clone_max clone_node_max notify_clones globally_unique
+       ordered interleave].each do |property|
+      it "has a #{property} property" do
         expect(subject).to be_validproperty(property)
       end
 
-      it "should have documentation for its #{property} property" do
+      it "has documentation for its #{property} property" do
         expect(subject.propertybyname(property).doc).to be_instance_of(String)
       end
     end
   end
 
   describe 'when validating attributes' do
-    [:notify_clones, :globally_unique, :ordered, :interleave].each do |attribute|
-      it "should validate that the #{attribute} attribute can be true/false" do
+    %i[notify_clones globally_unique ordered interleave].each do |attribute|
+      it "validates that the #{attribute} attribute can be true/false" do
         [true, false].each do |value|
           expect(subject.new(
-            name:      'mock_clone',
+            name: 'mock_clone',
             primitive: 'mock_primitive',
             attribute => value
           )[attribute]).to eq(value.to_s.to_sym)
         end
       end
 
-      it "should validate that the #{attribute} attribute cannot be other values" do
+      it "validates that the #{attribute} attribute cannot be other values" do
         ['fail', 42].each do |value|
           expect { subject.new(name: 'mock_clone', attribute => value) }. \
             to raise_error Puppet::Error, %r{(true|false)}
@@ -80,6 +80,7 @@ describe Puppet::Type.type(:cs_clone) do
       it 'has apache primitive as source of autorequire' do
         expect(autorequire_relationship.source).to eq apache_primitive
       end
+
       it 'has apache clone as target of autorequire' do
         expect(autorequire_relationship.target).to eq apache_clone
       end
@@ -119,6 +120,7 @@ describe Puppet::Type.type(:cs_clone) do
     it 'has apache group as source of autorequire' do
       expect(autorequire_relationship.source).to eq apache_group
     end
+
     it 'has apache clone as target of autorequire' do
       expect(autorequire_relationship.target).to eq apache_clone
     end

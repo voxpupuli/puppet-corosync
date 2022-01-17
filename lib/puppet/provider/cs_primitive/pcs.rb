@@ -4,6 +4,7 @@ rescue LoadError
   require 'pathname' # WORKAROUND #14073, #7788 and SERVER-973
   corosync = Puppet::Module.find('corosync')
   raise(LoadError, "Unable to find corosync module in modulepath #{Puppet[:basemodulepath] || Puppet[:modulepath]}") unless corosync
+
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider/pcs'
 end
 
@@ -20,28 +21,28 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
 
   mk_resource_methods
 
-  defaultfor operatingsystem: [:fedora, :centos, :redhat]
+  defaultfor operatingsystem: %i[fedora centos redhat]
 
   # given an XML element (a <primitive> from cibadmin), produce a hash suitible
   # for creating a new provider instance.
   def self.element_to_hash(e)
     hash = {
-      primitive_class:          e.attributes['class'],
-      primitive_type:           e.attributes['type'],
-      provided_by:              e.attributes['provider'],
-      name:                     e.attributes['id'].to_sym,
-      ensure:                   :present,
-      provider:                 name,
-      parameters:               nvpairs_to_hash(e.elements['instance_attributes']),
-      operations:               [],
-      utilization:              nvpairs_to_hash(e.elements['utilization']),
-      metadata:                 nvpairs_to_hash(e.elements['meta_attributes']),
-      existing_resource:        :true,
+      primitive_class: e.attributes['class'],
+      primitive_type: e.attributes['type'],
+      provided_by: e.attributes['provider'],
+      name: e.attributes['id'].to_sym,
+      ensure: :present,
+      provider: name,
+      parameters: nvpairs_to_hash(e.elements['instance_attributes']),
+      operations: [],
+      utilization: nvpairs_to_hash(e.elements['utilization']),
+      metadata: nvpairs_to_hash(e.elements['meta_attributes']),
+      existing_resource: :true,
       existing_primitive_class: e.attributes['class'],
-      existing_primitive_type:  e.attributes['type'],
-      existing_provided_by:     e.attributes['provider'],
-      existing_metadata:        nvpairs_to_hash(e.elements['meta_attributes']),
-      existing_operations:      []
+      existing_primitive_type: e.attributes['type'],
+      existing_provided_by: e.attributes['provider'],
+      existing_metadata: nvpairs_to_hash(e.elements['meta_attributes']),
+      existing_operations: []
     }
 
     operations = e.elements['operations']
@@ -98,11 +99,11 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
   # updates or create a resource, so we flag the resources with that parameter
   def create
     @property_hash = {
-      name:              @resource[:name],
-      ensure:            :present,
-      primitive_class:   @resource[:primitive_class],
-      provided_by:       @resource[:provided_by],
-      primitive_type:    @resource[:primitive_type],
+      name: @resource[:name],
+      ensure: :present,
+      primitive_class: @resource[:primitive_class],
+      provided_by: @resource[:provided_by],
+      primitive_type: @resource[:primitive_type],
       existing_resource: :false
     }
     @property_hash[:parameters] = @resource[:parameters] unless @resource[:parameters].nil?
@@ -183,9 +184,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
     # provider or type has changed. Since stonith resources have a special
     # command they do not include a provider or class in their type name
     resource_type = "#{@property_hash[:primitive_class]}:"
-    if @property_hash[:provided_by]
-      resource_type << "#{@property_hash[:provided_by]}:"
-    end
+    resource_type << "#{@property_hash[:provided_by]}:" if @property_hash[:provided_by]
     resource_type << (@property_hash[:primitive_type]).to_s
 
     # We destroy the resource if it's type, class or provider has changed
@@ -269,7 +268,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
     end
 
     # Clear all metadata structures when specified
-    if @resource && @resource.class.name == :cs_primitive && @resource[:unmanaged_metadata]
+    if @resource && @resource.instance_of?(:cs_primitive) && @resource[:unmanaged_metadata]
       @resource[:unmanaged_metadata].each do |parameter_name|
         @property_hash[:metadata].delete(parameter_name)
         @property_hash[:existing_metadata].delete(parameter_name) if @property_hash[:existing_metadata]
@@ -291,11 +290,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
     # Establish whether this is a regular resource or a special stonith resource
     # The destinction exists only because pcs uses a different subcommand to
     # interact with stonith resources
-    is_stonith = if (@property_hash[:primitive_class]).to_s == 'stonith'
-                   true
-                 else
-                   false
-                 end
+    is_stonith = (@property_hash[:primitive_class]).to_s == 'stonith'
 
     # Call the appropriate helper function to generate the PCS commands
     if is_stonith

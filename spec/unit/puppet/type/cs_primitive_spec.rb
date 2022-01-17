@@ -17,37 +17,37 @@ describe Puppet::Type.type(:cs_primitive) do
       expect(subject.new(name: 'mock_primitive')).not_to be_nil
     end
 
-    [:name, :primitive_class, :primitive_type, :provided_by, :cib].each do |param|
-      it "should have a #{param} parameter" do
+    %i[name primitive_class primitive_type provided_by cib].each do |param|
+      it "has a #{param} parameter" do
         expect(subject).to be_validparameter(param)
       end
 
-      it "should have documentation for its #{param} parameter" do
+      it "has documentation for its #{param} parameter" do
         expect(subject.paramclass(param).doc).to be_instance_of(String)
       end
     end
 
-    [:parameters, :operations, :metadata].each do |property|
-      it "should have a #{property} property" do
+    %i[parameters operations metadata].each do |property|
+      it "has a #{property} property" do
         expect(subject).to be_validproperty(property)
       end
 
-      it "should have documentation for its #{property} property" do
+      it "has documentation for its #{property} property" do
         expect(subject.propertybyname(property).doc).to be_instance_of(String)
       end
     end
   end
 
   describe 'when validating attributes' do
-    [:parameters, :operations, :metadata].each do |attribute|
-      it "should validate that the #{attribute} attribute defaults to a hash" do
+    %i[parameters operations metadata].each do |attribute|
+      it "validates that the #{attribute} attribute defaults to a hash" do
         expect(subject.new(name: 'mock_primitive')[:parameters]).to eq({})
       end
 
-      it "should validate that the #{attribute} attribute must be a hash" do
+      it "validates that the #{attribute} attribute must be a hash" do
         expect do
           subject.new(
-            name:       'mock_primitive',
+            name: 'mock_primitive',
             parameters: 'fail'
           )
         end.to raise_error Puppet::Error, %r{hash}
@@ -66,6 +66,7 @@ describe Puppet::Type.type(:cs_primitive) do
                                      { 'stop' => { 'interval' => '10' } }
                                    ])
     end
+
     it 'converts hashes into array' do
       Puppet.expects(:deprecation_warning).never
       expect(subject.new(
@@ -76,6 +77,7 @@ describe Puppet::Type.type(:cs_primitive) do
                                      { 'stop' => { 'interval' => '10' } }
                                    ])
     end
+
     it 'converts hashes into array with correct roles' do
       Puppet.expects(:deprecation_warning).once
       expect(subject.new(
@@ -86,6 +88,7 @@ describe Puppet::Type.type(:cs_primitive) do
                                      { 'stop' => { 'interval' => '10', 'role' => 'Master' } }
                                    ])
     end
+
     it 'converts sub-arrays into array' do
       Puppet.expects(:deprecation_warning).once
       expect(subject.new(
@@ -97,6 +100,7 @@ describe Puppet::Type.type(:cs_primitive) do
                                      { 'stop' => { 'interval' => '10' } }
                                    ])
     end
+
     it 'converts sub-arrays into array with correct roles' do # That case probably never happens in practice
       Puppet.expects(:deprecation_warning).twice
       expect(subject.new(

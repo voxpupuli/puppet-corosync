@@ -64,7 +64,7 @@ def cleanup_cs_resources
       resources { 'cs_location' :
         purge => true,
       }
-    EOS
+  EOS
 
   apply_manifest(pp, catch_failures: true, debug: false, trace: true)
   apply_manifest(pp, catch_changes: true, debug: false, trace: true)
@@ -73,7 +73,7 @@ def cleanup_cs_resources
       resources { 'cs_primitive' :
         purge => true,
       }
-    EOS
+  EOS
 
   apply_manifest(pp, catch_failures: true, debug: false, trace: true)
   apply_manifest(pp, catch_changes: true, debug: false, trace: true)

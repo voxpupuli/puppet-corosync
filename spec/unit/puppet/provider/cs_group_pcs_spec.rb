@@ -60,7 +60,7 @@ describe Puppet::Type.type(:cs_group).provider(:pcs) do
         instances.first
       end
 
-      it "should be a kind of #{described_class.name}" do
+      it "is a kind of #{described_class.name}" do
         expect(instance).to be_a_kind_of(described_class)
       end
 

@@ -4,6 +4,7 @@ rescue LoadError
   require 'pathname' # WORKAROUND #14073, #7788 and SERVER-973
   corosync = Puppet::Module.find('corosync')
   raise(LoadError, "Unable to find corosync module in modulepath #{Puppet[:basemodulepath] || Puppet[:modulepath]}") unless corosync
+
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider/crmsh'
 end
 
@@ -30,9 +31,9 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:crm, parent: PuppetX::Voxpupuli::Co
       rsc_defaults = { name: items['name'], value: items['value'] }
 
       rsc_defaults_instance = {
-        name:     rsc_defaults[:name],
-        ensure:   :present,
-        value:    rsc_defaults[:value],
+        name: rsc_defaults[:name],
+        ensure: :present,
+        value: rsc_defaults[:value],
         provider: name
       }
       instances << new(rsc_defaults_instance)
@@ -44,9 +45,9 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:crm, parent: PuppetX::Voxpupuli::Co
   # of actually doing the work.
   def create
     @property_hash = {
-      name:   @resource[:name],
+      name: @resource[:name],
       ensure: :present,
-      value:  @resource[:value]
+      value: @resource[:value]
     }
   end
 

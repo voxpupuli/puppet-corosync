@@ -17,22 +17,22 @@ describe Puppet::Type.type(:cs_group) do
       expect(subject.new(name: 'mock_group')).not_to be_nil
     end
 
-    [:name, :cib].each do |param|
-      it "should have a #{param} parameter" do
+    %i[name cib].each do |param|
+      it "has a #{param} parameter" do
         expect(subject).to be_validparameter(param)
       end
 
-      it "should have documentation for its #{param} parameter" do
+      it "has documentation for its #{param} parameter" do
         expect(subject.paramclass(param).doc).to be_instance_of(String)
       end
     end
 
     [:primitives].each do |property|
-      it "should have a #{property} property" do
+      it "has a #{property} property" do
         expect(subject).to be_validproperty(property)
       end
 
-      it "should have documentation for its #{property} property" do
+      it "has documentation for its #{property} property" do
         expect(subject.propertybyname(property).doc).to be_instance_of(String)
       end
     end
@@ -58,6 +58,7 @@ describe Puppet::Type.type(:cs_group) do
       it 'has apache primitive as source of autorequire' do
         expect(autorequire_relationship.source).to eq apache_primitive
       end
+
       it 'has apache group as target of autorequire' do
         expect(autorequire_relationship.target).to eq apache_group
       end

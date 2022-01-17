@@ -13,21 +13,21 @@ describe Puppet::Type.type(:cs_property) do
     end
 
     [:replace].each do |param|
-      it "should have a #{param} parameter" do
+      it "has a #{param} parameter" do
         expect(subject).to be_validparameter(param)
       end
 
-      it "should have documentation for its #{param} parameter" do
+      it "has documentation for its #{param} parameter" do
         expect(subject.paramclass(param).doc).to be_instance_of(String)
       end
     end
 
     [:value].each do |property|
-      it "should have a #{property} property" do
+      it "has a #{property} property" do
         expect(subject).to be_validproperty(property)
       end
 
-      it "should have documentation for its #{property} property" do
+      it "has documentation for its #{property} property" do
         expect(subject.propertybyname(property).doc).to be_instance_of(String)
       end
     end

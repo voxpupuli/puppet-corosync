@@ -39,6 +39,7 @@ Puppet::Type.newtype(:cs_shadow) do
 
   def generate
     return [] if self[:autocommit] != true
+
     options = { name: @title }
     [Puppet::Type.type(:cs_commit).new(options)]
   end

@@ -66,10 +66,10 @@ describe 'corosync' do
             %r{nodelist}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 1}
+            %r{ring0_addr: node1\.test\.org\n\s*nodeid: 1}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 2}
+            %r{ring0_addr: node2\.test\.org\n\s*nodeid: 2}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{two_node: 1\n}
@@ -84,10 +84,10 @@ describe 'corosync' do
               %r{nodelist}
             )
             is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-              %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 3}
+              %r{ring0_addr: node1\.test\.org\n\s*nodeid: 3}
             )
             is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-              %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 11}
+              %r{ring0_addr: node2\.test\.org\n\s*nodeid: 11}
             )
           end
         end
@@ -105,10 +105,10 @@ describe 'corosync' do
               %r{nodelist}
             )
             is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-              %r{ring0_addr\: 192\.168\.0\.1\n\s*nodeid: 1\n\s*name: node1\.test\.org}
+              %r{ring0_addr: 192\.168\.0\.1\n\s*nodeid: 1\n\s*name: node1\.test\.org}
             )
             is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-              %r{ring0_addr\: 192\.168\.0\.2\n\s*nodeid: 2\n\s*name: node2\.test\.org}
+              %r{ring0_addr: 192\.168\.0\.2\n\s*nodeid: 2\n\s*name: node2\.test\.org}
             )
           end
         end
@@ -156,10 +156,10 @@ describe 'corosync' do
             %r{nodelist}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 1}
+            %r{ring0_addr: node1\.test\.org\n\s*nodeid: 1}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 2}
+            %r{ring0_addr: node2\.test\.org\n\s*nodeid: 2}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{two_node: 1\n}
@@ -241,10 +241,10 @@ describe 'corosync' do
             %r{nodelist}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 1}
+            %r{ring0_addr: node1\.test\.org\n\s*nodeid: 1}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 2}
+            %r{ring0_addr: node2\.test\.org\n\s*nodeid: 2}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{two_node: 1\n}
@@ -257,10 +257,10 @@ describe 'corosync' do
             %r{nodelist}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr\: node1\.test\.org\n\s*nodeid: 3}
+            %r{ring0_addr: node1\.test\.org\n\s*nodeid: 3}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr\: node2\.test\.org\n\s*nodeid: 11}
+            %r{ring0_addr: node2\.test\.org\n\s*nodeid: 11}
           )
         end
 
@@ -271,10 +271,10 @@ describe 'corosync' do
             %r{nodelist}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr\: 192\.168\.0\.1\n\s*nodeid: 1\n\s*name: node1\.test\.org}
+            %r{ring0_addr: 192\.168\.0\.1\n\s*nodeid: 1\n\s*name: node1\.test\.org}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr\: 192\.168\.0\.2\n\s*nodeid: 2\n\s*name: node2\.test\.org}
+            %r{ring0_addr: 192\.168\.0\.2\n\s*nodeid: 2\n\s*name: node2\.test\.org}
           )
         end
       end
@@ -282,7 +282,7 @@ describe 'corosync' do
       context 'with one ring' do
         let(:params) do
           super().merge(
-            bind_address:      '10.0.0.1',
+            bind_address: '10.0.0.1',
             unicast_addresses: ['10.0.0.1', '10.0.0.2']
           )
         end
@@ -294,10 +294,10 @@ describe 'corosync' do
         end
       end
 
-      context 'with multiple rings ' do
+      context 'with multiple rings' do
         let(:params) do
           super().merge(
-            bind_address:      ['10.0.0.1', '10.0.1.1'],
+            bind_address: ['10.0.0.1', '10.0.1.1'],
             unicast_addresses: [
               [
                 '10.0.0.1',
@@ -321,7 +321,7 @@ describe 'corosync' do
     context 'when cluster_name is not set' do
       it do
         is_expected.to contain_file('/etc/corosync/corosync.conf').without_content(
-          %r{cluster_name\:}
+          %r{cluster_name:}
         )
       end
     end
@@ -335,7 +335,7 @@ describe 'corosync' do
 
       it 'configures cluster_name' do
         is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-          %r{cluster_name\:\s*hacell$}
+          %r{cluster_name:\s*hacell$}
         )
       end
     end
@@ -446,6 +446,7 @@ describe 'corosync' do
           %r{to_logfile.*yes}
         )
       end
+
       it 'does not set logfile' do
         is_expected.to contain_file('/etc/corosync/corosync.conf').without_content(
           %r{^\s*logfile}
@@ -484,9 +485,10 @@ describe 'corosync' do
           %r{to_logfile.*yes}
         )
       end
+
       it 'does set logfile' do
         is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-          %r{logfile.*\/var\/log\/corosync/corosync\.log}
+          %r{logfile.*/var/log/corosync/corosync\.log}
         )
       end
     end
@@ -503,6 +505,7 @@ describe 'corosync' do
           %r{to_logfile.*no}
         )
       end
+
       it 'does not set logfile' do
         is_expected.to contain_file('/etc/corosync/corosync.conf').without_content(
           %r{^\s*logfile}
@@ -543,7 +546,7 @@ describe 'corosync' do
       end
     end
 
-    [:corosync, :pacemaker].each do |package|
+    %i[corosync pacemaker].each do |package|
       context "install package #{package} with default version" do
         let(:params) { super().merge("package_#{package}" => true) }
 
@@ -1042,6 +1045,7 @@ describe 'corosync' do
                   require: 'Exec[authorize_qdevice]'
                 )
               end
+
               it 'contains the quorum configuration' do
                 is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
                   %r!quorum {

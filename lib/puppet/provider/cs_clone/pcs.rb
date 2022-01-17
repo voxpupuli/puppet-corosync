@@ -4,6 +4,7 @@ rescue LoadError
   require 'pathname' # WORKAROUND #14073, #7788 and SERVER-973
   corosync = Puppet::Module.find('corosync')
   raise(LoadError, "Unable to find corosync module in modulepath #{Puppet[:basemodulepath] || Puppet[:modulepath]}") unless corosync
+
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider/pcs'
 end
 
@@ -15,7 +16,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
 
   mk_resource_methods
 
-  defaultfor operatingsystem: [:fedora, :centos, :redhat]
+  defaultfor operatingsystem: %i[fedora centos redhat]
 
   def change_clone_id(type, primitive, id, cib)
     xpath = "/cib/configuration/resources/clone[descendant::#{type}[@id='#{primitive}']]"
@@ -42,14 +43,14 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
       items = nvpairs_to_hash(e.elements['meta_attributes'])
 
       clone_instance = {
-        name:              e.attributes['id'],
-        ensure:            :present,
-        clone_max:         items['clone-max'],
-        clone_node_max:    items['clone-node-max'],
-        notify_clones:     items['notify'],
-        globally_unique:   items['globally-unique'],
-        ordered:           items['ordered'],
-        interleave:        items['interleave']
+        name: e.attributes['id'],
+        ensure: :present,
+        clone_max: items['clone-max'],
+        clone_node_max: items['clone-node-max'],
+        notify_clones: items['notify'],
+        globally_unique: items['globally-unique'],
+        ordered: items['ordered'],
+        interleave: items['interleave']
       }
 
       if e.elements['primitive']
@@ -73,16 +74,16 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
   # of actually doing the work.
   def create
     @property_hash = {
-      name:              @resource[:name],
-      ensure:            :present,
-      primitive:         @resource[:primitive],
-      group:             @resource[:group],
-      clone_max:         @resource[:clone_max],
-      clone_node_max:    @resource[:clone_node_max],
-      notify_clones:     @resource[:notify_clones],
-      globally_unique:   @resource[:globally_unique],
-      ordered:           @resource[:ordered],
-      interleave:        @resource[:interleave]
+      name: @resource[:name],
+      ensure: :present,
+      primitive: @resource[:primitive],
+      group: @resource[:group],
+      clone_max: @resource[:clone_max],
+      clone_node_max: @resource[:clone_node_max],
+      notify_clones: @resource[:notify_clones],
+      globally_unique: @resource[:globally_unique],
+      ordered: @resource[:ordered],
+      interleave: @resource[:interleave]
     }
   end
 

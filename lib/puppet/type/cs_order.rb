@@ -92,7 +92,7 @@ Puppet::Type.newtype(:cs_order) do
     %w[corosync pacemaker]
   end
 
-  [:cs_clone, :cs_group, :cs_primitive].each do |resource_type|
+  %i[cs_clone cs_group cs_primitive].each do |resource_type|
     autorequire(resource_type) do
       autos = []
       autos << unmunge_cs_resourcename(should(:first))
@@ -109,6 +109,7 @@ Puppet::Type.newtype(:cs_order) do
 
   def unmunge_cs_resourcename(name)
     return if name.nil?
+
     name = name.split(':')[0]
     name = name[3..-1] if name.start_with? 'ms_'
 

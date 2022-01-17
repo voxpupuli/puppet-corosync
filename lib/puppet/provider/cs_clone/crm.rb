@@ -4,6 +4,7 @@ rescue LoadError
   require 'pathname' # WORKAROUND #14073, #7788 and SERVER-973
   corosync = Puppet::Module.find('corosync')
   raise(LoadError, "Unable to find corosync module in modulepath #{Puppet[:basemodulepath] || Puppet[:modulepath]}") unless corosync
+
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider/crmsh'
 end
 
@@ -30,24 +31,20 @@ Puppet::Type.type(:cs_clone).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
       items = nvpairs_to_hash(e.elements['meta_attributes'])
 
       clone_instance = {
-        name:              e.attributes['id'],
-        ensure:            :present,
-        clone_max:         items['clone-max'],
-        clone_node_max:    items['clone-node-max'],
-        notify_clones:     items['notify'],
-        globally_unique:   items['globally-unique'],
-        ordered:           items['ordered'],
-        interleave:        items['interleave'],
+        name: e.attributes['id'],
+        ensure: :present,
+        clone_max: items['clone-max'],
+        clone_node_max: items['clone-node-max'],
+        notify_clones: items['notify'],
+        globally_unique: items['globally-unique'],
+        ordered: items['ordered'],
+        interleave: items['interleave'],
         existing_resource: :true
       }
 
-      if e.elements['primitive']
-        clone_instance[:primitive] = e.elements['primitive'].attributes['id']
-      end
+      clone_instance[:primitive] = e.elements['primitive'].attributes['id'] if e.elements['primitive']
 
-      if e.elements['group']
-        clone_instance[:group] = e.elements['group'].attributes['id']
-      end
+      clone_instance[:group] = e.elements['group'].attributes['id'] if e.elements['group']
       instances << new(clone_instance)
     end
     instances
@@ -57,16 +54,16 @@ Puppet::Type.type(:cs_clone).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
   # of actually doing the work.
   def create
     @property_hash = {
-      name:              @resource[:name],
-      ensure:            :present,
-      primitive:         @resource[:primitive],
-      clone_max:         @resource[:clone_max],
-      clone_node_max:    @resource[:clone_node_max],
-      notify_clones:     @resource[:notify_clones],
-      globally_unique:   @resource[:globally_unique],
-      ordered:           @resource[:ordered],
-      interleave:        @resource[:interleave],
-      cib:               @resource[:cib],
+      name: @resource[:name],
+      ensure: :present,
+      primitive: @resource[:primitive],
+      clone_max: @resource[:clone_max],
+      clone_node_max: @resource[:clone_node_max],
+      notify_clones: @resource[:notify_clones],
+      globally_unique: @resource[:globally_unique],
+      ordered: @resource[:ordered],
+      interleave: @resource[:interleave],
+      cib: @resource[:cib],
       existing_resource: :false
     }
   end

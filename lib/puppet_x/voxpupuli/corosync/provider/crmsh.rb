@@ -5,6 +5,7 @@ rescue LoadError
   require 'pathname' # WORKAROUND #14073, #7788 and SERVER-973
   corosync = Puppet::Module.find('corosync')
   raise(LoadError, "Unable to find corosync module in modulepath #{Puppet[:basemodulepath] || Puppet[:modulepath]}") unless corosync
+
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider'
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider/cib_helper'
 end
@@ -24,6 +25,7 @@ class PuppetX::Voxpupuli::Corosync::Provider::Crmsh < PuppetX::Voxpupuli::Corosy
   # rubocop:enable Style/ClassVars
   def self.ready?(shadow_cib)
     return true if @@crmready
+
     cmd =  [command(:crm_attribute), '--type', 'crm_config', '--query', '--name', 'dc-version']
     raw, status = run_command_in_cib(cmd, nil, false)
     if status.zero?
@@ -45,10 +47,10 @@ class PuppetX::Voxpupuli::Corosync::Provider::Crmsh < PuppetX::Voxpupuli::Corosy
       # rubocop:enable Style/ClassVars
 
       debug("Corosync is ready, CIB epoch is #{cib_epoch}.")
-      return true
+      true
     else
       debug("Corosync not ready, retrying: #{raw}")
-      return false
+      false
     end
   end
 

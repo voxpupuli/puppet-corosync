@@ -115,7 +115,8 @@ Puppet::Type.newtype(:cs_clone) do
 
   validate do
     return if self[:ensure] == :absent
-    mandatory_single_properties = [:primitive, :group]
+
+    mandatory_single_properties = %i[primitive group]
     has_should = mandatory_single_properties.select { |prop| should(prop) }
     raise Puppet::Error, "You cannot specify #{has_should.join(' and ')} on this type (only one)" if has_should.length > 1
     raise Puppet::Error, "You must specify #{mandatory_single_properties.join(' or ')}" if has_should.length != 1

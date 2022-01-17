@@ -22,6 +22,10 @@ japvs+0tdy9iwHj3z1ZME2Ntm/5TzG537e7Hb2zogatM9aBTUAWlZ1tpoaXuTH52
 J76GtqoIOh+CTeY/BMwBotdQdgeR0zvjE9FuLWkhTmRtVFhbVIzJbFlFuYq5d3LH
 NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   File.open('/tmp/ca.pem', 'w') { |f| f.write(cert) }
+  after :all do
+    cleanup_cs_resources
+  end
+
   it 'with defaults' do
     pp = <<-EOS
       file { '/tmp/ca.pem':
@@ -331,9 +335,5 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         end
       end
     end
-  end
-
-  after :all do
-    cleanup_cs_resources
   end
 end

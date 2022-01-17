@@ -4,6 +4,7 @@ rescue LoadError
   require 'pathname' # WORKAROUND #14073, #7788 and SERVER-973
   corosync = Puppet::Module.find('corosync')
   raise(LoadError, "Unable to find corosync module in modulepath #{Puppet[:basemodulepath] || Puppet[:modulepath]}") unless corosync
+
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider/pcs'
 end
 
@@ -13,7 +14,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
         of current primitive locations on the system; add, delete, or adjust various
         aspects.'
 
-  defaultfor operatingsystem: [:fedora, :centos, :redhat]
+  defaultfor operatingsystem: %i[fedora centos redhat]
   has_feature :discovery
 
   commands pcs: 'pcs'
@@ -39,14 +40,14 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
         id, items = node2hash(e, ['expression']).first
 
         location_instance = {
-          name:               id,
-          ensure:             :present,
-          primitive:          items['rsc'],
-          node_name:          items['node'],
-          score:              items['score'] || 'INFINITY',
-          rules:              items['rule'],
+          name: id,
+          ensure: :present,
+          primitive: items['rsc'],
+          node_name: items['node'],
+          score: items['score'] || 'INFINITY',
+          rules: items['rule'],
           resource_discovery: items['resource-discovery'],
-          provider:           name
+          provider: name
         }
         instances << new(location_instance)
       end
@@ -58,12 +59,12 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
   # of actually doing the work.
   def create
     @property_hash = {
-      name:               @resource[:name],
-      ensure:             :present,
-      primitive:          @resource[:primitive],
-      node_name:          @resource[:node_name],
-      score:              @resource[:score],
-      rules:              @resource[:rules],
+      name: @resource[:name],
+      ensure: :present,
+      primitive: @resource[:primitive],
+      node_name: @resource[:node_name],
+      score: @resource[:score],
+      rules: @resource[:rules],
       resource_discovery: @resource[:resource_discovery]
     }
   end

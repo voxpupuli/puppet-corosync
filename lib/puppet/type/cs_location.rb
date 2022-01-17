@@ -95,7 +95,7 @@ Puppet::Type.newtype(:cs_location) do
     %w[corosync pacemaker]
   end
 
-  [:cs_primitive, :cs_clone, :cs_group].each do |type|
+  %i[cs_primitive cs_clone cs_group].each do |type|
     autorequire(type) do
       autos = []
       autos << unmunge_cs_primitive(should(:primitive)) if should(:primitive)
@@ -112,8 +112,6 @@ Puppet::Type.newtype(:cs_location) do
   end
 
   validate do
-    if [self[:node_name], self[:rules]].compact.length > 1
-      raise Puppet::Error, 'Location constraints dictate that node_name and rules cannot co-exist for this type.'
-    end
+    raise Puppet::Error, 'Location constraints dictate that node_name and rules cannot co-exist for this type.' if [self[:node_name], self[:rules]].compact.length > 1
   end
 end

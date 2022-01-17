@@ -75,6 +75,7 @@ Puppet::Type.newtype(:cs_primitive) do
 
     munge do |value|
       return [value] if value.is_a?(String) || value.is_a?(Symbol)
+
       value
     end
 

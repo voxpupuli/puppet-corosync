@@ -4,13 +4,14 @@ rescue LoadError
   require 'pathname' # WORKAROUND #14073, #7788 and SERVER-973
   corosync = Puppet::Module.find('corosync')
   raise(LoadError, "Unable to find corosync module in modulepath #{Puppet[:basemodulepath] || Puppet[:modulepath]}") unless corosync
+
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider/pcs'
 end
 
 Puppet::Type.type(:cs_group).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync::Provider::Pcs) do
   desc 'Provider to add, delete, manipulate primitive groups.'
 
-  defaultfor operatingsystem: [:fedora, :centos, :redhat]
+  defaultfor operatingsystem: %i[fedora centos redhat]
 
   # Path to the pcs binary for interacting with the cluster configuration.
   commands pcs: '/usr/sbin/pcs'
@@ -34,11 +35,11 @@ Puppet::Type.type(:cs_group).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
       end
 
       group_instance = {
-        name:       e.attributes['id'],
-        ensure:     :present,
+        name: e.attributes['id'],
+        ensure: :present,
         primitives: primitives,
-        provider:   name,
-        new:        false
+        provider: name,
+        new: false
       }
       instances << new(group_instance)
     end
@@ -49,10 +50,10 @@ Puppet::Type.type(:cs_group).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
   # of actually doing the work.
   def create
     @property_hash = {
-      name:       @resource[:name],
-      ensure:     :present,
+      name: @resource[:name],
+      ensure: :present,
       primitives: Array(@resource[:primitives]),
-      new:        true
+      new: true
     }
     @property_hash[:cib] = @resource[:cib] unless @resource[:cib].nil?
   end

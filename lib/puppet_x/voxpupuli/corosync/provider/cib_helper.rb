@@ -4,6 +4,7 @@ rescue LoadError
   require 'pathname' # WORKAROUND #14073, #7788 and SERVER-973
   corosync = Puppet::Module.find('corosync')
   raise(LoadError, "Unable to find corosync module in modulepath #{Puppet[:basemodulepath] || Puppet[:modulepath]}") unless corosync
+
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider'
 end
 
@@ -69,21 +70,15 @@ class PuppetX::Voxpupuli::Corosync::Provider::CibHelper < Puppet::Provider
     rule_parameters = []
     count = 0
 
-    if boolean_op != 'and' && boolean_op != 'or'
-      raise Puppet::Error, "boolean-op must be 'and' or 'or' in rule #{rulename}"
-    end
+    raise Puppet::Error, "boolean-op must be 'and' or 'or' in rule #{rulename}" if boolean_op != 'and' && boolean_op != 'or'
 
     expressions.each do |expr|
       rule_parameters << boolean_op if count > 0
       count += 1
 
-      if expr['attribute'].nil?
-        raise Puppet::Error, "attribute must be defined for expression #{count} in rule #{rulename}"
-      end
+      raise Puppet::Error, "attribute must be defined for expression #{count} in rule #{rulename}" if expr['attribute'].nil?
 
-      if expr['operation'].nil?
-        raise Puppet::Error, "operation must be defined for expression #{count} in rule #{rulename}"
-      end
+      raise Puppet::Error, "operation must be defined for expression #{count} in rule #{rulename}" if expr['operation'].nil?
 
       attribute = expr['attribute']
       operation = expr['operation']
@@ -94,9 +89,7 @@ class PuppetX::Voxpupuli::Corosync::Provider::CibHelper < Puppet::Provider
         rule_parameters << attribute
 
       when 'lt', 'gt', 'lte', 'gte', 'eq', 'ne'
-        if expr['value'].nil?
-          raise Puppet::Error, "value must be defined for expression #{count} in rule #{rulename}"
-        end
+        raise Puppet::Error, "value must be defined for expression #{count} in rule #{rulename}" if expr['value'].nil?
 
         rule_parameters << attribute
         rule_parameters << operation
@@ -114,6 +107,7 @@ class PuppetX::Voxpupuli::Corosync::Provider::CibHelper < Puppet::Provider
   def self._get_epoch(cmd, cib = nil)
     raw, status = run_command_in_cib(cmd, cib, false)
     return :absent if status.nonzero?
+
     doc = REXML::Document.new(raw)
     current_epoch = REXML::XPath.first(doc, '/cib').attributes['epoch']
     current_admin_epoch = REXML::XPath.first(doc, '/cib').attributes['admin_epoch']

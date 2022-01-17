@@ -21,6 +21,10 @@ japvs+0tdy9iwHj3z1ZME2Ntm/5TzG537e7Hb2zogatM9aBTUAWlZ1tpoaXuTH52
 J76GtqoIOh+CTeY/BMwBotdQdgeR0zvjE9FuLWkhTmRtVFhbVIzJbFlFuYq5d3LH
 NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   File.open('/tmp/ca.pem', 'w') { |f| f.write(cert) }
+  after :all do
+    cleanup_cs_resources
+  end
+
   it 'with defaults' do
     pp = <<-EOS
       file { '/tmp/ca.pem':
@@ -75,7 +79,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
            ensure  => present,
            #{type} => '#{property_value}',
          }
-         EOS
+        EOS
         apply_manifest(pp, catch_failures: true, debug: false, trace: true)
         apply_manifest(pp, catch_changes: true, debug: false, trace: true)
         command = "cibadmin --query | grep duncan_vip_clone_#{type}"
@@ -93,7 +97,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
          cs_clone { 'duncan_vip_clone_#{type}':
            ensure => absent,
          }
-         EOS
+        EOS
         apply_manifest(pp, catch_failures: true, debug: false, trace: true)
         apply_manifest(pp, catch_changes: true, debug: false, trace: true)
         command = "cibadmin --query | grep duncan_vip_clone_#{type}"
@@ -123,7 +127,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
            ordered         => false,
            interleave      => false,
          }
-      EOS
+          EOS
           apply_manifest(pp, catch_failures: true, debug: false, trace: true)
           apply_manifest(pp, catch_changes: true, debug: false, trace: true)
 
@@ -184,7 +188,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
            ordered         => true,
            interleave      => true,
          }
-      EOS
+          EOS
           apply_manifest(pp, catch_failures: true, debug: false, trace: true)
           apply_manifest(pp, catch_changes: true, debug: false, trace: true)
 
@@ -237,7 +241,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
            clone_max => 43,
            interleave => true,
          }
-      EOS
+          EOS
           apply_manifest(pp, catch_failures: true, debug: false, trace: true)
           apply_manifest(pp, catch_changes: true, debug: false, trace: true)
 
@@ -310,9 +314,5 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
 
       apply_manifest(pp, catch_changes: true, debug: false, trace: true)
     end
-  end
-
-  after :all do
-    cleanup_cs_resources
   end
 end

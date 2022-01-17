@@ -29,7 +29,7 @@ describe Puppet::Type.type(:cs_order).provider(:pcs) do
         instances.first
       end
 
-      it "should be a kind of #{described_class.name}" do
+      it "is a kind of #{described_class.name}" do
         expect(instance).to be_a_kind_of(described_class)
       end
 
@@ -37,6 +37,7 @@ describe Puppet::Type.type(:cs_order).provider(:pcs) do
         expect(instance.name).to eq('nul-messagebus_before_nul-interface-2')
       end
     end
+
     describe 'first instance' do
       let :instance do
         instances.first
