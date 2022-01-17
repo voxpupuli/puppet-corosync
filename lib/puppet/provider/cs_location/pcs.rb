@@ -40,17 +40,17 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
         # expression id so Puppet would try to update the rule at every run.
       id, items = node2hash(e, ['expression']).first
 
-        location_instance = {
-          name: id,
-          ensure: :present,
-          primitive: items['rsc'],
-          node_name: items['node'],
-          score: items['score'] || 'INFINITY',
-          rules: items['rule'],
-          resource_discovery: items['resource-discovery'],
-          provider: name
-        }
-        instances << new(location_instance)
+      location_instance = {
+        name: id,
+        ensure: :present,
+        primitive: items['rsc'],
+        node_name: items['node'],
+        score: items['score'] || 'INFINITY',
+        rules: items['rule'],
+        resource_discovery: items['resource-discovery'],
+        provider: name
+      }
+      instances << new(location_instance)
     end
     instances
   end

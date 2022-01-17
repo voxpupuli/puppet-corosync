@@ -106,16 +106,16 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
 
     @property_hash[:rules]&.each do |rule_item|
       name = rule_item.keys.first
-        rule = rule_item[name]
+      rule = rule_item[name]
 
-        score = rule['score-attribute'] || rule['score']
+      score = rule['score-attribute'] || rule['score']
 
-        boolean_op = rule['boolean-op'] || 'and'
-        expression = self.class.rule_expression(name, rule['expression'], boolean_op)
+      boolean_op = rule['boolean-op'] || 'and'
+      expression = self.class.rule_expression(name, rule['expression'], boolean_op)
 
-        updated << " rule $id=\"#{name}\""
-        updated << " $role=\"#{rule['role']}\"" unless rule['role'].nil?
-        updated << " #{score}: #{expression.join(' ')}"
+      updated << " rule $id=\"#{name}\""
+      updated << " $role=\"#{rule['role']}\"" unless rule['role'].nil?
+      updated << " #{score}: #{expression.join(' ')}"
     end
 
     debug("Loading update: #{updated}")

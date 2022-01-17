@@ -38,37 +38,37 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
     constraints&.each_element('rsc_order') do |e|
       items = e.attributes
 
-        first = if items['first-action']
-                  "#{items['first']}:#{items['first-action']}"
-                else
-                  items['first']
-                end
+      first = if items['first-action']
+                "#{items['first']}:#{items['first-action']}"
+              else
+                items['first']
+              end
 
-        second = if items['then-action']
-                   "#{items['then']}:#{items['then-action']}"
-                 else
-                   items['then']
-                 end
-        kind = items['kind'] || 'Mandatory'
+      second = if items['then-action']
+                 "#{items['then']}:#{items['then-action']}"
+               else
+                 items['then']
+               end
+      kind = items['kind'] || 'Mandatory'
 
-        symmetrical = if items['symmetrical']
-                        (items['symmetrical'] == 'true')
-                      else
-                        # Default: symmetrical is true unless explicitly defined.
-                        true
-                      end
+      symmetrical = if items['symmetrical']
+                      (items['symmetrical'] == 'true')
+                    else
+                      # Default: symmetrical is true unless explicitly defined.
+                      true
+                    end
 
-        order_instance = {
-          name: items['id'],
-          ensure: :present,
-          first: first,
-          second: second,
-          kind: kind,
-          symmetrical: symmetrical,
-          provider: name,
-          new: false
-        }
-        instances << new(order_instance)
+      order_instance = {
+        name: items['id'],
+        ensure: :present,
+        first: first,
+        second: second,
+        kind: kind,
+        symmetrical: symmetrical,
+        provider: name,
+        new: false
+      }
+      instances << new(order_instance)
     end
     instances
   end

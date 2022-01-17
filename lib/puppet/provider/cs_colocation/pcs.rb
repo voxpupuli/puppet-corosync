@@ -34,55 +34,55 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, parent: PuppetX::Voxpupuli::Coro
     constraints&.each_element('rsc_colocation') do |e|
       items = e.attributes
 
-        if e.has_elements?
-          resource_sets = []
-          e.each_element('resource_set') do |rs|
-            resource_set = {}
-            options = {}
-            resource_set_options.each do |o|
-              options[o] = rs.attributes[o] if rs.attributes[o]
-            end
-            # rubocop:disable Style/ZeroLengthPredicate
-            resource_set['options'] = options if options.keys.size.positive?
-            # rubocop:enable Style/ZeroLengthPredicate
-            resource_set['primitives'] = []
-            rs.each_element('resource_ref') do |rr|
-              resource_set['primitives'] << rr.attributes['id']
-            end
-            resource_sets << resource_set
+      if e.has_elements?
+        resource_sets = []
+        e.each_element('resource_set') do |rs|
+          resource_set = {}
+          options = {}
+          resource_set_options.each do |o|
+            options[o] = rs.attributes[o] if rs.attributes[o]
           end
-          colocation_instance = {
-            name: items['id'],
-            ensure: :present,
-            primitives: resource_sets,
-            score: items['score'],
-            provider: name,
-            new: false
-          }
-        else
-          rsc = if items['rsc-role'] && items['rsc-role'] != 'Started'
-                  "#{items['rsc']}:#{items['rsc-role']}"
-                else
-                  items['rsc']
-                end
-
-          with_rsc = if items['with-rsc-role'] && items['with-rsc-role'] != 'Started'
-                       "#{items['with-rsc']}:#{items['with-rsc-role']}"
-                     else
-                       items['with-rsc']
-                     end
-
-          colocation_instance = {
-            name: items['id'],
-            ensure: :present,
-            # Put primitives in chronological order, first 'with-rsc', then 'rsc'.
-            primitives: [with_rsc, rsc],
-            score: items['score'],
-            provider: name,
-            new: false
-          }
+          # rubocop:disable Style/ZeroLengthPredicate
+          resource_set['options'] = options if options.keys.size.positive?
+          # rubocop:enable Style/ZeroLengthPredicate
+          resource_set['primitives'] = []
+          rs.each_element('resource_ref') do |rr|
+            resource_set['primitives'] << rr.attributes['id']
+          end
+          resource_sets << resource_set
         end
-        instances << new(colocation_instance)
+        colocation_instance = {
+          name: items['id'],
+          ensure: :present,
+          primitives: resource_sets,
+          score: items['score'],
+          provider: name,
+          new: false
+        }
+      else
+        rsc = if items['rsc-role'] && items['rsc-role'] != 'Started'
+                "#{items['rsc']}:#{items['rsc-role']}"
+              else
+                items['rsc']
+              end
+
+        with_rsc = if items['with-rsc-role'] && items['with-rsc-role'] != 'Started'
+                     "#{items['with-rsc']}:#{items['with-rsc-role']}"
+                   else
+                     items['with-rsc']
+                   end
+
+        colocation_instance = {
+          name: items['id'],
+          ensure: :present,
+          # Put primitives in chronological order, first 'with-rsc', then 'rsc'.
+          primitives: [with_rsc, rsc],
+          score: items['score'],
+          provider: name,
+          new: false
+        }
+      end
+      instances << new(colocation_instance)
     end
     instances
   end

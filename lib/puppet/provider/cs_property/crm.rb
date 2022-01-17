@@ -31,15 +31,15 @@ Puppet::Type.type(:cs_property).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
     cluster_property_set = doc.root.elements["configuration/crm_config/cluster_property_set[@id='cib-bootstrap-options']"]
     cluster_property_set&.each_element do |e|
       items = e.attributes
-        property = { name: items['name'], value: items['value'] }
+      property = { name: items['name'], value: items['value'] }
 
-        property_instance = {
-          name: property[:name],
-          ensure: :present,
-          value: property[:value],
-          provider: name
-        }
-        instances << new(property_instance)
+      property_instance = {
+        name: property[:name],
+        ensure: :present,
+        value: property[:value],
+        provider: name
+      }
+      instances << new(property_instance)
     end
     instances
   end

@@ -43,16 +43,16 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
     operations = e.elements['operations']
     operations&.each_element do |o|
       valids = o.attributes.reject { |k, _v| k == 'id' }
-        name = valids['name'].to_s
-        operation = {}
-        operation[name] = {}
-        valids.each do |k, v|
-          operation[name][k] = v.to_s if k != 'name'
-        end
-        o.elements['instance_attributes']&.each_element do |i|
-          operation[name][i.attributes['name']] = i.attributes['value']
-        end
-        hash[:operations] << operation
+      name = valids['name'].to_s
+      operation = {}
+      operation[name] = {}
+      valids.each do |k, v|
+        operation[name][k] = v.to_s if k != 'name'
+      end
+      o.elements['instance_attributes']&.each_element do |i|
+        operation[name][i.attributes['name']] = i.attributes['value']
+      end
+      hash[:operations] << operation
     end
 
     hash
