@@ -1,0 +1,3 @@
+---
+corosync::pcs_version: '0.10.0'
+corosync::provider: 'pcs'

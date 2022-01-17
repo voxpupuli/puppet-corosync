@@ -65,8 +65,12 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'creates the service resource' do
-    command = if fact('osfamily') == 'RedHat'
-                'pcs resource show'
+    command = if fact('default_provider') == 'pcs'
+                if Gem::Version.new(fact('pcs_version')) < Gem::Version.new('0.10.0')
+                  'pcs resource show'
+                else
+                  'pcs resource status'
+                end
               else
                 'crm_resource --list'
               end
@@ -76,8 +80,12 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'creates the vip resource' do
-    command = if fact('osfamily') == 'RedHat'
-                'pcs resource show'
+    command = if fact('default_provider') == 'pcs'
+                if Gem::Version.new(fact('pcs_version')) < Gem::Version.new('0.10.0')
+                  'pcs resource show'
+                else
+                  'pcs resource status'
+                end
               else
                 'crm_resource --list'
               end

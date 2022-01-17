@@ -1,0 +1,4 @@
+---
+corosync::provider: 'pcs'
+corosync::pcs_version: '0.10.0'
+corosync::package_fence_agents: true

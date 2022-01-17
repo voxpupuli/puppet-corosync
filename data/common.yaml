@@ -1,0 +1,3 @@
+---
+corosync::package_fence_agents: false
+corosync::qdevice::provider: "%{alias('corosync::provider')}"

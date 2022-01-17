@@ -1,5 +1,46 @@
 # This file contains helpers that are specific to this module
 
+def corosync_stack(facts)
+  case facts[:os]['family']
+  when 'RedHat'
+    corosync_stack = 'pcs'
+    pcs_version = if facts[:os]['release']['major'].to_i > 7
+                    '0.10.0'
+                  else
+                    '0.9.0'
+                  end
+  when 'Debian'
+    case facts[:os]['name']
+    when 'Debian'
+      if facts[:os]['release']['major'].to_i > 9
+        corosync_stack = 'pcs'
+        pcs_version = '0.10.0'
+      else
+        corosync_stack = 'crm'
+        pcs_version = ''
+      end
+    when 'Ubuntu'
+      if facts[:os]['release']['major'].to_i > 18
+        corosync_stack = 'pcs'
+        pcs_version = '0.10.0'
+      elsif facts[:os]['release']['major'].to_i > 16
+        corosync_stack = 'pcs'
+        pcs_version = '0.9.0'
+      else
+        corosync_stack = 'crm'
+        pcs_version = ''
+      end
+    end
+  when 'Suse'
+    corosync_stack = 'crm'
+    pcs_version = ''
+  else
+    corosync_stack = 'crm'
+    pcs_version = ''
+  end
+  { provider: corosync_stack, pcs_version: pcs_version }
+end
+
 def expect_commands(patterns)
   command_suite = sequence('pcs commands')
   Array(patterns).each do |pattern|

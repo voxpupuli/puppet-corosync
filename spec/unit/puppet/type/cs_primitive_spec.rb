@@ -27,7 +27,7 @@ describe Puppet::Type.type(:cs_primitive) do
       end
     end
 
-    [:parameters, :operations, :metadata, :ms_metadata, :promotable].each do |property|
+    [:parameters, :operations, :metadata].each do |property|
       it "should have a #{property} property" do
         expect(subject).to be_validproperty(property)
       end
@@ -39,7 +39,7 @@ describe Puppet::Type.type(:cs_primitive) do
   end
 
   describe 'when validating attributes' do
-    [:parameters, :operations, :metadata, :ms_metadata].each do |attribute|
+    [:parameters, :operations, :metadata].each do |attribute|
       it "should validate that the #{attribute} attribute defaults to a hash" do
         expect(subject.new(name: 'mock_primitive')[:parameters]).to eq({})
       end
@@ -51,26 +51,6 @@ describe Puppet::Type.type(:cs_primitive) do
             parameters: 'fail'
           )
         end.to raise_error Puppet::Error, %r{hash}
-      end
-    end
-
-    it 'validates that the promotable attribute can be true/false' do
-      [true, false].each do |value|
-        expect(subject.new(
-          name:       'mock_primitive',
-          promotable: value
-        )[:promotable]).to eq(value.to_s.to_sym)
-      end
-    end
-
-    it 'validates that the promotable attribute cannot be other values' do
-      ['fail', 42].each do |value|
-        expect do
-          subject.new(
-            name:       'mock_primitive',
-            promotable: value
-          )
-        end.to raise_error Puppet::Error, %r{(true|false)}
       end
     end
   end

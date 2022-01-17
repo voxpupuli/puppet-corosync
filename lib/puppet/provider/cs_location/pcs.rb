@@ -87,7 +87,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
     cmd = [command(:pcs), 'constraint', 'remove', @resource[:name]]
     self.class.run_command_in_cib(cmd, @resource[:cib], false)
     unless @property_hash[:node_name].nil?
-      cmd = [command(:pcs), 'constraint', 'location', 'add', @property_hash[:name], @property_hash[:primitive], @property_hash[:node_name], @property_hash[:score]]
+      cmd = [command(:pcs), 'constraint', 'location', 'add', '--force', @property_hash[:name], @property_hash[:primitive], @property_hash[:node_name], @property_hash[:score]]
       cmd << "resource-discovery=#{@property_hash[:resource_discovery]}" unless @property_hash[:resource_discovery].nil?
       self.class.run_command_in_cib(cmd, @resource[:cib])
     end

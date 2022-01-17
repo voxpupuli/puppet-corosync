@@ -1,4 +1,5 @@
 require 'spec_helper_acceptance'
+require 'pry'
 
 describe 'corosync' do
   cert = '-----BEGIN CERTIFICATE-----
@@ -37,19 +38,14 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       cs_primitive { 'pgsql':
         primitive_class => 'ocf',
         primitive_type => 'pgsql',
-        promotable => true,
         provided_by => 'heartbeat',
         parameters => { 'pgctl' => '/bin/pg_ctl', 'psql' => '/bin/psql', 'pgdata' => '/var/lib/pgsql/data/', 'rep_mode' => 'sync', 'restore_command' => 'cp /var/lib/pgsql/pg_archive/%f %p', 'primary_conninfo_opt' => 'keepalives_idle=60 keepalives_interval=5 keepalives_count=5', 'restart_on_promote' => 'true' },
         operations => [
           { 'start' => { 'interval' => '0s', 'timeout' => '60s', 'on-fail' => 'restart' } },
           { 'monitor' => { 'interval' => '4s', 'timeout' => '60s', 'on-fail' => 'restart' } },
-          { 'monitor' => { 'interval' => '3s', 'timeout' => '60s', 'on-fail' => 'restart', 'role' => 'Master' } },
-          { 'promote' => { 'interval' => '0s', 'timeout' => '60s', 'on-fail' => 'restart' } },
-          { 'demote' => { 'interval' => '1s', 'timeout' => '60s', 'on-fail' => 'stop' } },
           { 'stop' => { 'interval' => '0s', 'timeout' => '60s', 'on-fail' => 'block' } },
           { 'notify' => { 'interval' => '0s', 'timeout' => '60s' } },
         ],
-        ms_metadata => { 'master-max' => '1', 'master-node-max' => '1', 'clone-max' => '2', 'clone-node-max' => '1', 'notify' => 'true' },
       }
     EOS
 
@@ -62,39 +58,18 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'creates the resources' do
-    command = if fact('osfamily') == 'RedHat'
-                'pcs resource show'
+    command = if fact('default_provider') == 'pcs'
+                if Gem::Version.new(fact('pcs_version')) < Gem::Version.new('0.10.0')
+                  'pcs resource show'
+                else
+                  'pcs resource status'
+                end
               else
                 'crm_resource --list'
               end
     shell(command) do |r|
       expect(r.stdout).to match(%r{pgsql.*pgsql})
     end
-  end
-
-  it 'updates master/slave primitive parameters' do
-    pp_master_update = <<-EOS
-      cs_primitive { 'pgsql':
-        primitive_class => 'ocf',
-        primitive_type => 'pgsql',
-        promotable => true,
-        provided_by => 'heartbeat',
-        parameters => { 'pgctl' => '/bin/pg_ctl', 'psql' => '/bin/psql', 'pgdata' => '/var/lib/pgsql/data/', 'rep_mode' => 'sync', 'restore_command' => 'cp /var/lib/pgsql/pg_archive/%f %p', 'primary_conninfo_opt' => 'keepalives_idle=60 keepalives_interval=1 keepalives_count=5', 'restart_on_promote' => 'true' },
-        operations => [
-          { 'start' => { 'interval' => '0s', 'timeout' => '60s', 'on-fail' => 'restart' } },
-          { 'monitor' => { 'interval' => '4s', 'timeout' => '60s', 'on-fail' => 'restart' } },
-          { 'monitor' => { 'interval' => '3s', 'timeout' => '60s', 'on-fail' => 'restart', 'role' => 'Master' } },
-          { 'promote' => { 'interval' => '0s', 'timeout' => '60s', 'on-fail' => 'restart' } },
-          { 'demote' => { 'interval' => '1s', 'timeout' => '30s', 'on-fail' => 'stop' } },
-          { 'stop' => { 'interval' => '0s', 'timeout' => '60s', 'on-fail' => 'block' } },
-          { 'notify' => { 'interval' => '0s', 'timeout' => '60s' } },
-        ],
-        ms_metadata => { 'master-max' => '1', 'master-node-max' => '1', 'clone-max' => '2', 'clone-node-max' => '1', 'notify' => 'true' },
-      }
-    EOS
-
-    apply_manifest(pp_master_update, expect_changes: true, debug: false, trace: true)
-    apply_manifest(pp_master_update, catch_changes: true, debug: false, trace: true)
   end
 
   it 'creates a haproxy_vip resources' do
@@ -133,7 +108,11 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     apply_manifest(pp, expect_changes: true, debug: false, trace: true)
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
 
-    shell('crm_resource -r test_stop -m -p target-role -v Stopped')
+    if fact('default_provider') == 'crm'
+      shell('crm_resource -r test_stop -m -p target-role -v Stopped')
+    else
+      shell('pcs resource update test_stop meta target-role=Stopped')
+    end
 
     apply_manifest(pp, expect_changes: true, debug: false, trace: true)
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
@@ -153,8 +132,11 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     apply_manifest(pp, expect_changes: true, debug: false, trace: true)
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
 
-    shell('crm_resource -r test_stop2 -m -p target-role -v Stopped')
-
+    if fact('default_provider') == 'crm'
+      shell('crm_resource -r test_stop2 -m -p target-role -v Stopped')
+    else
+      shell('pcs resource update test_stop2 meta target-role=Stopped')
+    end
     apply_manifest(pp, catch_changes: true, debug: false, trace: true)
 
     pp = <<-EOS
@@ -188,14 +170,36 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
 
   # rubocop:disable RSpec/RepeatedExample
   it 'does set is-managed in test_md' do
-    shell('crm_resource -r test_md -q') do |r|
-      expect(r.stdout).to match(%r{is-managed.*false})
+    if fact('default_provider') == 'crm'
+      shell('crm_resource -r test_md -q') do |r|
+        expect(r.stdout).to match(%r{is-managed.*false})
+      end
+    else
+      subcommand = if Gem::Version.new(fact('pcs_version')) < Gem::Version.new('0.10.0')
+                     'show'
+                   else
+                     'config'
+                   end
+      shell("pcs resource #{subcommand} test_md") do |r|
+        expect(r.stdout).to match(%r{is-managed.*false})
+      end
     end
   end
 
   it 'does set target-role in test_md' do
-    shell('crm_resource -r test_md -q') do |r|
-      expect(r.stdout).to match(%r{target-role.*stopped})
+    if fact('default_provider') == 'crm'
+      shell('crm_resource -r test_md -q') do |r|
+        expect(r.stdout).to match(%r{target-role.*stopped})
+      end
+    else
+      subcommand = if Gem::Version.new(fact('pcs_version')) < Gem::Version.new('0.10.0')
+                     'show'
+                   else
+                     'config'
+                   end
+      shell("pcs resource #{subcommand} test_md") do |r|
+        expect(r.stdout).to match(%r{target-role.*stopped})
+      end
     end
   end
 
@@ -215,14 +219,36 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'does not delete or change is-managed if it is in unmanaged_metadata' do
-    shell('crm_resource -r test_md -q') do |r|
-      expect(r.stdout).to match(%r{is-managed.*false})
+    if fact('default_provider') == 'crm'
+      shell('crm_resource -r test_md -q') do |r|
+        expect(r.stdout).to match(%r{is-managed.*false})
+      end
+    else
+      subcommand = if Gem::Version.new(fact('pcs_version')) < Gem::Version.new('0.10.0')
+                     'show'
+                   else
+                     'config'
+                   end
+      shell("pcs resource #{subcommand} test_md") do |r|
+        expect(r.stdout).to match(%r{is-managed.*false})
+      end
     end
   end
 
   it 'does not delete or change target-role if it is in unmanaged_metadata' do
-    shell('crm_resource -r test_md -q') do |r|
-      expect(r.stdout).to match(%r{target-role.*stopped})
+    if fact('default_provider') == 'crm'
+      shell('crm_resource -r test_md -q') do |r|
+        expect(r.stdout).to match(%r{target-role.*stopped})
+      end
+    else
+      subcommand = if Gem::Version.new(fact('pcs_version')) < Gem::Version.new('0.10.0')
+                     'show'
+                   else
+                     'config'
+                   end
+      shell("pcs resource #{subcommand} test_md") do |r|
+        expect(r.stdout).to match(%r{target-role.*stopped})
+      end
     end
   end
 
@@ -243,17 +269,39 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'does delete is-managed because it is no longer in unmanaged_metadata' do
-    shell('crm_resource -r test_md -q') do |r|
-      expect(r.stdout).not_to match(%r{is-managed.*false})
+    if fact('default_provider') == 'crm'
+      shell('crm_resource -r test_md -q') do |r|
+        expect(r.stdout).not_to match(%r{is-managed.*false})
+      end
+    else
+      subcommand = if Gem::Version.new(fact('pcs_version')) < Gem::Version.new('0.10.0')
+                     'show'
+                   else
+                     'config'
+                   end
+      shell("pcs resource #{subcommand} test_md") do |r|
+        expect(r.stdout).not_to match(%r{is-managed.*false})
+      end
     end
   end
 
   it 'does not delete target-role because it is still in unmanaged_metadata' do
-    shell('crm_resource -r test_md -q') do |r|
-      expect(r.stdout).to match(%r{target-role.*stopped})
+    if fact('default_provider') == 'crm'
+      shell('crm_resource -r test_md -q') do |r|
+        expect(r.stdout).to match(%r{target-role.*stopped})
+      end
+    else
+      subcommand = if Gem::Version.new(fact('pcs_version')) < Gem::Version.new('0.10.0')
+                     'show'
+                   else
+                     'config'
+                   end
+      shell("pcs resource #{subcommand} test_md") do |r|
+        expect(r.stdout).to match(%r{target-role.*stopped})
+      end
     end
+    # rubocop:enable RSpec/RepeatedExample
   end
-  # rubocop:enable RSpec/RepeatedExample
 
   context 'on RedHat derivitives' do
     it 'applies stonith resources without error' do

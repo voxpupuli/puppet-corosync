@@ -96,14 +96,6 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
         expect(instance.metadata).to eq('target-role' => 'Started',
                                         'priority' => '7')
       end
-
-      it 'has an ms_metadata property' do
-        expect(instance).to respond_to(:ms_metadata)
-      end
-
-      it 'has a promotable property that is :false' do
-        expect(instance.promotable).to eq(:false)
-      end
     end
   end
 

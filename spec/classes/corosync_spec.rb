@@ -558,7 +558,7 @@ describe 'corosync' do
         let(:params) do
           super().merge(
             "package_#{package}" => true,
-            "version_#{package}" => '1.1.1'
+            "ensure_#{package}" => '1.1.1'
           )
         end
 
@@ -650,7 +650,40 @@ describe 'corosync' do
 
   on_supported_os.each do |os, os_facts|
     context "on #{os}" do
-      let(:facts) { os_facts }
+      let(:facts) do
+        os_facts
+      end
+
+      auth_command = if corosync_stack(os_facts)[:provider] == 'pcs'
+                       if Gem::Version.new(corosync_stack(os_facts)[:pcs_version]) < Gem::Version.new('0.10.0')
+                         'cluster auth'
+                       else
+                         'host auth'
+                       end
+                     else
+                       'cluster auth'
+                     end
+      cluster_name_arg = if corosync_stack(os_facts)[:provider] == 'pcs'
+                           if Gem::Version.new(corosync_stack(os_facts)[:pcs_version]) < Gem::Version.new('0.10.0')
+                             '--name'
+                           else
+                             ''
+                           end
+                         else
+                           '--name'
+                         end
+      provider_package = case corosync_stack(os_facts)[:provider]
+                         when 'pcs'
+                           'pcs'
+                         else
+                           'crmsh'
+                         end
+
+      it 'has the correct pcs version' do
+        is_expected.to contain_class('corosync').with(
+          'pcs_version' => corosync_stack(os_facts)[:pcs_version]
+        )
+      end
 
       context 'without secauth' do
         let(:params) do
@@ -692,25 +725,29 @@ describe 'corosync' do
 
       it_configures 'corosync'
 
-      context 'on RH osfamily', if: os_facts[:os]['family'] == 'RedHat' do
+      # Check default package installations per platform
+      case os_facts[:os]['family']
+      when 'RedHat'
         it 'installs fence-agents-all' do
           is_expected.to contain_package('fence-agents-all')
         end
+      end
 
-        it 'installs the pcs package' do
-          is_expected.to contain_package('pcs').with(
-            ensure: 'present',
-            install_options: nil
-          )
-        end
+      it 'installs the provider package' do
+        is_expected.to contain_package(provider_package).with(
+          ensure: 'present',
+          install_options: nil
+        )
+      end
 
-        it 'does manage the pacemaker service' do
-          is_expected.to contain_service('pacemaker').with(
-            ensure: 'running'
-          )
-        end
+      it 'does manage the pacemaker service' do
+        is_expected.to contain_service('pacemaker').with(
+          ensure: 'running'
+        )
+      end
 
-        # Tests for pcsd_auth management
+      # Tests for pcsd_auth management
+      if corosync_stack(os_facts)[:provider] == 'pcs'
         context 'when mananging pcsd authorization' do
           let(:params) do
             super().merge(
@@ -746,12 +783,12 @@ describe 'corosync' do
             let(:node) { 'node2.test.org' }
 
             it 'does not perform the auth' do
-              is_expected.not_to contain_exec('pcs_cluster_auth')
+              is_expected.not_to contain_exec('authorize_members')
             end
           end
 
           it 'configures the hacluster user and haclient group' do
-            is_expected.to contain_group('haclient').that_requires('Package[pcs]')
+            is_expected.to contain_group('haclient').that_requires("Package[#{provider_package}]")
             is_expected.to contain_user('hacluster').with(
               ensure: 'present',
               gid: 'haclient',
@@ -768,8 +805,8 @@ describe 'corosync' do
             end
 
             it 'authorizes all nodes' do
-              is_expected.to contain_exec('pcs_cluster_auth').with(
-                command: 'pcs cluster auth node1.test.org node2.test.org node3.test.org -u hacluster -p some-secret-sauce',
+              is_expected.to contain_exec('authorize_members').with(
+                command: "pcs #{auth_command} node1.test.org node2.test.org node3.test.org -u hacluster -p some-secret-sauce",
                 path: '/sbin:/bin:/usr/sbin:/usr/bin',
                 require: [
                   'Service[pcsd]',
@@ -800,8 +837,8 @@ describe 'corosync' do
             let(:facts) { override_facts(super(), networking: { ip: '192.168.0.10' }) }
 
             it 'match ip and auth nodes by member names' do
-              is_expected.to contain_exec('pcs_cluster_auth').with(
-                command: 'pcs cluster auth 192.168.0.10 192.168.0.12 192.168.0.13 -u hacluster -p some-secret-sauce',
+              is_expected.to contain_exec('authorize_members').with(
+                command: "pcs #{auth_command} 192.168.0.10 192.168.0.12 192.168.0.13 -u hacluster -p some-secret-sauce",
                 path: '/sbin:/bin:/usr/sbin:/usr/bin',
                 require: [
                   'Service[pcsd]',
@@ -827,13 +864,15 @@ describe 'corosync' do
               end
 
               it 'still detects that this is the auth-node' do
-                is_expected.to contain_exec('pcs_cluster_auth')
+                is_expected.to contain_exec('authorize_members')
               end
             end
           end
         end
+      end
 
-        # Corosync qnet device is enabled
+      # Corosync qnet device is enabled
+      if corosync_stack(os_facts)[:provider] == 'pcs'
         context 'when quorum device is configured' do
           let(:params) do
             super().merge(
@@ -881,7 +920,7 @@ describe 'corosync' do
               )
             end
 
-            it 'fails to delpoy' do
+            it 'fails to deploy' do
               is_expected.to raise_error(
                 Puppet::Error,
                 %r{Quorum device host cannot also be a member of the cluster!}
@@ -909,7 +948,7 @@ describe 'corosync' do
             end
 
             it 'does not attempt to authorize or configure the quorum node' do
-              is_expected.not_to contain_exec('pcs_cluster_auth_qdevice')
+              is_expected.not_to contain_exec('authorized_qdevice')
               is_expected.not_to contain_exec('pcs_cluster_add_qdevice')
             end
           end
@@ -950,7 +989,7 @@ describe 'corosync' do
             end
 
             it 'does not authorize or add the quorum device' do
-              is_expected.not_to contain_exec('pcs_cluster_auth_qdevice')
+              is_expected.not_to contain_exec('authorize_qdevice')
               is_expected.not_to contain_exec('pcs_cluster_add_qdevice')
             end
           end
@@ -971,39 +1010,41 @@ describe 'corosync' do
               )
             end
 
-            it 'configures a temporary cluster if corosync.conf is missing' do
-              is_expected.to contain_exec('pcs_cluster_temporary').with(
-                command: 'pcs cluster setup --force --name cluster_test node1.test.org node2.test.org node3.test.org',
-                path: '/sbin:/bin:/usr/sbin:/usr/bin',
-                onlyif: 'test ! -f /etc/corosync/corosync.conf',
-                require: 'Exec[pcs_cluster_auth]'
-              )
-            end
+            case corosync_stack(os_facts)[:provider]
+            when 'pcs'
+              it 'configures a temporary cluster if corosync.conf is missing' do
+                is_expected.to contain_exec('pcs_cluster_temporary').with(
+                  command: "pcs cluster setup --force #{cluster_name_arg} cluster_test node1.test.org node2.test.org node3.test.org",
+                  path: '/sbin:/bin:/usr/sbin:/usr/bin',
+                  onlyif: 'test ! -f /etc/corosync/corosync.conf',
+                  require: 'Exec[authorize_members]'
+                )
+              end
 
-            it 'authorizes and adds the quorum device' do
-              is_expected.to contain_exec('pcs_cluster_auth_qdevice').with(
-                command: 'pcs cluster auth quorum1.test.org -u hacluster -p quorum-secret-password',
-                path: '/sbin:/bin:/usr/sbin:/usr/bin',
-                onlyif: 'test 0 -ne $(grep quorum1.test.org /var/lib/pcsd/tokens >/dev/null 2>&1; echo $?)',
-                require: [
-                  'Package[corosync-qdevice]',
-                  'Exec[pcs_cluster_auth]',
-                  'Exec[pcs_cluster_temporary]'
-                ]
-              )
-              is_expected.to contain_exec('pcs_cluster_add_qdevice').with(
-                command: 'pcs quorum device add model net host=quorum1.test.org algorithm=ffsplit',
-                path: '/sbin:/bin:/usr/sbin:/usr/bin',
-                onlyif: [
-                  'test 0 -ne $(pcs quorum config | grep "host:" >/dev/null 2>&1; echo $?)'
-                ],
-                require: 'Exec[pcs_cluster_auth_qdevice]'
-              )
-            end
+              it 'authorizes and adds the quorum device' do
+                is_expected.to contain_exec('authorize_qdevice').with(
+                  command: "pcs #{auth_command} quorum1.test.org -u hacluster -p quorum-secret-password",
+                  path: '/sbin:/bin:/usr/sbin:/usr/bin',
+                  onlyif: 'test 0 -ne $(grep quorum1.test.org /var/lib/pcsd/tokens >/dev/null 2>&1; echo $?)',
+                  require: [
+                    'Package[corosync-qdevice]',
+                    'Exec[authorize_members]',
+                    'Exec[pcs_cluster_temporary]'
+                  ]
+                )
 
-            it 'contains the quorum configuration' do
-              is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-                %r!quorum {
+                is_expected.to contain_exec('pcs_cluster_add_qdevice').with(
+                  command: 'pcs quorum device add model net host=quorum1.test.org algorithm=ffsplit',
+                  path: '/sbin:/bin:/usr/sbin:/usr/bin',
+                  onlyif: [
+                    'test 0 -ne $(pcs quorum config | grep "host:" >/dev/null 2>&1; echo $?)'
+                  ],
+                  require: 'Exec[authorize_qdevice]'
+                )
+              end
+              it 'contains the quorum configuration' do
+                is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+                  %r!quorum {
   provider: corosync_votequorum
   device {
     model: net
@@ -1015,7 +1056,8 @@ describe 'corosync' do
     }
   }
 }!m
-              )
+                )
+              end
             end
           end
 
@@ -1034,6 +1076,7 @@ describe 'corosync' do
                 %r{two_node: 1\n}
               )
             end
+            # else - to implement
           end
         end
       end

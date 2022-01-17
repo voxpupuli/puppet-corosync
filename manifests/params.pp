@@ -15,11 +15,11 @@ class corosync::params {
   $log_function_name                   = false
   $package_corosync                    = true
   $package_pacemaker                   = true
-  $version_corosync                    = 'present'
-  $version_crmsh                       = 'present'
-  $version_pacemaker                   = 'present'
-  $version_pcs                         = 'present'
-  $version_fence_agents                = 'present'
+  $ensure_corosync                    = 'present'
+  $ensure_crmsh                       = 'present'
+  $ensure_pacemaker                   = 'present'
+  $ensure_pcs                         = 'present'
+  $ensure_fence_agents                = 'present'
   $enable_corosync_service             = true
   $manage_corosync_service             = true
   $enable_pacemaker_service            = true
@@ -28,38 +28,5 @@ class corosync::params {
   $set_votequorum                      = true
   $manage_pacemaker_service            = true
   $test_corosync_config                = true
-
-  case $facts['os']['family'] {
-    'RedHat': {
-      $package_crmsh  = false
-      $package_pcs    = true
-      $package_fence_agents = true
-      $package_install_options = undef
-    }
-
-    'Debian': {
-      $package_crmsh  = true
-      $package_pcs    = false
-      $package_fence_agents = false
-      $package_install_options = undef
-    }
-
-    'Suse': {
-      case $facts['os']['name'] {
-        'SLES': {
-          $package_crmsh  = true
-          $package_pcs    = false
-          $package_fence_agents = false
-          $package_install_options = undef
-        }
-        default: {
-          fail("Unsupported flavour of ${facts['os']['family']}: ${facts['os']['name']}")
-        }
-      }
-    }
-
-    default: {
-      fail("Unsupported operating system: ${facts['os']['name']}")
-    }
-  }
+  $package_install_options = undef
 }

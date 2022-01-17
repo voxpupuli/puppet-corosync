@@ -36,15 +36,11 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
       operations:               [],
       utilization:              nvpairs_to_hash(e.elements['utilization']),
       metadata:                 nvpairs_to_hash(e.elements['meta_attributes']),
-      ms_metadata:              {},
-      promotable:               :false,
       existing_resource:        :true,
       existing_primitive_class: e.attributes['class'],
       existing_primitive_type:  e.attributes['type'],
-      existing_promotable:      :false,
       existing_provided_by:     e.attributes['provider'],
       existing_metadata:        nvpairs_to_hash(e.elements['meta_attributes']),
-      existing_ms_metadata:     {},
       existing_operations:      []
     }
 
@@ -65,16 +61,6 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
         end
         hash[:operations] << operation
         hash[:existing_operations] << operation
-      end
-    end
-    if e.parent.name == 'master'
-      hash[:promotable] = :true
-      hash[:existing_promotable] = :true
-      unless e.parent.elements['meta_attributes'].nil?
-        e.parent.elements['meta_attributes'].each_element do |m|
-          hash[:ms_metadata][m.attributes['name']] = m.attributes['value']
-        end
-        hash[:existing_ms_metadata] = hash[:ms_metadata].dup
       end
     end
 
@@ -117,14 +103,12 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
       primitive_class:   @resource[:primitive_class],
       provided_by:       @resource[:provided_by],
       primitive_type:    @resource[:primitive_type],
-      promotable:        @resource[:promotable],
       existing_resource: :false
     }
     @property_hash[:parameters] = @resource[:parameters] unless @resource[:parameters].nil?
     @property_hash[:operations] = @resource[:operations] unless @resource[:operations].nil?
     @property_hash[:utilization] = @resource[:utilization] unless @resource[:utilization].nil?
     @property_hash[:metadata] = @resource[:metadata] unless @resource[:metadata].nil?
-    @property_hash[:ms_metadata] = @resource[:ms_metadata] unless @resource[:ms_metadata].nil?
     @property_hash[:existing_metadata] = {}
   end
 
@@ -134,16 +118,6 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
     debug("Removing primitive - #{pcs_subcommand}")
     self.class.run_command_in_cib([command(:pcs), pcs_subcommand, 'delete', '--force', @resource[:name]], @resource[:cib])
     @property_hash.clear
-  end
-
-  def promotable=(should)
-    case should
-    when :true
-      @property_hash[:promotable] = should
-    when :false
-      @property_hash[:promotable] = should
-      self.class.run_command_in_cib([command(:pcs), 'resource', 'delete', "ms_#{@resource[:name]}"], @resource[:cib])
-    end
   end
 
   # Performs a subset of flush operations which are relevant only to stonith
@@ -229,39 +203,18 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
     end
 
     if @property_hash[:existing_resource] == :false || force_reinstall == :true
-      cmd = if Facter.value(:osfamily) == 'RedHat' && Facter.value(:operatingsystemmajrelease).to_s == '7'
-              [command(:pcs), pcs_subcommand, 'create', '--force', '--no-default-ops', (@property_hash[:name]).to_s]
-            else
-              cmd = [command(:pcs), pcs_subcommand, 'create', '--force', (@property_hash[:name]).to_s]
-            end
+      cmd = [command(:pcs), pcs_subcommand, 'create', '--force', '--no-default-ops', (@property_hash[:name]).to_s]
       cmd << resource_type
       cmd += parameters unless parameters.nil?
       cmd += operations unless operations.nil?
       cmd += utilization unless utilization.nil?
       cmd += metadatas unless metadatas.nil?
-      self.class.run_command_in_cib(cmd, @resource[:cib])
-      # if we are using a master/slave resource, prepend ms_ before its name
-      # and declare it as a master/slave resource
-      if @property_hash[:promotable] == :true
-        cmd = [command(:pcs), pcs_subcommand, 'master', "ms_#{@property_hash[:name]}", (@property_hash[:name]).to_s]
-        unless @property_hash[:ms_metadata].empty?
-          cmd << 'meta'
-          @property_hash[:ms_metadata].each_pair do |k, v|
-            cmd << "#{k}=#{v}"
-          end
-        end
-        self.class.run_command_in_cib(cmd, @resource[:cib])
-      end
-      # try to remove the default monitor operation
-      default_op = { 'monitor' => { 'interval' => '60s' } }
-      unless @property_hash[:operations].include?(default_op)
-        cmd = [command(:pcs), pcs_subcommand, 'op', 'remove', (@property_hash[:name]).to_s, 'monitor', 'interval=60s']
-        self.class.run_command_in_cib(cmd, @resource[:cib], false)
-      end
+      # default_op = { 'monitor' => { 'interval' => '60s' } }
+      # unless @property_hash[:operations].include?(default_op)
+      #   cmd = [command(:pcs), pcs_subcommand, 'op', 'remove', (@property_hash[:name]).to_s, 'monitor', 'interval=60s']
+      # end
+      self.class.run_command_in_cib(cmd, @resource[:cib], false)
     else
-      if @property_hash[:promotable] == :false && @property_hash[:existing_promotable] == :true
-        self.class.run_command_in_cib([command(:pcs), pcs_subcommand, 'delete', '--force', "ms_#{@property_hash[:name]}"], @resource[:cib])
-      end
       @property_hash[:existing_operations].reject { |op| @property_hash[:operations].include?(op) }.each do |o|
         cmd = [command(:pcs), pcs_subcommand, 'op', 'remove', (@property_hash[:name]).to_s]
         cmd << o.keys.first.to_s
@@ -276,19 +229,6 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
       cmd += utilization unless utilization.nil?
       cmd += metadatas unless metadatas.nil?
       self.class.run_command_in_cib(cmd, @resource[:cib])
-      if @property_hash[:promotable] == :true
-        cmd = [command(:pcs), pcs_subcommand, 'update', "ms_#{@property_hash[:name]}"]
-        unless @property_hash[:ms_metadata].empty? && @property_hash[:existing_ms_metadata].empty?
-          cmd << 'meta'
-          @property_hash[:ms_metadata].each_pair do |k, v|
-            cmd << "#{k}=#{v}"
-          end
-          @property_hash[:existing_ms_metadata].keys.reject { |key| @property_hash[:ms_metadata].key?(key) }.each do |k|
-            cmd << "#{k}="
-          end
-        end
-        self.class.run_command_in_cib(cmd, @resource[:cib])
-      end
     end
   end
 
@@ -332,8 +272,6 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
     if @resource && @resource.class.name == :cs_primitive && @resource[:unmanaged_metadata]
       @resource[:unmanaged_metadata].each do |parameter_name|
         @property_hash[:metadata].delete(parameter_name)
-        @property_hash[:ms_metadata].delete(parameter_name) if @property_hash[:ms_metadata]
-        @property_hash[:existing_ms_metadata].delete(parameter_name) if @property_hash[:existing_ms_metadata]
         @property_hash[:existing_metadata].delete(parameter_name) if @property_hash[:existing_metadata]
       end
     end

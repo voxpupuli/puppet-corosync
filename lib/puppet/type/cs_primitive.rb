@@ -243,62 +243,6 @@ Puppet::Type.newtype(:cs_primitive) do
     # rubocop:enable Style/EmptyLiteral
   end
 
-  newproperty(:ms_metadata) do
-    desc 'A hash of metadata for the master/slave primitive state.'
-
-    munge do |value_hash|
-      # Ruby 1.8.7 does not support each_with_object
-      # rubocop:disable Style/EachWithObject
-      value_hash.reduce({}) do |memo, (key, value)|
-        # rubocop:enable Style/EachWithObject
-        memo[key] = String(value)
-        memo
-      end
-    end
-
-    def insync?(is)
-      super(is.reject { |k| @resource[:unmanaged_metadata].include?(k) })
-    end
-
-    # rubocop:disable Style/PredicateName
-    def is_to_s(is)
-      # rubocop:enable Style/PredicateName
-      super(is.reject { |k| @resource[:unmanaged_metadata].include?(k) })
-    end
-
-    def should_to_s(should)
-      super(should.reject { |k| @resource[:unmanaged_metadata].include?(k) })
-    end
-
-    def change_to_s(currentvalue, newvalue)
-      if @resource[:unmanaged_metadata].count.zero?
-        super
-      else
-        super + " (unmanaged parameters: #{@resource[:unmanaged_metadata].join(', ')})"
-      end
-    end
-
-    validate do |value|
-      raise Puppet::Error, 'Puppet::Type::Cs_Primitive: ms_metadata property must be a hash' unless value.is_a? Hash
-    end
-    # rubocop:disable Style/EmptyLiteral
-    defaultto Hash.new
-    # rubocop:enable Style/EmptyLiteral
-  end
-
-  newproperty(:promotable) do
-    desc "Designates if the primitive is capable of being managed in a master/slave
-      state.  This will create a new ms resource in your Corosync config and add
-      this primitive to it.  Concequently Corosync will be helpful and update all
-      your colocation and order resources too but Puppet won't.  Currenlty we unmunge
-      configuraiton entries that start with ms_ so that you don't have to account for
-      name change in all our manifests."
-
-    newvalues(:true, :false)
-
-    defaultto :false
-  end
-
   autorequire(:cs_shadow) do
     autos = []
     autos << @parameters[:cib].value if @parameters[:cib]
