@@ -82,7 +82,7 @@ class PuppetX::Voxpupuli::Corosync::Provider::Pcs < PuppetX::Voxpupuli::Corosync
 
     unless cib.nil?
       if cmd.first == command(:pcs)
-        cib_path = File.join(Puppet[:vardir], 'shadow.' + cib)
+        cib_path = File.join(Puppet[:vardir], "shadow.#{cib}")
         cmd.push('-f', cib_path)
       else
         custom_environment[:custom_environment] = { 'CIB_shadow_dir' => Puppet[:vardir], 'CIB_shadow' => cib }
@@ -93,9 +93,9 @@ class PuppetX::Voxpupuli::Corosync::Provider::Pcs < PuppetX::Voxpupuli::Corosync
   end
 
   def self.sync_shadow_cib(cib, failondeletefail = false)
-    cib_path = File.join(Puppet[:vardir], 'shadow.' + cib)
+    cib_path = File.join(Puppet[:vardir], "shadow.#{cib}")
     run_command_in_cib([command(:pcs), 'cluster', 'cib', cib_path], nil, failondeletefail)
-    FileUtils.cp cib_path, cib_path + '.ori'
+    FileUtils.cp cib_path, "#{cib_path}.ori"
   end
 
   def exists?

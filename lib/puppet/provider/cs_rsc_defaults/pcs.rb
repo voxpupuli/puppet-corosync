@@ -57,7 +57,7 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:pcs, parent: PuppetX::Voxpupuli::Co
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing resource default')
-    cmd = [command(:pcs), 'resource', 'defaults', (@property_hash[:name]).to_s + '=']
+    cmd = [command(:pcs), 'resource', 'defaults', "#{(@property_hash[:name]).to_s}="]
     self.class.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
   end
