@@ -51,7 +51,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
           provider: name
         }
         instances << new(location_instance)
-      end
+    end
     instances
   end
 

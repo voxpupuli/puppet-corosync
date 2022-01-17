@@ -69,7 +69,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
           new: false
         }
         instances << new(order_instance)
-      end
+    end
     instances
   end
 

@@ -83,7 +83,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, parent: PuppetX::Voxpupuli::Coro
           }
         end
         instances << new(colocation_instance)
-      end
+    end
     instances
   end
 

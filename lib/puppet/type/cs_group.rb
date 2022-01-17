@@ -58,7 +58,7 @@ Puppet::Type.newtype(:cs_group) do
     autos = []
     should(:primitives)&.each do |val|
         autos << unmunge_cs_primitive(val)
-      end
+    end
 
     autos
   end

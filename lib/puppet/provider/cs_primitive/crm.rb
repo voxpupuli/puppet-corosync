@@ -51,9 +51,9 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
         end
         o.elements['instance_attributes']&.each_element do |i|
             operation[name][i.attributes['name']] = i.attributes['value']
-          end
+        end
         hash[:operations] << operation
-      end
+    end
 
     hash
   end

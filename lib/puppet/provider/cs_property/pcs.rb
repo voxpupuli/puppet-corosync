@@ -41,7 +41,7 @@ Puppet::Type.type(:cs_property).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
           provider: name
         }
         instances << new(property_instance)
-      end
+    end
     instances
   end
 
