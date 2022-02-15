@@ -4,4 +4,5 @@ type Corosync::CryptoCipher = Enum[
   'aes192',
   'aes128',
   '3des',
+  'none',
 ]
