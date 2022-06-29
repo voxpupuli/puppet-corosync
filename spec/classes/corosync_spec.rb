@@ -807,6 +807,7 @@ describe 'corosync' do
             it 'authorizes all nodes' do
               is_expected.to contain_exec('authorize_members').with(
                 command: "pcs #{auth_command} node1.test.org node2.test.org node3.test.org -u hacluster -p some-secret-sauce",
+                unless: "grep 'node1.test.org' /var/lib/pcsd/tokens && grep 'node2.test.org' /var/lib/pcsd/tokens && grep 'node3.test.org' /var/lib/pcsd/tokens",
                 path: '/sbin:/bin:/usr/sbin:/usr/bin',
                 require: [
                   'Service[pcsd]',
