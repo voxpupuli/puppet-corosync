@@ -159,9 +159,11 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
         end
       end
     end
-    if @resource&.instance_of?(:cs_primitive) && @resource[:unmanaged_metadata]
+    if @resource && @resource.class.name == :cs_primitive && @resource[:unmanaged_metadata]
       @resource[:unmanaged_metadata].each do |parameter_name|
-        @property_hash[:metadata][parameter_name] = @property_hash[:existing_metadata]['target-role'] if @property_hash[:existing_metadata] && @property_hash[:existing_metadata][parameter_name]
+        if @property_hash[:existing_metadata] && @property_hash[:existing_metadata][parameter_name]
+          @property_hash[:metadata][parameter_name] = @property_hash[:existing_metadata]['target-role']
+        end
       end
     end
     unless @property_hash[:parameters].empty?
