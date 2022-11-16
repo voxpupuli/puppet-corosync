@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'spec_helper_acceptance'
-require 'pry'
 
 describe 'corosync' do
   cert = '-----BEGIN CERTIFICATE-----
