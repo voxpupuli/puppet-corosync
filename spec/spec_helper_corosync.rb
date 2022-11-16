@@ -12,13 +12,8 @@ def corosync_stack(facts)
   when 'Debian'
     case facts[:os]['name']
     when 'Debian'
-      if facts[:os]['release']['major'].to_i > 9
-        corosync_stack = 'pcs'
-        pcs_version = '0.10.0'
-      else
-        corosync_stack = 'crm'
-        pcs_version = ''
-      end
+      corosync_stack = 'pcs'
+      pcs_version = '0.10.0'
     when 'Ubuntu'
       if facts[:os]['release']['major'].to_i > 18
         corosync_stack = 'pcs'
