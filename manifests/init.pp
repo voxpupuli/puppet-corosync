@@ -599,7 +599,7 @@ class corosync (
 
       # Check that all nodes have an authorization token
       $auth_check_command = $quorum_members.map |$node| {
-        "grep '${node}' /var/lib/pcsd/tokens"
+        "grep --silent '${node}' /var/lib/pcsd/tokens /var/lib/pcsd/known-hosts"
       }.join(' && ')
 
       # Attempt to authorize all members. The command will return successfully
@@ -650,8 +650,8 @@ class corosync (
       }
 
       # Authorize the quorum device via PCS so we can execute the configuration
-      $token_prefix = 'test 0 -ne $(grep'
-      $token_suffix = '/var/lib/pcsd/tokens >/dev/null 2>&1; echo $?)'
+      $token_prefix = 'test 0 -ne $(grep --silent'
+      $token_suffix = '/var/lib/pcsd/tokens /var/lib/pcsd/known-hosts >/dev/null 2>&1; echo $?)'
       $qdevice_token_check = "${token_prefix} ${quorum_device_host} ${token_suffix}"
 
       $quorum_device_password = $sensitive_quorum_device_password.unwrap
