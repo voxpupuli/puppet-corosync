@@ -387,7 +387,7 @@ class corosync(
       'string': {
         file { '/etc/corosync/authkey':
           ensure  => file,
-          content => $authkey,
+          content => Binary($authkey, '%B'),
           mode    => '0400',
           owner   => 'root',
           group   => 'root',
