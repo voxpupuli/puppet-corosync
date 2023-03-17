@@ -7,7 +7,7 @@ Puppet::Type.newtype(:cs_primitive) do
     an application, ip address, or similar to monitor and maintain.  These
     managed primitives are maintained using what is called a resource agent.
     These resource agents have a concept of class, type, and subsystem that
-    provides the functionality.  Regretibly these pieces of vocabulary
+    provides the functionality.  Regrettably these pieces of vocabulary
     clash with those used in Puppet so to overcome the name clashing the
     property and parameter names have been qualified a bit for clarity.
 
@@ -28,21 +28,21 @@ Puppet::Type.newtype(:cs_primitive) do
 
   newparam(:primitive_class) do
     desc "Corosync class of the primitive.  Examples of classes are lsb or ocf.
-      Lsb funtions a lot like the init provider in Puppet for services, an init
+      Lsb functions a lot like the init provider in Puppet for services, an init
       script is ran periodically on each host to identify status, or to start
       and stop a particular application.  Ocf of the other hand is a script with
-      meta-data and stucture that is specific to Corosync and Pacemaker."
+      meta-data and structure that is specific to Corosync and Pacemaker."
   end
 
   newparam(:primitive_type) do
     desc "Corosync primitive type.  Type generally matches to the specific
       'thing' your managing, i.e. ip address or vhost.  Though, they can be
-      completely arbitarily named and manage any number of underlying
+      completely arbitrarily named and manage any number of underlying
       applications or resources."
   end
 
   newparam(:provided_by) do
-    desc "Corosync primitive provider.  All resource agents used in a primitve
+    desc "Corosync primitive provider.  All resource agents used in a primitive
       have something that provides them to the system, be it the Pacemaker or
       redhat plugins...they're not always obvious though so currently you're
       left to understand Corosync enough to figure it out.  Usually, if it isn't
@@ -60,7 +60,7 @@ Puppet::Type.newtype(:cs_primitive) do
       once. This can be necessary to insert complex configurations into
       Corosync correctly.
 
-      This paramater sets the CIB this primitive should be created in. A
+      This parameter sets the CIB this primitive should be created in. A
       cs_shadow resource with a title of the same name as this value should
       also be added to your manifest."
   end
@@ -131,7 +131,7 @@ Puppet::Type.newtype(:cs_primitive) do
             end
           end
           if v.is_a? Array
-            Puppet.deprecation_warning 'cs_primitive.rb[operations]: Multiple operations with the same name now have to be declared as an array of hashe, not as a hash with arrays.'
+            Puppet.deprecation_warning 'cs_primitive.rb[operations]: Multiple operations with the same name now have to be declared as an array of hashes, not as a hash with arrays.'
             v.each do |p|
               operations << { k => p }
             end
@@ -190,7 +190,7 @@ Puppet::Type.newtype(:cs_primitive) do
   newproperty(:utilization) do
     desc "A hash of utilization attributes for the primitive. If nodes are
       also configured with available resources, and Pacemaker's placement
-      stratgey is set appropriately, then Pacemaker can place primitives on
+      strategy is set appropriately, then Pacemaker can place primitives on
       nodes only where resources are available.
 
       See the Pacemaker documentation:

@@ -33,7 +33,7 @@ Puppet::Type.newtype(:cs_property) do
       once. This can be necessary to insert complex configurations into
       Corosync correctly.
 
-      This paramater sets the CIB this parameter should be created in. A
+      This parameter sets the CIB this parameter should be created in. A
       cs_shadow resource with a title of the same name as this value should
       also be added to your manifest."
   end

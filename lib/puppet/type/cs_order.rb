@@ -1,7 +1,7 @@
 require 'puppet/property/boolean'
 
 Puppet::Type.newtype(:cs_order) do
-  @doc = "Type for manipulating Corosync/Pacemkaer ordering entries.  Order
+  @doc = "Type for manipulating Corosync/Pacemaker ordering entries.  Order
     entries are another type of constraint that can be put on sets of
     primitives but unlike colocation, order does matter.  These designate
     the order at which you need specific primitives to come into a desired
@@ -24,7 +24,7 @@ Puppet::Type.newtype(:cs_order) do
 
   newproperty(:first) do
     desc "First Corosync primitive.  Just like colocation, our primitives for
-      ording come in pairs but this time order matters so we need to define
+      ordering come in pairs but this time order matters so we need to define
       which primitive starts the desired state change chain."
 
     munge do |value|
@@ -49,7 +49,7 @@ Puppet::Type.newtype(:cs_order) do
       once. This can be necessary to insert complex configurations into
       Corosync correctly.
 
-      This paramater sets the CIB this order should be created in. A
+      This parameter sets the CIB this order should be created in. A
       cs_shadow resource with a title of the same name as this value should
       also be added to your manifest."
   end

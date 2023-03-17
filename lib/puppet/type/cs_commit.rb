@@ -1,5 +1,5 @@
 Puppet::Type.newtype(:cs_commit) do
-  @doc = 'Final commit statement which triggers the syncronous application of
+  @doc = 'Final commit statement which triggers the synchronous application of
           all primitive changes which reference this CIB. Do not generate more
           than one cs_commit referencing the same CIB for a given cluster!'
 
