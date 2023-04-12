@@ -448,6 +448,21 @@ cs_clone { 'nginx_service-clone' :
 }
 ```
 
+Configure a Promotable (Active/Passive) resource
+
+```puppet
+cs_clone { 'redis-clone':
+  ensure            => present,
+  primitive         => 'redis',
+  clone_max         => 2,
+  clone_node_max    => 1,
+  promotable        => true,
+  promoted_max      => 1,
+  promoted_node_max => 1,
+  notify_clones     => true,
+}
+```
+
 ### Corosync Properties
 
 A few global settings can be changed with the "cs_property" section.

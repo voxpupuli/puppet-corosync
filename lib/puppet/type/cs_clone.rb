@@ -78,6 +78,31 @@ Puppet::Type.newtype(:cs_clone) do
     defaultto :absent
   end
 
+  newproperty(:promotable) do
+    desc 'If true, clone instances can perform a special role that Pacemaker will manage via the resource agent’s
+      promote and demote actions. The resource agent must support these actions. Allowed values: false, true'
+
+    newvalues(:true, :false, :absent)
+
+    defaultto :absent
+  end
+
+  newproperty(:promoted_max) do
+    desc 'If promotable is true, the number of instances that can be promoted at one time across the entire cluster'
+
+    newvalues(%r{\d+}, :absent)
+
+    defaultto :absent
+  end
+
+  newproperty(:promoted_node_max) do
+    desc 'If promotable is true and globally-unique is false, the number of clone instances can be promoted at one time on a single node'
+
+    newvalues(%r{\d+}, :absent)
+
+    defaultto :absent
+  end
+
   newparam(:cib) do
     desc "Corosync applies its configuration immediately. Using a CIB allows
       you to group multiple primitives and relationships to be applied at

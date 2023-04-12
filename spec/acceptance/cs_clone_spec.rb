@@ -120,14 +120,17 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         it 'creates the clone' do
           pp = <<-EOS
          cs_clone { 'duncan_vip_complex_clone_#{type}':
-           ensure          => present,
-           #{type}         => '#{property_value}',
-           clone_max       => 42,
-           notify_clones   => false,
-           clone_node_max  => 2,
-           globally_unique => true,
-           ordered         => false,
-           interleave      => false,
+           ensure            => present,
+           #{type}           => '#{property_value}',
+           clone_max         => 42,
+           notify_clones     => false,
+           clone_node_max    => 2,
+           globally_unique   => true,
+           ordered           => false,
+           interleave        => false,
+           promotable        => false,
+           promoted_max      => 5,
+           promoted_node_max => 2,
          }
           EOS
           apply_manifest(pp, catch_failures: true, debug: false, trace: true)
@@ -178,17 +181,38 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
           end
         end
 
+        it 'sets promotable' do
+          shell(fetch_value_command('promotable')) do |r|
+            expect(r.stdout).to match(%r{value="false"})
+          end
+        end
+
+        it 'sets promoted_max' do
+          shell(fetch_value_command('promoted-max')) do |r|
+            expect(r.stdout).to match(%r{value="5"})
+          end
+        end
+
+        it 'sets promoted_node_max' do
+          shell(fetch_value_command('promoted-node-max')) do |r|
+            expect(r.stdout).to match(%r{value="2"})
+          end
+        end
+
         it 'changes the clone' do
           pp = <<-EOS
          cs_clone { 'duncan_vip_complex_clone_#{type}':
-           ensure          => present,
-           #{type}         => '#{property_value}',
-           clone_max       => 43,
-           clone_node_max  => 1,
-           notify_clones   => true,
-           globally_unique => false,
-           ordered         => true,
-           interleave      => true,
+           ensure            => present,
+           #{type}           => '#{property_value}',
+           clone_max         => 43,
+           clone_node_max    => 1,
+           notify_clones     => true,
+           globally_unique   => false,
+           ordered           => true,
+           interleave        => true,
+           promotable        => true,
+           promoted_max      => 6,
+           promoted_node_max => 1,
          }
           EOS
           apply_manifest(pp, catch_failures: true, debug: false, trace: true)
@@ -232,6 +256,24 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         it 'changes interleave' do
           shell(fetch_value_command('interleave')) do |r|
             expect(r.stdout).to match(%r{value="true"})
+          end
+        end
+
+        it 'sets promotable' do
+          shell(fetch_value_command('promotable')) do |r|
+            expect(r.stdout).to match(%r{value="true"})
+          end
+        end
+
+        it 'sets promoted_max' do
+          shell(fetch_value_command('promoted-max')) do |r|
+            expect(r.stdout).to match(%r{value="6"})
+          end
+        end
+
+        it 'sets promoted_node_max' do
+          shell(fetch_value_command('promoted-node-max')) do |r|
+            expect(r.stdout).to match(%r{value="1"})
           end
         end
 
@@ -285,6 +327,24 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         it 'keeps interleave' do
           shell(fetch_value_command('interleave')) do |r|
             expect(r.stdout).to match(%r{value="true"})
+          end
+        end
+
+        it 'deletes promotable' do
+          assert_raises(Beaker::Host::CommandFailure) do
+            shell(fetch_value_command('promotable'))
+          end
+        end
+
+        it 'deletes promoted-max' do
+          assert_raises(Beaker::Host::CommandFailure) do
+            shell(fetch_value_command('promoted-max'))
+          end
+        end
+
+        it 'deletes promoted-node-max' do
+          assert_raises(Beaker::Host::CommandFailure) do
+            shell(fetch_value_command('promoted-node-max'))
           end
         end
       end

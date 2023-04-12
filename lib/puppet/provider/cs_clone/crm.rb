@@ -33,14 +33,17 @@ Puppet::Type.type(:cs_clone).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
       items = nvpairs_to_hash(e.elements['meta_attributes'])
 
       clone_instance = {
-        name: e.attributes['id'],
-        ensure: :present,
-        clone_max: items['clone-max'],
-        clone_node_max: items['clone-node-max'],
-        notify_clones: items['notify'],
-        globally_unique: items['globally-unique'],
-        ordered: items['ordered'],
-        interleave: items['interleave'],
+        name:              e.attributes['id'],
+        ensure:            :present,
+        clone_max:         items['clone-max'],
+        clone_node_max:    items['clone-node-max'],
+        notify_clones:     items['notify'],
+        globally_unique:   items['globally-unique'],
+        ordered:           items['ordered'],
+        interleave:        items['interleave'],
+        promotable:        items['promotable'],
+        promoted_max:      items['promoted-max'],
+        promoted_node_max: items['promoted-node-max'],
         existing_resource: :true
       }
 
@@ -56,16 +59,19 @@ Puppet::Type.type(:cs_clone).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
   # of actually doing the work.
   def create
     @property_hash = {
-      name: @resource[:name],
-      ensure: :present,
-      primitive: @resource[:primitive],
-      clone_max: @resource[:clone_max],
-      clone_node_max: @resource[:clone_node_max],
-      notify_clones: @resource[:notify_clones],
-      globally_unique: @resource[:globally_unique],
-      ordered: @resource[:ordered],
-      interleave: @resource[:interleave],
-      cib: @resource[:cib],
+      name:              @resource[:name],
+      ensure:            :present,
+      primitive:         @resource[:primitive],
+      clone_max:         @resource[:clone_max],
+      clone_node_max:    @resource[:clone_node_max],
+      notify_clones:     @resource[:notify_clones],
+      globally_unique:   @resource[:globally_unique],
+      ordered:           @resource[:ordered],
+      interleave:        @resource[:interleave],
+      cib:               @resource[:cib],
+      promotable:        @resource[:promotable],
+      promoted_max:      @resource[:promoted_max],
+      promoted_node_max: @resource[:promoted_node_max],
       existing_resource: :false
     }
   end
@@ -104,7 +110,10 @@ Puppet::Type.type(:cs_clone).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
       notify_clones: 'notify',
       globally_unique: 'globally-unique',
       ordered: 'ordered',
-      interleave: 'interleave'
+      interleave: 'interleave',
+      promotable: 'promotable',
+      promoted_max: 'promoted-max',
+      promoted_node_max: 'promoted-node-max'
     }.each do |property, clone_property|
       meta << "#{clone_property}=#{@resource.should(property)}" unless @resource.should(property) == :absent
     end
