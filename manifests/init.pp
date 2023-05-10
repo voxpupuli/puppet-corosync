@@ -306,8 +306,10 @@
 #   Whether we should test new configuration files with `corosync -t`.
 #   (requires corosync 2.3.4)
 #
-# @param test_corosync_config_cmd
-#   Override the standard config_validate_cmd which only works for corosync 2.x.
+# @param config_validate_cmd
+#   Override the default check-command:
+#     Default for Corosync 2.x: '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
+#     Override example for 3.x: '/usr/sbin/corosync -t -c %'
 #
 # @param watchdog_device
 #   Watchdog device to use, for example '/dev/watchdog' or 'off'.
