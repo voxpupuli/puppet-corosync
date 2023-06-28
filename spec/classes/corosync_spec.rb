@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'deep_merge'
 
 describe 'corosync' do
   let :params do
@@ -651,9 +652,14 @@ describe 'corosync' do
   on_supported_os.each do |os, os_facts|
     context "on #{os}" do
       let(:facts) do
-        os_facts
+        os_facts.deep_merge(
+          {
+            corosync: {
+              pcs_version_full: corosync_stack(os_facts)[:pcs_version]
+            }
+          }
+        )
       end
-
       auth_command = if corosync_stack(os_facts)[:provider] == 'pcs'
                        if Gem::Version.new(corosync_stack(os_facts)[:pcs_version]) < Gem::Version.new('0.10.0')
                          'cluster auth'
