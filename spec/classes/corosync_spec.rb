@@ -660,6 +660,7 @@ describe 'corosync' do
           }
         )
       end
+
       auth_command = if corosync_stack(os_facts)[:provider] == 'pcs'
                        if Gem::Version.new(corosync_stack(os_facts)[:pcs_version]) < Gem::Version.new('0.10.0')
                          'cluster auth'
@@ -1043,7 +1044,7 @@ describe 'corosync' do
                   command: 'pcs quorum device add model net host=quorum1.test.org algorithm=ffsplit',
                   path: '/sbin:/bin:/usr/sbin:/usr/bin',
                   onlyif: [
-                    'test 0 -ne $(pcs quorum config | grep "host:" >/dev/null 2>&1; echo $?)'
+                    "test 0 -ne $(pcs quorum config | grep 'host: quorum1.test.org' >/dev/null 2>&1; echo $?)"
                   ],
                   require: 'Exec[authorize_qdevice]'
                 )
@@ -1083,6 +1084,23 @@ describe 'corosync' do
               )
             end
             # else - to implement
+
+            it 'contains the quorum configuration' do
+              is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
+                %r!nodelist\s{\n
+                \s+node\s{\n
+                \s+ring0_addr:\snode1[.]test[.]org\n
+                \s+nodeid:\s1\n
+                \s+name:\snode1[.]test[.]org\n
+                \s+}\n
+                \s+node\s{\n
+                \s+ring0_addr:\snode2[.]test[.]org\n
+                \s+nodeid:\s2\n
+                \s+name:\snode2[.]test[.]org\n
+                \s+}\n
+                }!xm
+              )
+            end
           end
         end
       end

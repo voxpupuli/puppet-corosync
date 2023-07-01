@@ -669,7 +669,7 @@ class corosync (
         command => $quorum_setup_cmd,
         path    => $exec_path,
         onlyif  => [
-          'test 0 -ne $(pcs quorum config | grep "host:" >/dev/null 2>&1; echo $?)',
+          "test 0 -ne $(pcs quorum config | grep 'host: ${quorum_device_host}' >/dev/null 2>&1; echo $?)",
         ],
         require => Exec['authorize_qdevice'],
         before  => File['/etc/corosync/corosync.conf'],
