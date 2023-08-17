@@ -56,7 +56,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
       end
 
       it "is a kind of #{described_class.name}" do
-        expect(instance).to be_a_kind_of(described_class)
+        expect(instance).to be_a(described_class)
       end
 
       it "is named by the <primitive>'s id attribute" do
@@ -84,10 +84,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:crm) do
       end
 
       it 'has an operations property corresponding to <operations>' do
-        expect(instance.operations).to match_array([{ 'monitor' => { 'interval' => '15', 'timeout' => '10', 'on-fail' => 'standby', 'OCF_CHECK_LEVEL' => '10' } },
-                                                    { 'monitor' => { 'interval' => '5', 'timeout' => '10', 'on-fail' => 'standby', 'role' => 'Master' } },
-                                                    { 'start'   => { 'interval' => '0', 'timeout' => '60' } },
-                                                    { 'stop'    => { 'interval' => '0', 'timeout' => '40' } }])
+        expect(instance.operations).to contain_exactly({ 'monitor' => { 'interval' => '15', 'timeout' => '10', 'on-fail' => 'standby', 'OCF_CHECK_LEVEL' => '10' } }, { 'monitor' => { 'interval' => '5', 'timeout' => '10', 'on-fail' => 'standby', 'role' => 'Master' } }, { 'start' => { 'interval' => '0', 'timeout' => '60' } }, { 'stop' => { 'interval' => '0', 'timeout' => '40' } })
       end
 
       it 'has a utilization property corresponding to <utilization>' do

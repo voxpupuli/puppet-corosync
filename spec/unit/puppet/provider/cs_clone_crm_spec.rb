@@ -42,7 +42,7 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
       end
 
       it "is a kind of #{described_class.name}" do
-        expect(instance).to be_a_kind_of(described_class)
+        expect(instance).to be_a(described_class)
       end
 
       it "is named by the <primitive>'s id attribute" do
@@ -104,7 +104,7 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
       end
 
       it "is a kind of #{described_class.name}" do
-        expect(instance).to be_a_kind_of(described_class)
+        expect(instance).to be_a(described_class)
       end
 
       it "is named by the <primitive>'s id attribute" do
