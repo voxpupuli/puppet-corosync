@@ -25,3 +25,4 @@ end
 require 'spec_helper_corosync'
 
 require 'spec_helper_methods'
+Dir['./spec/support/spec/**/*.rb'].sort.each { |f| require f }
