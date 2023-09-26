@@ -402,7 +402,7 @@ class corosync (
   Boolean $test_corosync_config                                         = $corosync::params::test_corosync_config,
   Optional[Variant[Stdlib::Absolutepath, Enum['off']]] $watchdog_device = undef,
   Enum['pcs', 'crm'] $provider                                          = 'pcs',
-  String $pcs_version                                                   = '',
+  String $pcs_version                                                   = $facts['corosync']['pcs_version_full'],
 ) inherits corosync::params {
   if $set_votequorum and (empty($quorum_members) and empty($multicast_address) and !$cluster_name) {
     fail('set_votequorum is true, so you must set either quorum_members, or one of multicast_address or cluster_name.')
@@ -580,7 +580,7 @@ class corosync (
 
     $exec_path = '/sbin:/bin:/usr/sbin:/usr/bin'
 
-    if $manage_pcsd_auth and $is_auth_node {
+    if $manage_pcsd_auth and $is_auth_node and $pcs_version != '' {
       # TODO - verify if this breaks out of the sensitivity
       $hacluster_password = $sensitive_hacluster_password.unwrap
       $auth_credential_string = "-u hacluster -p ${hacluster_password}"
@@ -669,7 +669,7 @@ class corosync (
         command => $quorum_setup_cmd,
         path    => $exec_path,
         onlyif  => [
-          'test 0 -ne $(pcs quorum config | grep "host:" >/dev/null 2>&1; echo $?)',
+          "test 0 -ne $(pcs quorum config | grep 'host: ${quorum_device_host}' >/dev/null 2>&1; echo $?)",
         ],
         require => Exec['authorize_qdevice'],
         before  => File['/etc/corosync/corosync.conf'],
