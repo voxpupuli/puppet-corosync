@@ -20,6 +20,8 @@ Puppet::Type.type(:cs_commit).provide(:crm, parent: PuppetX::Voxpupuli::Corosync
   # Required for block_until_ready
   commands crm: 'crm'
 
+  defaultfor operatingsystem: [:ubuntu]
+
   def self.instances
     block_until_ready
     []
