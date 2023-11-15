@@ -1,5 +1,4 @@
 require 'spec_helper_acceptance'
-require 'pry'
 
 describe 'corosync' do
   cert = '-----BEGIN CERTIFICATE-----
