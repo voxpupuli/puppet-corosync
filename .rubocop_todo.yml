@@ -58,13 +58,3 @@ Style/ClassEqualityComparison:
   Exclude:
     - 'lib/puppet/provider/cs_primitive/crm.rb'
     - 'lib/puppet/provider/cs_primitive/pcs.rb'
-
-# Offense count: 5
-# This cop supports unsafe autocorrection (--autocorrect-all).
-Style/SlicingWithRange:
-  Exclude:
-    - 'lib/puppet/type/cs_clone.rb'
-    - 'lib/puppet/type/cs_colocation.rb'
-    - 'lib/puppet/type/cs_group.rb'
-    - 'lib/puppet/type/cs_location.rb'
-    - 'lib/puppet/type/cs_order.rb'

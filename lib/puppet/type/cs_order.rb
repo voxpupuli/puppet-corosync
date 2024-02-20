@@ -113,7 +113,7 @@ Puppet::Type.newtype(:cs_order) do
     return if name.nil?
 
     name = name.split(':')[0]
-    name = name[3..-1] if name.start_with? 'ms_'
+    name = name[3..] if name.start_with? 'ms_'
 
     name
   end
