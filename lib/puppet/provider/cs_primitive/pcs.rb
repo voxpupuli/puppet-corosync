@@ -269,7 +269,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
     if @resource && @resource.class.name == :cs_primitive && @resource[:unmanaged_metadata]
       @resource[:unmanaged_metadata].each do |parameter_name|
         @property_hash[:metadata].delete(parameter_name)
-        @property_hash[:existing_metadata].delete(parameter_name) if @property_hash[:existing_metadata]
+        @property_hash[:existing_metadata]&.delete(parameter_name)
       end
     end
 
