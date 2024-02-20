@@ -39,13 +39,6 @@ Naming/VariableNumber:
   Exclude:
     - 'lib/puppet_x/voxpupuli/corosync/provider/pcs.rb'
 
-# Offense count: 4
-# This cop supports unsafe autocorrection (--autocorrect-all).
-RSpec/BeEq:
-  Exclude:
-    - 'spec/unit/puppet/provider/cs_order_crm_spec.rb'
-    - 'spec/unit/puppet/provider/cs_order_pcs_spec.rb'
-
 # Offense count: 1
 # Configuration parameters: AllowSubject.
 RSpec/MultipleMemoizedHelpers:

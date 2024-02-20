@@ -65,7 +65,7 @@ describe Puppet::Type.type(:cs_order).provider(:crm) do
       end
 
       it 'has symmetrical set to true' do
-        expect(instance.symmetrical).to eq(true)
+        expect(instance.symmetrical).to be(true)
       end
     end
 
@@ -87,7 +87,7 @@ describe Puppet::Type.type(:cs_order).provider(:crm) do
       end
 
       it 'has symmetrical set to false' do
-        expect(instance.symmetrical).to eq(false)
+        expect(instance.symmetrical).to be(false)
       end
     end
   end
