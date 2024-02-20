@@ -18,7 +18,7 @@ configure_beaker do |host|
       pcs_version = '0.10.0'
     when 'Ubuntu'
       default_provider = 'pcs'
-      pcs_version = if fact_on(host,'os.release.major').to_i > 18
+      pcs_version = if fact_on(host, 'os.release.major').to_i > 18
                       '0.10.0'
                     else
                       '0.9.0'
