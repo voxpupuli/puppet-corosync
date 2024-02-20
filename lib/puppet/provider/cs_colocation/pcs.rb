@@ -42,9 +42,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, parent: PuppetX::Voxpupuli::Coro
           resource_set_options.each do |o|
             options[o] = rs.attributes[o] if rs.attributes[o]
           end
-          # rubocop:disable Style/ZeroLengthPredicate
           resource_set['options'] = options if options.keys.size.positive?
-          # rubocop:enable Style/ZeroLengthPredicate
           resource_set['primitives'] = []
           rs.each_element('resource_ref') do |rr|
             resource_set['primitives'] << rr.attributes['id']
