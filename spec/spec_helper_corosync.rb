@@ -18,10 +18,10 @@ def corosync_stack(facts)
       pcs_version = '0.10.0'
     when 'Ubuntu'
       corosync_stack = 'pcs'
-      pcs_version = if facts[:os]['release']['major'].to_i == 18
-                      '0.9.0'
-                    else
+      pcs_version = if facts[:os]['release']['major'].to_i > 18
                       '0.10.0'
+                    else
+                      '0.9.0'
                     end
     end
   when 'Suse'
