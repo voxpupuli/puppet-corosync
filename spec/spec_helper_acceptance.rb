@@ -18,11 +18,11 @@ configure_beaker do |host|
       pcs_version = '0.10.0'
     when 'Ubuntu'
       default_provider = 'pcs'
-      if facts[:os]['release']['major'].to_i = 18
-        pcs_version = '0.9.0'
-      else
-        pcs_version = '0.10.0'
-      end
+      pcs_version = if facts[:os]['release']['major'].to_i == 18
+                      '0.9.0'
+                    else
+                      '0.10.0'
+                    end
     end
   when 'Suse'
     default_provider = 'crm'
