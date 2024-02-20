@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 begin
   require 'puppet_x/voxpupuli/corosync/provider'
   require 'puppet_x/voxpupuli/corosync/provider/cib_helper'
@@ -5,6 +7,7 @@ rescue LoadError
   require 'pathname' # WORKAROUND #14073, #7788 and SERVER-973
   corosync = Puppet::Module.find('corosync')
   raise(LoadError, "Unable to find corosync module in modulepath #{Puppet[:basemodulepath] || Puppet[:modulepath]}") unless corosync
+
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider'
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider/cib_helper'
 end
@@ -23,6 +26,7 @@ class PuppetX::Voxpupuli::Corosync::Provider::Pcs < PuppetX::Voxpupuli::Corosync
   # rubocop:enable Style/ClassVars
   def self.ready?(shadow_cib)
     return true if @@pcsready
+
     cmd = [command(:pcs), 'property', 'show', 'dc-version']
     raw, status = run_command_in_cib(cmd, nil, false)
     if status.zero?
@@ -45,10 +49,10 @@ class PuppetX::Voxpupuli::Corosync::Provider::Pcs < PuppetX::Voxpupuli::Corosync
 
       debug("Corosync is ready, CIB epoch is #{cib_epoch}. Sleeping 5 seconds for safety.")
       sleep 5
-      return true
+      true
     else
       debug("Corosync not ready, retrying: #{raw}")
-      return false
+      false
     end
   end
 
@@ -78,7 +82,7 @@ class PuppetX::Voxpupuli::Corosync::Provider::Pcs < PuppetX::Voxpupuli::Corosync
 
     unless cib.nil?
       if cmd.first == command(:pcs)
-        cib_path = File.join(Puppet[:vardir], 'shadow.' + cib)
+        cib_path = File.join(Puppet[:vardir], "shadow.#{cib}")
         cmd.push('-f', cib_path)
       else
         custom_environment[:custom_environment] = { 'CIB_shadow_dir' => Puppet[:vardir], 'CIB_shadow' => cib }
@@ -89,9 +93,9 @@ class PuppetX::Voxpupuli::Corosync::Provider::Pcs < PuppetX::Voxpupuli::Corosync
   end
 
   def self.sync_shadow_cib(cib, failondeletefail = false)
-    cib_path = File.join(Puppet[:vardir], 'shadow.' + cib)
+    cib_path = File.join(Puppet[:vardir], "shadow.#{cib}")
     run_command_in_cib([command(:pcs), 'cluster', 'cib', cib_path], nil, failondeletefail)
-    FileUtils.cp cib_path, cib_path + '.ori'
+    FileUtils.cp cib_path, "#{cib_path}.ori"
   end
 
   def exists?

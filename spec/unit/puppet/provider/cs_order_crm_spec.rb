@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Puppet::Type.type(:cs_order).provider(:crm) do
@@ -36,14 +38,15 @@ describe Puppet::Type.type(:cs_order).provider(:crm) do
         instances.first
       end
 
-      it "should be a kind of #{described_class.name}" do
-        expect(instance).to be_a_kind_of(described_class)
+      it "is a kind of #{described_class.name}" do
+        expect(instance).to be_a(described_class)
       end
 
       it "is named by the <primitive>'s id attribute" do
         expect(instance.name).to eq('nul-messagebus_before_nul-interface-2')
       end
     end
+
     describe 'first instance' do
       let :instance do
         instances.first
@@ -62,7 +65,7 @@ describe Puppet::Type.type(:cs_order).provider(:crm) do
       end
 
       it 'has symmetrical set to true' do
-        expect(instance.symmetrical).to eq(true)
+        expect(instance.symmetrical).to be(true)
       end
     end
 
@@ -84,7 +87,7 @@ describe Puppet::Type.type(:cs_order).provider(:crm) do
       end
 
       it 'has symmetrical set to false' do
-        expect(instance.symmetrical).to eq(false)
+        expect(instance.symmetrical).to be(false)
       end
     end
   end

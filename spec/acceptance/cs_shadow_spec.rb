@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper_acceptance'
 
 describe 'corosync' do
@@ -22,7 +24,11 @@ J52cejAMVsP3ROOdxBv0HZIVVJ8NLBHNLFOHJEDtvzogLVplzmo59vPAdmQo6eIV
 japvs+0tdy9iwHj3z1ZME2Ntm/5TzG537e7Hb2zogatM9aBTUAWlZ1tpoaXuTH52
 J76GtqoIOh+CTeY/BMwBotdQdgeR0zvjE9FuLWkhTmRtVFhbVIzJbFlFuYq5d3LH
 NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
-  File.open('/tmp/ca.pem', 'w') { |f| f.write(cert) }
+  File.write('/tmp/ca.pem', cert)
+  after :all do
+    cleanup_cs_resources
+  end
+
   it 'with defaults' do
     pp = <<-EOS
       file { '/tmp/ca.pem':
@@ -189,7 +195,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
         primitive => 'apache3_vip',
         cib       => 'puppet',
       }
-      EOS
+    EOS
     apply_manifest(pp, catch_failures: true, debug: false, trace: true)
     apply_manifest(pp, expect_changes: true, debug: false, trace: true)
     command = if fact('default_provider') == 'pcs'
@@ -200,9 +206,5 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     shell(command) do |r|
       expect(r.stdout).to match(%r{<clone})
     end
-  end
-
-  after :all do
-    cleanup_cs_resources
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 require 'spec_helper_corosync'
 
@@ -44,7 +46,7 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
       end
 
       it "is a kind of #{described_class.name}" do
-        expect(instance).to be_a_kind_of(described_class)
+        expect(instance).to be_a(described_class)
       end
 
       it "is named by the <primitive>'s id attribute" do
@@ -76,47 +78,47 @@ describe Puppet::Type.type(:cs_primitive).provider(:pcs) do
 
   context 'when flushing' do
     let :instances do
-      cib = <<-EOS
-        <configuration>
-          <resources>
-            <primitive class="ocf" id="simple" provider="heartbeat" type="IPaddr2" />
-            <primitive class="ocf" id="example_vip" provider="heartbeat" type="IPaddr2">
-              <operations>
-                <op id="example_vip-monitor-10s" interval="10s" name="monitor"/>
-              </operations>
-              <instance_attributes id="example_vip-instance_attributes">
-                <nvpair id="example_vip-instance_attributes-cidr_netmask" name="cidr_netmask" value="24"/>
-                <nvpair id="example_vip-instance_attributes-ip" name="ip" value="172.31.110.68"/>
-              </instance_attributes>
-            </primitive>
-h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat" type="IPaddr2">
-              <operations>
-                <op id="example_vip-monitor-10s" interval="10s" name="monitor"/>
-                <op id="example_vip-monitor-10s" interval="20s" name="monitor2"/>
-                <op id="example_vip-monitor-10s" interval="30s" name="monitor3"/>
-              </operations>
-              <instance_attributes id="example_vip-instance_attributes">
-                <nvpair id="example_vip-instance_attributes-cidr_netmask" name="cidr_netmask" value="24"/>
-                <nvpair id="example_vip-instance_attributes-ip" name="ip" value="172.31.110.68"/>
-              </instance_attributes>
-            </primitive>
-            <primitive class="stonith" id="vmfence" type="fence_vmware_soap">
-              <instance_attributes id="vmfence-instance_attributes">
-                <nvpair id="vmfence-instance_attributes-ipaddr" name="ipaddr" value="vcenter00.example.org"/>
-                <nvpair id="vmfence-instance_attributes-login" name="login" value="service-fence_vmware_soap@vsphere.local"/>
-                <nvpair id="vmfence-instance_attributes-passwd" name="passwd" value="some-secret"/>
-                <nvpair id="vmfence-instance_attributes-pcmk_host_map" name="pcmk_host_map" value="nfs00.example.org:nfs00;nfs01.example.org:nfs01"/>
-                <nvpair id="vmfence-instance_attributes-ssl" name="ssl" value="1"/>
-                <nvpair id="vmfence-instance_attributes-ssl_insecure" name="ssl_insecure" value="1"/>
-                <nvpair id="vmfence-instance_attributes-pcmk_delay_max" name="pcmk_delay_max" value="15"/>
-              </instance_attributes>
-              <operations>
-                <op id="vmfence-monitor-interval-60s" interval="60s" name="monitor"/>
-              </operations>
-              <meta_attributes id="vmfence-meta_attributes"/>
-            </primitive>
-          </resources>
-        </configuration>
+      cib = <<~EOS
+                <configuration>
+                  <resources>
+                    <primitive class="ocf" id="simple" provider="heartbeat" type="IPaddr2" />
+                    <primitive class="ocf" id="example_vip" provider="heartbeat" type="IPaddr2">
+                      <operations>
+                        <op id="example_vip-monitor-10s" interval="10s" name="monitor"/>
+                      </operations>
+                      <instance_attributes id="example_vip-instance_attributes">
+                        <nvpair id="example_vip-instance_attributes-cidr_netmask" name="cidr_netmask" value="24"/>
+                        <nvpair id="example_vip-instance_attributes-ip" name="ip" value="172.31.110.68"/>
+                      </instance_attributes>
+                    </primitive>
+        h           <primitive class="ocf" id="example_vip_with_op" provider="heartbeat" type="IPaddr2">
+                      <operations>
+                        <op id="example_vip-monitor-10s" interval="10s" name="monitor"/>
+                        <op id="example_vip-monitor-10s" interval="20s" name="monitor2"/>
+                        <op id="example_vip-monitor-10s" interval="30s" name="monitor3"/>
+                      </operations>
+                      <instance_attributes id="example_vip-instance_attributes">
+                        <nvpair id="example_vip-instance_attributes-cidr_netmask" name="cidr_netmask" value="24"/>
+                        <nvpair id="example_vip-instance_attributes-ip" name="ip" value="172.31.110.68"/>
+                      </instance_attributes>
+                    </primitive>
+                    <primitive class="stonith" id="vmfence" type="fence_vmware_soap">
+                      <instance_attributes id="vmfence-instance_attributes">
+                        <nvpair id="vmfence-instance_attributes-ipaddr" name="ipaddr" value="vcenter00.example.org"/>
+                        <nvpair id="vmfence-instance_attributes-login" name="login" value="service-fence_vmware_soap@vsphere.local"/>
+                        <nvpair id="vmfence-instance_attributes-passwd" name="passwd" value="some-secret"/>
+                        <nvpair id="vmfence-instance_attributes-pcmk_host_map" name="pcmk_host_map" value="nfs00.example.org:nfs00;nfs01.example.org:nfs01"/>
+                        <nvpair id="vmfence-instance_attributes-ssl" name="ssl" value="1"/>
+                        <nvpair id="vmfence-instance_attributes-ssl_insecure" name="ssl_insecure" value="1"/>
+                        <nvpair id="vmfence-instance_attributes-pcmk_delay_max" name="pcmk_delay_max" value="15"/>
+                      </instance_attributes>
+                      <operations>
+                        <op id="vmfence-monitor-interval-60s" interval="60s" name="monitor"/>
+                      </operations>
+                      <meta_attributes id="vmfence-meta_attributes"/>
+                    </primitive>
+                  </resources>
+                </configuration>
       EOS
 
       pcs_load_cib(cib)

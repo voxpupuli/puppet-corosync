@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Puppet::Type.type(:cs_group).provider(:crm) do
@@ -65,8 +67,8 @@ describe Puppet::Type.type(:cs_group).provider(:crm) do
         instances.first
       end
 
-      it "should be a kind of #{described_class.name}" do
-        expect(instance).to be_a_kind_of(described_class)
+      it "is a kind of #{described_class.name}" do
+        expect(instance).to be_a(described_class)
       end
 
       it 'is named by the group id attribute' do

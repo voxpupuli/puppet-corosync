@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Puppet::Type.newtype(:cs_colocation) do
   @doc = "Type for manipulating corosync/pacemaker colocation.  Colocation
     is the grouping together of a set of primitives so that they travel
@@ -43,6 +45,7 @@ Puppet::Type.newtype(:cs_colocation) do
       super
       raise Puppet::Error, 'Puppet::Type::Cs_Colocation: The primitives property must be an array.' unless value.is_a? Array
       raise Puppet::Error, 'Puppet::Type::Cs_Colocation: The primitives property must be an array of at least one element.' if value.empty?
+
       @should
     end
   end
@@ -83,9 +86,7 @@ Puppet::Type.newtype(:cs_colocation) do
     unless @parameters[:primitives].should.nil?
       if @parameters[:primitives].should.first.is_a?(Hash)
         @parameters[:primitives].should.each do |colocation_set|
-          if colocation_set.key?('primitives')
-            result << colocation_set['primitives']
-          end
+          result << colocation_set['primitives'] if colocation_set.key?('primitives')
         end
       end
       if @parameters[:primitives].should.first.is_a?(String)
@@ -97,7 +98,7 @@ Puppet::Type.newtype(:cs_colocation) do
     result.flatten
   end
 
-  [:cs_clone, :cs_primitive].each do |resource_type|
+  %i[cs_clone cs_primitive].each do |resource_type|
     autorequire(resource_type) do
       extract_primitives
     end
@@ -105,7 +106,7 @@ Puppet::Type.newtype(:cs_colocation) do
 
   def unmunge_cs_primitive(name)
     name = name.split(':')[0]
-    name = name[3..-1] if name.start_with? 'ms_'
+    name = name[3..] if name.start_with? 'ms_'
 
     name
   end

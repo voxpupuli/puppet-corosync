@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Puppet::Type.type(:cs_clone).provider(:crm) do
@@ -40,7 +42,7 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
       end
 
       it "is a kind of #{described_class.name}" do
-        expect(instance).to be_a_kind_of(described_class)
+        expect(instance).to be_a(described_class)
       end
 
       it "is named by the <primitive>'s id attribute" do
@@ -102,7 +104,7 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
       end
 
       it "is a kind of #{described_class.name}" do
-        expect(instance).to be_a_kind_of(described_class)
+        expect(instance).to be_a(described_class)
       end
 
       it "is named by the <primitive>'s id attribute" do
@@ -123,16 +125,12 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
     def expect_update(pattern)
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with do |*args|
-          if args.slice(0..2) == %w[configure load update]
-            expect(File.read(args[3])).to match(pattern)
-          end
+          expect(File.read(args[3])).to match(pattern) if args.slice(0..2) == %w[configure load update]
           true
         end.at_least_once.returns(['', 0])
       else
         Puppet::Util::Execution.expects(:execute).with do |*args|
-          if args.slice(0..2) == %w[configure load update]
-            expect(File.read(args[3])).to match(pattern)
-          end
+          expect(File.read(args[3])).to match(pattern) if args.slice(0..2) == %w[configure load update]
           true
         end.at_least_once.returns(
           Puppet::Util::Execution::ProcessOutput.new('', 0)
@@ -142,10 +140,10 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
 
     let :resource do
       Puppet::Type.type(:cs_clone).new(
-        name:      'p_keystone-clone',
-        provider:  :crm,
+        name: 'p_keystone-clone',
+        provider: :crm,
         primitive: 'p_keystone',
-        ensure:    :present
+        ensure: :present
       )
     end
 

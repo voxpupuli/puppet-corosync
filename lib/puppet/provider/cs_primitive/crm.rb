@@ -1,9 +1,12 @@
+# frozen_string_literal: false
+
 begin
   require 'puppet_x/voxpupuli/corosync/provider/crmsh'
 rescue LoadError
   require 'pathname' # WORKAROUND #14073, #7788 and SERVER-973
   corosync = Puppet::Module.find('corosync')
   raise(LoadError, "Unable to find corosync module in modulepath #{Puppet[:basemodulepath] || Puppet[:modulepath]}") unless corosync
+
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider/crmsh'
 end
 
@@ -23,37 +26,33 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
   # for creating a new provider instance.
   def self.element_to_hash(e)
     hash = {
-      primitive_class:   e.attributes['class'],
-      primitive_type:    e.attributes['type'],
-      provided_by:       e.attributes['provider'],
-      name:              e.attributes['id'].to_sym,
-      ensure:            :present,
-      provider:          name,
-      parameters:        nvpairs_to_hash(e.elements['instance_attributes']),
-      operations:        [],
-      utilization:       nvpairs_to_hash(e.elements['utilization']),
-      metadata:          nvpairs_to_hash(e.elements['meta_attributes']),
+      primitive_class: e.attributes['class'],
+      primitive_type: e.attributes['type'],
+      provided_by: e.attributes['provider'],
+      name: e.attributes['id'].to_sym,
+      ensure: :present,
+      provider: name,
+      parameters: nvpairs_to_hash(e.elements['instance_attributes']),
+      operations: [],
+      utilization: nvpairs_to_hash(e.elements['utilization']),
+      metadata: nvpairs_to_hash(e.elements['meta_attributes']),
       existing_metadata: nvpairs_to_hash(e.elements['meta_attributes']),
-      ms_metadata:       {},
+      ms_metadata: {},
     }
 
     operations = e.elements['operations']
-    unless operations.nil?
-      operations.each_element do |o|
-        valids = o.attributes.reject { |k, _v| k == 'id' }
-        name = valids['name'].to_s
-        operation = {}
-        operation[name] = {}
-        valids.each do |k, v|
-          operation[name][k] = v.to_s if k != 'name'
-        end
-        unless o.elements['instance_attributes'].nil?
-          o.elements['instance_attributes'].each_element do |i|
-            operation[name][i.attributes['name']] = i.attributes['value']
-          end
-        end
-        hash[:operations] << operation
+    operations&.each_element do |o|
+      valids = o.attributes.reject { |k, _v| k == 'id' }
+      name = valids['name'].to_s
+      operation = {}
+      operation[name] = {}
+      valids.each do |k, v|
+        operation[name][k] = v.to_s if k != 'name'
       end
+      o.elements['instance_attributes']&.each_element do |i|
+        operation[name][i.attributes['name']] = i.attributes['value']
+      end
+      hash[:operations] << operation
     end
 
     hash
@@ -78,11 +77,11 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
   # of actually doing the work.
   def create
     @property_hash = {
-      name:            @resource[:name],
-      ensure:          :present,
+      name: @resource[:name],
+      ensure: :present,
       primitive_class: @resource[:primitive_class],
-      provided_by:     @resource[:provided_by],
-      primitive_type:  @resource[:primitive_type],
+      provided_by: @resource[:provided_by],
+      primitive_type: @resource[:primitive_type],
     }
     @property_hash[:parameters] = @resource[:parameters] unless @resource[:parameters].nil?
     @property_hash[:operations] = @resource[:operations] unless @resource[:operations].nil?
@@ -162,9 +161,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
     end
     if @resource && @resource.class.name == :cs_primitive && @resource[:unmanaged_metadata]
       @resource[:unmanaged_metadata].each do |parameter_name|
-        if @property_hash[:existing_metadata] && @property_hash[:existing_metadata][parameter_name]
-          @property_hash[:metadata][parameter_name] = @property_hash[:existing_metadata]['target-role']
-        end
+        @property_hash[:metadata][parameter_name] = @property_hash[:existing_metadata]['target-role'] if @property_hash[:existing_metadata] && @property_hash[:existing_metadata][parameter_name]
       end
     end
     unless @property_hash[:parameters].empty?

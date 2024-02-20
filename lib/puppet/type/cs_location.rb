@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Puppet::Type.newtype(:cs_location) do
   @doc = "Type for manipulating corosync/pacemaker resource location.
     More information on Corosync/Pacemaker colocation can be found here:
@@ -95,7 +97,7 @@ Puppet::Type.newtype(:cs_location) do
     %w[corosync pacemaker]
   end
 
-  [:cs_primitive, :cs_clone, :cs_group].each do |type|
+  %i[cs_primitive cs_clone cs_group].each do |type|
     autorequire(type) do
       autos = []
       autos << unmunge_cs_primitive(should(:primitive)) if should(:primitive)
@@ -106,14 +108,12 @@ Puppet::Type.newtype(:cs_location) do
 
   def unmunge_cs_primitive(name)
     name = name.split(':')[0]
-    name = name[3..-1] if name.start_with? 'ms_'
+    name = name[3..] if name.start_with? 'ms_'
 
     name
   end
 
   validate do
-    if [self[:node_name], self[:rules]].compact.length > 1
-      raise Puppet::Error, 'Location constraints dictate that node_name and rules cannot co-exist for this type.'
-    end
+    raise Puppet::Error, 'Location constraints dictate that node_name and rules cannot co-exist for this type.' if [self[:node_name], self[:rules]].compact.length > 1
   end
 end

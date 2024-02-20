@@ -1,9 +1,12 @@
+# frozen_string_literal: true
+
 begin
   require 'puppet_x/voxpupuli/corosync/provider/crmsh'
 rescue LoadError
   require 'pathname' # WORKAROUND #14073, #7788 and SERVER-973
   corosync = Puppet::Module.find('corosync')
   raise(LoadError, "Unable to find corosync module in modulepath #{Puppet[:basemodulepath] || Puppet[:modulepath]}") unless corosync
+
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider/crmsh'
 end
 
@@ -29,11 +32,7 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
     pacemakerd_version_string = pacemakerd('--version')
     if pacemakerd_version_string
       pacemakerd_version = pacemakerd_version_string.scan(%r{\d+\.\d+\.\d+}).first
-      if pacemakerd_version
-        if Puppet::Util::Package.versioncmp(pacemakerd_version, '1.1.13') >= 0
-          has_feature :discovery
-        end
-      end
+      has_feature :discovery if pacemakerd_version && (Puppet::Util::Package.versioncmp(pacemakerd_version, '1.1.13') >= 0)
     end
   rescue Puppet::MissingCommand
     # on fresh systems pacemaker is not yet installed when pacemakerd command is executed, so we do just nothing, when the executable is missing
@@ -57,14 +56,14 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
       id, items = node2hash(e, ['expression']).first
 
       location_instance = {
-        name:               id,
-        ensure:             :present,
-        primitive:          items['rsc'],
-        node_name:          items['node'],
-        score:              items['score'] || 'INFINITY',
-        rules:              items['rule'],
+        name: id,
+        ensure: :present,
+        primitive: items['rsc'],
+        node_name: items['node'],
+        score: items['score'] || 'INFINITY',
+        rules: items['rule'],
         resource_discovery: items['resource-discovery'],
-        provider:           name
+        provider: name
       }
       instances << new(location_instance)
     end
@@ -75,12 +74,12 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
   # care of actually doing the work.
   def create
     @property_hash = {
-      name:               @resource[:name],
-      ensure:             :present,
-      primitive:          @resource[:primitive],
-      node_name:          @resource[:node_name],
-      score:              @resource[:score],
-      rules:              @resource[:rules],
+      name: @resource[:name],
+      ensure: :present,
+      primitive: @resource[:primitive],
+      node_name: @resource[:node_name],
+      score: @resource[:score],
+      rules: @resource[:rules],
       resource_discovery: @resource[:resource_discovery]
     }
   end
@@ -101,28 +100,22 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
 
     updated = "location #{@property_hash[:name]} #{@property_hash[:primitive]}"
 
-    if feature?(:discovery)
-      updated << " resource-discovery=#{@property_hash[:resource_discovery]}" unless @property_hash[:resource_discovery].nil?
-    end
+    updated << " resource-discovery=#{@property_hash[:resource_discovery]}" if feature?(:discovery) && !@property_hash[:resource_discovery].nil?
 
-    unless @property_hash[:node_name].nil?
-      updated << " #{@property_hash[:score]}: #{@property_hash[:node_name]}"
-    end
+    updated << " #{@property_hash[:score]}: #{@property_hash[:node_name]}" unless @property_hash[:node_name].nil?
 
-    unless @property_hash[:rules].nil?
-      @property_hash[:rules].each do |rule_item|
-        name = rule_item.keys.first
-        rule = rule_item[name]
+    @property_hash[:rules]&.each do |rule_item|
+      name = rule_item.keys.first
+      rule = rule_item[name]
 
-        score = rule['score-attribute'] || rule['score']
+      score = rule['score-attribute'] || rule['score']
 
-        boolean_op = rule['boolean-op'] || 'and'
-        expression = self.class.rule_expression(name, rule['expression'], boolean_op)
+      boolean_op = rule['boolean-op'] || 'and'
+      expression = self.class.rule_expression(name, rule['expression'], boolean_op)
 
-        updated << " rule $id=\"#{name}\""
-        updated << " $role=\"#{rule['role']}\"" unless rule['role'].nil?
-        updated << " #{score}: #{expression.join(' ')}"
-      end
+      updated << " rule $id=\"#{name}\""
+      updated << " $role=\"#{rule['role']}\"" unless rule['role'].nil?
+      updated << " #{score}: #{expression.join(' ')}"
     end
 
     debug("Loading update: #{updated}")

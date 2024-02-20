@@ -1,3 +1,0 @@
----
-corosync::provider: 'crm'
-corosync::pcs_version: ~

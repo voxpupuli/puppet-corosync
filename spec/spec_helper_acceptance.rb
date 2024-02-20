@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'voxpupuli/acceptance/spec_helper_acceptance'
 
 configure_beaker do |host|
@@ -15,16 +17,12 @@ configure_beaker do |host|
       default_provider = 'pcs'
       pcs_version = '0.10.0'
     when 'Ubuntu'
-      if fact_on(host, 'os.release.major').to_i > 18
-        default_provider = 'pcs'
-        pcs_version = '0.10.0'
-      elsif fact_on(host, 'os.release.major').to_i > 16
-        default_provider = 'pcs'
-        pcs_version = '0.9.0'
-      else
-        default_provider = 'crm'
-        pcs_version = ''
-      end
+      default_provider = 'pcs'
+      pcs_version = if fact_on(host, 'os.release.major').to_i > 18
+                      '0.10.0'
+                    else
+                      '0.9.0'
+                    end
     end
   when 'Suse'
     default_provider = 'crm'
@@ -64,7 +62,7 @@ def cleanup_cs_resources
       resources { 'cs_location' :
         purge => true,
       }
-    EOS
+  EOS
 
   apply_manifest(pp, catch_failures: true, debug: false, trace: true)
   apply_manifest(pp, catch_changes: true, debug: false, trace: true)
@@ -73,7 +71,7 @@ def cleanup_cs_resources
       resources { 'cs_primitive' :
         purge => true,
       }
-    EOS
+  EOS
 
   apply_manifest(pp, catch_failures: true, debug: false, trace: true)
   apply_manifest(pp, catch_changes: true, debug: false, trace: true)

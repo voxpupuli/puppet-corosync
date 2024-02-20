@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # This file contains helpers that are specific to this module
 
 def corosync_stack(facts)
@@ -15,16 +17,12 @@ def corosync_stack(facts)
       corosync_stack = 'pcs'
       pcs_version = '0.10.0'
     when 'Ubuntu'
-      if facts[:os]['release']['major'].to_i > 18
-        corosync_stack = 'pcs'
-        pcs_version = '0.10.0'
-      elsif facts[:os]['release']['major'].to_i > 16
-        corosync_stack = 'pcs'
-        pcs_version = '0.9.0'
-      else
-        corosync_stack = 'crm'
-        pcs_version = ''
-      end
+      corosync_stack = 'pcs'
+      pcs_version = if facts[:os]['release']['major'].to_i > 18
+                      '0.10.0'
+                    else
+                      '0.9.0'
+                    end
     end
   when 'Suse'
     corosync_stack = 'crm'

@@ -1,9 +1,12 @@
+# frozen_string_literal: false
+
 begin
   require 'puppet_x/voxpupuli/corosync/provider/crmsh'
 rescue LoadError
   require 'pathname' # WORKAROUND #14073, #7788 and SERVER-973
   corosync = Puppet::Module.find('corosync')
   raise(LoadError, "Unable to find corosync module in modulepath #{Puppet[:basemodulepath] || Puppet[:modulepath]}") unless corosync
+
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider/crmsh'
 end
 
@@ -39,7 +42,7 @@ Puppet::Type.type(:cs_colocation).provide(:crm, parent: PuppetX::Voxpupuli::Coro
                 items['rsc']
               end
 
-        with_rsc = if items ['with-rsc-role']
+        with_rsc = if items['with-rsc-role']
                      "#{items['with-rsc']}:#{items['with-rsc-role']}"
                    else
                      items['with-rsc']
@@ -58,7 +61,7 @@ Puppet::Type.type(:cs_colocation).provide(:crm, parent: PuppetX::Voxpupuli::Coro
           rsetitems = rset.attributes
 
           # If the resource set has a role, it will apply to all referenced resources.
-          rsetrole = (rsetitems['role'] if rsetitems['role'])
+          rsetrole = (rsetitems['role'])
 
           # Add all referenced resources to the primitives array.
           rset.each_element('resource_ref') do |rref|
@@ -77,11 +80,11 @@ Puppet::Type.type(:cs_colocation).provide(:crm, parent: PuppetX::Voxpupuli::Coro
       end
 
       colocation_instance = {
-        name:       items['id'],
-        ensure:     :present,
+        name: items['id'],
+        ensure: :present,
         primitives: primitives,
-        score:      items['score'],
-        provider:   name
+        score: items['score'],
+        provider: name
       }
       instances << new(colocation_instance)
     end
@@ -92,11 +95,11 @@ Puppet::Type.type(:cs_colocation).provide(:crm, parent: PuppetX::Voxpupuli::Coro
   # of actually doing the work.
   def create
     @property_hash = {
-      name:       @resource[:name],
-      ensure:     :present,
+      name: @resource[:name],
+      ensure: :present,
       primitives: @resource[:primitives],
-      score:      @resource[:score],
-      cib:        @resource[:cib]
+      score: @resource[:score],
+      cib: @resource[:cib]
     }
   end
 

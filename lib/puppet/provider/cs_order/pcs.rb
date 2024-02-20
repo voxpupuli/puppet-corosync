@@ -1,9 +1,12 @@
+# frozen_string_literal: true
+
 begin
   require 'puppet_x/voxpupuli/corosync/provider/pcs'
 rescue LoadError
   require 'pathname' # WORKAROUND #14073, #7788 and SERVER-973
   corosync = Puppet::Module.find('corosync')
   raise(LoadError, "Unable to find corosync module in modulepath #{Puppet[:basemodulepath] || Puppet[:modulepath]}") unless corosync
+
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider/pcs'
 end
 
@@ -13,7 +16,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
         of current primitive start orders on the system; add, delete, or adjust various
         aspects.'
 
-  defaultfor operatingsystem: [:fedora, :centos, :redhat]
+  defaultfor operatingsystem: %i[fedora centos redhat]
 
   has_feature :kindness
 
@@ -32,46 +35,40 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
     doc = REXML::Document.new(raw)
 
     constraints = doc.root.elements['configuration'].elements['constraints']
-    unless constraints.nil?
-      constraints.each_element('rsc_order') do |e|
-        items = e.attributes
+    constraints&.each_element('rsc_order') do |e|
+      items = e.attributes
 
-        first = if items['first-action']
-                  "#{items['first']}:#{items['first-action']}"
-                else
-                  items['first']
-                end
+      first = if items['first-action']
+                "#{items['first']}:#{items['first-action']}"
+              else
+                items['first']
+              end
 
-        second = if items['then-action']
-                   "#{items['then']}:#{items['then-action']}"
-                 else
-                   items['then']
-                 end
-        kind = if items['kind']
-                 items['kind']
+      second = if items['then-action']
+                 "#{items['then']}:#{items['then-action']}"
                else
-                 'Mandatory'
+                 items['then']
                end
+      kind = items['kind'] || 'Mandatory'
 
-        symmetrical = if items['symmetrical']
-                        (items['symmetrical'] == 'true')
-                      else
-                        # Default: symmetrical is true unless explicitly defined.
-                        true
-                      end
+      symmetrical = if items['symmetrical']
+                      (items['symmetrical'] == 'true')
+                    else
+                      # Default: symmetrical is true unless explicitly defined.
+                      true
+                    end
 
-        order_instance = {
-          name:        items['id'],
-          ensure:      :present,
-          first:       first,
-          second:      second,
-          kind:        kind,
-          symmetrical: symmetrical,
-          provider:    name,
-          new:         false
-        }
-        instances << new(order_instance)
-      end
+      order_instance = {
+        name: items['id'],
+        ensure: :present,
+        first: first,
+        second: second,
+        kind: kind,
+        symmetrical: symmetrical,
+        provider: name,
+        new: false
+      }
+      instances << new(order_instance)
     end
     instances
   end
@@ -80,13 +77,13 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
   # of actually doing the work.
   def create
     @property_hash = {
-      name:        @resource[:name],
-      ensure:      :present,
-      first:       @resource[:first],
-      second:      @resource[:second],
-      kind:        @resource[:kind],
+      name: @resource[:name],
+      ensure: :present,
+      first: @resource[:first],
+      second: @resource[:second],
+      kind: @resource[:kind],
       symmetrical: @resource[:symmetrical],
-      new:         true
+      new: true
     }
   end
 

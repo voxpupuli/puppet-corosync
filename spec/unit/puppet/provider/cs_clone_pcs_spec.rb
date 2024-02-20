@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 require 'spec_helper_corosync'
 
@@ -40,7 +42,7 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
       end
 
       it "is a kind of #{described_class.name}" do
-        expect(instance).to be_a_kind_of(described_class)
+        expect(instance).to be_a(described_class)
       end
 
       it "is named by the <primitive>'s id attribute" do
@@ -99,7 +101,7 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
       end
 
       it "is a kind of #{described_class.name}" do
-        expect(instance).to be_a_kind_of(described_class)
+        expect(instance).to be_a(described_class)
       end
 
       it "is named by the <primitive>'s id attribute" do
@@ -119,10 +121,10 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
   context 'when flushing' do
     let :resource do
       Puppet::Type.type(:cs_clone).new(
-        name:      'p_keystone-clone',
+        name: 'p_keystone-clone',
         primitive: 'p_keystone',
-        provider:  :pcs,
-        ensure:    :present
+        provider: :pcs,
+        ensure: :present
       )
     end
 
@@ -180,19 +182,19 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
 
   context 'when changing clone id' do
     def clone_xml(name)
-      <<-EOS
-<clone id='#{name}'>
-  <primitive class='ocf' id='apache_service' provider='heartbeat' type='IPaddr2'>
-    <instance_attributes id='apache_service-instance_attributes'>
-      <nvpair id='apache_service-instance_attributes-ip' name='ip' value='172.16.210.101'/>
-      <nvpair id='apache_service-instance_attributes-cidr_netmask' name='cidr_netmask' value='24'/>
-    </instance_attributes>
-    <operations>
-      <op id='apache_service-monitor-interval-10s' interval='10s' name='monitor'/>
-    </operations>
-  </primitive>
-  <meta_attributes id='apache_service-clone-meta_attributes'/>
-</clone>
+      <<~EOS
+        <clone id='#{name}'>
+          <primitive class='ocf' id='apache_service' provider='heartbeat' type='IPaddr2'>
+            <instance_attributes id='apache_service-instance_attributes'>
+              <nvpair id='apache_service-instance_attributes-ip' name='ip' value='172.16.210.101'/>
+              <nvpair id='apache_service-instance_attributes-cidr_netmask' name='cidr_netmask' value='24'/>
+            </instance_attributes>
+            <operations>
+              <op id='apache_service-monitor-interval-10s' interval='10s' name='monitor'/>
+            </operations>
+          </primitive>
+          <meta_attributes id='apache_service-clone-meta_attributes'/>
+        </clone>
       EOS
     end
 

@@ -1,9 +1,12 @@
+# frozen_string_literal: true
+
 begin
   require 'puppet_x/voxpupuli/corosync/provider/pcs'
 rescue LoadError
   require 'pathname' # WORKAROUND #14073, #7788 and SERVER-973
   corosync = Puppet::Module.find('corosync')
   raise(LoadError, "Unable to find corosync module in modulepath #{Puppet[:basemodulepath] || Puppet[:modulepath]}") unless corosync
+
   require File.join corosync.path, 'lib/puppet_x/voxpupuli/corosync/provider/pcs'
 end
 
@@ -12,7 +15,7 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:pcs, parent: PuppetX::Voxpupuli::Co
         abstract corosync/pacemaker vs. keepalived. This provider will check the state
         of Corosync global defaults for resource options.'
 
-  defaultfor operatingsystem: [:fedora, :centos, :redhat]
+  defaultfor operatingsystem: %i[fedora centos redhat]
 
   # Path to the pcs binary for interacting with the cluster configuration.
   commands pcs: 'pcs'
@@ -31,9 +34,9 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:pcs, parent: PuppetX::Voxpupuli::Co
       rsc_defaults = { name: items['name'], value: items['value'] }
 
       rsc_defaults_instance = {
-        name:     rsc_defaults[:name],
-        ensure:   :present,
-        value:    rsc_defaults[:value],
+        name: rsc_defaults[:name],
+        ensure: :present,
+        value: rsc_defaults[:value],
         provider: name
       }
       instances << new(rsc_defaults_instance)
@@ -45,16 +48,16 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:pcs, parent: PuppetX::Voxpupuli::Co
   # of actually doing the work.
   def create
     @property_hash = {
-      name:   @resource[:name],
+      name: @resource[:name],
       ensure: :present,
-      value:  @resource[:value]
+      value: @resource[:value]
     }
   end
 
   # Unlike create we actually immediately delete the item.
   def destroy
     debug('Removing resource default')
-    cmd = [command(:pcs), 'resource', 'defaults', (@property_hash[:name]).to_s + '=']
+    cmd = [command(:pcs), 'resource', 'defaults', "#{@property_hash[:name]}="]
     self.class.run_command_in_cib(cmd, @resource[:cib])
     @property_hash.clear
   end
@@ -79,6 +82,7 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:pcs, parent: PuppetX::Voxpupuli::Co
   # as stdin for the pcs command.
   def flush
     return if @property_hash.empty?
+
     # clear this on properties, in case it's set from a previous
     # run of a different corosync type
     cmd = [command(:pcs), 'resource', 'defaults', "#{@property_hash[:name]}=#{@property_hash[:value]}"]

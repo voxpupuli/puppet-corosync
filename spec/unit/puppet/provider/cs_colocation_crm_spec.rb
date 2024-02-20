@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Puppet::Type.type(:cs_colocation).provider(:crm) do
@@ -38,8 +40,8 @@ describe Puppet::Type.type(:cs_colocation).provider(:crm) do
         instances.first
       end
 
-      it "should be a kind of #{described_class.name}" do
-        expect(instance).to be_a_kind_of(described_class)
+      it "is a kind of #{described_class.name}" do
+        expect(instance).to be_a(described_class)
       end
 
       it "is named by the <primitive>'s id attribute" do
@@ -64,16 +66,12 @@ describe Puppet::Type.type(:cs_colocation).provider(:crm) do
     def expect_update(pattern)
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
         Puppet::Util::SUIDManager.expects(:run_and_capture).with do |*args|
-          if args.slice(0..2) == %w[configure load update]
-            expect(File.read(args[3])).to match(pattern)
-          end
+          expect(File.read(args[3])).to match(pattern) if args.slice(0..2) == %w[configure load update]
           true
         end.at_least_once.returns(['', 0])
       else
         Puppet::Util::Execution.expects(:execute).with do |*args|
-          if args.slice(0..2) == %w[configure load update]
-            expect(File.read(args[3])).to match(pattern)
-          end
+          expect(File.read(args[3])).to match(pattern) if args.slice(0..2) == %w[configure load update]
           true
         end.at_least_once.returns(
           Puppet::Util::Execution::ProcessOutput.new('', 0)
@@ -84,10 +82,10 @@ describe Puppet::Type.type(:cs_colocation).provider(:crm) do
     context 'with 2 primitives' do
       let :resource do
         Puppet::Type.type(:cs_colocation).new(
-          name:       'first_with_second',
-          provider:   :crm,
+          name: 'first_with_second',
+          provider: :crm,
           primitives: %w[first second],
-          ensure:     :present
+          ensure: :present
         )
       end
 
@@ -130,10 +128,10 @@ describe Puppet::Type.type(:cs_colocation).provider(:crm) do
     context 'with 3 or more primitives' do
       let :resource do
         Puppet::Type.type(:cs_colocation).new(
-          name:       'first_with_second_with_third',
-          provider:   :crm,
+          name: 'first_with_second_with_third',
+          provider: :crm,
           primitives: %w[first second third],
-          ensure:     :present
+          ensure: :present
         )
       end
 

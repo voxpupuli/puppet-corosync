@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper_acceptance'
 
 # These tests are designed to ensure that the module, when ran with defaults,
@@ -22,7 +24,7 @@ J52cejAMVsP3ROOdxBv0HZIVVJ8NLBHNLFOHJEDtvzogLVplzmo59vPAdmQo6eIV
 japvs+0tdy9iwHj3z1ZME2Ntm/5TzG537e7Hb2zogatM9aBTUAWlZ1tpoaXuTH52
 J76GtqoIOh+CTeY/BMwBotdQdgeR0zvjE9FuLWkhTmRtVFhbVIzJbFlFuYq5d3LH
 NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
-  File.open('/tmp/ca.pem', 'w') { |f| f.write(cert) }
+  File.write('/tmp/ca.pem', cert)
   it 'with only cluster_name' do
     pp = <<-EOS
       file { '/tmp/ca.pem':

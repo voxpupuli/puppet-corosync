@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Puppet::Type.newtype(:cs_commit) do
   @doc = 'Final commit statement which triggers the synchronous application of
           all primitive changes which reference this CIB. Do not generate more
@@ -35,7 +37,7 @@ Puppet::Type.newtype(:cs_commit) do
     autos
   end
 
-  if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '4.0') < 0
+  if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '4.0').negative?
     autorequire(:cs_primitive) do
       resources_with_cib :cs_primitive
     end

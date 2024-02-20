@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Puppet::Type.newtype(:cs_clone) do
   @doc = "Type for manipulating corosync/pacemaker resource clone.
     More information on Corosync/Pacemaker colocation can be found here:
@@ -108,14 +110,15 @@ Puppet::Type.newtype(:cs_clone) do
 
   def unmunge_cs_primitive(name)
     name = name.split(':')[0]
-    name = name[3..-1] if name.start_with? 'ms_'
+    name = name[3..] if name.start_with? 'ms_'
 
     name
   end
 
   validate do
     return if self[:ensure] == :absent
-    mandatory_single_properties = [:primitive, :group]
+
+    mandatory_single_properties = %i[primitive group]
     has_should = mandatory_single_properties.select { |prop| should(prop) }
     raise Puppet::Error, "You cannot specify #{has_should.join(' and ')} on this type (only one)" if has_should.length > 1
     raise Puppet::Error, "You must specify #{mandatory_single_properties.join(' or ')}" if has_should.length != 1

@@ -1,3 +1,5 @@
+# frozen_string_literal: false
+
 require 'puppet/parameter/boolean'
 
 Puppet::Type.newtype(:cs_primitive) do
@@ -75,6 +77,7 @@ Puppet::Type.newtype(:cs_primitive) do
 
     munge do |value|
       return [value] if value.is_a?(String) || value.is_a?(Symbol)
+
       value
     end
 
@@ -220,9 +223,7 @@ Puppet::Type.newtype(:cs_primitive) do
       super(is.reject { |k| @resource[:unmanaged_metadata].include?(k) })
     end
 
-    # rubocop:disable Style/PredicateName
     def is_to_s(is)
-      # rubocop:enable Style/PredicateName
       super(is.reject { |k| @resource[:unmanaged_metadata].include?(k) })
     end
 
