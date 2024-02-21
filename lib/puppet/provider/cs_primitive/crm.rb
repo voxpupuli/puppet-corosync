@@ -24,7 +24,6 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
 
   defaultfor operatingsystem: [:ubuntu]
 
-
   # given an XML element (a <primitive> from cibadmin), produce a hash suitible
   # for creating a new provider instance.
   def self.element_to_hash(e)
