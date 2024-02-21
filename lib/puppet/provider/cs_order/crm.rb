@@ -21,6 +21,8 @@ Puppet::Type.type(:cs_order).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
 
   mk_resource_methods
 
+  defaultfor operatingsystem: [:ubuntu]
+
   def self.instances
     block_until_ready
 
