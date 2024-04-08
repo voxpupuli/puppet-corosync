@@ -30,12 +30,12 @@
 
 ### Data types
 
-* [`Corosync::ArrayRing`](#Corosync--ArrayRing)
+* [`Corosync::ArrayRing`](#Corosync--ArrayRing): Custom type for infinitely nestable arrays
 * [`Corosync::CryptoCipher`](#Corosync--CryptoCipher): Defines the allowed cipher types for secure corosync communication
-* [`Corosync::CryptoHash`](#Corosync--CryptoHash)
-* [`Corosync::IpStringIp`](#Corosync--IpStringIp)
-* [`Corosync::QuorumAlgorithm`](#Corosync--QuorumAlgorithm)
-* [`Corosync::Syslogpriority`](#Corosync--Syslogpriority)
+* [`Corosync::CryptoHash`](#Corosync--CryptoHash): Custom type for possible crypto hashes
+* [`Corosync::IpStringIp`](#Corosync--IpStringIp): Custom type for string <-> array of string variants
+* [`Corosync::QuorumAlgorithm`](#Corosync--QuorumAlgorithm): Custom type for quorumalgorithm enum
+* [`Corosync::Syslogpriority`](#Corosync--Syslogpriority): Custom type for syslog priority enum
 
 ## Classes
 
@@ -76,8 +76,10 @@ The following parameters are available in the `corosync` class:
 * [`authkey`](#-corosync--authkey)
 * [`crypto_hash`](#-corosync--crypto_hash)
 * [`crypto_cipher`](#-corosync--crypto_cipher)
+* [`config_validate_cmd`](#-corosync--config_validate_cmd)
 * [`threads`](#-corosync--threads)
 * [`bind_address`](#-corosync--bind_address)
+* [`pcs_version`](#-corosync--pcs_version)
 * [`port`](#-corosync--port)
 * [`multicast_address`](#-corosync--multicast_address)
 * [`unicast_addresses`](#-corosync--unicast_addresses)
@@ -137,11 +139,8 @@ The following parameters are available in the `corosync` class:
 * [`clear_node_high_bit`](#-corosync--clear_node_high_bit)
 * [`max_messages`](#-corosync--max_messages)
 * [`test_corosync_config`](#-corosync--test_corosync_config)
-* [`test_corosync_config_cmd`](#-corosync--test_corosync_config_cmd)
 * [`watchdog_device`](#-corosync--watchdog_device)
 * [`provider`](#-corosync--provider)
-* [`config_validate_cmd`](#-corosync--config_validate_cmd)
-* [`pcs_version`](#-corosync--pcs_version)
 
 ##### <a name="-corosync--enable_secauth"></a>`enable_secauth`
 
@@ -187,6 +186,14 @@ values are none, aes256, aes192, aes128, and 3des
 
 Default value: `'aes256'`
 
+##### <a name="-corosync--config_validate_cmd"></a>`config_validate_cmd`
+
+Data type: `String[1]`
+
+
+
+Default value: `'/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'`
+
 ##### <a name="-corosync--threads"></a>`threads`
 
 Data type: `Optional[Integer]`
@@ -205,6 +212,14 @@ The ip address we are going to bind the corosync daemon too.
 Can be specified as an array to have multiple rings.
 
 Default value: `$corosync::params::bind_address`
+
+##### <a name="-corosync--pcs_version"></a>`pcs_version`
+
+Data type: `String`
+
+
+
+Default value: `''`
 
 ##### <a name="-corosync--port"></a>`port`
 
@@ -774,10 +789,6 @@ Whether we should test new configuration files with `corosync -t`.
 
 Default value: `$corosync::params::test_corosync_config`
 
-##### <a name="-corosync--test_corosync_config_cmd"></a>`test_corosync_config_cmd`
-
-Override the standard config_validate_cmd which only works for corosync 2.x.
-
 ##### <a name="-corosync--watchdog_device"></a>`watchdog_device`
 
 Data type: `Optional[Variant[Stdlib::Absolutepath, Enum['off']]]`
@@ -794,22 +805,6 @@ Data type: `Enum['pcs', 'crm']`
 What command line utility provides corosync configuration capabilities.
 
 Default value: `'pcs'`
-
-##### <a name="-corosync--config_validate_cmd"></a>`config_validate_cmd`
-
-Data type: `String[1]`
-
-
-
-Default value: `'/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'`
-
-##### <a name="-corosync--pcs_version"></a>`pcs_version`
-
-Data type: `String`
-
-
-
-Default value: `''`
 
 ### <a name="corosync--params"></a>`corosync::params`
 
@@ -1802,7 +1797,7 @@ discover the appropriate provider for your platform.
 
 ### <a name="Corosync--ArrayRing"></a>`Corosync::ArrayRing`
 
-The Corosync::ArrayRing data type.
+Custom type for infinitely nestable arrays
 
 Alias of
 
@@ -1820,13 +1815,13 @@ Alias of `Enum['aes256', 'aes192', 'aes128', '3des']`
 
 ### <a name="Corosync--CryptoHash"></a>`Corosync::CryptoHash`
 
-The Corosync::CryptoHash data type.
+Custom type for possible crypto hashes
 
 Alias of `Enum['md5', 'sha1', 'sha256', 'sha384', 'sha512']`
 
 ### <a name="Corosync--IpStringIp"></a>`Corosync::IpStringIp`
 
-The Corosync::IpStringIp data type.
+Custom type for string <-> array of string variants
 
 Alias of
 
@@ -1838,13 +1833,13 @@ Variant[Stdlib::IP::Address, Array[
 
 ### <a name="Corosync--QuorumAlgorithm"></a>`Corosync::QuorumAlgorithm`
 
-The Corosync::QuorumAlgorithm data type.
+Custom type for quorumalgorithm enum
 
 Alias of `Enum['ffsplit', 'lms']`
 
 ### <a name="Corosync--Syslogpriority"></a>`Corosync::Syslogpriority`
 
-The Corosync::Syslogpriority data type.
+Custom type for syslog priority enum
 
 Alias of `Enum['debug', 'info', 'notice', 'warning', 'err', 'alert', 'emerg', 'crit']`
 
