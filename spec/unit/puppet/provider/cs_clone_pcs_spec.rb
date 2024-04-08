@@ -186,14 +186,14 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
     end
 
     it 'sets max promoted' do
-      instance.resource[:promotable_max] = 3
-      expect_commands(%r{promotable-max=3})
+      instance.resource[:promoted_max] = 3
+      expect_commands(%r{promoted-max=3})
       instance.flush
     end
 
     it 'sets max node promotable' do
-      instance.resource[:promotable_node_max] = 3
-      expect_commands(%r{promotable-node-max=3})
+      instance.resource[:promoted_node_max] = 3
+      expect_commands(%r{promoted-node-max=3})
       instance.flush
     end
   end
