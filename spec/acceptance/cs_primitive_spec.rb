@@ -328,7 +328,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
             },
           }
       EOS
-      if $facts['os']['family'] == 'RedHat'
+      if fact('os.family') == 'RedHat'
         apply_manifest(pp, catch_failures: true, debug: false, trace: true)
         apply_manifest(pp, catch_changes: true, debug: false, trace: true)
         shell('pcs stonith show') do |r|
