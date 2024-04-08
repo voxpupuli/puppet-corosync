@@ -30,7 +30,7 @@ describe Puppet::Type.type(:cs_clone) do
     end
 
     %i[primitive clone_max clone_node_max notify_clones globally_unique
-       ordered interleave].each do |property|
+       ordered interleave promotable promoted_max promoted_node_max].each do |property|
       it "has a #{property} property" do
         expect(subject).to be_validproperty(property)
       end
@@ -42,7 +42,7 @@ describe Puppet::Type.type(:cs_clone) do
   end
 
   describe 'when validating attributes' do
-    %i[notify_clones globally_unique ordered interleave].each do |attribute|
+    %i[notify_clones globally_unique ordered interleave promotable].each do |attribute|
       it "validates that the #{attribute} attribute can be true/false" do
         [true, false].each do |value|
           expect(subject.new(

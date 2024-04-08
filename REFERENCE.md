@@ -1048,6 +1048,31 @@ Default value: `absent`
 
 The corosync resource primitive to be cloned.
 
+##### `promotable`
+
+Valid values: `true`, `false`, `absent`
+
+If true, clone instances can perform a special role that Pacemaker will manage via the resource agent’s
+promote and demote actions. The resource agent must support these actions. Allowed values: false, true
+
+Default value: `absent`
+
+##### `promoted_max`
+
+Valid values: `%r{\d+}`, `absent`
+
+If promotable is true, the number of instances that can be promoted at one time across the entire cluster
+
+Default value: `absent`
+
+##### `promoted_node_max`
+
+Valid values: `%r{\d+}`, `absent`
+
+If promotable is true and globally-unique is false, the number of clone instances can be promoted at one time on a single node
+
+Default value: `absent`
+
 #### Parameters
 
 The following parameters are available in the `cs_clone` type.

@@ -193,5 +193,23 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
       expect_update(%r{\sinterleave=true})
       instance.flush
     end
+
+    it 'sets promotable' do
+      instance.resource[:interleave] = :true
+      expect_update(%r{\spromotable=true})
+      instance.flush
+    end
+
+    it 'sets max promoted' do
+      instance.resource[:promoted_max] = 3
+      expect_update(%r{\spromoted-max=3})
+      instance.flush
+    end
+
+    it 'sets max node promoted' do
+      instance.resource[:promoted_node_max] = 3
+      expect_update(%r{\spromoted-node-max=3})
+      instance.flush
+    end
   end
 end
