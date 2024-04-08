@@ -64,7 +64,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     pp = <<-EOS
       cs_location { 'duncan_vip_there':
         primitive => 'duncan_vip',
-        node_name => $::hostname,
+        node_name => $facts['networking']['hostname'],
         score     => 'INFINITY',
       }
     EOS
@@ -93,7 +93,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
       cs_location { 'duncan_vip_there':
         primitive          => 'duncan_vip',
         resource_discovery => 'exclusive',
-        node_name          => $::hostname,
+        node_name          => $facts['networking']['hostname'],
         score              => 'INFINITY',
       }
     EOS
