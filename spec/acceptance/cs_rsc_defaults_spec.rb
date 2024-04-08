@@ -3,7 +3,7 @@
 require 'spec_helper_acceptance'
 
 describe 'corosync' do
-  if fact('osfamily') == 'Debian'
+  if $facts['os']['family'] == 'Debian'
     cert = '-----BEGIN CERTIFICATE-----
 MIIDVzCCAj+gAwIBAgIJAJNCo5ZPmKegMA0GCSqGSIb3DQEBBQUAMEIxCzAJBgNV
 BAYTAlhYMRUwEwYDVQQHDAxEZWZhdWx0IENpdHkxHDAaBgNVBAoME0RlZmF1bHQg
