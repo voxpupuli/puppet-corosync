@@ -1,4 +1,8 @@
 ---
+.puppet-lint.rc:
+  enabled_lint_checks:
+    - parameter_documentation
+    - parameter_types
 .travis.yml:
   docker_sets:
     - set: centos7-64

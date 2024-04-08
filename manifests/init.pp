@@ -24,6 +24,8 @@
 #   Encryption cipher used by corosync for intra-cluster communication. Valid
 #   values are none, aes256, aes192, aes128, and 3des
 #
+# @param config_validate_cmd
+#
 # @param threads
 #   How many threads you are going to let corosync use to encode and decode
 #   multicast messages.  If you turn off secauth then corosync will ignore
@@ -32,6 +34,8 @@
 # @param bind_address
 #   The ip address we are going to bind the corosync daemon too.
 #   Can be specified as an array to have multiple rings.
+#
+# @param pcs_version
 #
 # @param port
 #   The UDP port that corosync will use to do its multicast communication. Be
@@ -305,9 +309,6 @@
 # @param test_corosync_config
 #   Whether we should test new configuration files with `corosync -t`.
 #   (requires corosync 2.3.4)
-#
-# @param test_corosync_config_cmd
-#   Override the standard config_validate_cmd which only works for corosync 2.x.
 #
 # @param watchdog_device
 #   Watchdog device to use, for example '/dev/watchdog' or 'off'.
