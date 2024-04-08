@@ -105,7 +105,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
   end
 
-  if fact('osfamily') == 'RedHat'
+  if fact('os.family') == 'RedHat'
     it 'creates a simple order constraint with Mandatory as kind' do
       shell('cibadmin --query | grep first_then_two') do |r|
         expect(r.stdout).to match(%r{kind="Mandatory"})
@@ -165,7 +165,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
     end
   end
 
-  if fact('osfamily') == 'RedHat'
+  if fact('os.family') == 'RedHat'
     it 'creates a more complex order constraint with Optional as kind' do
       shell('cibadmin --query | grep one_then_two_complex') do |r|
         expect(r.stdout).to match(%r{kind="Optional"})
