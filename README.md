@@ -31,7 +31,7 @@ providers).
 ```puppet
 class { 'corosync':
   authkey        => '/var/lib/puppet/ssl/certs/ca.pem',
-  bind_address   => $::ipaddress,
+  bind_address   => $facts['networking']['ip'],
   cluster_name   => 'mycluster',
   enable_secauth => true,
 }
