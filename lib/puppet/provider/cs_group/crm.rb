@@ -1,5 +1,3 @@
-# frozen_string_literal: true
-
 begin
   require 'puppet_x/voxpupuli/corosync/provider/crmsh'
 rescue LoadError
