@@ -1,4 +1,0 @@
----
-nodesets:
-  - 'trusty'
-  - 'centos7'
