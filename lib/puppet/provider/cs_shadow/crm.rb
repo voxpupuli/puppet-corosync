@@ -19,7 +19,7 @@ Puppet::Type.type(:cs_shadow).provide(:crm, parent: PuppetX::Voxpupuli::Corosync
   commands cibadmin: 'cibadmin'
   commands crm: 'crm'
 
-  defaultfor operatingsystem: [:ubuntu]
+  defaultfor 'os.family': [:ubuntu]
 
   def self.instances
     block_until_ready(120, true)

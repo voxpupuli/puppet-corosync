@@ -26,7 +26,7 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
 
   mk_resource_methods
 
-  defaultfor operatingsystem: [:ubuntu]
+  defaultfor 'os.family': [:ubuntu]
 
   # we need to check if we run at least pacemakerd version 1.1.13 before enabling feature discovery
   # see http://blog.clusterlabs.org/blog/2014/feature-spotlight-controllable-resource-discovery

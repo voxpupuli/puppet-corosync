@@ -14,7 +14,7 @@ Puppet::Type.type(:cs_group).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
   # Path to the crm binary for interacting with the cluster configuration.
   commands crm: '/usr/sbin/crm'
 
-  defaultfor operatingsystem: [:ubuntu]
+  defaultfor 'os.family': [:ubuntu]
 
   def self.instances
     block_until_ready

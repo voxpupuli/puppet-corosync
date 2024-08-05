@@ -20,7 +20,7 @@ Puppet::Type.type(:cs_colocation).provide(:crm, parent: PuppetX::Voxpupuli::Coro
   # Decided to just go with relative.
   commands crm: 'crm'
 
-  defaultfor operatingsystem: [:ubuntu]
+  defaultfor 'os.family': [:ubuntu]
 
   def self.instances
     block_until_ready
