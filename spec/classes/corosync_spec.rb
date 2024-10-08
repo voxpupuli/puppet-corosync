@@ -731,7 +731,7 @@ describe 'corosync' do
           case os_facts[:os]['release']['major'].to_i
           when 0..7
             is_expected.to contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
-             '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
+              '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
             )
           else
             is_expected.to contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
