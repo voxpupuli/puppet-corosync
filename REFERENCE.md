@@ -443,7 +443,7 @@ Default value: `$corosync::params::package_install_options`
 
 ##### <a name="-corosync--highavailability_repo"></a>`highavailability_repo`
 
-Data type: `String[1]`
+Data type: `Optional[String]`
 
 Whether the module should enable the corosync service.
 
