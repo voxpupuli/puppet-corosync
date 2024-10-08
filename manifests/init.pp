@@ -407,7 +407,7 @@ class corosync (
   Optional[Variant[Stdlib::Absolutepath, Enum['off']]] $watchdog_device = undef,
   Enum['pcs', 'crm'] $provider                                          = 'pcs',
   String $pcs_version                                                   = '', # lint:ignore:params_empty_string_assignment
-  String[1] $highavailability_repo                                      = unfed
+  String[1] $highavailability_repo                                      = undef,
 ) inherits corosync::params {
   if $set_votequorum and (empty($quorum_members) and empty($multicast_address) and !$cluster_name) {
     fail('set_votequorum is true, so you must set either quorum_members, or one of multicast_address or cluster_name.')
