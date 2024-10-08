@@ -104,6 +104,7 @@ The following parameters are available in the `corosync` class:
 * [`packageopts_pacemaker`](#-corosync--packageopts_pacemaker)
 * [`packageopts_pcs`](#-corosync--packageopts_pcs)
 * [`packageopts_fence_agents`](#-corosync--packageopts_fence_agents)
+* [`highavailability_repo`](#-corosync--highavailability_repo)
 * [`ensure_corosync`](#-corosync--ensure_corosync)
 * [`ensure_crmsh`](#-corosync--ensure_crmsh)
 * [`ensure_pacemaker`](#-corosync--ensure_pacemaker)
@@ -141,10 +142,6 @@ The following parameters are available in the `corosync` class:
 * [`test_corosync_config`](#-corosync--test_corosync_config)
 * [`watchdog_device`](#-corosync--watchdog_device)
 * [`provider`](#-corosync--provider)
-* [`highavailability_repo`](#-corosync--highavailability_repo)
-
-
-
 
 ##### <a name="-corosync--enable_secauth"></a>`enable_secauth`
 
@@ -194,13 +191,9 @@ Default value: `'aes256'`
 
 Data type: `String[1]`
 
+
+
 Default value: `'/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'`
-
-##### <a name="-corosync--highavailability_repo"></a>`highavailability_repo`
-
-Data type: `String[1]`
-
-Default value: `undef`
 
 ##### <a name="-corosync--threads"></a>`threads`
 
@@ -447,6 +440,14 @@ Additional install-options for the pcs package resource.
 Default:      undef
 
 Default value: `$corosync::params::package_install_options`
+
+##### <a name="-corosync--highavailability_repo"></a>`highavailability_repo`
+
+Data type: `String[1]`
+
+Whether the module should enable the corosync service.
+
+Default value: `undef`
 
 ##### <a name="-corosync--ensure_corosync"></a>`ensure_corosync`
 
@@ -1835,8 +1836,8 @@ Custom type for infinitely nestable arrays
 Alias of
 
 ```puppet
-Variant[Array[Stdlib::IP::Address], Array[
-    Array[Stdlib::IP::Address]
+Variant[Array[Stdlib::IP::Address], Array[
+    Array[Stdlib::IP::Address]
   ]]
 ```
 
@@ -1859,8 +1860,8 @@ Custom type for string <-> array of string variants
 Alias of
 
 ```puppet
-Variant[Stdlib::IP::Address, Array[
-    Stdlib::IP::Address
+Variant[Stdlib::IP::Address, Array[
+    Stdlib::IP::Address
   ]]
 ```
 
