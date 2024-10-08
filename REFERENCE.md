@@ -1836,8 +1836,8 @@ Custom type for infinitely nestable arrays
 Alias of
 
 ```puppet
-Variant[Array[Stdlib::IP::Address], Array[
-    Array[Stdlib::IP::Address]
+Variant[Array[Stdlib::IP::Address], Array[
+    Array[Stdlib::IP::Address]
   ]]
 ```
 
@@ -1860,8 +1860,8 @@ Custom type for string <-> array of string variants
 Alias of
 
 ```puppet
-Variant[Stdlib::IP::Address, Array[
-    Stdlib::IP::Address
+Variant[Stdlib::IP::Address, Array[
+    Stdlib::IP::Address
   ]]
 ```
 
