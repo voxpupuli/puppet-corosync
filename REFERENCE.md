@@ -104,6 +104,7 @@ The following parameters are available in the `corosync` class:
 * [`packageopts_pacemaker`](#-corosync--packageopts_pacemaker)
 * [`packageopts_pcs`](#-corosync--packageopts_pcs)
 * [`packageopts_fence_agents`](#-corosync--packageopts_fence_agents)
+* [`highavailability_repo`](#-corosync--highavailability_repo)
 * [`ensure_corosync`](#-corosync--ensure_corosync)
 * [`ensure_crmsh`](#-corosync--ensure_crmsh)
 * [`ensure_pacemaker`](#-corosync--ensure_pacemaker)
@@ -439,6 +440,14 @@ Additional install-options for the pcs package resource.
 Default:      undef
 
 Default value: `$corosync::params::package_install_options`
+
+##### <a name="-corosync--highavailability_repo"></a>`highavailability_repo`
+
+Data type: `String[1]`
+
+Whether the module should enable the corosync service.
+
+Default value: `unfed`
 
 ##### <a name="-corosync--ensure_corosync"></a>`ensure_corosync`
 
