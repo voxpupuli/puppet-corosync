@@ -136,6 +136,9 @@
 #   Additional install-options for the pcs package resource.
 #   Default:      undef
 #
+# @param #highavailability_repo
+#   Whether the module should enable the corosync service.
+#
 # @param ensure_corosync
 #   Define what version of the corosync package should be installed.
 #   Default: 'present'
@@ -404,6 +407,7 @@ class corosync (
   Optional[Variant[Stdlib::Absolutepath, Enum['off']]] $watchdog_device = undef,
   Enum['pcs', 'crm'] $provider                                          = 'pcs',
   String $pcs_version                                                   = '', # lint:ignore:params_empty_string_assignment
+  String[1] $highavailability_repo                                      = unfed
 ) inherits corosync::params {
   if $set_votequorum and (empty($quorum_members) and empty($multicast_address) and !$cluster_name) {
     fail('set_votequorum is true, so you must set either quorum_members, or one of multicast_address or cluster_name.')
@@ -415,6 +419,29 @@ class corosync (
 
   if $quorum_members_ids and empty($quorum_members) {
     fail('quorum_members_ids may not be used without the quorum_members.')
+  }
+
+  # Enable High Availability repository
+  case $facts['os']['name'] {
+    'RedHat': {
+      if $facts['os']['release']['major'] > 7 {
+        exec { 'enable_highavailability_repo':
+          command => "subscription-manager repos --enable=${highavailability_repo}",
+          path    => '/usr/bin:/usr/sbin:/bin:/sbin',
+          unless  => "yum repolist enabled | grep -q ${highavailability_repo}",
+        }
+      }
+    }
+    'CentOS': {
+      if $facts['os']['release']['major'] == 9 {
+        exec { 'enable_highavailability_repo':
+          command => "yum config-manager --set-enabled ${highavailability_repo}",
+          path    => '/usr/bin:/usr/sbin:/bin:/sbin',
+          unless  => "yum repolist enabled | grep -q ${highavailability_repo}",
+        }
+      }
+    }
+    default: {}
   }
 
   if $package_corosync {
