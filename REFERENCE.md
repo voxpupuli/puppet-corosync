@@ -141,6 +141,10 @@ The following parameters are available in the `corosync` class:
 * [`test_corosync_config`](#-corosync--test_corosync_config)
 * [`watchdog_device`](#-corosync--watchdog_device)
 * [`provider`](#-corosync--provider)
+* [`highavailability_repo`](#-corosync--highavailability_repo)
+
+
+
 
 ##### <a name="-corosync--enable_secauth"></a>`enable_secauth`
 
@@ -190,9 +194,13 @@ Default value: `'aes256'`
 
 Data type: `String[1]`
 
-
-
 Default value: `'/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'`
+
+##### <a name="-corosync--highavailability_repo"></a>`highavailability_repo`
+
+Data type: `String[1]`
+
+Default value: `undef`
 
 ##### <a name="-corosync--threads"></a>`threads`
 
