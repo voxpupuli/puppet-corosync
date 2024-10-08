@@ -447,7 +447,7 @@ Data type: `String[1]`
 
 Whether the module should enable the corosync service.
 
-Default value: `unfed`
+Default value: `undef`
 
 ##### <a name="-corosync--ensure_corosync"></a>`ensure_corosync`
 
