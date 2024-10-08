@@ -136,7 +136,7 @@
 #   Additional install-options for the pcs package resource.
 #   Default:      undef
 #
-# @param #highavailability_repo
+# @param highavailability_repo
 #   Whether the module should enable the corosync service.
 #
 # @param ensure_corosync
