@@ -250,15 +250,13 @@ describe 'corosync' do
         it 'supports persistent node IDs' do
           params[:quorum_members_ids] = [3, 11]
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{nodelist\s*\{}   # Match the presence of the word 'nodelist'
+            %r{nodelist\s*\{}
           )
-          
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{^\s*ring0_addr:\s*node1\.test\.org(?:\r\n|\n)\s*nodeid:\s*3}   # Match 'node1.test.org' with 'nodeid 3'
+            %r{^\s*ring0_addr:\s*node1\.test\.org(?:\r\n|\n)\s*nodeid:\s*3}
           )
-          
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{^\s*ring0_addr:\s*node2\.test\.org(?:\r\n|(?:\r\n|\n))\s*nodeid:\s*11}  # Match 'node2.test.org' with 'nodeid 11'
+            %r{^\s*ring0_addr:\s*node2\.test\.org(?:\r\n|(?:\r\n|\n))\s*nodeid:\s*11}
           )
         end
 
@@ -537,9 +535,7 @@ describe 'corosync' do
         end
 
         it 'is set in corosync.conf' do
-          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{#{optional_parameter.to_s}:\s*#{Regexp.escape(possible_value.to_s)}\s*\n}
-          )
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(%r{#{optional_parameter}:\s*#{Regexp.escape(possible_value.to_s)}\s*\n})
         end
       end
     end
@@ -979,19 +975,19 @@ describe 'corosync' do
             it 'contains the quorum configuration' do
               is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
                 %r{
-                  quorum\s*\{                       # Match 'quorum {' with optional spaces
-                  \s*provider:\s*corosync_votequorum  # Match 'provider: corosync_votequorum'
-                  \s*device\s*\{                    # Match 'device {' with optional spaces
-                  \s*model:\s*net                   # Match 'model: net'
-                  \s*votes:\s*1                     # Match 'votes: 1'
-                  \s*                                # Match optional empty line
-                  \s*net\s*\{                       # Match 'net {' with optional spaces
-                  \s*algorithm:\s*ffsplit           # Match 'algorithm: ffsplit'
-                  \s*host:\s*quorum1\.test\.org     # Match 'host: quorum1.test.org'
-                  \s*\}                             # Match closing '}' for 'net'
-                  \s*\}                             # Match closing '}' for 'device'
-                  \s*\}                             # Match closing '}' for 'quorum'
-                }x                                  # 'x' modifier allows free-spacing and comments
+                  quorum\s*\{
+                  \s*provider:\s*corosync_votequorum
+                  \s*device\s*\{
+                  \s*model:\s*net
+                  \s*votes:\s*1
+                  \s*
+                  \s*net\s*\{
+                  \s*algorithm:\s*ffsplit
+                  \s*host:\s*quorum1\.test\.org
+                  \s*\}
+                  \s*\}
+                  \s*\}
+                }x
               )
             end
 
@@ -1068,18 +1064,18 @@ describe 'corosync' do
               it 'contains the quorum configuration' do
                 is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
                   %r{
-                    quorum\s*\{                      # Match 'quorum {' with optional spaces
+                    quorum\s*\{
                       \s*provider:\s*corosync_votequorum  # Match 'provider: corosync_votequorum'
-                      \s*device\s*\{                 # Match 'device {' with optional spaces
-                        \s*model:\s*net              # Match 'model: net'
-                        \s*votes:\s*1                # Match 'votes: 1'
-                        \s*net\s*\{                  # Match 'net {' with optional spaces
-                          \s*algorithm:\s*ffsplit    # Match 'algorithm: ffsplit'
-                          \s*host:\s*quorum1\.test\.org  # Match 'host: quorum1.test.org'
-                        \s*\}                        # Match closing '}' for 'net'
-                      \s*\}                          # Match closing '}' for 'device'
-                    \s*\}                            # Match closing '}' for 'quorum'
-                  }x                                 # 'x' modifier allows free-spacing and comments
+                      \s*device\s*\{
+                        \s*model:\s*net
+                        \s*votes:\s*1
+                        \s*net\s*\{
+                          \s*algorithm:\s*ffsplit
+                          \s*host:\s*quorum1\.test\.org
+                        \s*\}
+                      \s*\}
+                    \s*\}
+                  }x
                 )
               end
             end
