@@ -102,7 +102,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'creates the vip resource in the cib' do
-    command = if fact('default_provider') == 'pcs' && fact('os.name') != 'Ubuntu'
+    command = if fact('default_provider') == 'pcs'
                 if Gem::Version.new(fact('pcs_version')) < Gem::Version.new('0.10.0')
                   'pcs resource show'
                 else
@@ -139,7 +139,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'creates the vip resource in the shadow cib' do
-    command = if fact('default_provider') == 'pcs' && fact('os.name') != 'Ubuntu'
+    command = if fact('default_provider') == 'pcs'
                 if Gem::Version.new(fact('pcs_version')) < Gem::Version.new('0.10.0')
                   "pcs resource show -f #{pcs_shadow_cib}"
                 else
@@ -154,7 +154,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'creates the service resource in the shadow cib' do
-    command = if fact('default_provider') == 'pcs' && fact('os.name') != 'Ubuntu'
+    command = if fact('default_provider') == 'pcs'
                 if Gem::Version.new(fact('pcs_version')) < Gem::Version.new('0.10.0')
                   "pcs resource show -f #{pcs_shadow_cib}"
                 else
@@ -169,7 +169,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'creates the colocation in the shadow cib and apache2_vip is the "with" resource' do
-    command = if fact('default_provider') == 'pcs' && fact('os.name') != 'Ubuntu'
+    command = if fact('default_provider') == 'pcs'
                 "pcs cluster cib -f #{pcs_shadow_cib} | grep apache2_vip_with_service"
               else
                 'CIB_shadow=puppet cibadmin --query | grep apache2_vip_with_service'
@@ -180,7 +180,7 @@ NWyN0RsTXFaqowV1/HSyvfD7LoF/CrmN5gOAM3Ierv/Ti9uqGVhdGBd/kw=='
   end
 
   it 'creates the colocation in the shadow cib and apache2_service is the main resource' do
-    command = if fact('default_provider') == 'pcs' && fact('os.name') != 'Ubuntu'
+    command = if fact('default_provider') == 'pcs'
                 "pcs cluster cib -f #{pcs_shadow_cib} | grep apache2_vip_with_service"
               else
                 'CIB_shadow=puppet cibadmin --query | grep apache2_vip_with_service'

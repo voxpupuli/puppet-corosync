@@ -16,7 +16,7 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, parent: PuppetX::Voxpupuli::Coro
         of current primitive colocations on the system; add, delete, or adjust various
         aspects.'
 
-  defaultfor operatingsystem: %i[fedora centos redhat]
+  defaultfor 'os.family' => %i[redhat debian]
 
   commands pcs: 'pcs'
 

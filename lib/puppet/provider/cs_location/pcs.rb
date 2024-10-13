@@ -16,7 +16,7 @@ Puppet::Type.type(:cs_location).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
         of current primitive locations on the system; add, delete, or adjust various
         aspects.'
 
-  defaultfor operatingsystem: %i[fedora centos redhat]
+  defaultfor 'os.family' => %i[redhat debian]
   has_feature :discovery
 
   commands pcs: 'pcs'

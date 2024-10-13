@@ -13,7 +13,7 @@ end
 Puppet::Type.type(:cs_group).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync::Provider::Pcs) do
   desc 'Provider to add, delete, manipulate primitive groups.'
 
-  defaultfor operatingsystem: %i[fedora centos redhat]
+  defaultfor 'os.family' => %i[redhat debian]
 
   # Path to the pcs binary for interacting with the cluster configuration.
   commands pcs: '/usr/sbin/pcs'

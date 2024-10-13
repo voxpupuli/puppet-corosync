@@ -15,7 +15,7 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:pcs, parent: PuppetX::Voxpupuli::Co
         abstract corosync/pacemaker vs. keepalived. This provider will check the state
         of Corosync global defaults for resource options.'
 
-  defaultfor operatingsystem: %i[fedora centos redhat]
+  defaultfor 'os.family' => %i[redhat debian]
 
   # Path to the pcs binary for interacting with the cluster configuration.
   commands pcs: 'pcs'

@@ -23,7 +23,7 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
 
   mk_resource_methods
 
-  defaultfor operatingsystem: %i[fedora centos redhat]
+  defaultfor 'os.family' => %i[redhat debian]
 
   # given an XML element (a <primitive> from cibadmin), produce a hash suitible
   # for creating a new provider instance.
