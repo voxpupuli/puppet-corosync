@@ -62,13 +62,13 @@ describe 'corosync' do
             %r{nodelist}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr: node1\.test\.org\n\s*nodeid: 1}
+            %r{^\s*ring0_addr:\s*node1\.test\.org\s*(?:\r\n|\n)\s*nodeid:\s*1\s*}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr: node2\.test\.org\n\s*nodeid: 2}
+            %r{^\s*ring0_addr:\s*node2\.test\.org\s*(?:\r\n|\n)\s*nodeid:\s*2\s*}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{two_node: 1\n}
+            %r{^\s*two_node:\s*1}
           )
         end
 
@@ -80,10 +80,10 @@ describe 'corosync' do
               %r{nodelist}
             )
             is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-              %r{ring0_addr: node1\.test\.org\n\s*nodeid: 3}
+              %r{^\s*ring0_addr:\s*node1\.test\.org\s*(?:\r\n|\n)\s*nodeid:\s*3}
             )
             is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-              %r{ring0_addr: node2\.test\.org\n\s*nodeid: 11}
+              %r{^\s*ring0_addr:\s*node2\.test\.org\s*(?:\r\n|\n)\s*nodeid:\s*11}
             )
           end
         end
@@ -101,10 +101,10 @@ describe 'corosync' do
               %r{nodelist}
             )
             is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-              %r{ring0_addr: 192\.168\.0\.1\n\s*nodeid: 1\n\s*name: node1\.test\.org}
+              %r{^\s*ring0_addr:\s*192\.168\.0\.1(?:\r\n|\n)\s*nodeid:\s*1(?:\r\n|\n)\s*name:\s*node1\.test\.org}
             )
             is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-              %r{ring0_addr: 192\.168\.0\.2\n\s*nodeid: 2\n\s*name: node2\.test\.org}
+              %r{^\s*ring0_addr:\s*192\.168\.0\.2(?:\r\n|\n)\s*nodeid:\s*2(?:\r\n|\n)\s*name:\s*node2\.test\.org}
             )
           end
         end
@@ -120,7 +120,7 @@ describe 'corosync' do
 
         it 'does not configure two_nodes option' do
           is_expected.not_to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{two_node: 1\n}
+            %r{^\s*two_node:\s*1}
           )
         end
       end
@@ -134,7 +134,7 @@ describe 'corosync' do
 
         it 'configures two_node' do
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{two_node: 1\n}
+            %r{^\s*two_node:\s*1}
           )
         end
       end
@@ -152,13 +152,13 @@ describe 'corosync' do
             %r{nodelist}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr: node1\.test\.org\n\s*nodeid: 1}
+            %r{^\s*ring0_addr:\s*node1\.test\.org(?:\r\n|\n)\s*nodeid:\s*1}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr: node2\.test\.org\n\s*nodeid: 2}
+            %r{^\s*ring0_addr:\s*node2\.test\.org(?:\r\n|\n)\s*nodeid:\s*2}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{two_node: 1\n}
+            %r{^\s*two_node:\s*1}
           )
         end
       end
@@ -178,14 +178,14 @@ describe 'corosync' do
         (1..4).each do |node_id|
           it "configures rings for host #{node_id} correctly" do
             is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-              %r{ring0_addr: 172.31.10.#{node_id}\n\s*ring1_addr: 172.31.11.#{node_id}\n\s*ring2_addr: 172.31.12.#{node_id}\n\s*nodeid: #{node_id}}
+              %r{ring0_addr: 172.31.10.#{node_id}(?:\r\n|\n)\s*ring1_addr: 172.31.11.#{node_id}(?:\r\n|\n)\s*ring2_addr: 172.31.12.#{node_id}(?:\r\n|\n)\s*nodeid: #{node_id}}
             )
           end
         end
 
         it 'does not configure two_nodes option' do
           is_expected.not_to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{two_node: 1\n}
+            %r{^\s*two_node:\s*1}
           )
         end
       end
@@ -203,14 +203,14 @@ describe 'corosync' do
         (1..2).each do |node_id|
           it "configures rings for host #{node_id} correctly" do
             is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-              %r{ring0_addr: 172.31.10.#{node_id}\n\s*ring1_addr: 172.31.11.#{node_id}\n\s*ring2_addr: 172.31.12.#{node_id}\n\s*nodeid: #{node_id}}
+              %r{ring0_addr: 172.31.10.#{node_id}(?:\r\n|\n)\s*ring1_addr: 172.31.11.#{node_id}(?:\r\n|\n)\s*ring2_addr: 172.31.12.#{node_id}(?:\r\n|\n)\s*nodeid: #{node_id}}
             )
           end
         end
 
         it 'configures two_node' do
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{two_node: 1\n}
+            %r{^\s*two_node:\s*1}
           )
         end
       end
@@ -237,13 +237,13 @@ describe 'corosync' do
             %r{nodelist}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr: node1\.test\.org\n\s*nodeid: 1}
+            %r{^\s*ring0_addr: node1\.test\.org(?:\r\n|\n)\s*nodeid:\s*1}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr: node2\.test\.org\n\s*nodeid: 2}
+            %r{^\s*ring0_addr: node2\.test\.org(?:\r\n|\n)\s*nodeid:\s*2}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{two_node: 1\n}
+            %r{^\s*two_node:\s*1}
           )
         end
 
@@ -253,10 +253,10 @@ describe 'corosync' do
             %r{nodelist}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr: node1\.test\.org\n\s*nodeid: 3}
+            %r{^\s*ring0_addr:\s*node1\.test\.org(?:\r\n|\n)\s*nodeid:\s*3}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr: node2\.test\.org\n\s*nodeid: 11}
+            %r{^\s*ring0_addr:\s*node2\.test\.org(?:\r\n|(?:\r\n|\n))\s*nodeid:\s*11}
           )
         end
 
@@ -267,10 +267,10 @@ describe 'corosync' do
             %r{nodelist}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr: 192\.168\.0\.1\n\s*nodeid: 1\n\s*name: node1\.test\.org}
+            %r{^\s*ring0_addr: 192\.168\.0\.1(?:\r\n|\n)\s*nodeid:\s*1(?:\r\n|\n)\s*name:\s*node1\.test\.org}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{ring0_addr: 192\.168\.0\.2\n\s*nodeid: 2\n\s*name: node2\.test\.org}
+            %r{^\s*ring0_addr: 192\.168\.0\.2(?:\r\n|\n)\s*nodeid:\s*2(?:\r\n|\n)\s*name:\s*node2\.test\.org}
           )
         end
       end
@@ -331,7 +331,7 @@ describe 'corosync' do
 
       it 'configures cluster_name' do
         is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-          %r{cluster_name:\s*hacell$}
+          %r{^\s*cluster_name:\s*hacell}
         )
       end
     end
@@ -535,9 +535,7 @@ describe 'corosync' do
         end
 
         it 'is set in corosync.conf' do
-          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{#{optional_parameter}:\s*#{possible_value}\n}
-          )
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(%r{#{optional_parameter}:\s*#{Regexp.escape(possible_value.to_s)}\s*\n})
         end
       end
     end
@@ -958,9 +956,7 @@ describe 'corosync' do
 
             it 'does not contain the quorum device config in corosync.conf' do
               is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-                %r!quorum {
-  provider: corosync_votequorum
-}$!m
+                %r{quorum\s*\{\s*provider:\s*corosync_votequorum\s*\}\s*}
               )
             end
 
@@ -979,18 +975,20 @@ describe 'corosync' do
 
             it 'contains the quorum configuration' do
               is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-                %r!quorum {
-  provider: corosync_votequorum
-  device {
-    model: net
-    votes: 1
-
-    net {
-      algorithm: ffsplit
-      host:      quorum1[.]test[.]org
-    }
-  }
-}!m
+                %r{
+                  quorum\s*\{
+                  \s*provider:\s*corosync_votequorum
+                  \s*device\s*\{
+                  \s*model:\s*net
+                  \s*votes:\s*1
+                  \s*
+                  \s*net\s*\{
+                  \s*algorithm:\s*ffsplit
+                  \s*host:\s*quorum1\.test\.org
+                  \s*\}
+                  \s*\}
+                  \s*\}
+                }x
               )
             end
 
@@ -1066,18 +1064,19 @@ describe 'corosync' do
 
               it 'contains the quorum configuration' do
                 is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-                  %r!quorum {
-  provider: corosync_votequorum
-  device {
-    model: net
-    votes: 1
-
-    net {
-      algorithm: ffsplit
-      host:      quorum1[.]test[.]org
-    }
-  }
-}!m
+                  %r{
+                    quorum\s*\{
+                      \s*provider:\s*corosync_votequorum  # Match 'provider: corosync_votequorum'
+                      \s*device\s*\{
+                        \s*model:\s*net
+                        \s*votes:\s*1
+                        \s*net\s*\{
+                          \s*algorithm:\s*ffsplit
+                          \s*host:\s*quorum1\.test\.org
+                        \s*\}
+                      \s*\}
+                    \s*\}
+                  }x
                 )
               end
             end
@@ -1095,7 +1094,7 @@ describe 'corosync' do
 
             it 'does not configure two node' do
               is_expected.not_to contain_file('/etc/corosync/corosync.conf').with_content(
-                %r{two_node: 1\n}
+                %r{^\s*two_node:\s*1}
               )
             end
             # else - to implement
