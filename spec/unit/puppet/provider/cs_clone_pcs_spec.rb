@@ -245,7 +245,7 @@ describe Puppet::Type.type(:cs_clone).provider(:pcs) do
         Puppet::Util::Execution.expects(:execute).with(['cibadmin', '--query', '--xpath', xpath], failonfail: true, combine: true).at_least_once.returns(
           Puppet::Util::Execution::ProcessOutput.new(clone_xml('apache_service-clone'), 0)
         )
-        Puppet::Util::Execution.expects(:execute).with(['cibadmin', '--replace', '--xpath', xpath, '--xml-text', clone_xml('apache_service-newclone').chop], failonfail: true, combine: true).at_least_once.returns(
+        Puppet::Util::Execution.expects(:execute).with(['cibadmin', '--replace', '--xpath', xpath, '--xml-text', clone_xml('apache_service-newclone').chomp], failonfail: true, combine: true).at_least_once.returns(
           Puppet::Util::Execution::ProcessOutput.new('', 0)
         )
         instance.change_clone_id('primitive', 'apache_service', 'apache_service-newclone', nil)
