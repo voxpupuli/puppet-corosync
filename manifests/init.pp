@@ -424,7 +424,7 @@ class corosync (
   # Enable High Availability repository
   case $facts['os']['name'] {
     'RedHat': {
-      if $facts['os']['release']['major'] > 7 {
+      if $facts['os']['release']['major'] > '7' {
         exec { 'enable_highavailability_repo':
           command => "subscription-manager repos --enable=${highavailability_repo}",
           path    => '/usr/bin:/usr/sbin:/bin:/sbin',
@@ -433,7 +433,7 @@ class corosync (
       }
     }
     'CentOS': {
-      if $facts['os']['release']['major'] == 9 {
+      if $facts['os']['release']['major'] == '9' {
         exec { 'enable_highavailability_repo':
           command => "yum config-manager --set-enabled ${highavailability_repo}",
           path    => '/usr/bin:/usr/sbin:/bin:/sbin',
