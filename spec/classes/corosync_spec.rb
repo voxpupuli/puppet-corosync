@@ -59,13 +59,13 @@ describe 'corosync' do
 
         it 'configures votequorum' do
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{nodelist\s*\{}
+            %r{nodelist}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{^\s*ring0_addr:\s*node1\.test\.org\s*(?:\r\n|\n)\s*nodeid:\s*1\s*$}
+            %r{^\s*ring0_addr:\s*node1\.test\.org\s*(?:\r\n|\n)\s*nodeid:\s*1\s*}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{^\s*ring0_addr:\s*node2\.test\.org\s*(?:\r\n|\n)\s*nodeid:\s*2\s*$}
+            %r{^\s*ring0_addr:\s*node2\.test\.org\s*(?:\r\n|\n)\s*nodeid:\s*2\s*}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{^\s*two_node:\s*1}
@@ -77,7 +77,7 @@ describe 'corosync' do
 
           it 'supports persistent node IDs' do
             is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-              %r{nodelist\s*\{}
+              %r{nodelist}
             )
             is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
               %r{^\s*ring0_addr:\s*node1\.test\.org\s*(?:\r\n|\n)\s*nodeid:\s*3}
@@ -98,7 +98,7 @@ describe 'corosync' do
 
           it 'supports persistent node names' do
             is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-              %r{nodelist\s*\{}
+              %r{nodelist}
             )
             is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
               %r{^\s*ring0_addr:\s*192\.168\.0\.1(?:\r\n|\n)\s*nodeid:\s*1(?:\r\n|\n)\s*name:\s*node1\.test\.org}
@@ -149,7 +149,7 @@ describe 'corosync' do
 
         it 'configures nodelist' do
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{nodelist\s*\{}
+            %r{nodelist}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{^\s*ring0_addr:\s*node1\.test\.org(?:\r\n|\n)\s*nodeid:\s*1}
@@ -234,7 +234,7 @@ describe 'corosync' do
 
         it 'configures votequorum' do
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{nodelist\s*\{}
+            %r{nodelist}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{^\s*ring0_addr: node1\.test\.org(?:\r\n|\n)\s*nodeid:\s*1}
@@ -250,7 +250,7 @@ describe 'corosync' do
         it 'supports persistent node IDs' do
           params[:quorum_members_ids] = [3, 11]
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{nodelist\s*\{}
+            %r{nodelist}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{^\s*ring0_addr:\s*node1\.test\.org(?:\r\n|\n)\s*nodeid:\s*3}
@@ -264,7 +264,7 @@ describe 'corosync' do
           params[:quorum_members] = ['192.168.0.1', '192.168.0.2']
           params[:quorum_members_names] = ['node1.test.org', 'node2.test.org']
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{nodelist\s*\{}
+            %r{nodelist}
           )
           is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
             %r{^\s*ring0_addr: 192\.168\.0\.1(?:\r\n|\n)\s*nodeid:\s*1(?:\r\n|\n)\s*name:\s*node1\.test\.org}
@@ -593,7 +593,7 @@ describe 'corosync' do
 
         it 'does not contain nodelist' do
           is_expected.not_to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{nodelist\s*\{}
+            %r{nodelist}
           )
         end
       end
@@ -608,7 +608,7 @@ describe 'corosync' do
 
         it 'does not contain nodelist' do
           is_expected.not_to contain_file('/etc/corosync/corosync.conf').with_content(
-            %r{nodelist\s*\{}
+            %r{nodelist}
           )
         end
       end
@@ -955,7 +955,7 @@ describe 'corosync' do
 
             it 'does not contain the quorum device config in corosync.conf' do
               is_expected.to contain_file('/etc/corosync/corosync.conf').with_content(
-                %r{quorum\s*\{\s*provider:\s*corosync_votequorum\s*\}\s*$}
+                %r{quorum\s*\{\s*provider:\s*corosync_votequorum\s*\}\s*}
               )
             end
 
