@@ -28,7 +28,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
     return unless doc.root.attributes['id'] != id
 
     doc.root.attributes['id'] = id
-    cmd = [command(:cibadmin), '--replace', '--xpath', xpath, '--xml-text', doc.to_s]
+    cmd = [command(:cibadmin), '--replace', '--xpath', xpath, '--xml-text', doc.to_s.chomp]
     self.class.run_command_in_cib(cmd, cib)
   end
 
