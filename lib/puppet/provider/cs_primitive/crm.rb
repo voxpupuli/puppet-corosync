@@ -22,6 +22,8 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
   # Path to the crm binary for interacting with the cluster configuration.
   commands crm: 'crm'
 
+  defaultfor 'os.family': [:ubuntu]
+
   # given an XML element (a <primitive> from cibadmin), produce a hash suitible
   # for creating a new provider instance.
   def self.element_to_hash(e)
