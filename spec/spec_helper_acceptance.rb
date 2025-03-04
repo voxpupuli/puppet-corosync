@@ -26,13 +26,13 @@ configure_beaker do |host|
   # On Debian-based, service state transitions (restart, stop) hang indefinitely and
   # lead to test timeouts if there is a service unit of Type=notify involved.
   # Use Type=simple as a workaround. See issue 455.
-  if host[:hypervisor] =~ %r{docker} && fact_on(host, 'os.family') == 'Debian'
+  if host[:hypervisor] =~ %r{(vagrant|docker)} && fact_on(host, 'os.family') == 'Debian'
     on host, 'mkdir /etc/systemd/system/corosync.service.d'
     on host, 'echo -e "[Service]\nType=simple" > /etc/systemd/system/corosync.service.d/10-type-simple.conf'
   end
   # Issue 455: On Centos-based there are recurring problems with the pacemaker systemd service
   # refusing to stop its crmd subprocess leading to test timeouts. Force a fast SigKill here.
-  if host[:hypervisor] =~ %r{docker} && fact_on(host, 'os.family') == 'RedHat' && fact_on(host, 'os.release.major') == '7'
+  if host[:hypervisor] =~ %r{(vagrant|docker)} && fact_on(host, 'os.family') == 'RedHat' && fact_on(host, 'os.release.major') == '7'
     on host, 'mkdir /etc/systemd/system/pacemaker.service.d'
     on host, 'echo -e "[Service]\nSendSIGKILL=yes\nTimeoutStopSec=60s" > /etc/systemd/system/pacemaker.service.d/10-timeout.conf'
   end

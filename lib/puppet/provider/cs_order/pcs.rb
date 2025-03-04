@@ -16,7 +16,7 @@ Puppet::Type.type(:cs_order).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
         of current primitive start orders on the system; add, delete, or adjust various
         aspects.'
 
-  defaultfor operatingsystem: %i[fedora centos redhat]
+  defaultfor 'os.family' => %i[redhat debian]
 
   has_feature :kindness
 

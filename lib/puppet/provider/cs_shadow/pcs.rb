@@ -15,6 +15,8 @@ Puppet::Type.type(:cs_shadow).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync
         abstract corosync/pacemaker vs. keepalived. This provider initializes a new CIB
         to begin tracking cluster changes.'
 
+  defaultfor 'os.family' => %i[redhat debian]
+
   commands cibadmin: 'cibadmin'
   # Required for block_until_ready
   commands pcs: 'pcs'

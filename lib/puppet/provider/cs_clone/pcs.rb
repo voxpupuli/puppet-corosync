@@ -18,7 +18,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
 
   mk_resource_methods
 
-  defaultfor operatingsystem: %i[fedora centos redhat]
+  defaultfor 'os.family' => %i[redhat debian]
 
   def change_clone_id(type, primitive, id, cib)
     xpath = "/cib/configuration/resources/clone[descendant::#{type}[@id='#{primitive}']]"
@@ -28,7 +28,7 @@ Puppet::Type.type(:cs_clone).provide(:pcs, parent: PuppetX::Voxpupuli::Corosync:
     return unless doc.root.attributes['id'] != id
 
     doc.root.attributes['id'] = id
-    cmd = [command(:cibadmin), '--replace', '--xpath', xpath, '--xml-text', doc.to_s.chop]
+    cmd = [command(:cibadmin), '--replace', '--xpath', xpath, '--xml-text', doc.to_s.chomp]
     self.class.run_command_in_cib(cmd, cib)
   end
 

@@ -15,7 +15,7 @@ Puppet::Type.type(:cs_property).provide(:pcs, parent: PuppetX::Voxpupuli::Corosy
         abstract corosync/pacemaker vs. keepalived. This provider will check the state
         of Corosync cluster configuration properties.'
 
-  defaultfor operatingsystem: %i[fedora centos redhat]
+  defaultfor 'os.family' => %i[redhat debian]
 
   # Path to the pcs binary for interacting with the cluster configuration.
   commands pcs: 'pcs'
