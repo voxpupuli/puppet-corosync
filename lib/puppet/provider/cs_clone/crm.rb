@@ -20,6 +20,8 @@ Puppet::Type.type(:cs_clone).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
 
   mk_resource_methods
 
+  defaultfor 'os.family': [:ubuntu]
+
   def self.instances
     block_until_ready
 
