@@ -6,4 +6,5 @@ type Corosync::CryptoHash = Enum[
   'sha256',
   'sha384',
   'sha512',
+  'none',
 ]
