@@ -4,6 +4,43 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v9.0.0](https://github.com/voxpupuli/puppet-corosync/tree/v9.0.0) (2025-08-15)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-corosync/compare/v8.2.0...v9.0.0)
+
+**Breaking changes:**
+
+- The `promotable` and `ms_metadata` attributes have been removed from `ms_metadata`. [\#523](https://github.com/voxpupuli/puppet-corosync/issues/523)
+- Drop puppet, update openvox minimum version to 8.19 [\#568](https://github.com/voxpupuli/puppet-corosync/pull/568) ([TheMeier](https://github.com/TheMeier))
+- Drop EoL Debian 10 support [\#560](https://github.com/voxpupuli/puppet-corosync/pull/560) ([bastelfreak](https://github.com/bastelfreak))
+- Drop Ubuntu 18.04 support [\#541](https://github.com/voxpupuli/puppet-corosync/pull/541) ([zilchms](https://github.com/zilchms))
+- Drop Puppet 6 support [\#533](https://github.com/voxpupuli/puppet-corosync/pull/533) ([bastelfreak](https://github.com/bastelfreak))
+- Drop Debian 9 support [\#529](https://github.com/voxpupuli/puppet-corosync/pull/529) ([bastelfreak](https://github.com/bastelfreak))
+- Support pcs 0.10 syntax and Debian family with `pcs` [\#499](https://github.com/voxpupuli/puppet-corosync/pull/499) ([towo](https://github.com/towo))
+
+**Implemented enhancements:**
+
+- metadata.json: Add OpenVox [\#564](https://github.com/voxpupuli/puppet-corosync/pull/564) ([jstraw](https://github.com/jstraw))
+- Clean-up legacy code [\#549](https://github.com/voxpupuli/puppet-corosync/pull/549) ([zilchms](https://github.com/zilchms))
+- Remove legacy facts from spec files and README [\#548](https://github.com/voxpupuli/puppet-corosync/pull/548) ([zilchms](https://github.com/zilchms))
+- Remove topscope facts from spec testing [\#547](https://github.com/voxpupuli/puppet-corosync/pull/547) ([zilchms](https://github.com/zilchms))
+- Improve documentation [\#546](https://github.com/voxpupuli/puppet-corosync/pull/546) ([zilchms](https://github.com/zilchms))
+- puppetlabs/stdlib: Allow 9.x [\#545](https://github.com/voxpupuli/puppet-corosync/pull/545) ([zilchms](https://github.com/zilchms))
+- Add Debian 12 support [\#543](https://github.com/voxpupuli/puppet-corosync/pull/543) ([zilchms](https://github.com/zilchms))
+- Add Ubuntu 22.04 support [\#542](https://github.com/voxpupuli/puppet-corosync/pull/542) ([zilchms](https://github.com/zilchms))
+- feat: Set crm as default provider for ubuntu [\#538](https://github.com/voxpupuli/puppet-corosync/pull/538) ([dploeger](https://github.com/dploeger))
+- Add Puppet 8 support [\#534](https://github.com/voxpupuli/puppet-corosync/pull/534) ([bastelfreak](https://github.com/bastelfreak))
+- Make promotable resources configurable with cs\_clone [\#532](https://github.com/voxpupuli/puppet-corosync/pull/532) ([maartenbeeckmans](https://github.com/maartenbeeckmans))
+- Allow stdlib 8.0.0 [\#517](https://github.com/voxpupuli/puppet-corosync/pull/517) ([smortex](https://github.com/smortex))
+
+**Fixed bugs:**
+
+- use chomp instead of chop [\#555](https://github.com/voxpupuli/puppet-corosync/pull/555) ([TheMeier](https://github.com/TheMeier))
+
+**Merged pull requests:**
+
+- Typos fixes in types documentation [\#531](https://github.com/voxpupuli/puppet-corosync/pull/531) ([Safranil](https://github.com/Safranil))
+
 ## [v8.2.0](https://github.com/voxpupuli/puppet-corosync/tree/v8.2.0) (2021-06-15)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-corosync/compare/v8.1.0...v8.2.0)
@@ -72,7 +109,7 @@ These should not affect the functionality of the module.
 **Implemented enhancements:**
 
 - add parameter ip\_version [\#482](https://github.com/voxpupuli/puppet-corosync/pull/482) ([antondollmaier](https://github.com/antondollmaier))
-- allow auth\_node to be declared whith short name [\#478](https://github.com/voxpupuli/puppet-corosync/pull/478) ([aop-dw](https://github.com/aop-dw))
+- allow auth\_node to be declared whith short name [\#478](https://github.com/voxpupuli/puppet-corosync/pull/478) ([aop-dw-zz](https://github.com/aop-dw-zz))
 - Feat: Add pcs STONITH Resource Support [\#475](https://github.com/voxpupuli/puppet-corosync/pull/475) ([pdemonaco](https://github.com/pdemonaco))
 - Puppet Strings Reference & Corosync Crypto [\#460](https://github.com/voxpupuli/puppet-corosync/pull/460) ([pdemonaco](https://github.com/pdemonaco))
 - Corosync-qdevice and PCSD Auth [\#458](https://github.com/voxpupuli/puppet-corosync/pull/458) ([pdemonaco](https://github.com/pdemonaco))
@@ -80,7 +117,7 @@ These should not affect the functionality of the module.
 
 **Fixed bugs:**
 
-- fix: missing / in path [\#477](https://github.com/voxpupuli/puppet-corosync/pull/477) ([aop-dw](https://github.com/aop-dw))
+- fix: missing / in path [\#477](https://github.com/voxpupuli/puppet-corosync/pull/477) ([aop-dw-zz](https://github.com/aop-dw-zz))
 - fix: cs\_primitive pcs resource update for Master/Slave primitive correction [\#476](https://github.com/voxpupuli/puppet-corosync/pull/476) ([pdemonaco](https://github.com/pdemonaco))
 - Don't fail when set\_votequorum=true and cluster\_name is set [\#473](https://github.com/voxpupuli/puppet-corosync/pull/473) ([antaflos](https://github.com/antaflos))
 - Do not explicitly request current environment [\#442](https://github.com/voxpupuli/puppet-corosync/pull/442) ([towo](https://github.com/towo))
