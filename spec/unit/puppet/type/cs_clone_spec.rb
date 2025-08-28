@@ -14,7 +14,7 @@ describe Puppet::Type.type(:cs_clone) do
   describe 'basic structure' do
     it 'is able to create an instance' do
       provider_class = Puppet::Type::Cs_clone.provider(Puppet::Type::Cs_clone.providers[0])
-      Puppet::Type::Cs_clone.expects(:defaultprovider).returns(provider_class)
+      allow(Puppet::Type::Cs_clone).to receive(:defaultprovider).and_return(provider_class)
 
       expect(subject.new(name: 'mock_clone', primitive: 'mock_primitive')).not_to be_nil
     end

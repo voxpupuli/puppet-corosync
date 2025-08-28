@@ -4,7 +4,7 @@ require 'spec_helper'
 
 describe Puppet::Type.type(:cs_clone).provider(:crm) do
   before do
-    described_class.stubs(:command).with(:crm).returns 'crm'
+    allow(described_class).to receive(:command).with(:crm).and_return('crm')
   end
 
   context 'when getting instances with primitive' do
@@ -25,8 +25,8 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
         </cib>
       EOS
 
-      described_class.expects(:block_until_ready).returns(nil)
-      Puppet::Util::Execution.expects(:execute).with(%w[crm configure show xml], combine: true, failonfail: true).at_least_once.returns(
+      allow(described_class).to receive(:block_until_ready).and_return(nil)
+      allow(Puppet::Util::Execution).to receive(:execute).and_return(
         Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
       )
       described_class.instances
@@ -83,8 +83,8 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
         </cib>
       EOS
 
-      described_class.expects(:block_until_ready).returns(nil)
-      Puppet::Util::Execution.expects(:execute).with(%w[crm configure show xml], combine: true, failonfail: true).at_least_once.returns(
+      allow(described_class).to receive(:block_until_ready).and_return(nil)
+      allow(Puppet::Util::Execution).to receive(:execute).and_return(
         Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
       )
       described_class.instances
@@ -100,7 +100,7 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
       end
 
       before do
-        instance.stubs(:change_clone_id) { nil }
+        allow(instance).to receive(:change_clone_id).and_return(nil)
       end
 
       it "is a kind of #{described_class.name}" do
@@ -124,15 +124,15 @@ describe Puppet::Type.type(:cs_clone).provider(:crm) do
   context 'when flushing' do
     def expect_update(pattern)
       if Puppet::Util::Package.versioncmp(Puppet::PUPPETVERSION, '3.4') == -1
-        Puppet::Util::SUIDManager.expects(:run_and_capture).with do |*args|
+        allow(Puppet::Util::SUIDManager).to receive(:run_and_capture) do |*args|
           expect(File.read(args[3])).to match(pattern) if args.slice(0..2) == %w[configure load update]
           true
-        end.at_least_once.returns(['', 0])
+        end.and_return(['', 0])
       else
-        Puppet::Util::Execution.expects(:execute).with do |*args|
+        allow(Puppet::Util::Execution).to receive(:execute) do |*args|
           expect(File.read(args[3])).to match(pattern) if args.slice(0..2) == %w[configure load update]
           true
-        end.at_least_once.returns(
+        end.and_return(
           Puppet::Util::Execution::ProcessOutput.new('', 0)
         )
       end

@@ -14,7 +14,7 @@ describe Puppet::Type.type(:cs_location) do
   describe 'basic structure' do
     it 'is able to create an instance' do
       provider_class = Puppet::Type::Cs_location.provider(Puppet::Type::Cs_location.providers[0])
-      Puppet::Type::Cs_location.expects(:defaultprovider).returns(provider_class)
+      allow(Puppet::Type::Cs_location).to receive(:defaultprovider).and_return(provider_class)
 
       expect(subject.new(name: 'mock_location')).not_to be_nil
     end
