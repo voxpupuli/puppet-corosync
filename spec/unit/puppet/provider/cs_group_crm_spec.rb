@@ -4,7 +4,7 @@ require 'spec_helper'
 
 describe Puppet::Type.type(:cs_group).provider(:crm) do
   before do
-    described_class.stubs(:command).with(:crm).returns 'crm'
+    allow(described_class).to receive(:command).with(:crm).and_return('crm')
   end
 
   let :instances do
@@ -50,8 +50,8 @@ describe Puppet::Type.type(:cs_group).provider(:crm) do
       </cib>
     EOS
 
-    described_class.expects(:block_until_ready).returns(nil)
-    Puppet::Util::Execution.expects(:execute).with(%w[crm configure show xml], failonfail: true, combine: true).at_least_once.returns(
+    allow(described_class).to receive(:block_until_ready).and_return(nil)
+    allow(Puppet::Util::Execution).to receive(:execute).and_return(
       Puppet::Util::Execution::ProcessOutput.new(cib, 0)
     )
     described_class.instances

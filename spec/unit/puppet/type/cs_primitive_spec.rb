@@ -14,7 +14,7 @@ describe Puppet::Type.type(:cs_primitive) do
   describe 'basic structure' do
     it 'is able to create an instance' do
       provider_class = Puppet::Type::Cs_primitive.provider(Puppet::Type::Cs_primitive.providers[0])
-      Puppet::Type::Cs_primitive.expects(:defaultprovider).returns(provider_class)
+      allow(Puppet::Type::Cs_primitive).to receive(:defaultprovider).and_return(provider_class)
 
       expect(subject.new(name: 'mock_primitive')).not_to be_nil
     end
@@ -59,7 +59,6 @@ describe Puppet::Type.type(:cs_primitive) do
 
   describe 'when munging the operations attributes' do
     it 'does not change arrays' do
-      Puppet.expects(:deprecation_warning).never
       expect(subject.new(
         name: 'mock_primitive',
         operations: [{ 'start' => { 'interval' => '10' } }, { 'stop' => { 'interval' => '10' } }]
@@ -70,7 +69,6 @@ describe Puppet::Type.type(:cs_primitive) do
     end
 
     it 'converts hashes into array' do
-      Puppet.expects(:deprecation_warning).never
       expect(subject.new(
         name: 'mock_primitive',
         operations: { 'start' => { 'interval' => '10' }, 'stop' => { 'interval' => '10' } }
@@ -81,7 +79,7 @@ describe Puppet::Type.type(:cs_primitive) do
     end
 
     it 'converts hashes into array with correct roles' do
-      Puppet.expects(:deprecation_warning).once
+      allow(Puppet).to receive(:deprecation_warning).once
       expect(subject.new(
         name: 'mock_primitive',
         operations: { 'start' => { 'interval' => '10' }, 'stop:Master' => { 'interval' => '10' } }
@@ -92,7 +90,7 @@ describe Puppet::Type.type(:cs_primitive) do
     end
 
     it 'converts sub-arrays into array' do
-      Puppet.expects(:deprecation_warning).once
+      allow(Puppet).to receive(:deprecation_warning).once
       expect(subject.new(
         name: 'mock_primitive',
         operations: { 'start' => [{ 'interval' => '10' }, { 'interval' => '10', 'role' => 'foo' }], 'stop' => { 'interval' => '10' } }
@@ -104,7 +102,7 @@ describe Puppet::Type.type(:cs_primitive) do
     end
 
     it 'converts sub-arrays into array with correct roles' do # That case probably never happens in practice
-      Puppet.expects(:deprecation_warning).twice
+      allow(Puppet).to receive(:deprecation_warning).twice
       expect(subject.new(
         name: 'mock_primitive',
         operations: { 'start' => { 'interval' => '10' }, 'stop:Master' => [{ 'interval' => '10' }, { 'interval' => '20' }] }

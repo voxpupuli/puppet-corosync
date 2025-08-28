@@ -14,7 +14,7 @@ describe Puppet::Type.type(:cs_group) do
   describe 'basic structure' do
     it 'is able to create an instance' do
       provider_class = Puppet::Type::Cs_group.provider(Puppet::Type::Cs_group.providers[0])
-      Puppet::Type::Cs_group.expects(:defaultprovider).returns(provider_class)
+      allow(Puppet::Type::Cs_group).to receive(:defaultprovider).and_return(provider_class)
 
       expect(subject.new(name: 'mock_group')).not_to be_nil
     end

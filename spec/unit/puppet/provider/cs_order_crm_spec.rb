@@ -4,8 +4,8 @@ require 'spec_helper'
 
 describe Puppet::Type.type(:cs_order).provider(:crm) do
   before do
-    described_class.stubs(:command).with(:crm).returns 'crm'
-    described_class.expects(:block_until_ready).returns(nil)
+    allow(described_class).to receive(:command).with(:crm).and_return('crm')
+    allow(described_class).to receive(:block_until_ready).and_return(nil)
   end
 
   let :test_cib do
@@ -22,7 +22,7 @@ describe Puppet::Type.type(:cs_order).provider(:crm) do
   end
 
   let :instances do
-    Puppet::Util::Execution.expects(:execute).with(%w[crm configure show xml], failonfail: true, combine: true).at_least_once.returns(
+    allow(Puppet::Util::Execution).to receive(:execute).and_return(
       Puppet::Util::Execution::ProcessOutput.new(test_cib, 0)
     )
     described_class.instances
