@@ -17,12 +17,6 @@ describe 'corosync' do
       )
     end
 
-    it 'validates the corosync configuration' do
-      is_expected.to contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
-        '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
-      )
-    end
-
     context 'validates the corosncy configuration when config_validate_cmd is set' do
       let(:params) do
         super().merge(
@@ -729,6 +723,27 @@ describe 'corosync' do
       end
 
       it_configures 'corosync'
+
+      # Check the correct validation command is used for each OS
+      it 'validates the corosync configuration' do
+        case os_facts[:os]['family']
+        when 'RedHat'
+          case os_facts[:os]['release']['major']
+          when '8'
+            is_expected.to contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
+              '/usr/sbin/corosync -c % -t'
+            )
+          else
+            is_expected.to contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
+              '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
+            )
+          end
+        else
+          is_expected.to contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
+            '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
+          )
+        end
+      end
 
       # Check default package installations per platform
       case os_facts[:os]['family']
