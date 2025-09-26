@@ -598,12 +598,18 @@ class corosync (
         default => 'pcs host auth',
       }
 
+      # Check that all nodes have an authorization token
+      $auth_check_command = $quorum_members.map |$node| {
+        "grep '${node}' /var/lib/pcsd/tokens"
+      }.join(' && ')
+
       # Attempt to authorize all members. The command will return successfully
       # if they were already authenticated so it's safe to run every time this
       # is applied.
       # TODO - make it run only once
       exec { 'authorize_members':
         command => "${pcs_auth_command} ${node_string} ${auth_credential_string}",
+        unless  => $auth_check_command,
         path    => $exec_path,
         require => [
           Service['pcsd'],
