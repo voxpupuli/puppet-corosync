@@ -845,6 +845,7 @@ describe 'corosync' do
               is_expected.to contain_exec('authorize_members').with(
                 command: "pcs #{auth_command} 192.168.0.10 192.168.0.12 192.168.0.13 -u hacluster -p some-secret-sauce",
                 path: '/sbin:/bin:/usr/sbin:/usr/bin',
+                unless: "grep -q '192.168.0.10' /var/lib/pcsd/known-hosts 2>/dev/null && grep -q '192.168.0.12' /var/lib/pcsd/known-hosts 2>/dev/null && grep -q '192.168.0.13' /var/lib/pcsd/known-hosts 2>/dev/null",
                 require: [
                   'Service[pcsd]',
                   'User[hacluster]'
@@ -1030,7 +1031,7 @@ describe 'corosync' do
                 is_expected.to contain_exec('authorize_qdevice').with(
                   command: "pcs #{auth_command} quorum1.test.org -u hacluster -p quorum-secret-password",
                   path: '/sbin:/bin:/usr/sbin:/usr/bin',
-                  onlyif: 'test 0 -ne $(grep quorum1.test.org /var/lib/pcsd/tokens >/dev/null 2>&1; echo $?)',
+                  onlyif: 'test 0 -ne $(grep quorum1.test.org /var/lib/pcsd/known-hosts >/dev/null 2>&1; echo $?)',
                   require: [
                     'Package[corosync-qdevice]',
                     'Exec[authorize_members]',
