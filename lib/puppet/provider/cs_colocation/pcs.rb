@@ -64,8 +64,13 @@ Puppet::Type.type(:cs_colocation).provide(:pcs, parent: PuppetX::Voxpupuli::Coro
                 items['rsc']
               end
 
-        with_rsc = if items['with-rsc-role'] && items['with-rsc-role'] != 'Started'
-                     "#{items['with-rsc']}:#{items['with-rsc-role']}"
+        with_rsc = if items['with-rsc-role']
+                     case items['with-rsc-role']
+                     when 'Promoted' then "#{items['with-rsc']}:Master"
+                     when 'Unpromoted' then "#{items['with-rsc']}:Slave"
+                     when 'Started' then items['with-rsc']
+                     else "#{items['with-rsc']}:#{items['with-rsc-role']}"
+                     end
                    else
                      items['with-rsc']
                    end
