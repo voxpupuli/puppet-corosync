@@ -19,7 +19,7 @@ describe 'corosync' do
 
     it 'validates the corosync configuration' do
       is_expected.to contain_file('/etc/corosync/corosync.conf').with_validate_cmd(
-        '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'
+        '/usr/sbin/corosync -t -c %'
       )
     end
 
