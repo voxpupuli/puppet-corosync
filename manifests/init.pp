@@ -399,7 +399,7 @@ class corosync (
   Optional[String[1]] $ip_version                                       = undef,
   Optional[Enum['yes', 'no']] $clear_node_high_bit                      = undef,
   Optional[Integer] $max_messages                                       = undef,
-  String[1] $config_validate_cmd                                        = '/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t',
+  String[1] $config_validate_cmd                                        = '/usr/sbin/corosync -t -c %',
   Boolean $test_corosync_config                                         = $corosync::params::test_corosync_config,
   Optional[Variant[Stdlib::Absolutepath, Enum['off']]] $watchdog_device = undef,
   Enum['pcs', 'crm'] $provider                                          = 'pcs',

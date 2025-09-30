@@ -192,7 +192,7 @@ Data type: `String[1]`
 
 
 
-Default value: `'/usr/bin/env COROSYNC_MAIN_CONFIG_FILE=% /usr/sbin/corosync -t'`
+Default value: `'/usr/sbin/corosync -t -c %'`
 
 ##### <a name="-corosync--threads"></a>`threads`
 
