@@ -601,9 +601,9 @@ class corosync (
       # Attempt to authorize all members. The command will return successfully
       # if they were already authenticated so it's safe to run every time this
       # is applied.
-      # TODO - make it run only once
       exec { 'authorize_members':
         command => "${pcs_auth_command} ${node_string} ${auth_credential_string}",
+        unless  => join($quorum_members.map |$m| { "grep -q '${m}' /var/lib/pcsd/known-hosts 2>/dev/null" }, ' && '),
         path    => $exec_path,
         require => [
           Service['pcsd'],
@@ -646,7 +646,7 @@ class corosync (
 
       # Authorize the quorum device via PCS so we can execute the configuration
       $token_prefix = 'test 0 -ne $(grep'
-      $token_suffix = '/var/lib/pcsd/tokens >/dev/null 2>&1; echo $?)'
+      $token_suffix = '/var/lib/pcsd/known-hosts >/dev/null 2>&1; echo $?)'
       $qdevice_token_check = "${token_prefix} ${quorum_device_host} ${token_suffix}"
 
       $quorum_device_password = $sensitive_quorum_device_password.unwrap
