@@ -1,3 +1,2 @@
 ---
-corosync::config_validate_cmd: "/usr/sbin/corosync -c % -t"
 corosync::highavailability_repo: "rhel-9-for-x86_64-highavailability-rpms"
