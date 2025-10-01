@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 Each new release typically also includes the latest modulesync defaults.
 These should not affect the functionality of the module.
 
+## [v9.1.0](https://github.com/voxpupuli/puppet-corosync/tree/v9.1.0) (2025-10-01)
+
+[Full Changelog](https://github.com/voxpupuli/puppet-corosync/compare/v9.0.0...v9.1.0)
+
+**Implemented enhancements:**
+
+- Add Ubuntu 24.04 support [\#578](https://github.com/voxpupuli/puppet-corosync/pull/578) ([bastelfreak](https://github.com/bastelfreak))
+- Remove old env variable / require corosync 3 [\#576](https://github.com/voxpupuli/puppet-corosync/pull/576) ([marek130](https://github.com/marek130))
+- pcsd: Switch from tokens to known-hosts file [\#575](https://github.com/voxpupuli/puppet-corosync/pull/575) ([marek130](https://github.com/marek130))
+
+**Fixed bugs:**
+
+- Fix mapping between Master and Promoted [\#574](https://github.com/voxpupuli/puppet-corosync/pull/574) ([marek130](https://github.com/marek130))
+
+**Closed issues:**
+
+- Release new version [\#558](https://github.com/voxpupuli/puppet-corosync/issues/558)
+
 ## [v9.0.0](https://github.com/voxpupuli/puppet-corosync/tree/v9.0.0) (2025-08-15)
 
 [Full Changelog](https://github.com/voxpupuli/puppet-corosync/compare/v8.2.0...v9.0.0)
