@@ -152,7 +152,7 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
     return if @property_hash.empty?
 
     unless @property_hash[:operations].empty?
-      operations = ''
+      operations = []
       @property_hash[:operations].each do |o|
         op_name = o.keys.first
         operations << "op #{op_name} "
@@ -167,34 +167,35 @@ Puppet::Type.type(:cs_primitive).provide(:crm, parent: PuppetX::Voxpupuli::Coros
       end
     end
     unless @property_hash[:parameters].empty?
-      parameters = 'params '
+      parameters = ['params ']
       @property_hash[:parameters].each_pair do |k, v|
         parameters << "'#{k}=#{v}' "
       end
     end
     unless @property_hash[:utilization].empty?
-      utilization = 'utilization '
+      utilization = ['utilization ']
       @property_hash[:utilization].each_pair do |k, v|
         utilization << "#{k}=#{v} "
       end
     end
     unless @property_hash[:metadata].empty?
-      metadatas = 'meta '
+      metadatas = ['meta ']
       @property_hash[:metadata].each_pair do |k, v|
         metadatas << "#{k}=#{v} "
       end
     end
-    updated = 'primitive '
+    updated = ['primitive ']
     updated << "#{@property_hash[:name]} #{@property_hash[:primitive_class]}:"
     updated << "#{@property_hash[:provided_by]}:" if @property_hash[:provided_by]
     updated << "#{@property_hash[:primitive_type]} "
-    updated << "#{operations} " unless operations.nil?
-    updated << "#{parameters} " unless parameters.nil?
-    updated << "#{utilization} " unless utilization.nil?
-    updated << "#{metadatas} " unless metadatas.nil?
-    debug("Loading update: #{updated}")
+    updated.concat(operations) unless operations.nil?
+    updated.concat(parameters) unless parameters.nil?
+    updated.concat(utilization) unless utilization.nil?
+    updated.concat(metadatas) unless metadatas.nil?
+    updated_s = updated.join
+    debug("Loading update: #{updated_s}")
     Tempfile.open('puppet_crm_update') do |tmpfile|
-      tmpfile.write(updated)
+      tmpfile.write(updated_s)
       tmpfile.flush
       cmd = ['crm', '-F', 'configure', 'load', 'update', tmpfile.path.to_s]
       self.class.run_command_in_cib(cmd, @resource[:cib])
