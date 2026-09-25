@@ -85,7 +85,7 @@ Puppet::Type.type(:cs_rsc_defaults).provide(:pcs, parent: PuppetX::Voxpupuli::Co
 
     # clear this on properties, in case it's set from a previous
     # run of a different corosync type
-    cmd = [command(:pcs), 'resource', 'defaults', 'update',"#{@property_hash[:name]}=#{@property_hash[:value]}"]
+    cmd = [command(:pcs), 'resource', 'defaults', 'update', "#{@property_hash[:name]}=#{@property_hash[:value]}"]
     self.class.run_command_in_cib(cmd, @resource[:cib])
   end
 end
