@@ -181,17 +181,19 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
     # The resource_type variable is used to check if one of the class,
     # provider or type has changed. Since stonith resources have a special
     # command they do not include a provider or class in their type name
-    resource_type = "#{@property_hash[:primitive_class]}:"
+    resource_type = ["#{@property_hash[:primitive_class]}:"]
     resource_type << "#{@property_hash[:provided_by]}:" if @property_hash[:provided_by]
     resource_type << @property_hash[:primitive_type].to_s
+    resource_type = resource_type.join
 
     # We destroy the resource if it's type, class or provider has changed
     unless @property_hash[:existing_resource] == :false
-      existing_resource_type = "#{@property_hash[:existing_primitive_class]}:"
+      existing_resource_type = ["#{@property_hash[:existing_primitive_class]}:"]
       existing_resource_type << "#{@property_hash[:existing_provided_by]}:" if @property_hash[:existing_provided_by]
       existing_resource_type << @property_hash[:existing_primitive_type].to_s
+      existing_resource_type = existing_resource_type.join
 
-      if existing_resource_type != resource_type
+      unless existing_resource_type == resource_type
         debug('Removing primitive')
         self.class.run_command_in_cib([command(:pcs), pcs_subcommand, 'unclone', @property_hash[:name].to_s], @resource[:cib], false)
         self.class.run_command_in_cib([command(:pcs), pcs_subcommand, 'delete', '--force', @property_hash[:name].to_s], @resource[:cib])
@@ -201,11 +203,11 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
 
     if @property_hash[:existing_resource] == :false || force_reinstall == :true
       cmd = [command(:pcs), pcs_subcommand, 'create', '--force', '--no-default-ops', @property_hash[:name].to_s]
-      cmd << resource_type
-      cmd += parameters unless parameters.nil?
-      cmd += operations unless operations.nil?
-      cmd += utilization unless utilization.nil?
-      cmd += metadatas unless metadatas.nil?
+      cmd.push(resource_type)
+      cmd.concat(parameters) unless parameters.nil?
+      cmd.concat(operations) unless operations.nil?
+      cmd.concat(utilization) unless utilization.nil?
+      cmd.concat(metadatas) unless metadatas.nil?
       # default_op = { 'monitor' => { 'interval' => '60s' } }
       # unless @property_hash[:operations].include?(default_op)
       #   cmd = [command(:pcs), pcs_subcommand, 'op', 'remove', (@property_hash[:name]).to_s, 'monitor', 'interval=60s']
@@ -221,10 +223,10 @@ Puppet::Type.type(:cs_primitive).provide(:pcs, parent: PuppetX::Voxpupuli::Coros
         self.class.run_command_in_cib(cmd, @resource[:cib])
       end
       cmd = [command(:pcs), pcs_subcommand, 'update', @property_hash[:name].to_s]
-      cmd += parameters unless parameters.nil?
-      cmd += operations unless operations.nil?
-      cmd += utilization unless utilization.nil?
-      cmd += metadatas unless metadatas.nil?
+      cmd.concat(parameters) unless parameters.nil?
+      cmd.concat(operations) unless operations.nil?
+      cmd.concat(utilization) unless utilization.nil?
+      cmd.concat(metadatas) unless metadatas.nil?
       self.class.run_command_in_cib(cmd, @resource[:cib])
     end
   end

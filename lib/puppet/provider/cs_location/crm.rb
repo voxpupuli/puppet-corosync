@@ -100,7 +100,7 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
   def flush
     return if @property_hash.empty?
 
-    updated = "location #{@property_hash[:name]} #{@property_hash[:primitive]}"
+    updated = ["location #{@property_hash[:name]} #{@property_hash[:primitive]}"]
 
     updated << " resource-discovery=#{@property_hash[:resource_discovery]}" if feature?(:discovery) && !@property_hash[:resource_discovery].nil?
 
@@ -120,9 +120,10 @@ Puppet::Type.type(:cs_location).provide(:crm, parent: PuppetX::Voxpupuli::Corosy
       updated << " #{score}: #{expression.join(' ')}"
     end
 
-    debug("Loading update: #{updated}")
+    updated_s = updated.join
+    debug("Loading update: #{updated_s}")
     Tempfile.open('puppet_crm_update') do |tmpfile|
-      tmpfile.write(updated)
+      tmpfile.write(updated_s)
       tmpfile.flush
       self.class.run_command_in_cib(['crm', 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
     end

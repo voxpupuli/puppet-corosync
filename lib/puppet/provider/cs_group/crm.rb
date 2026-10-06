@@ -89,11 +89,12 @@ Puppet::Type.type(:cs_group).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
   def flush
     return if @property_hash.empty?
 
-    updated = 'group '
+    updated = ['group ']
     updated << "#{@property_hash[:name]} #{Array(@property_hash[:primitives]).join(' ')}"
-    debug("Loading update: #{updated}")
+    updated_s = updated.join
+    debug("Loading update: #{updated_s}")
     Tempfile.open('puppet_crm_update') do |tmpfile|
-      tmpfile.write(updated)
+      tmpfile.write(updated_s)
       tmpfile.flush
       cmd = [command(:crm), 'configure', 'load', 'update', tmpfile.path.to_s]
       self.class.run_command_in_cib(cmd, @resource[:cib])

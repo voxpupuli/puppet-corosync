@@ -172,14 +172,14 @@ Puppet::Type.newtype(:cs_primitive) do
       same_ops = (currentvalue + newvalue).uniq - new_ops - deleted_ops
       message = []
       unless new_ops.empty?
-        m = "#{new_ops.size} added:"
-        new_ops.each { |n| m << ' ' << op_to_s(n) }
-        message << m
+        m = ["#{new_ops.size} added:"]
+        new_ops.each { |n| m << op_to_s(n) }
+        message << m.join(' ')
       end
       unless deleted_ops.empty?
-        m = "#{deleted_ops.size} removed:"
-        deleted_ops.each { |n| m << ' ' << op_to_s(n) }
-        message << m
+        m = ["#{deleted_ops.size} removed:"]
+        deleted_ops.each { |n| m << op_to_s(n) }
+        message << m.join(' ')
       end
       message << "#{same_ops.size} kept" unless same_ops.empty?
       message.join ' / '

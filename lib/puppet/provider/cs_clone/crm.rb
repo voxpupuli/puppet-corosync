@@ -102,10 +102,10 @@ Puppet::Type.type(:cs_clone).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
     else
       raise Puppet::Error, 'No primitive or group'
     end
-    updated = 'clone '
+    updated = ['clone ']
     updated << "#{@resource.value(:name)} "
     updated << "#{target} "
-    meta = []
+    meta = ['meta']
     {
       clone_max: 'clone-max',
       clone_node_max: 'clone-node-max',
@@ -119,10 +119,11 @@ Puppet::Type.type(:cs_clone).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
     }.each do |property, clone_property|
       meta << "#{clone_property}=#{@resource.should(property)}" unless @resource.should(property) == :absent
     end
-    updated << 'meta ' << meta.join(' ') unless meta.empty?
-    debug "Update: #{updated}"
+    updated << meta.join(' ') unless meta.length == 1
+    updated_s = updated.join
+    debug "Update: #{updated_s}"
     Tempfile.open('puppet_crm_update') do |tmpfile|
-      tmpfile.write(updated)
+      tmpfile.write(updated_s)
       tmpfile.flush
       cmd = [command(:crm), 'configure', 'load', 'update', tmpfile.path.to_s]
       self.class.run_command_in_cib(cmd, @resource.value(:cib))

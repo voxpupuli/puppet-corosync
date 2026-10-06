@@ -100,7 +100,7 @@ Puppet::Type.type(:cs_order).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
   def flush
     return if @property_hash.empty?
 
-    updated = 'order '
+    updated = ['order ']
     updated << "#{@property_hash[:name]} "
     if @property_hash[:score]
       updated << "#{@property_hash[:score]}: "
@@ -108,9 +108,10 @@ Puppet::Type.type(:cs_order).provide(:crm, parent: PuppetX::Voxpupuli::Corosync:
       updated << "#{@property_hash[:kind]}: "
     end
     updated << "#{@property_hash[:first]} #{@property_hash[:second]} symmetrical=#{@property_hash[:symmetrical]}"
-    debug("Loading update: #{updated}")
+    updated_s = updated.join
+    debug("Loading update: #{updated_s}")
     Tempfile.open('puppet_crm_update') do |tmpfile|
-      tmpfile.write(updated)
+      tmpfile.write(updated_s)
       tmpfile.flush
       self.class.run_command_in_cib([command(:crm), 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
     end

@@ -152,11 +152,12 @@ Puppet::Type.type(:cs_colocation).provide(:crm, parent: PuppetX::Voxpupuli::Coro
                  else
                    @property_hash[:primitives]
                  end
-    updated = 'colocation '
+    updated = ['colocation ']
     updated << "#{@property_hash[:name]} #{@property_hash[:score]}: #{primitives.join(' ')}"
-    debug("Loading update: #{updated}")
+    updated_s = updated.join
+    debug("Loading update: #{updated_s}")
     Tempfile.open('puppet_crm_update') do |tmpfile|
-      tmpfile.write(updated)
+      tmpfile.write(updated_s)
       tmpfile.flush
       self.class.run_command_in_cib(['crm', 'configure', 'load', 'update', tmpfile.path.to_s], @resource[:cib])
     end
