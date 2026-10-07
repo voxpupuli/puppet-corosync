@@ -27,7 +27,7 @@ class PuppetX::Voxpupuli::Corosync::Provider::Pcs < PuppetX::Voxpupuli::Corosync
   def self.ready?(shadow_cib)
     return true if @@pcsready
 
-    cmd = [command(:pcs), 'property', 'show', 'dc-version']
+    cmd = [command(:pcs), 'property', 'config', 'dc-version']
     raw, status = run_command_in_cib(cmd, nil, false)
     if status.zero?
       # Wait until epoch is not 0.0.
