@@ -143,6 +143,11 @@ Puppet::Type.newtype(:cs_clone) do
   validate do
     return if self[:ensure] == :absent
 
+    # If resource was generated dynamically by the provider (e.g., puppet resource or purge), short-circuit validation.
+    has_provider_properties = provider&.instance_variable_defined?(:@property_hash) &&
+                              provider&.instance_variable_get(:@property_hash)&.any?
+    return if @sensitive_parameters.nil? || has_provider_properties
+
     mandatory_single_properties = %i[primitive group]
     has_should = mandatory_single_properties.select { |prop| should(prop) }
     raise Puppet::Error, "You cannot specify #{has_should.join(' and ')} on this type (only one)" if has_should.length > 1
