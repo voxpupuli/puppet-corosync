@@ -24,9 +24,9 @@
 * [`cs_location`](#cs_location): Type for manipulating corosync/pacemaker resource location. More information on Corosync/Pacemaker colocation can be found here:  * http://ww
 * [`cs_order`](#cs_order): Type for manipulating Corosync/Pacemaker ordering entries.  Order entries are another type of constraint that can be put on sets of primitive
 * [`cs_primitive`](#cs_primitive): Type for manipulating Corosync/Pacemaker primitives.  Primitives are probably the most important building block when creating highly availabl
-* [`cs_property`](#cs_property): Type for manipulating corosync/pacemaker configuration properties. Besides the configuration file that is managed by the module the contains 
+* [`cs_property`](#cs_property): Type for manipulating corosync/pacemaker configuration properties. Besides the configuration file that is managed by the module the contains
 * [`cs_rsc_defaults`](#cs_rsc_defaults): Type for manipulating corosync/pacemaker global defaults for resource options. The type is pretty simple interface for setting key/value pair
-* [`cs_shadow`](#cs_shadow): cs_shadow resources represent a Corosync shadow CIB. Any corosync resources defined with 'cib' set to the title of a cs_shadow resource will 
+* [`cs_shadow`](#cs_shadow): cs_shadow resources represent a Corosync shadow CIB. Any corosync resources defined with 'cib' set to the title of a cs_shadow resource will
 
 ### Data types
 
@@ -1869,4 +1869,3 @@ Alias of `Enum['ffsplit', 'lms']`
 Custom type for syslog priority enum
 
 Alias of `Enum['debug', 'info', 'notice', 'warning', 'err', 'alert', 'emerg', 'crit']`
-
